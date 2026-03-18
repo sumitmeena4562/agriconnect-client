@@ -1,5 +1,6 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
+import { motion } from 'framer-motion';
 
 const HeroSection = () => {
     return (
@@ -7,13 +8,8 @@ const HeroSection = () => {
             <style>{`
         @keyframes float { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-12px)} }
         @keyframes blob { 0%,100%{border-radius:60% 40% 30% 70%/60% 30% 70% 40%} 50%{border-radius:30% 60% 70% 40%/50% 60% 30% 60%} }
-        @keyframes fadeUp { from{opacity:0;transform:translateY(24px)} to{opacity:1;transform:translateY(0)} }
         .anim-float { animation: float 6s ease-in-out infinite; }
         .anim-blob { animation: blob 8s ease-in-out infinite; }
-        .anim-up-1 { animation: fadeUp 0.6s ease-out both; }
-        .anim-up-2 { animation: fadeUp 0.6s ease-out 0.15s both; }
-        .anim-up-3 { animation: fadeUp 0.6s ease-out 0.3s both; }
-        .anim-up-4 { animation: fadeUp 0.6s ease-out 0.45s both; }
       `}</style>
 
             <section id="home" className="relative pt-10 pb-16 sm:pt-16 sm:pb-20 lg:pt-16 lg:pb-24 overflow-hidden bg-gradient-to-b from-green-50/80 via-white to-white">
@@ -29,27 +25,47 @@ const HeroSection = () => {
                         {/* Content */}
                         <div className="text-center lg:text-left">
                             {/* Badge */}
-                            <div className="anim-up-1 inline-flex items-center gap-2 px-3 py-1.5 bg-[#EEFDF3] rounded-full mb-5 max-w-fit mx-auto lg:mx-0">
+                            <motion.div 
+                                initial={{ opacity: 0, y: 20 }}
+                                whileInView={{ opacity: 1, y: 0 }}
+                                viewport={{ once: true }}
+                                transition={{ duration: 0.5, ease: "easeOut" }}
+                                className="inline-flex items-center gap-2 px-3 py-1.5 bg-[#EEFDF3] rounded-full mb-5 max-w-fit mx-auto lg:mx-0">
                                 <span className="w-1.5 h-1.5 bg-[#00B464] rounded-full animate-pulse" />
                                 <span className="text-[#00B464] font-bold text-[10px] sm:text-[11px] tracking-[0.05em] uppercase">
                                     Farm to Fork — Direct & Fresh
                                 </span>
-                            </div>
+                            </motion.div>
 
                             {/* Headline */}
-                            <h1 className="anim-up-2 text-4xl sm:text-5xl lg:text-[56px] font-black text-[#0A2616] leading-[1.1] tracking-tight mb-5 font-heading">
+                            <motion.h1 
+                                initial={{ opacity: 0, y: 20 }}
+                                whileInView={{ opacity: 1, y: 0 }}
+                                viewport={{ once: true }}
+                                transition={{ duration: 0.5, delay: 0.15, ease: "easeOut" }}
+                                className="text-4xl sm:text-5xl lg:text-[56px] font-black text-[#0A2616] leading-[1.1] tracking-tight mb-5 font-heading">
                                 Connecting<br className="hidden lg:block"/>
                                 <span className="text-[#00B464]"> Farmers</span>,<br className="hidden sm:block lg:hidden"/>
                                 <span className="text-[#2F80ED]"> Vendors</span>
                                 {' '}&&nbsp;<br className="hidden lg:block"/>Customers.
-                            </h1>
+                            </motion.h1>
 
-                            <p className="anim-up-3 text-[15px] sm:text-[16px] text-[#556070] mb-8 leading-[1.6] max-w-lg mx-auto lg:mx-0">
+                            <motion.p 
+                                initial={{ opacity: 0, y: 20 }}
+                                whileInView={{ opacity: 1, y: 0 }}
+                                viewport={{ once: true }}
+                                transition={{ duration: 0.5, delay: 0.3, ease: "easeOut" }}
+                                className="text-[15px] sm:text-[16px] text-[#556070] mb-8 leading-[1.6] max-w-lg mx-auto lg:mx-0">
                                 India's first unified platform — sell directly, buy in bulk, and get farm-fresh produce at fair prices. No middlemen.
-                            </p>
+                            </motion.p>
 
                             {/* CTA Cards */}
-                            <div className="anim-up-4 grid grid-cols-3 gap-3 sm:gap-4 max-w-[420px] mx-auto lg:mx-0">
+                            <motion.div 
+                                initial={{ opacity: 0, y: 20 }}
+                                whileInView={{ opacity: 1, y: 0 }}
+                                viewport={{ once: true }}
+                                transition={{ duration: 0.5, delay: 0.45, ease: "easeOut" }}
+                                className="grid grid-cols-3 gap-3 sm:gap-4 max-w-[420px] mx-auto lg:mx-0">
                                 {[
                                     { to: '/customer-registration', icon: 'shopping_basket', label: 'Customer', desc: 'Buy Fresh', bgText: 'bg-[#EAF6ED] text-[#28A745]' },
                                     { to: '/farmer-registration', icon: 'agriculture', label: 'Farmer', desc: 'Sell Produce', bgText: 'bg-[#FFF3E5] text-[#FA8231]' },
@@ -64,10 +80,15 @@ const HeroSection = () => {
                                         <p className="text-[10px] sm:text-[11px] text-gray-500 mt-1">{cta.desc}</p>
                                     </Link>
                                 ))}
-                            </div>
+                            </motion.div>
 
                             {/* Trust Badges */}
-                            <div className="anim-up-4 mt-8 flex flex-wrap items-center justify-center lg:justify-start gap-4 sm:gap-6">
+                            <motion.div 
+                                initial={{ opacity: 0, y: 20 }}
+                                whileInView={{ opacity: 1, y: 0 }}
+                                viewport={{ once: true }}
+                                transition={{ duration: 0.5, delay: 0.6, ease: "easeOut" }}
+                                className="mt-8 flex flex-wrap items-center justify-center lg:justify-start gap-4 sm:gap-6">
                                 {[
                                     { icon: 'verified', label: 'Verified Profiles' },
                                     { icon: 'bolt', label: 'Fast Logistics' },
@@ -78,7 +99,7 @@ const HeroSection = () => {
                                         <span>{b.label}</span>
                                     </div>
                                 ))}
-                            </div>
+                            </motion.div>
                         </div>
 
                         {/* Hero Image */}
@@ -97,8 +118,12 @@ const HeroSection = () => {
                                 </div>
 
                                 {/* Floating Stats Card (Farmers Earning) */}
-                                <div className="absolute -bottom-5 -left-4 sm:-bottom-6 sm:-left-6 bg-white rounded-2xl shadow-[0_12px_30px_rgba(0,0,0,0.08)] px-4 py-3 border border-gray-100 z-10"
-                                    style={{ animation: 'fadeUp 0.6s ease-out 0.8s both' }}>
+                                <motion.div 
+                                    initial={{ opacity: 0, y: 20 }}
+                                    whileInView={{ opacity: 1, y: 0 }}
+                                    viewport={{ once: true }}
+                                    transition={{ duration: 0.5, delay: 0.8, ease: "easeOut" }}
+                                    className="absolute -bottom-5 -left-4 sm:-bottom-6 sm:-left-6 bg-white rounded-2xl shadow-[0_12px_30px_rgba(0,0,0,0.08)] px-4 py-3 border border-gray-100 z-10">
                                     <div className="flex items-center gap-3">
                                         <div className="w-10 h-10 bg-[#EEFDF3] rounded-xl flex items-center justify-center">
                                             <span className="material-symbols-outlined text-[#00B464] text-[22px]">trending_up</span>
@@ -110,11 +135,15 @@ const HeroSection = () => {
                                             </p>
                                         </div>
                                     </div>
-                                </div>
+                                </motion.div>
 
                                 {/* Floating Badge (Deliveries) */}
-                                <div className="absolute -top-5 -right-4 sm:-top-6 sm:-right-6 bg-white rounded-2xl shadow-[0_12px_30px_rgba(0,0,0,0.08)] px-4 py-3 border border-gray-100 z-10"
-                                    style={{ animation: 'fadeUp 0.6s ease-out 1s both' }}>
+                                <motion.div 
+                                    initial={{ opacity: 0, y: 20 }}
+                                    whileInView={{ opacity: 1, y: 0 }}
+                                    viewport={{ once: true }}
+                                    transition={{ duration: 0.5, delay: 1, ease: "easeOut" }}
+                                    className="absolute -top-5 -right-4 sm:-top-6 sm:-right-6 bg-white rounded-2xl shadow-[0_12px_30px_rgba(0,0,0,0.08)] px-4 py-3 border border-gray-100 z-10">
                                     <div className="flex items-center gap-3">
                                         <div className="w-10 h-10 bg-[#FFF8E6] rounded-xl flex items-center justify-center">
                                             <span className="material-symbols-outlined text-[#F5B01B] text-[22px]">local_shipping</span>
@@ -124,7 +153,7 @@ const HeroSection = () => {
                                             <p className="text-[17px] font-black text-gray-900 leading-none">15K+</p>
                                         </div>
                                     </div>
-                                </div>
+                                </motion.div>
                             </div>
                         </div>
                     </div>

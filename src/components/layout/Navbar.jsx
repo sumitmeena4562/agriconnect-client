@@ -4,11 +4,31 @@ import { Link } from 'react-router-dom';
 const Header = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
+  const [activeSection, setActiveSection] = useState('home');
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 20);
     window.addEventListener('scroll', onScroll);
     return () => window.removeEventListener('scroll', onScroll);
+  }, []);
+
+  useEffect(() => {
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          setActiveSection(entry.target.id);
+        }
+      });
+    }, { threshold: 0.3, rootMargin: '-60px 0px -60px 0px' });
+
+    setTimeout(() => {
+      ['home', 'how-it-works', 'market-rates', 'contact'].forEach(id => {
+        const el = document.getElementById(id);
+        if (el) observer.observe(el);
+      });
+    }, 500);
+
+    return () => observer.disconnect();
   }, []);
 
   const scrollToSection = (sectionId) => {
@@ -34,24 +54,27 @@ const Header = () => {
           <div className="flex h-[55px] items-center justify-between">
 
             {/* Logo */}
-            <Link to="/" className="flex items-center gap-3 group">
+            <button onClick={() => scrollToSection('home')} className="flex items-center gap-3 group focus:outline-none">
               <div className="w-[38px] h-[38px] bg-[#00B464] rounded-[12px] flex items-center justify-center shadow-lg shadow-green-200/50 group-hover:shadow-green-300/60 transition-shadow">
                 <span className="material-symbols-outlined text-white text-[24px]">eco</span>
               </div>
               <span className="text-[22px] font-black tracking-tight text-slate-800 leading-none mt-0.5">
                 Agri<span className="text-[#00B464]">Connect</span>
               </span>
-            </Link>
+            </button>
 
             {/* Desktop Nav */}
-            <nav className="hidden md:flex items-center gap-8">
+            <nav className="hidden md:flex items-center gap-8 relative">
               {navLinks.map(link => (
                 <button
                   key={link.id}
                   onClick={() => scrollToSection(link.id)}
-                  className="text-[15px] font-medium text-slate-600 hover:text-[#00B464] transition-colors duration-200"
+                  className={`text-[15px] font-medium transition-colors duration-200 relative ${activeSection === link.id ? 'text-[#00B464]' : 'text-slate-600 hover:text-[#00B464]'}`}
                 >
                   {link.label}
+                  {activeSection === link.id && (
+                    <span className="absolute -bottom-1.5 left-1/2 w-1 h-1 bg-[#00B464] rounded-full transform -translate-x-1/2" />
+                  )}
                 </button>
               ))}
             </nav>
@@ -71,7 +94,10 @@ const Header = () => {
             {/* Mobile Menu Button */}
             <button
               onClick={() => setIsMenuOpen(!isMenuOpen)}
-              className="md:hidden w-11 h-11 flex items-center justify-center rounded-xl bg-slate-100 hover:bg-slate-200 transition-colors"
+              aria-expanded={isMenuOpen}
+              aria-controls="mobile-menu"
+              aria-label={isMenuOpen ? "Close menu" : "Open menu"}
+              className="md:hidden w-11 h-11 flex items-center justify-center rounded-xl bg-slate-100 hover:bg-slate-200 transition-colors focus:outline-none"
             >
               <span className="material-symbols-outlined text-slate-700">
                 {isMenuOpen ? 'close' : 'menu'}
@@ -85,14 +111,14 @@ const Header = () => {
       {isMenuOpen && (
         <div className="fixed inset-0 z-40 md:hidden">
           <div className="absolute inset-0 bg-black/20 backdrop-blur-sm" onClick={() => setIsMenuOpen(false)} />
-          <div className="absolute top-[55px] left-0 right-0 bg-white border-b border-gray-100 shadow-2xl"
+          <div id="mobile-menu" className="absolute top-[55px] left-0 right-0 bg-white border-b border-gray-100 shadow-2xl"
             style={{ animation: 'slideDown 0.25s ease-out' }}>
             <div className="px-5 py-2 space-y-1">
               {navLinks.map(link => (
                 <button
                   key={link.id}
                   onClick={() => scrollToSection(link.id)}
-                  className="block w-full text-left py-3.5 text-[15px] font-semibold text-slate-700 hover:text-[#00B464] transition-colors"
+                  className={`block w-full text-left py-3.5 text-[15px] font-semibold transition-colors ${activeSection === link.id ? 'text-[#00B464]' : 'text-slate-700 hover:text-[#00B464]'}`}
                 >
                   {link.label}
                 </button>
