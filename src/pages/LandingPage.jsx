@@ -4,6 +4,7 @@ import HeroSection from "../components/home/HeroSection";
 import TrendingCategories from "../components/home/TrendingCategories";
 import HowItWorks from "../components/home/HowItWorks";
 import FeaturesSection from "../components/home/FeaturesSection";
+import Footer from "../components/layout/Footer";
 
 const LandingPage = () => {
     return (
@@ -15,6 +16,7 @@ const LandingPage = () => {
                 <FeaturesSection />
                 <HowItWorks />
             </main>
+            <Footer />
         </div>
     );
 };
