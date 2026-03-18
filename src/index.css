@@ -20,7 +20,7 @@
 
   /* Typography */
   --font-sans: 'Inter', system-ui, -apple-system, sans-serif;
-  --font-heading: 'Outfit', system-ui, -apple-system, sans-serif;
+  --font-heading: 'Inter', system-ui, -apple-system, sans-serif;
 
   /* Premium Shadows */
   --shadow-premium: 0 10px 40px -10px rgba(22, 163, 74, 0.15);
