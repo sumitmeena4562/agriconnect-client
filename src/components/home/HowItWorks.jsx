@@ -43,23 +43,25 @@ const HowItWorks = () => {
     ];
 
     return (
-        <section id="how-it-works" className="py-20 lg:py-32 bg-white relative overflow-hidden">
+        <section id="how-it-works" className="py-16 sm:py-20 lg:py-24 bg-white relative overflow-hidden">
             {/* Background elements */}
             <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-green-50/50 rounded-full blur-[100px] -mr-64 -mt-64" />
             <div className="absolute bottom-0 left-0 w-[500px] h-[500px] bg-blue-50/30 rounded-full blur-[100px] -ml-64 -mb-64" />
 
-            <div className="max-w-7xl mx-auto px-5 sm:px-6 lg:px-8 relative z-10">
+            <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
                 {/* Header */}
-                <div className="text-center max-w-3xl mx-auto mb-16 lg:mb-24">
+                <div className="text-center max-w-xl mx-auto mb-12 sm:mb-16">
                     <motion.div 
                         initial={{ opacity: 0, y: 20 }}
                         whileInView={{ opacity: 1, y: 0 }}
                         viewport={{ once: true }}
                         transition={{ duration: 0.5 }}
-                        className="inline-flex items-center gap-2 px-3 py-1 bg-green-50 rounded-full mb-4"
+                        className="inline-flex items-center gap-1.5 px-3 py-1 bg-[#EEFDF3] rounded-md mb-4"
                     >
-                        <span className="w-1.5 h-1.5 bg-[#00B464] rounded-full" />
-                        <span className="text-[#00B464] font-bold text-[10px] tracking-widest uppercase">Simple Process</span>
+                        <span className="material-symbols-outlined text-[#00B464] text-[13px]">route</span>
+                        <span className="text-[#00B464] font-bold text-[9px] tracking-[0.1em] uppercase">
+                            Simple Process
+                        </span>
                     </motion.div>
                     
                     <motion.h2 
@@ -67,7 +69,7 @@ const HowItWorks = () => {
                         whileInView={{ opacity: 1, y: 0 }}
                         viewport={{ once: true }}
                         transition={{ duration: 0.5, delay: 0.1 }}
-                        className="text-3xl sm:text-4xl lg:text-[42px] font-black text-slate-900 mb-6 font-heading tracking-tight leading-tight"
+                        className="text-2xl sm:text-3xl lg:text-4xl font-black text-[#0A2616] mb-4 font-heading tracking-tight"
                     >
                         How <span className="text-[#00B464]">AgriConnect</span> Works
                     </motion.h2>
@@ -77,7 +79,7 @@ const HowItWorks = () => {
                         whileInView={{ opacity: 1, y: 0 }}
                         viewport={{ once: true }}
                         transition={{ duration: 0.5, delay: 0.2 }}
-                        className="text-slate-600 text-lg sm:text-[19px] leading-relaxed"
+                        className="text-slate-500 text-[14px] sm:text-[15px] leading-[1.6]"
                     >
                         We’ve removed the complexity to bring you closer to fresh produce. 
                         Follow these simple steps and start trading today.
@@ -85,39 +87,36 @@ const HowItWorks = () => {
                 </div>
 
                 {/* Steps Grid */}
-                <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-8 lg:gap-12">
+                <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 lg:gap-8">
                     {steps.map((step, index) => (
                         <motion.div
                             key={index}
                             initial={{ opacity: 0, y: 30 }}
                             whileInView={{ opacity: 1, y: 0 }}
                             viewport={{ once: true }}
-                            transition={{ duration: 0.6, delay: index * 0.15 }}
+                            transition={{ duration: 0.6, delay: index * 0.1 }}
                             className="group relative"
                         >
                             {/* Connector line for desktop */}
                             {index < steps.length - 1 && (
-                                <div className="hidden lg:block absolute top-12 left-full w-full h-[2px] bg-dashed border-t-2 border-dashed border-slate-100 z-0 transform -translate-x-6" />
+                                <div className="hidden lg:block absolute top-[44px] left-full w-full h-[2px] border-t-2 border-dashed border-gray-200 z-0 transform -translate-x-4" />
                             )}
 
-                            <div className="relative z-10 bg-white p-2 rounded-[32px] transition-all duration-500 group-hover:transform group-hover:-translate-y-2">
-                                <div className={`aspect-square w-20 h-20 sm:w-24 sm:h-24 rounded-3xl ${step.color} flex items-center justify-center mb-8 relative shadow-lg shadow-black/[0.02] overflow-hidden`}>
-                                    {/* Glass reflection effect */}
-                                    <div className="absolute inset-0 bg-gradient-to-tr from-white/0 via-white/20 to-white/0 transform -translate-x-full group-hover:translate-x-full transition-transform duration-1000 ease-in-out" />
-                                    
-                                    <span className="material-symbols-outlined text-[32px] sm:text-[40px] z-10">{step.icon}</span>
-                                    
-                                    {/* Floating Number */}
-                                    <div className="absolute -top-2 -right-2 bg-white w-8 h-8 rounded-full flex items-center justify-center text-[12px] font-black text-slate-900 shadow-md border border-slate-50">
-                                        {step.number}
-                                    </div>
+                            <div className="relative z-10 bg-white p-5 sm:p-6 rounded-2xl shadow-[var(--shadow-card)] group-hover:shadow-[var(--shadow-card-hover)] transition-all duration-300 border border-gray-100/50 group-hover:-translate-y-1.5 h-full flex flex-col">
+                                <div className={`w-12 h-12 sm:w-14 sm:h-14 rounded-xl ${step.color} flex items-center justify-center mb-5 relative overflow-hidden transition-transform duration-500 group-hover:scale-110 group-hover:rotate-3`}>
+                                    <span className="material-symbols-outlined text-[24px] sm:text-[28px] z-10">{step.icon}</span>
                                 </div>
 
-                                <h3 className="text-xl sm:text-[22px] font-black text-slate-900 mb-3 group-hover:text-[#00B464] transition-colors duration-300">
+                                {/* Floating Number */}
+                                <div className="absolute top-5 right-5 text-[32px] sm:text-[36px] font-black text-gray-100/60 select-none group-hover:text-gray-100 transition-colors">
+                                    {step.number}
+                                </div>
+
+                                <h3 className="text-[16px] sm:text-[17px] font-black text-[#0A2616] mb-2 group-hover:text-[#00B464] transition-colors duration-300 relative z-10 tracking-tight">
                                     {step.title}
                                 </h3>
                                 
-                                <p className="text-slate-500 text-[15px] leading-[1.6]">
+                                <p className="text-slate-500 text-[12px] sm:text-[13px] leading-[1.5] relative z-10">
                                     {step.description}
                                 </p>
                             </div>
@@ -130,22 +129,22 @@ const HowItWorks = () => {
                     initial={{ opacity: 0, scale: 0.95 }}
                     whileInView={{ opacity: 1, scale: 1 }}
                     viewport={{ once: true }}
-                    transition={{ duration: 0.6, delay: 0.8 }}
-                    className="mt-20 lg:mt-32 p-8 lg:p-12 rounded-[40px] bg-[#0A2616] relative overflow-hidden text-center lg:text-left lg:flex items-center justify-between gap-8"
+                    transition={{ duration: 0.5, delay: 0.3 }}
+                    className="mt-12 sm:mt-16 lg:mt-20 p-6 sm:p-8 lg:p-10 rounded-[28px] sm:rounded-[36px] bg-[#0A2616] relative overflow-hidden flex flex-col lg:flex-row items-center justify-between gap-6 sm:gap-8 shadow-[var(--shadow-premium)]"
                 >
-                    <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/carbon-fibre.png')] opacity-10 pointer-events-none" />
                     <div className="absolute top-0 right-0 w-64 h-64 bg-[#00B464]/20 rounded-full blur-[100px] transform translate-x-1/2 -translate-y-1/2" />
+                    <div className="absolute bottom-0 left-0 w-64 h-64 bg-blue-500/10 rounded-full blur-[100px] transform -translate-x-1/2 translate-y-1/2" />
                     
-                    <div className="relative z-10">
-                        <h4 className="text-2xl sm:text-3xl font-black text-white mb-4">Ready to Grow Your Agriculture Business?</h4>
-                        <p className="text-green-100/70 text-lg max-w-xl">Join 15,000+ users already transforming the face of Indian Agriculture.</p>
+                    <div className="relative z-10 text-center lg:text-left max-w-xl">
+                        <h4 className="text-xl sm:text-2xl lg:text-[28px] font-black text-white mb-3 tracking-tight">Ready to Grow Your Business?</h4>
+                        <p className="text-green-50/80 text-[13px] sm:text-[15px] leading-relaxed">Join 15,000+ users already transforming the face of Indian Agriculture. Get direct access to fresh produce and fair prices today.</p>
                     </div>
 
-                    <div className="relative z-10 mt-8 lg:mt-0 flex flex-wrap justify-center lg:justify-end gap-4">
-                        <Link to="/farmer-registration" className="px-8 py-4 bg-[#00B464] hover:bg-[#009c56] text-white font-bold rounded-2xl shadow-xl shadow-green-900/20 transition-all hover:scale-[1.03] active:scale-95">
-                            Get Started Now
+                    <div className="relative z-10 flex flex-col sm:flex-row gap-3 w-full lg:w-auto mt-4 lg:mt-0">
+                        <Link to="/farmer-registration" className="px-6 py-3.5 bg-[#00B464] hover:bg-[#009c56] text-white font-bold text-[13px] sm:text-[14px] rounded-xl shadow-lg shadow-[#00B464]/20 transition-all hover:-translate-y-1 text-center whitespace-nowrap">
+                            Get Started
                         </Link>
-                        <Link to="/about" className="px-8 py-4 bg-white/10 hover:bg-white/20 text-white font-bold rounded-2xl backdrop-blur-md transition-all">
+                        <Link to="/about" className="px-6 py-3.5 bg-white/10 hover:bg-white/15 text-white font-bold text-[13px] sm:text-[14px] rounded-xl backdrop-blur-md transition-all hover:-translate-y-1 text-center border border-white/10 whitespace-nowrap">
                             Learn More
                         </Link>
                     </div>

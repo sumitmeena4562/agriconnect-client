@@ -4,20 +4,12 @@ import { motion } from 'framer-motion';
 
 const HeroSection = () => {
     return (
-        <>
-            <style>{`
-        @keyframes float { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-12px)} }
-        @keyframes blob { 0%,100%{border-radius:60% 40% 30% 70%/60% 30% 70% 40%} 50%{border-radius:30% 60% 70% 40%/50% 60% 30% 60%} }
-        .anim-float { animation: float 6s ease-in-out infinite; }
-        .anim-blob { animation: blob 8s ease-in-out infinite; }
-      `}</style>
+        <section id="home" className="relative pt-10 pb-16 sm:pt-16 sm:pb-20 lg:pt-16 lg:pb-24 overflow-hidden bg-gradient-to-b from-green-50/80 via-white/40 to-transparent">
 
-            <section id="home" className="relative pt-10 pb-16 sm:pt-16 sm:pb-20 lg:pt-16 lg:pb-24 overflow-hidden bg-gradient-to-b from-green-50/80 via-white/40 to-transparent">
-
-                {/* Background Blobs */}
-                <div className="absolute top-20 -left-32 w-72 h-72 bg-green-200/30 rounded-full blur-3xl anim-blob" />
-                <div className="absolute bottom-10 -right-32 w-80 h-80 bg-emerald-200/20 rounded-full blur-3xl anim-blob" style={{ animationDelay: '4s' }} />
-                <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-blue-100/20 rounded-full blur-3xl" />
+            {/* Background Blobs (Static) */}
+            <div className="absolute top-20 -left-32 w-72 h-72 bg-green-200/30 rounded-[30%_70%_70%_30%/30%_30%_70%_70%] blur-3xl" />
+            <div className="absolute bottom-10 -right-32 w-80 h-80 bg-emerald-200/20 rounded-[50%_50%_20%_80%/20%_80%_20%_80%] blur-3xl" />
+            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-blue-100/20 rounded-full blur-3xl" />
 
                 <div className="max-w-7xl mx-auto px-5 sm:px-6 lg:px-8 relative z-10">
                     <div className="grid lg:grid-cols-2 gap-10 lg:gap-16 items-center">
@@ -159,7 +151,6 @@ const HeroSection = () => {
                     </div>
                 </div>
             </section>
-        </>
     );
 };
 

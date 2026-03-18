@@ -86,6 +86,7 @@ const TrendingCategories = () => {
                 }
                 .animate-marquee {
                     animation: marquee 30s linear infinite;
+                    will-change: transform;
                 }
                 .animate-marquee:hover {
                     animation-play-state: paused;
