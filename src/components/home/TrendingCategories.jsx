@@ -1,0 +1,234 @@
+import React from 'react';
+import { motion } from 'framer-motion';
+
+const TrendingCategories = () => {
+    // 1. Trust Leaders Data
+    const trustedLeaders = [
+        { icon: 'account_balance', name: 'NABARD' },
+        { icon: 'eco', name: 'Ministry of Agriculture' },
+        { icon: 'assured_workload', name: 'State Bank' },
+        { icon: 'agriculture', name: 'AgriTech Corp' },
+        { icon: 'local_shipping', name: 'FastLogistics' },
+    ];
+
+    // 2. Ticker Data
+    const tickerItems = [
+        { name: 'Tomato', price: '₹20/kg', trend: 'up', emoji: '🍅' },
+        { name: 'Potato', price: '₹15/kg', trend: 'up', emoji: '🥔' },
+        { name: 'Onion', price: '₹30/kg', trend: 'down', emoji: '🧅' },
+        { name: 'Carrot', price: '₹45/kg', trend: 'up', emoji: '🥕' },
+        { name: 'Chili', price: '₹40/kg', trend: 'down', emoji: '🌶️' },
+        { name: 'Capsicum', price: '₹35/kg', trend: 'up', emoji: '🫑' },
+    ];
+
+    // 3. Fake infinite ticker item list (double to ensure smooth marquee loop)
+    const infiniteTicker = [...tickerItems, ...tickerItems, ...tickerItems];
+
+    // 4. Categories Data
+    const categories = [
+        { 
+            name: 'Fresh Tomatoes', 
+            supply: '50T+', 
+            price: '₹18/kg', 
+            img: 'https://images.unsplash.com/photo-1592924357228-91a4daadcfea?auto=format&fit=crop&q=80&w=400&h=300' 
+        },
+        { 
+            name: 'Premium Potatoes', 
+            supply: '120T+', 
+            price: '₹12/kg', 
+            img: 'https://images.unsplash.com/photo-1518977676601-b53f82aba655?auto=format&fit=crop&q=80&w=400&h=300' 
+        },
+        { 
+            name: 'Red Onions', 
+            supply: '80T+', 
+            price: '₹25/kg', 
+            img: 'https://images.unsplash.com/photo-1618512496248-a07fe83aa8cb?auto=format&fit=crop&q=80&w=400&h=300' 
+        },
+        { 
+            name: 'Exotic Greens', 
+            supply: '10T+', 
+            price: '₹150/kg', 
+            img: 'https://images.unsplash.com/photo-1540420773420-3366772f4999?auto=format&fit=crop&q=80&w=400&h=300' 
+        },
+        { 
+            name: 'Organic Carrots', 
+            supply: '30T+', 
+            price: '₹40/kg', 
+            img: 'https://images.unsplash.com/photo-1598170845058-32b9d6a5da37?auto=format&fit=crop&q=80&w=400&h=300' 
+        },
+        { 
+            name: 'Green Cabbage', 
+            supply: '40T+', 
+            price: '₹15/kg', 
+            img: 'https://images.unsplash.com/photo-1628773822503-ae3ddf235d94?auto=format&fit=crop&q=80&w=400&h=300' 
+        },
+        { 
+            name: 'Crisp Capsicum', 
+            supply: '25T+', 
+            price: '₹30/kg', 
+            img: 'https://images.unsplash.com/photo-1526346698789-22fd84314424?auto=format&fit=crop&q=80&w=400&h=300' 
+        },
+        { 
+            name: 'Spicy Chilies', 
+            supply: '15T+', 
+            price: '₹35/kg', 
+            img: 'https://images.unsplash.com/photo-1588614639912-ee989adab8bb?auto=format&fit=crop&q=80&w=400&h=300' 
+        },
+    ];
+
+    return (
+        <section className="bg-transparent relative">
+            
+            <style>{`
+                @keyframes marquee {
+                    0% { transform: translateX(0); }
+                    100% { transform: translateX(-50%); }
+                }
+                .animate-marquee {
+                    animation: marquee 30s linear infinite;
+                }
+                .animate-marquee:hover {
+                    animation-play-state: paused;
+                }
+            `}</style>
+
+            {/* 1. TRUST BAR */}
+            <div className="bg-[#F8FAF9] pt-8 pb-6 px-4 sm:px-6 lg:px-8 border-t border-b border-gray-100/50">
+                <div className="max-w-6xl mx-auto flex flex-col items-center">
+                    <p className="text-[9px] sm:text-[10px] font-bold text-gray-400 tracking-[0.15em] uppercase mb-4 text-center">
+                        Trusted by industry leaders and organizations
+                    </p>
+                    
+                    <div className="flex flex-wrap justify-center items-center gap-x-6 sm:gap-x-10 lg:gap-x-12 gap-y-4">
+                        {trustedLeaders.map((partner, i) => (
+                            <motion.div 
+                                key={i}
+                                initial={{ opacity: 0, y: 10 }}
+                                whileInView={{ opacity: 1, y: 0 }}
+                                viewport={{ once: true }}
+                                transition={{ duration: 0.4, delay: i * 0.1 }}
+                                className="flex items-center gap-2 text-gray-500 hover:text-gray-700 transition-colors cursor-pointer group grayscale hover:grayscale-0 opacity-80 hover:opacity-100"
+                            >
+                                <span className="material-symbols-outlined text-[18px] sm:text-[20px] text-gray-400 group-hover:text-[#00B464] transition-colors">
+                                    {partner.icon}
+                                </span>
+                                <span className="font-bold text-[12px] sm:text-[13px] tracking-tight">
+                                    {partner.name}
+                                </span>
+                            </motion.div>
+                        ))}
+                    </div>
+                </div>
+            </div>
+
+            {/* 2. LIVE TICKER STRIP */}
+            <div className="bg-[#111827] w-full overflow-hidden relative flex items-center shadow-inner">
+                
+                {/* Fixed "LIVE" Button on the left */}
+                <div className="absolute left-0 top-0 bottom-0 bg-[#111827] z-20 flex items-center pl-4 sm:pl-6 lg:pl-8 pr-4 shadow-[10px_0_20px_-5px_#111827]">
+                    <div className="flex items-center gap-1.5 px-2.5 py-1 bg-red-500/10 border border-red-500/20 rounded-md">
+                        <span className="w-1.5 h-1.5 bg-red-500 rounded-full animate-pulse shadow-[0_0_8px_rgba(239,68,68,0.8)]" />
+                        <span className="text-red-500 font-bold text-[9px] sm:text-[10px] tracking-wider uppercase">Live</span>
+                    </div>
+                </div>
+
+                {/* Marquee Content */}
+                <div className="flex whitespace-nowrap animate-marquee py-2 pl-[90px] sm:pl-[120px]">
+                    {infiniteTicker.map((item, i) => (
+                        <div key={i} className="flex items-center gap-1.5 mx-4 sm:mx-6">
+                            <span className="text-[12px] sm:text-[13px]">{item.emoji}</span>
+                            <span className="text-gray-300 font-medium text-[11px] sm:text-[12px]">{item.name}</span>
+                            <span className="text-white font-bold text-[11px] sm:text-[12px]">{item.price}</span>
+                            <span className="material-symbols-outlined text-[12px] sm:text-[14px] font-bold" 
+                                style={{ color: item.trend === 'up' ? '#10B981' : '#EF4444' }}>
+                                {item.trend === 'up' ? 'trending_up' : 'trending_down'}
+                            </span>
+                        </div>
+                    ))}
+                </div>
+
+                {/* Fade on the right side */}
+                <div className="absolute right-0 top-0 bottom-0 w-12 sm:w-24 bg-gradient-to-l from-[#111827] to-transparent z-20 pointer-events-none" />
+            </div>
+
+            {/* 3. TRENDING CATEGORIES GRID */}
+            <div className="pt-16 pb-20 sm:pt-20 sm:pb-24 px-4 sm:px-6 lg:px-8 max-w-5xl mx-auto">
+                
+                <div className="text-center max-w-xl mx-auto mb-10 sm:mb-14">
+                    <motion.div 
+                        initial={{ opacity: 0, y: 20 }}
+                        whileInView={{ opacity: 1, y: 0 }}
+                        viewport={{ once: true }}
+                        transition={{ duration: 0.5 }}
+                        className="inline-flex items-center gap-1.5 px-3 py-1 bg-[#EEF2FF] rounded-md mb-4"
+                    >
+                        <span className="material-symbols-outlined text-blue-500 text-[13px]">shopping_basket</span>
+                        <span className="text-blue-600 font-bold text-[9px] tracking-[0.1em] uppercase">
+                            Top Produce
+                        </span>
+                    </motion.div>
+
+                    <motion.h2 
+                        initial={{ opacity: 0, y: 20 }}
+                        whileInView={{ opacity: 1, y: 0 }}
+                        viewport={{ once: true }}
+                        transition={{ duration: 0.5, delay: 0.1 }}
+                        className="text-2xl sm:text-3xl lg:text-4xl font-black text-[#0A2616] mb-4 font-heading tracking-tight"
+                    >
+                        Trending Categories
+                    </motion.h2>
+
+                    <motion.p 
+                        initial={{ opacity: 0, y: 20 }}
+                        whileInView={{ opacity: 1, y: 0 }}
+                        viewport={{ once: true }}
+                        transition={{ duration: 0.5, delay: 0.2 }}
+                        className="text-slate-500 text-[14px] sm:text-[15px] leading-[1.6]"
+                    >
+                        Explore high-quality, fresh produce currently in demand across the platform.
+                    </motion.p>
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
+                    {categories.map((cat, index) => (
+                        <motion.div
+                            key={index}
+                            initial={{ opacity: 0, y: 30 }}
+                            whileInView={{ opacity: 1, y: 0 }}
+                            viewport={{ once: true }}
+                            transition={{ duration: 0.5, delay: index * 0.1 }}
+                            className="bg-white rounded-2xl overflow-hidden shadow-[var(--shadow-card)] hover:shadow-[var(--shadow-card-hover)] transition-all duration-300 hover:-translate-y-1.5 group cursor-pointer border border-gray-100/50 flex flex-col h-full"
+                        >
+                            {/* Image Container */}
+                            <div className="w-full h-[140px] sm:h-[150px] bg-gray-50 overflow-hidden relative">
+                                <img 
+                                    src={cat.img} 
+                                    alt={cat.name} 
+                                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700 ease-out"
+                                />
+                                <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                            </div>
+
+                            {/* Content */}
+                            <div className="p-4 sm:p-5 flex flex-col flex-grow">
+                                <h3 className="text-[15px] font-bold text-gray-900 mb-3 group-hover:text-[#00B464] transition-colors">{cat.name}</h3>
+                                
+                                <div className="mt-auto flex items-center justify-between text-[10px] sm:text-[11px]">
+                                    <div className="text-gray-500 font-medium">
+                                        Daily Supply: {cat.supply}
+                                    </div>
+                                    <div className="font-bold text-[#00B464]">
+                                        From {cat.price}
+                                    </div>
+                                </div>
+                            </div>
+                        </motion.div>
+                    ))}
+                </div>
+
+            </div>
+        </section>
+    );
+};
+
+export default TrendingCategories;

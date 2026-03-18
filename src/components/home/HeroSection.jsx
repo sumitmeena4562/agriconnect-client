@@ -12,7 +12,7 @@ const HeroSection = () => {
         .anim-blob { animation: blob 8s ease-in-out infinite; }
       `}</style>
 
-            <section id="home" className="relative pt-10 pb-16 sm:pt-16 sm:pb-20 lg:pt-16 lg:pb-24 overflow-hidden bg-gradient-to-b from-green-50/80 via-white to-white">
+            <section id="home" className="relative pt-10 pb-16 sm:pt-16 sm:pb-20 lg:pt-16 lg:pb-24 overflow-hidden bg-gradient-to-b from-green-50/80 via-white/40 to-transparent">
 
                 {/* Background Blobs */}
                 <div className="absolute top-20 -left-32 w-72 h-72 bg-green-200/30 rounded-full blur-3xl anim-blob" />
