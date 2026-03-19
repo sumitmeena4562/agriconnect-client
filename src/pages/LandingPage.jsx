@@ -17,11 +17,11 @@ const LandingPage = () => {
             <main>
                 <HeroSection />
                 <TrendingCategories />
+                <HowItWorks />
                 <FeaturesSection />
+                <MobileAppSection />
                 <Testimonials />
                 <NewsSection />
-                <MobileAppSection />
-                <HowItWorks />
                 <FAQSection />
             </main>
             <Footer />

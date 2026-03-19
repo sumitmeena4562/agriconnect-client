@@ -57,19 +57,22 @@ const HeroSection = () => {
                                 whileInView={{ opacity: 1, y: 0 }}
                                 viewport={{ once: true }}
                                 transition={{ duration: 0.5, delay: 0.45, ease: "easeOut" }}
-                                className="grid grid-cols-3 gap-3 sm:gap-4 max-w-[420px]  mx-auto lg:mx-0">
+                                className="grid grid-cols-3 gap-3 sm:gap-4 max-w-[440px] mx-auto lg:mx-0">
                                 {[
-                                    { to: '/customer-registration', icon: 'shopping_basket', label: 'Customer', desc: 'Buy Fresh', bgText: 'bg-[#EAF6ED] text-[#28A745] shadow-[var(--shadow-card)] ' },
-                                    { to: '/farmer-registration', icon: 'agriculture', label: 'Farmer', desc: 'Sell Produce', bgText: 'bg-[#FFF3E5] text-[#FA8231] shadow-[var(--shadow-card)]' },
-                                    { to: '/vendor-registration', icon: 'storefront', label: 'Vendor', desc: 'Bulk Buy', bgText: 'bg-[#EFF5FF] text-[#2D80E3] shadow-[var(--shadow-card)]' },
+                                    { to: '/farmer-registration', icon: 'agriculture', label: 'Farmer', desc: 'Sell Produce', bgText: 'bg-[#00B464] text-white shadow-xl shadow-green-200/50 scale-105 z-10', primary: true },
+                                    { to: '/vendor-registration', icon: 'storefront', label: 'Vendor', desc: 'Bulk Buy', bgText: 'bg-white text-[#2D80E3] border-slate-100' },
+                                    { to: '/customer-registration', icon: 'shopping_basket', label: 'Customer', desc: 'Buy Fresh', bgText: 'bg-white text-[#28A745] border-slate-100' },
                                 ].map(cta => (
                                     <Link key={cta.label} to={cta.to}
-                                        className="group relative p-3 sm:p-4 rounded-xl bg-white border border-gray-100 hover:border-transparent hover:shadow-[0_8px_30px_rgb(0,0,0,0.06)] transition-all duration-300 text-center active:scale-[0.98]">
-                                        <div className={`w-10 h-10 sm:w-12 sm:h-12 mx-auto ${cta.bgText} rounded-full flex items-center justify-center mb-2.5 group-hover:scale-110 transition-transform`}>
+                                        className={`group relative p-3.5 sm:p-5 rounded-2xl border transition-all duration-300 text-center active:scale-[0.98] ${cta.bgText} ${!cta.primary ? 'hover:border-[#00B464]/30 hover:shadow-lg' : 'hover:scale-110'}`}>
+                                        {cta.primary && (
+                                            <div className="absolute -top-3 left-1/2 -translate-x-1/2 bg-slate-900 text-white text-[9px] font-black px-2 py-0.5 rounded-full tracking-widest uppercase shadow-lg">Popular</div>
+                                        )}
+                                        <div className={`w-10 h-10 sm:w-12 sm:h-12 mx-auto rounded-full flex items-center justify-center mb-2.5 transition-transform ${cta.primary ? 'bg-white/20' : 'bg-slate-50'}`}>
                                             <span className="material-symbols-outlined text-xl sm:text-[24px]">{cta.icon}</span>
                                         </div>
-                                        <h3 className="font-bold text-[13px] sm:text-[14px] text-gray-900">{cta.label}</h3>
-                                        <p className="text-[10px] sm:text-[11px] text-gray-500 mt-1">{cta.desc}</p>
+                                        <h3 className={`font-black text-[13px] sm:text-[14px] ${cta.primary ? 'text-white' : 'text-gray-900'}`}>{cta.label}</h3>
+                                        <p className={`text-[10px] sm:text-[11px] mt-1 ${cta.primary ? 'text-white/70' : 'text-gray-500'}`}>{cta.desc}</p>
                                     </Link>
                                 ))}
                             </motion.div>
