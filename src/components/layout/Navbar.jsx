@@ -85,12 +85,12 @@ const Header = () => {
     <>
       <header className={`sticky top-0 left-0 right-0 z-[100] transition-all duration-300 ${scrolled
         ? 'py-2 bg-white/80 backdrop-blur-xl border-b border-gray-100 shadow-sm'
-        : 'py-3 bg-[#f0fcf7]'
+        : 'py-3 bg-white border-b-2 border-green-50'
         }`}>
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col gap-2.5">
+        <div className="max-w-8xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col gap-2.5">
           
           {/* Main Row */}
-          <div className="flex h-[52px] items-center justify-between gap-2 lg:gap-8">
+          <div className="flex h-[50px] items-center justify-between gap-2 lg:gap-5">
 
             {/* 1. LEFT: Logo & Categories */}
             <div className="flex items-center gap-2 lg:gap-6 shrink-0">
@@ -132,7 +132,7 @@ const Header = () => {
             </div>
 
             {/* 2. CENTER: Smart Search (DESKTOP) */}
-            <div className="hidden md:flex flex-1 min-w-[280px] max-w-[420px] items-center bg-white border border-gray-200 rounded-2xl p-1 focus-within:border-[#00B464] focus-within:shadow-[0_15px_30px_-10px_rgba(0,180,100,0.1)] transition-all h-[42px] group overflow-hidden">
+            <div className="hidden md:flex flex-1 min-w-[280px] max-w-[420px] items-center bg-white border border-gray-200 rounded-2xl p-1 focus-within:border-[#00B464] focus-within:shadow-[0_15px_30px_-10px_rgba(0,180,100,0.1)] transition-all h-[42px] group relative">
               <div className="relative shrink-0 flex items-center">
                 <button 
                   onClick={() => setIsLocationOpen(!isLocationOpen)}
