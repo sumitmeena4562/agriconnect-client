@@ -1,6 +1,7 @@
 import React from "react";
 import Navbar from "../components/layout/Navbar";
 import HeroSection from "../components/home/HeroSection";
+import TrustLogos from "../components/home/TrustLogos";
 import TrendingCategories from "../components/home/TrendingCategories";
 import HowItWorks from "../components/home/HowItWorks";
 import FeaturesSection from "../components/home/FeaturesSection";
@@ -16,6 +17,7 @@ const LandingPage = () => {
             <Navbar />
             <main>
                 <HeroSection />
+                <TrustLogos />
                 <TrendingCategories />
                 <HowItWorks />
                 <FeaturesSection />

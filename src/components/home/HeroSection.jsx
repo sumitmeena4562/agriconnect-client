@@ -35,10 +35,9 @@ const HeroSection = () => {
                             viewport={{ once: true }}
                             transition={{ duration: 0.5, delay: 0.15, ease: "easeOut" }}
                             className="text-4xl sm:text-5xl lg:text-[56px] font-black text-[#0A2616] leading-[1.1] tracking-tighter mb-5 font-heading">
-                            Connecting<br className="hidden lg:block"/>
-                            <span className="text-[#00B464]"> Farmers</span>, 
-                            <span className="text-[#2F80ED]"> Vendors</span>
-                            <br className="hidden lg:block"/>& Customers.
+                            Connect Direct.<br className="hidden lg:block"/>
+                            <span className="text-[#00B464]"> Maximize Profit.</span>
+                            <br className="hidden lg:block"/> Grow Together.
                         </motion.h1>
 
                         <motion.p 
@@ -46,8 +45,8 @@ const HeroSection = () => {
                             whileInView={{ opacity: 1, y: 0 }}
                             viewport={{ once: true }}
                             transition={{ duration: 0.5, delay: 0.3, ease: "easeOut" }}
-                            className="text-[15px] sm:text-[16px] text-[#556070] mb-8 leading-[1.6] max-w-lg mx-auto lg:mx-0 font-medium">
-                            The most trusted platform to sell directly, buy in bulk, and get farm-fresh produce at fair prices. No middlemen involved.
+                            className="text-[15px] sm:text-[16px] text-[#556070] mb-8 leading-[1.6] max-w-lg mx-auto lg:mx-0 font-medium italic">
+                            India's leading marketplace for farmers, bulk vendors, and health-conscious customers. Eliminating middlemen for a fairer, fresher future.
                         </motion.p>
 
                         {/* CTA Cards - Reverted to Small & Equal */}
@@ -58,14 +57,14 @@ const HeroSection = () => {
                             transition={{ duration: 0.5, delay: 0.45, ease: "easeOut" }}
                             className="grid grid-cols-3 gap-3 sm:gap-4 max-w-[440px] mx-auto lg:mx-0">
                             {[
-                                { to: '/farmer-registration', icon: 'agriculture', label: 'Farmer', desc: 'Sell Direct', color: 'text-[#00B464]', bg: 'bg-[#ECFDF5]' },
-                                { to: '/vendor-registration', icon: 'storefront', label: 'Vendor', desc: 'Bulk Buy', color: 'text-[#2F80ED]', bg: 'bg-[#EFF6FF]' },
-                                { to: '/customer-registration', icon: 'shopping_basket', label: 'Customer', desc: 'Buy Fresh', color: 'text-[#F59E0B]', bg: 'bg-[#FFFBEB]' },
+                                { to: '/farmer-registration', icon: 'agriculture', label: 'Farmer', desc: 'Top Rates', color: 'text-[#00B464]', bg: 'bg-[#ECFDF5]' },
+                                { to: '/vendor-registration', icon: 'storefront', label: 'Vendor', desc: 'Bulk Deals', color: 'text-[#2F80ED]', bg: 'bg-[#EFF6FF]' },
+                                { to: '/customer-registration', icon: 'shopping_basket', label: 'Customer', desc: 'Zero Fees', color: 'text-[#F59E0B]', bg: 'bg-[#FFFBEB]' },
                             ].map(cta => (
                                 <Link key={cta.label} to={cta.to}
-                                    className="group relative p-3 sm:p-4 rounded-2xl bg-white border border-gray-100 hover:border-[#00B464]/30 hover:shadow-xl hover:shadow-green-50 transition-all duration-300 text-center active:scale-[0.98]">
+                                    className="group relative p-3 sm:p-4 rounded-2xl bg-white border border-gray-100 hover:border-[#00B464]/30 hover:shadow-xl hover:shadow-green-50 transition-all duration-300 text-center active:scale-[0.98] glass-shine">
                                     <div className={`w-10 h-10 sm:w-12 sm:h-12 mx-auto ${cta.bg} ${cta.color} rounded-xl flex items-center justify-center mb-2.5 transition-transform group-hover:scale-110 group-hover:rotate-3`}>
-                                        <span className="material-symbols-outlined text-xl sm:text-[24px]">{cta.icon}</span>
+                                        <span className="material-symbols-outlined text-xl sm:text-[24px] icon-pop">{cta.icon}</span>
                                     </div>
                                     <h3 className="font-black text-[12px] sm:text-[13px] text-gray-900">{cta.label}</h3>
                                     <p className="text-[9px] sm:text-[10px] text-gray-500 mt-0.5 font-bold uppercase tracking-tighter">{cta.desc}</p>
