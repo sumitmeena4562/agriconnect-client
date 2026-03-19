@@ -2,16 +2,7 @@ import React from 'react';
 import { motion } from 'framer-motion';
 
 const TrendingCategories = () => {
-    // 1. Trust Leaders Data
-    const trustedLeaders = [
-        { icon: 'account_balance', name: 'NABARD' },
-        { icon: 'eco', name: 'Ministry of Agriculture' },
-        { icon: 'assured_workload', name: 'State Bank' },
-        { icon: 'agriculture', name: 'AgriTech Corp' },
-        { icon: 'local_shipping', name: 'FastLogistics' },
-    ];
-
-    // 2. Ticker Data
+    // 1. Ticker Data
     const tickerItems = [
         { name: 'Tomato', price: '₹20/kg', trend: 'up', emoji: '🍅' },
         { name: 'Potato', price: '₹15/kg', trend: 'up', emoji: '🥔' },
@@ -21,10 +12,10 @@ const TrendingCategories = () => {
         { name: 'Capsicum', price: '₹35/kg', trend: 'up', emoji: '🫑' },
     ];
 
-    // 3. Fake infinite ticker item list (duplicated exactly once for a seamless -50% loop)
+    // 2. Fake infinite ticker item list (duplicated exactly once for a seamless -50% loop)
     const infiniteTicker = [...tickerItems, ...tickerItems];
 
-    // 4. Categories Data
+    // 3. Categories Data
     const categories = [
         {
             name: 'Fresh Tomatoes',
@@ -93,36 +84,7 @@ const TrendingCategories = () => {
                 }
             `}</style>
 
-            {/* 1. TRUST BAR */}
-            <div className="bg-[#F8FAF9] pt-8 pb-6 px-4 sm:px-6 lg:px-8 border-t border-b border-gray-100/50">
-                <div className="max-w-6xl mx-auto flex flex-col items-center">
-                    <p className="text-[9px] sm:text-[10px] font-bold text-gray-400 tracking-[0.15em] uppercase mb-4 text-center">
-                        Trusted by industry leaders and organizations
-                    </p>
-
-                    <div className="flex flex-wrap justify-center items-center gap-x-6 sm:gap-x-10 lg:gap-x-12 gap-y-4">
-                        {trustedLeaders.map((partner, i) => (
-                            <motion.div
-                                key={i}
-                                initial={{ opacity: 0, y: 10 }}
-                                whileInView={{ opacity: 1, y: 0 }}
-                                viewport={{ once: true }}
-                                transition={{ duration: 0.4, delay: i * 0.1 }}
-                                className="flex items-center gap-2 text-gray-500 hover:text-gray-700 transition-colors cursor-pointer group grayscale hover:grayscale-0 opacity-80 hover:opacity-100"
-                            >
-                                <span className="material-symbols-outlined text-[18px] sm:text-[20px] text-gray-400 group-hover:text-[#00B464] transition-colors">
-                                    {partner.icon}
-                                </span>
-                                <span className="font-bold text-[12px] sm:text-[13px] tracking-tight">
-                                    {partner.name}
-                                </span>
-                            </motion.div>
-                        ))}
-                    </div>
-                </div>
-            </div>
-
-            {/* 2. LIVE TICKER STRIP */}
+            {/* 1. LIVE TICKER STRIP */}
             <div className="bg-[#111827] w-full overflow-hidden relative flex items-center shadow-inner">
 
                 {/* Fixed "LIVE" Button on the left */}
@@ -155,7 +117,7 @@ const TrendingCategories = () => {
                 <div className="absolute right-0 top-0 bottom-0 w-24 sm:w-32 bg-gradient-to-l from-[#111827] to-transparent z-20 pointer-events-none" />
             </div>
 
-            {/* 3. TRENDING CATEGORIES GRID */}
+            {/* 2. TRENDING CATEGORIES GRID */}
             <div className="py-12 sm:py-16 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto">
 
                 <div className="text-center max-w-xl mx-auto mb-10 sm:mb-14">
