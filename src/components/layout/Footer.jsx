@@ -1,101 +1,110 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { motion } from 'framer-motion';
 
 const Footer = () => {
-    const currentYear = new Date().getFullYear();
-
-    const sections = [
-        {
-            title: "Platform",
-            links: [
-                { name: "How it Works", to: "#how-it-works" },
-                { name: "Market Prices", to: "#trending" },
-                { name: "Features", to: "#features" },
-                { name: "For Farmers", to: "/farmer-registration" },
-                { name: "For Vendors", to: "/vendor-registration" }
-            ]
-        },
-        {
-            title: "Company",
-            links: [
-                { name: "About Us", to: "/about" },
-                { name: "Contact", to: "/contact" },
-                { name: "Privacy Policy", to: "/privacy" },
-                { name: "Terms of Service", to: "/terms" }
-            ]
-        },
-        {
-            title: "Support",
-            links: [
-                { name: "Help Center", to: "/help" },
-                { name: "Safety Tips", to: "/safety" },
-                { name: "Traceability", to: "/trace" },
-                { name: "Logistics", to: "/logistics" }
-            ]
-        }
-    ];
-
     return (
-        <footer className="bg-[#0A2616] text-white pt-16 pb-8 px-5 sm:px-6 lg:px-8 relative overflow-hidden">
-            {/* Background pattern/glow */}
-            <div className="absolute top-0 left-0 w-96 h-96 bg-[#00B464]/10 rounded-full blur-[100px] -translate-x-1/2 -translate-y-1/2" />
-            
+        <footer className="bg-[#0B1527] text-white pt-12 pb-8 px-5 sm:px-6 lg:px-12 relative overflow-hidden border-t border-white/5 font-inter">
             <div className="max-w-7xl mx-auto relative z-10">
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-12 lg:gap-8 mb-16">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-10 lg:gap-8 mb-8">
                     
                     {/* Brand Section */}
-                    <div className="lg:col-span-2">
-                        <Link to="/" className="flex items-center gap-2 mb-6 group">
-                            <div className="w-10 h-10 bg-[#00B464] rounded-xl flex items-center justify-center shadow-lg shadow-[#00B464]/20 group-hover:scale-110 transition-transform duration-300">
-                                <span className="material-symbols-outlined text-white text-[24px]">agriculture</span>
+                    <div className="space-y-4">
+                        <Link to="/" className="flex items-center gap-2 group">
+                            <div className="w-8 h-8 bg-[#00B464] rounded-lg flex items-center justify-center shadow-lg transition-transform duration-300 group-hover:scale-105 shrink-0">
+                                <span className="material-symbols-outlined text-white text-[18px]">agriculture</span>
                             </div>
-                            <span className="text-2xl font-black tracking-tight font-heading">
-                                Agri<span className="text-[#00B464]">Connect</span>
+                            <span className="text-xl font-black tracking-tight font-heading">
+                                AgriConnect
                             </span>
                         </Link>
                         
-                        <p className="text-green-50/60 text-[15px] leading-relaxed max-w-sm mb-8">
-                            India's first unified platform connecting farmers directly with vendors and customers. Empowering the agriculture ecosystem with technology and transparency.
+                        <p className="text-white/40 text-[12.5px] leading-relaxed max-w-[220px]">
+                            Empowering Indian agriculture through technology. Direct farm-to-table connection.
                         </p>
 
-                        <div className="flex items-center gap-4">
-                            {['facebook', 'twitter', 'instagram', 'linkedin'].map(social => (
-                                <a key={social} href="#" className="w-10 h-10 rounded-full bg-white/5 border border-white/10 flex items-center justify-center hover:bg-[#00B464] hover:border-[#00B464] transition-all duration-300 group">
-                                    <span className={`material-symbols-outlined text-white/50 group-hover:text-white text-[20px] transition-colors`}>
-                                        {social === 'twitter' ? 'X' : social}
-                                    </span>
+                        <div className="flex items-center gap-3">
+                            {[
+                                { 
+                                    name: "Facebook",
+                                    path: "M22 12c0-5.52-4.48-10-10-10S2 6.48 2 12c0 4.84 3.44 8.87 8 9.8V15H8v-3h2V9a3 3 0 0 1 3-3h3v3h-3v3h3l-.5 3H13v6.8c4.56-.93 8-4.96 8-9.8z" 
+                                },
+                                { 
+                                    name: "Twitter",
+                                    path: "M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"
+                                },
+                                {
+                                    name: "LinkedIn",
+                                    path: "M19 3a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h14m-.5 15.5v-5.4a2.21 2.21 0 0 0-2.22-2.22c-.76 0-1.4.37-1.78.93V10h-2.2v8.5h2.2v-4.6c0-.6.48-1.07 1.07-1.07s1.07.47 1.07 1.07v4.6h2.2M8 18.5v-8.5H5.8v8.5H8M6.9 8.6c.7 0 1.25-.56 1.25-1.25S7.6 6.1 6.9 6.1s-1.25.56-1.25 1.25s.56 1.25 1.25 1.25z"
+                                }
+                            ].map((social, i) => (
+                                <a key={i} href="#" aria-label={social.name} className="w-8 h-8 rounded-full bg-white/5 border border-white/5 flex items-center justify-center hover:bg-[#00B464] hover:border-[#00B464] transition-all duration-300 group">
+                                    <svg 
+                                        viewBox="0 0 24 24" 
+                                        className="w-3.5 h-3.5 fill-white/30 group-hover:fill-white transition-colors"
+                                    >
+                                        <path d={social.path} />
+                                    </svg>
                                 </a>
                             ))}
                         </div>
                     </div>
 
                     {/* Links Sections */}
-                    {sections.map(section => (
+                    {[
+                        { title: "COMPANY", links: ["About Us", "Careers", "Press", "Impact"] },
+                        { title: "RESOURCES", links: ["Market Rates", "Farming Tips", "Help Center", "Privacy Policy"] }
+                    ].map(section => (
                         <div key={section.title}>
-                            <h4 className="text-[16px] font-bold mb-6 text-white uppercase tracking-wider">{section.title}</h4>
-                            <ul className="space-y-4">
+                            <h4 className="text-[12px] font-black mb-5 text-white uppercase tracking-[0.1em]">{section.title}</h4>
+                            <ul className="space-y-3">
                                 {section.links.map(link => (
-                                    <li key={link.name}>
-                                        <Link to={link.to} className="text-green-50/50 hover:text-[#00B464] transition-colors text-[14px] flex items-center gap-1.5 group">
-                                            <span className="w-1.5 h-[1.5px] bg-[#00B464] scale-x-0 group-hover:scale-x-100 transition-transform origin-left" />
-                                            {link.name}
+                                    <li key={link}>
+                                        <Link to="#" className="text-white/40 hover:text-[#00B464] transition-colors text-[13.5px] font-medium block">
+                                            {link}
                                         </Link>
                                     </li>
                                 ))}
                             </ul>
                         </div>
                     ))}
+
+                    {/* Contact Section */}
+                    <div>
+                        <h4 className="text-[12px] font-black mb-5 text-white uppercase tracking-[0.1em]">CONTACT</h4>
+                        <div className="space-y-4">
+                            <div className="flex items-center gap-3 text-white/40 cursor-default group">
+                                <span className="material-symbols-outlined text-[18px] group-hover:text-[#00B464] transition-colors font-normal">call</span>
+                                <span className="text-[13.5px] font-medium">+91 6261 652446</span>
+                            </div>
+                            <div className="flex items-center gap-3 text-white/40 cursor-default group">
+                                <span className="material-symbols-outlined text-[18px] group-hover:text-[#00B464] transition-colors font-normal">mail</span>
+                                <span className="text-[13.5px] font-medium truncate">agriconnect.tech@gmail.com</span>
+                            </div>
+                            
+                            <a 
+                                href="https://wa.me/916261652446" 
+                                target="_blank" 
+                                rel="noopener noreferrer"
+                                className="inline-flex items-center gap-2 px-4 py-2.5 bg-white/5 border border-white/10 rounded-lg hover:bg-white/10 transition-all duration-300 group"
+                            >
+                                <span className="material-symbols-outlined text-[#00B464] text-[18px] font-normal">chat</span>
+                                <span className="text-[13.5px] font-bold text-white/70 group-hover:text-white leading-none">WhatsApp Support</span>
+                            </a>
+                        </div>
+                    </div>
                 </div>
 
-                <div className="pt-8 border-t border-white/5 flex flex-col sm:flex-row justify-between items-center gap-4">
-                    <p className="text-green-50/30 text-[13px]">
-                        © {currentYear} AgriConnect. All rights reserved.
+                <div className="pt-6 border-t border-white/5 flex flex-col md:flex-row justify-between items-center gap-4">
+                    <p className="text-white/20 text-[11px] font-medium">
+                        © 2025 AgriConnect Technologies Pvt Ltd. All rights reserved.
                     </p>
                     
-                    <div className="flex items-center gap-6">
-                        <Link to="/privacy" className="text-green-50/30 hover:text-white text-[13px] transition-colors">Privacy Policy</Link>
-                        <Link to="/terms" className="text-green-50/30 hover:text-white text-[13px] transition-colors">Terms of Service</Link>
+                    <div className="flex items-center gap-8">
+                        {['Terms', 'Privacy', 'Cookies'].map(legal => (
+                            <Link key={legal} to="#" className="text-white/20 hover:text-[#00B464] text-[11px] font-medium transition-colors">
+                                {legal}
+                            </Link>
+                        ))}
                     </div>
                 </div>
             </div>
