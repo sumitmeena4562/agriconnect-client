@@ -60,9 +60,9 @@ const Header = () => {
 
   return (
     <>
-      <header className={`sticky top-0 left-0 right-0 z-50 transition-all duration-300 ${isMenuOpen || scrolled
-        ? 'bg-white shadow-md'
-        : 'bg-white/95 backdrop-blur-md'
+      <header className={`sticky top-0 left-0 right-0 z-[100] transition-all duration-500 ${scrolled
+        ? 'py-2 bg-white/70 backdrop-blur-xl border-b border-white/20 shadow-[0_20px_40px_-15px_rgba(0,0,0,0.05)]'
+        : 'py-4 bg-transparent'
         }`}>
         <div className="max-w-[1600px] mx-auto">
           {/* Main Nav Row */}
@@ -153,13 +153,21 @@ const Header = () => {
 
             {/* Right: Utils & Actions */}
             <div className="flex items-center gap-2 sm:gap-4 shrink-0">
-              <nav className="hidden xl:flex items-center gap-5 mr-4">
+              <nav className="hidden xl:flex items-center gap-8 mr-6">
                 {navLinks.map(link => (
                   <button key={link.id} onClick={() => scrollToSection(link.id)}
-                    className={`text-[13px] font-bold transition-colors relative ${activeSection === link.id ? 'text-[#00B464]' : 'text-slate-600 hover:text-[#00B464]'}`}
+                    className={`text-[13px] font-black transition-all relative py-2 px-1 group ${activeSection === link.id ? 'text-[#00B464]' : 'text-slate-500 hover:text-slate-900'}`}
                   >
-                    {link.label}
-                    {activeSection === link.id && <span className="absolute -bottom-1 left-1/2 w-1 h-1 bg-[#00B464] rounded-full transform -translate-x-1/2" />}
+                    <span className="relative z-10">{link.label}</span>
+                    {activeSection === link.id && (
+                      <motion.span 
+                        layoutId="activeNav"
+                        className="absolute bottom-0 left-0 right-0 h-[3px] bg-[#00B464] rounded-full"
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        transition={{ duration: 0.3 }}
+                      />
+                    )}
                   </button>
                 ))}
               </nav>
@@ -223,10 +231,15 @@ const Header = () => {
       <AnimatePresence>
         {isMenuOpen && (
           <div className="fixed inset-0 z-[100] md:hidden">
-            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
-              className="absolute inset-0 bg-black/50 backdrop-blur-sm" onClick={() => setIsMenuOpen(false)} />
-            <motion.div initial={{ x: '100%' }} animate={{ x: 0 }} exit={{ x: '100%' }} transition={{ type: 'spring', damping: 25, stiffness: 200 }}
-              className="absolute top-0 right-0 w-[85%] h-full bg-white shadow-2xl overflow-y-auto p-6 pt-10"
+            <motion.div 
+              initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+              className="absolute inset-0 bg-[#0A2616]/40 backdrop-blur-md" 
+              onClick={() => setIsMenuOpen(false)} 
+            />
+            <motion.div 
+              initial={{ x: '100%' }} animate={{ x: 0 }} exit={{ x: '100%' }} 
+              transition={{ type: 'spring', damping: 25, stiffness: 200 }}
+              className="absolute top-0 right-0 w-[85%] h-full bg-white/90 backdrop-blur-2xl shadow-[-20px_0_50px_rgba(0,0,0,0.1)] overflow-y-auto p-6 pt-10"
             >
               <div className="flex items-center justify-between mb-8 border-b border-slate-50 pb-6">
                 <Logo size="md" />
