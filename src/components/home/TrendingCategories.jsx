@@ -77,7 +77,7 @@ const TrendingCategories = () => {
     ];
 
     return (
-        <section className="bg-transparent relative">
+        <section id="trending" className="bg-transparent relative">
 
             <style>{`
                 @keyframes marquee {
@@ -126,22 +126,22 @@ const TrendingCategories = () => {
             <div className="bg-[#111827] w-full overflow-hidden relative flex items-center shadow-inner">
 
                 {/* Fixed "LIVE" Button on the left */}
-                <div className="absolute left-0 top-0 bottom-0 bg-[#111827] z-20 flex items-center pl-4 sm:pl-6 lg:pl-8 pr-4 shadow-[10px_0_20px_-5px_#111827]">
-                    <div className="flex items-center gap-1.5 px-2.5 py-1 bg-red-500/10 border border-red-500/20 rounded-md">
-                        <span className="w-1.5 h-1.5 bg-red-500 rounded-full animate-pulse shadow-[0_0_8px_rgba(239,68,68,0.8)]" />
-                        <span className="text-red-500 font-bold text-[9px] sm:text-[10px] tracking-wider uppercase">Live</span>
+                <div className="absolute left-0 top-0 bottom-0 bg-[#111827] z-20 flex items-center pl-6 sm:pl-8 lg:pl-10 pr-4 shadow-[15px_0_25px_-5px_#111827]">
+                    <div className="flex items-center gap-1.5 px-3 py-1.5 bg-red-500/10 border border-red-500/20 rounded-lg">
+                        <span className="w-1.5 h-1.5 bg-red-500 rounded-full animate-pulse shadow-[0_0_10px_rgba(239,68,68,0.8)]" />
+                        <span className="text-red-500 font-black text-[10px] tracking-widest uppercase">Live</span>
                     </div>
                 </div>
 
                 {/* Marquee Content */}
-                <div className="flex whitespace-nowrap animate-marquee py-2 pl-[90px] sm:pl-[120px]">
+                <div className="flex whitespace-nowrap animate-marquee py-2 pl-[100px] sm:pl-[140px]">
                     {infiniteTicker.map((item, i) => (
-                        <div key={i} className="flex items-center gap-1.5 mx-4 sm:mx-6">
-                            <span className="text-[12px] sm:text-[13px]">{item.emoji}</span>
-                            <span className="text-gray-300 font-medium text-[11px] sm:text-[12px]">{item.name}</span>
-                            <span className="text-white font-bold text-[11px] sm:text-[12px]">{item.price}</span>
+                        <div key={i} className="flex items-center gap-2 mx-4 sm:mx-6">
+                            <span className="text-[13px] sm:text-[14px]">{item.emoji}</span>
+                            <span className="text-gray-300 font-bold text-[11px] sm:text-[12px] tracking-tight">{item.name}</span>
+                            <span className="text-white font-black text-[12px] sm:text-[13px] ml-1">{item.price}</span>
                             <span className="material-symbols-outlined text-[12px] sm:text-[14px] font-bold"
-                                style={{ color: item.trend === 'up' ? '#10B981' : '#EF4444' }}>
+                                style={{ color: item.trend === 'up' ? '#00B464' : '#EF4444' }}>
                                 {item.trend === 'up' ? 'trending_up' : 'trending_down'}
                             </span>
                         </div>
@@ -149,11 +149,11 @@ const TrendingCategories = () => {
                 </div>
 
                 {/* Fade on the right side */}
-                <div className="absolute right-0 top-0 bottom-0 w-12 sm:w-24 bg-gradient-to-l from-[#111827] to-transparent z-20 pointer-events-none" />
+                <div className="absolute right-0 top-0 bottom-0 w-24 sm:w-32 bg-gradient-to-l from-[#111827] to-transparent z-20 pointer-events-none" />
             </div>
 
             {/* 3. TRENDING CATEGORIES GRID */}
-            <div className="pt-16 pb-20 sm:pt-20 sm:pb-24 px-4 sm:px-6 lg:px-8 max-w-5xl mx-auto">
+            <div className="py-12 sm:py-16 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto">
 
                 <div className="text-center max-w-xl mx-auto mb-10 sm:mb-14">
                     <motion.div
@@ -190,7 +190,7 @@ const TrendingCategories = () => {
                     </motion.p>
                 </div>
 
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
+                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-6 lg:gap-8">
                     {categories.map((cat, index) => (
                         <motion.div
                             key={index}

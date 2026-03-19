@@ -43,12 +43,12 @@ const HowItWorks = () => {
     ];
 
     return (
-        <section id="how-it-works" className="py-16 sm:py-20 lg:py-24 bg-white relative overflow-hidden">
+        <section id="how-it-works" className="py-12 sm:py-16 lg:py-20 bg-white relative overflow-hidden">
             {/* Background elements */}
             <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-green-50/50 rounded-full blur-[100px] -mr-64 -mt-64" />
             <div className="absolute bottom-0 left-0 w-[500px] h-[500px] bg-blue-50/30 rounded-full blur-[100px] -ml-64 -mb-64" />
 
-            <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
                 {/* Header */}
                 <div className="text-center max-w-xl mx-auto mb-12 sm:mb-16">
                     <motion.div 

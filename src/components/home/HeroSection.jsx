@@ -35,11 +35,11 @@ const HeroSection = () => {
                                 whileInView={{ opacity: 1, y: 0 }}
                                 viewport={{ once: true }}
                                 transition={{ duration: 0.5, delay: 0.15, ease: "easeOut" }}
-                                className="text-4xl sm:text-5xl lg:text-[56px] font-black text-[#0A2616] leading-[1.1] tracking-tight mb-5 font-heading">
+                                className="text-4xl sm:text-5xl lg:text-[52px] font-black text-[#0A2616] leading-[1.1] tracking-tight mb-5 font-heading">
                                 Connecting<br className="hidden lg:block"/>
-                                <span className="text-[#00B464]"> Farmers</span>,<br className="hidden sm:block lg:hidden"/>
+                                <span className="text-[#00B464]"> Farmers</span>, 
                                 <span className="text-[#2F80ED]"> Vendors</span>
-                                {' '}&&nbsp;<br className="hidden lg:block"/>Customers.
+                                <br className="hidden lg:block"/>& Customers.
                             </motion.h1>
 
                             <motion.p 

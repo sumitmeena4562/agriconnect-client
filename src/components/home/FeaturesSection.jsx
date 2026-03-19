@@ -42,8 +42,8 @@ const FeaturesSection = () => {
     ];
 
     return (
-        <section id="features" className="py-16 sm:py-20 bg-transparent relative">
-            <div className="max-w-6xl mx-auto px-5 sm:px-6 lg:px-8">
+        <section id="features" className="py-12 sm:py-16 bg-transparent relative">
+            <div className="max-w-7xl mx-auto px-5 sm:px-6 lg:px-8">
                 
                 {/* Header */}
                 <div className="text-center max-w-xl mx-auto mb-10 sm:mb-14">
