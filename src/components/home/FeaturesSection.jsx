@@ -4,38 +4,38 @@ import { motion } from 'framer-motion';
 const FeaturesSection = () => {
     const features = [
         {
-            title: "Verified Community",
-            description: "Interact with 100% KYC verified Farmers and bulk buyers for a stress-free experience.",
+            title: "Verified Ecosystem",
+            description: "Trade with 100% KYC-verified bulk buyers and farmers. Zero risk, absolute trust.",
             icon: "verified_user",
             colorClass: "bg-blue-50 text-blue-600"
         },
         {
-            title: "Live Mandi Rates",
-            description: "Access real-time APMC market prices across India to time your sales perfectly.",
+            title: "Real-time Profit Pulse",
+            description: "Live Mandi rates & APMC data from across India. Time your sales to maximize margins.",
             icon: "monitoring",
             colorClass: "bg-emerald-50 text-emerald-600"
         },
         {
-            title: "Smart Logistics",
-            description: "Farm gate to vendor doorstep. We handle everything including Mandi tax and paperwork.",
+            title: "Zero-Hassle Logistics",
+            description: "Direct farm-gate collection. We handle Mandi tax, loading, and doorstep delivery.",
             icon: "local_shipping",
             colorClass: "bg-orange-50 text-orange-600"
         },
         {
-            title: "QR Traceability",
-            description: "Farmers can build a brand. Buyers scan QR to see soil report, farm origin and harvest date.",
+            title: "Brand Traceability",
+            description: "Build your farm's brand. QR codes show harvest date, origin, and soil quality reports.",
             icon: "qr_code_scanner",
             colorClass: "bg-purple-50 text-purple-600"
         },
         {
-            title: "Regional Language Support",
-            description: "Available in Hindi, Marathi, Telugu and 5+ more regional languages for every Indian farmer.",
+            title: "Regional Optimization",
+            description: "Localized interface in Hindi, Marathi, Telugu & more. Built for every Indian village.",
             icon: "translate",
             colorClass: "bg-pink-50 text-pink-600"
         },
         {
-            title: "Weather Predictions",
-            description: "Hyper-local weather updates and smart harvesting advice based on AI satellite data.",
+            title: "Harvest Intelligence",
+            description: "AI-driven local weather predictions and smart harvesting advice to secure your crop.",
             icon: "cloudy_snowing",
             colorClass: "bg-cyan-50 text-cyan-600"
         }
@@ -90,11 +90,11 @@ const FeaturesSection = () => {
                             whileInView={{ opacity: 1, y: 0 }}
                             viewport={{ once: true }}
                             transition={{ duration: 0.5, delay: index * 0.1 }}
-                            className="bg-white rounded-2xl p-5 sm:p-6 shadow-[0_8px_30px_rgb(0,0,0,0.04)] hover:shadow-[0_20px_40px_rgba(0,0,0,0.08)] transition-all duration-300 border border-gray-100 group cursor-default hover:-translate-y-1.5"
+                            className="bg-white rounded-2xl p-5 sm:p-6 shadow-[0_8px_30px_rgb(0,0,0,0.04)] hover:shadow-[0_20px_40px_rgba(0,180,100,0.08)] transition-all duration-300 border border-gray-100 group cursor-default hover:-translate-y-1.5 glass-shine"
                         >
                             {/* Icon Container - Higher Contrast */}
                             <div className={`w-12 h-12 sm:w-14 sm:h-14 rounded-xl ${feature.colorClass.split(' ')[0]} flex items-center justify-center mb-5 transition-transform duration-500 group-hover:scale-110 group-hover:rotate-3`}>
-                                <span className={`material-symbols-outlined ${feature.colorClass.split(' ')[1]} text-[24px] sm:text-[28px] font-bold`}>
+                                <span className={`material-symbols-outlined ${feature.colorClass.split(' ')[1]} text-[24px] sm:text-[28px] font-bold icon-pop`}>
                                     {feature.icon}
                                 </span>
                             </div>
