@@ -7,19 +7,23 @@ const FAQSection = () => {
     const faqs = [
         {
             question: "How long does it take for farmers to get paid?",
-            answer: "Payments are processed instantly as soon as the buyer confirms delivery. It usually reflects in the farmer's linked bank account within 2-4 hours."
+            answer: "Payments are processed instantly through our Secure Escrow system. Once the buyer confirms receipt, funds are transferred to your linked bank account via UPI or IMPS within 2-4 hours."
         },
         {
-            question: "Is there a registration fee?",
-            answer: "No, registration for both farmers and vendors is completely free. We only charge a small platform fee once a successful transaction is completed."
+            question: "Is there a registration fee or Mandi tax?",
+            answer: "Registration is 100% Free. AgriConnect handles all digital paperwork. Any applicable Mandi taxes or cess are calculated transparently during the deal finalization so there are no surprises."
         },
         {
-            question: "Who handles the logistics and transportation?",
-            answer: "AgriConnect provides a built-in smart logistics network. Once an order is placed, our logistics partners collect the produce from the farm-gate and deliver it to the vendor's doorstep."
+            question: "Who handles the logistics and loading?",
+            answer: "AgriConnect provides a dedicated logistics network. Our partners handle the farm-gate collection, loading, and delivery. Farmers just need to have the produce ready for pickup."
         },
         {
-            question: "How is the produce quality verified?",
-            answer: "We have verified quality inspectors at major collection points. Additionally, the QR traceability system allows buyers to verify the farm origin and harvest date directly."
+            question: "Can I sell without a smartphone?",
+            answer: "Yes! While our app offers the best experience, you can also list produce and receive price alerts via our toll-free 'Agri-Helpline' or via SMS for basic phones."
+        },
+        {
+            question: "How do you ensure buyers are genuine?",
+            answer: "Every buyer (Vendor/Merchant) on AgriConnect undergoes a multi-step KYC verification, including GST and Trade License checks, to ensure you only deal with serious, verified businesses."
         }
     ];
 
