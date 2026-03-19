@@ -74,7 +74,7 @@ const Header = () => {
                 >
                   {link.label}
                   {activeSection === link.id && (
-                    <span className="absolute -bottom-1 w-1 h-1 bg-[#00B464] rounded-full transform -translate-x-1/2" />
+                    <span className="absolute -bottom-1 left-1/2 w-1 h-1 bg-[#00B464] rounded-full transform -translate-x-1/2" />
                   )}
                 </button>
               ))}
