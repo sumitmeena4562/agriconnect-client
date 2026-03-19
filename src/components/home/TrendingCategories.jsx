@@ -201,14 +201,14 @@ const TrendingCategories = () => {
                             whileInView={{ opacity: 1, y: 0 }}
                             viewport={{ once: true }}
                             transition={{ duration: 0.5, delay: index * 0.1 }}
-                            className="bg-white rounded-2xl overflow-hidden shadow-[var(--shadow-card)] hover:shadow-[var(--shadow-card-hover)] transition-all duration-300 hover:-translate-y-1.5 group cursor-pointer border border-gray-100/50 flex flex-col h-full"
+                            className="bg-white rounded-2xl overflow-hidden shadow-[var(--shadow-card)] hover:shadow-[var(--shadow-card-hover)] transition-all duration-300 hover:-translate-y-1.5 group cursor-pointer border border-gray-100/50 flex flex-col h-full glass-shine"
                         >
                             {/* Image Container */}
                             <div className="w-full h-[140px] sm:h-[150px] bg-gray-50 overflow-hidden relative">
                                 <img
                                     src={cat.img}
                                     alt={cat.name}
-                                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700 ease-out"
+                                    className="w-full h-full object-cover transition-transform duration-1000 ease-out icon-pop"
                                 />
                                 <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
                             </div>
