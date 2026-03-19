@@ -6,6 +6,7 @@ import HowItWorks from "../components/home/HowItWorks";
 import FeaturesSection from "../components/home/FeaturesSection";
 import Testimonials from "../components/home/Testimonials";
 import NewsSection from "../components/home/NewsSection";
+import MobileAppSection from "../components/home/MobileAppSection";
 import FAQSection from "../components/home/FAQSection";
 import Footer from "../components/layout/Footer";
 
@@ -19,6 +20,7 @@ const LandingPage = () => {
                 <FeaturesSection />
                 <Testimonials />
                 <NewsSection />
+                <MobileAppSection />
                 <HowItWorks />
                 <FAQSection />
             </main>
