@@ -59,7 +59,7 @@ const HeroSection = () => {
                                 transition={{ duration: 0.5, delay: 0.45, ease: "easeOut" }}
                                 className="grid grid-cols-3 gap-3 sm:gap-4 max-w-[420px]  mx-auto lg:mx-0">
                                 {[
-                                    { to: '/customer-registration', icon: 'shopping_basket', label: 'Customer', desc: 'Buy Fresh', bgText: 'bg-[#EAF6ED] text-[#28A745] shadow-[var(--shadow-card)]' },
+                                    { to: '/customer-registration', icon: 'shopping_basket', label: 'Customer', desc: 'Buy Fresh', bgText: 'bg-[#EAF6ED] text-[#28A745] shadow-[var(--shadow-card)] ' },
                                     { to: '/farmer-registration', icon: 'agriculture', label: 'Farmer', desc: 'Sell Produce', bgText: 'bg-[#FFF3E5] text-[#FA8231] shadow-[var(--shadow-card)]' },
                                     { to: '/vendor-registration', icon: 'storefront', label: 'Vendor', desc: 'Bulk Buy', bgText: 'bg-[#EFF5FF] text-[#2D80E3] shadow-[var(--shadow-card)]' },
                                 ].map(cta => (

@@ -23,7 +23,7 @@ const Header = () => {
     }, { threshold: 0.3, rootMargin: '-60px 0px -60px 0px' });
 
     setTimeout(() => {
-      ['home', 'how-it-works', 'market-rates', 'contact'].forEach(id => {
+      ['home', 'trending', 'features', 'how-it-works', 'testimonials', 'news', 'mobile-app', 'faq'].forEach(id => {
         const el = document.getElementById(id);
         if (el) observer.observe(el);
       });
@@ -40,9 +40,13 @@ const Header = () => {
 
   const navLinks = [
     { label: 'Home', id: 'home' },
-    { label: 'How it Works', id: 'how-it-works' },
-    { label: 'Market Rates', id: 'market-rates' },
-    { label: 'Contact', id: 'contact' },
+    { label: 'Rates', id: 'trending' },
+    { label: 'Features', id: 'features' },
+    { label: 'Process', id: 'how-it-works' },
+    { label: 'Reviews', id: 'testimonials' },
+    { label: 'Updates', id: 'news' },
+    { label: 'App', id: 'mobile-app' },
+    { label: 'FAQ', id: 'faq' },
   ];
 
   return (
@@ -61,7 +65,7 @@ const Header = () => {
             />
 
             {/* Desktop Nav */}
-            <nav className="hidden md:flex items-center gap-8 relative">
+            <nav className="hidden xl:flex items-center gap-6 relative">
               {navLinks.map(link => (
                 <button
                   key={link.id}
