@@ -90,21 +90,21 @@ const FeaturesSection = () => {
                             whileInView={{ opacity: 1, y: 0 }}
                             viewport={{ once: true }}
                             transition={{ duration: 0.5, delay: index * 0.1 }}
-                            className="bg-white rounded-2xl p-5 sm:p-6 shadow-[var(--shadow-card)] hover:shadow-[var(--shadow-card-hover)] transition-all duration-300 border border-gray-100/50 group cursor-default hover:-translate-y-1"
+                            className="bg-white rounded-2xl p-5 sm:p-6 shadow-[0_8px_30px_rgb(0,0,0,0.04)] hover:shadow-[0_20px_40px_rgba(0,0,0,0.08)] transition-all duration-300 border border-gray-100 group cursor-default hover:-translate-y-1.5"
                         >
-                            {/* Icon Container */}
-                            <div className={`w-12 h-12 sm:w-14 sm:h-14 rounded-xl ${feature.colorClass} flex items-center justify-center mb-5 shadow-md transition-transform duration-500 group-hover:scale-110 group-hover:rotate-3`}>
-                                <span className="material-symbols-outlined text-white text-[24px] sm:text-[28px]">
+                            {/* Icon Container - Higher Contrast */}
+                            <div className={`w-12 h-12 sm:w-14 sm:h-14 rounded-xl ${feature.colorClass.split(' ')[0]} flex items-center justify-center mb-5 transition-transform duration-500 group-hover:scale-110 group-hover:rotate-3`}>
+                                <span className={`material-symbols-outlined ${feature.colorClass.split(' ')[1]} text-[24px] sm:text-[28px] font-bold`}>
                                     {feature.icon}
                                 </span>
                             </div>
 
-                            {/* Text Content */}
-                            <h3 className="text-[16px] sm:text-[17px] font-black text-[#0A2616] mb-2 group-hover:text-[#00B464] transition-colors duration-300 tracking-tight">
+                            {/* Text Content - Consistent Titles */}
+                            <h3 className="text-[17px] sm:text-[18px] font-black text-[#0A2616] mb-2.5 transition-colors duration-300 tracking-tight">
                                 {feature.title}
                             </h3>
                             
-                            <p className="text-slate-500 text-[12px] sm:text-[13px] leading-[1.5]">
+                            <p className="text-[#556070] text-[13px] sm:text-[14px] leading-[1.6] font-medium">
                                 {feature.description}
                             </p>
                         </motion.div>
