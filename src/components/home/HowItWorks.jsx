@@ -6,8 +6,8 @@ const HowItWorks = () => {
     const steps = [
         {
             number: "01",
-            title: "Join the Network",
-            description: "Register as a Farmer, Vendor, or Customer in just 2 minutes.",
+            title: "Secure Access",
+            description: "Register your verified profile in 2 minutes as a Farmer, Vendor, or Customer.",
             icon: "person_add",
             color: "bg-blue-50 text-blue-600",
             borderColor: "border-blue-100",
@@ -15,8 +15,8 @@ const HowItWorks = () => {
         },
         {
             number: "02",
-            title: "List / Browse",
-            description: "Farmers list produce, while Vendors & Customers browse fresh stock.",
+            title: "Market Discovery",
+            description: "Post your harvest or discover premium bulk inventory with real-time pricing.",
             icon: "inventory_2",
             color: "bg-amber-50 text-amber-600",
             borderColor: "border-amber-100",
@@ -24,8 +24,8 @@ const HowItWorks = () => {
         },
         {
             number: "03",
-            title: "Direct Connect",
-            description: "No middlemen. Chat directly with buyers or sellers and finalize deals.",
+            title: "Zero-Fee Trading",
+            description: "Connect directly. Negotiate, chat, and close high-profit deals without middlemen.",
             icon: "handshake",
             color: "bg-green-50 text-[#00B464]",
             borderColor: "border-green-100",
@@ -33,8 +33,8 @@ const HowItWorks = () => {
         },
         {
             number: "04",
-            title: "Fast Delivery",
-            description: "Enjoy fast, reliable logistics right from the farm to your doorstep.",
+            title: "Smart Fulfillment",
+            description: "From farm-gate to doorstep. Integrated logistics handle every detail for you.",
             icon: "local_shipping",
             color: "bg-purple-50 text-purple-600",
             borderColor: "border-purple-100",
@@ -102,9 +102,9 @@ const HowItWorks = () => {
                                 <div className="hidden lg:block absolute top-[44px] left-full w-full h-[2px] border-t-2 border-dashed border-gray-200 z-0 transform -translate-x-4" />
                             )}
 
-                            <div className="relative z-10 bg-white p-5 sm:p-6 rounded-2xl shadow-[var(--shadow-card)] group-hover:shadow-[var(--shadow-card-hover)] transition-all duration-300 border border-gray-100/50 group-hover:-translate-y-1.5 h-full flex flex-col">
+                            <div className="relative z-10 bg-white p-5 sm:p-6 rounded-2xl shadow-[var(--shadow-card)] group-hover:shadow-[var(--shadow-card-hover)] transition-all duration-300 border border-gray-100/50 group-hover:-translate-y-1.5 h-full flex flex-col glass-shine">
                                 <div className={`w-12 h-12 sm:w-14 sm:h-14 rounded-xl ${step.color} flex items-center justify-center mb-5 relative overflow-hidden transition-transform duration-500 group-hover:scale-110 group-hover:rotate-3`}>
-                                    <span className="material-symbols-outlined text-[24px] sm:text-[28px] z-10">{step.icon}</span>
+                                    <span className="material-symbols-outlined text-[24px] sm:text-[28px] z-10 icon-pop">{step.icon}</span>
                                 </div>
 
                                 {/* Floating Number */}
@@ -136,13 +136,13 @@ const HowItWorks = () => {
                     <div className="absolute bottom-0 left-0 w-64 h-64 bg-blue-500/10 rounded-full blur-[100px] transform -translate-x-1/2 translate-y-1/2" />
                     
                     <div className="relative z-10 text-center lg:text-left max-w-xl">
-                        <h4 className="text-xl sm:text-2xl lg:text-[28px] font-black text-white mb-3 tracking-tight">Ready to Grow Your Business?</h4>
-                        <p className="text-green-50/80 text-[13px] sm:text-[15px] leading-relaxed">Join 15,000+ users already transforming the face of Indian Agriculture. Get direct access to fresh produce and fair prices today.</p>
+                        <h4 className="text-xl sm:text-2xl lg:text-[28px] font-black text-white mb-3 tracking-tight">Scale Your Agricultural Business Today</h4>
+                        <p className="text-green-50/80 text-[13px] sm:text-[15px] leading-relaxed">Over 25,000 users are driving the digital revolution in Indian farming. Secure your direct market link and eliminate middlemen forever.</p>
                     </div>
 
                     <div className="relative z-10 flex flex-col sm:flex-row gap-3 w-full lg:w-auto mt-4 lg:mt-0">
-                        <Link to="/farmer-registration" className="px-6 py-3.5 bg-[#00B464] hover:bg-[#009c56] text-white font-bold text-[13px] sm:text-[14px] rounded-xl shadow-lg shadow-[#00B464]/20 transition-all hover:-translate-y-1 text-center whitespace-nowrap">
-                            Get Started
+                        <Link to="/farmer-registration" className="px-6 py-3.5 bg-[#00B464] hover:bg-[#009c56] text-white font-bold text-[13px] sm:text-[14px] rounded-xl shadow-lg shadow-[#00B464]/20 transition-all hover:-translate-y-1 text-center whitespace-nowrap glass-shine">
+                            Join the Network
                         </Link>
                         <Link to="/about" className="px-6 py-3.5 bg-white/10 hover:bg-white/15 text-white font-bold text-[13px] sm:text-[14px] rounded-xl backdrop-blur-md transition-all hover:-translate-y-1 text-center border border-white/10 whitespace-nowrap">
                             Learn More

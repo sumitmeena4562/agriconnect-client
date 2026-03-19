@@ -4,22 +4,22 @@ import { motion } from 'framer-motion';
 const NewsSection = () => {
     const articles = [
         {
-            title: "How Technology is Changing Small Scale Farming",
-            date: "Oct 15, 2025",
+            title: "Scaling Direct Trade: How Elite Farmers are Beating Mandi Rates",
+            date: "Mar 18, 2026",
             image: "https://www.vimint.com/wp-content/uploads/2025/04/565.jpg",
-            category: "Technology"
+            category: "Trading"
         },
         {
-            title: "The Rise of Organic Farming in Maharashtra",
-            date: "Oct 10, 2025",
+            title: "Organic Scale: The $10B Opportunity in Maharashtra",
+            date: "Mar 15, 2026",
             image: "https://www.mahindratractor.com/sites/default/files/2025-07/Blog%207%20Organic%20Farming%20in%20India%20Types%2C%20Benefits%2C%20and%20Its%20Importance-Detail.jpg",
             category: "Organic"
         },
         {
-            title: "Preparing for the Monsoon: Tips for Maximizing Yield",
-            date: "Oct 05, 2025",
+            title: "Harvest Intelligence: Predicting Yields with 98% Accuracy",
+            date: "Mar 10, 2026",
             image: "https://mahaagrin.com/cdn/shop/articles/monsoon-season0cultivation.jpg?v=1750392477",
-            category: "Tips"
+            category: "AI Tech"
         }
     ];
 
@@ -49,7 +49,7 @@ const NewsSection = () => {
                         transition={{ duration: 0.5, delay: 0.1 }}
                         className="text-2xl sm:text-3xl lg:text-4xl font-black text-[#0A2616] mb-4 font-heading tracking-tight"
                     >
-                        Latest Agricultural News
+                        Elite Market <span className="text-[#00B464]">Insights</span>
                     </motion.h2>
                     
                     <motion.p 
@@ -57,9 +57,9 @@ const NewsSection = () => {
                         whileInView={{ opacity: 1, y: 0 }}
                         viewport={{ once: true }}
                         transition={{ duration: 0.5, delay: 0.2 }}
-                        className="text-slate-500 text-[13px] sm:text-[14px]"
+                        className="text-slate-500 text-[13px] sm:text-[14px] italic"
                     >
-                        Stay updated with the latest trends and practices in farming.
+                        Stay ahead of the curve with the latest trends and data in high-scale agricultural trading.
                     </motion.p>
                 </div>
 
@@ -72,13 +72,13 @@ const NewsSection = () => {
                             whileInView={{ opacity: 1, y: 0 }}
                             viewport={{ once: true }}
                             transition={{ duration: 0.5, delay: index * 0.1 }}
-                            className="flex flex-col group cursor-pointer"
+                            className="flex flex-col group cursor-pointer glass-shine p-4 rounded-3xl bg-white border border-gray-50 shadow-sm hover:shadow-xl hover:shadow-green-50/50 transition-all duration-500"
                         >
                             <div className="relative aspect-[16/10] rounded-2xl overflow-hidden mb-4">
                                 <img 
                                     src={article.image} 
                                     alt={article.title}
-                                    className="w-full h-full object-cover transform hover:scale-110 transition-transform duration-700"
+                                    className="w-full h-full object-cover transition-transform duration-1000 ease-out icon-pop"
                                 />
                                 <div className="absolute top-4 left-4">
                                     <span className="px-3 py-1 bg-white/90 backdrop-blur-sm rounded-lg text-[10px] font-black uppercase tracking-wider text-[#0A2616] shadow-sm">

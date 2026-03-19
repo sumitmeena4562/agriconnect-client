@@ -32,7 +32,7 @@ const MobileAppSection = () => {
                             transition={{ duration: 0.7, ease: "easeOut" }}
                             className="text-4xl sm:text-5xl lg:text-6xl font-black text-white mb-6 font-heading tracking-tight leading-[1.1]"
                         >
-                            Grow <span className="text-green-200">on the go.</span>
+                            Command your farm <span className="text-green-200">anywhere.</span>
                         </motion.h2>
 
                         <motion.p 
@@ -40,9 +40,9 @@ const MobileAppSection = () => {
                             whileInView={{ opacity: 1, y: 0 }}
                             viewport={{ once: true }}
                             transition={{ duration: 0.6, delay: 0.1 }}
-                            className="text-green-50/90 text-[15px] sm:text-[16px] leading-relaxed mb-10 max-w-lg mx-auto lg:mx-0 font-medium"
+                            className="text-green-50/90 text-[15px] sm:text-[16px] leading-relaxed mb-10 max-w-lg mx-auto lg:mx-0 font-medium italic"
                         >
-                            Manage your farm and business from anywhere. Get real-time rates, instant payments, and smart insights on any device.
+                            Execute trades, track live logistics, and secure instant payments. India's most powerful agricultural super-app, built for elite scale.
                         </motion.p>
 
                         <motion.div 
@@ -52,11 +52,11 @@ const MobileAppSection = () => {
                             transition={{ duration: 0.6, delay: 0.2 }}
                             className="flex flex-wrap items-center gap-4 justify-center lg:justify-start"
                         >
-                            <a href="#" className="group relative flex items-center justify-center bg-white p-0.5 rounded-xl transition-all duration-300 hover:scale-105 hover:shadow-[0_15px_30px_-8px_rgba(255,255,255,0.3)]">
+                            <a href="#" className="group relative flex items-center justify-center bg-white p-0.5 rounded-xl transition-all duration-300 hover:scale-105 hover:shadow-[0_15px_30px_-8px_rgba(255,255,255,0.3)] glass-shine">
                                 <img src="https://upload.wikimedia.org/wikipedia/commons/7/78/Google_Play_Store_badge_EN.svg" alt="Google Play" className="h-[44px]" />
                             </a>
 
-                            <a href="#" className="group relative flex items-center justify-center bg-black p-0.5 rounded-xl transition-all duration-300 hover:scale-105 hover:shadow-[0_15px_30px_-8px_rgba(0,0,0,0.3)] border border-white/10">
+                            <a href="#" className="group relative flex items-center justify-center bg-black p-0.5 rounded-xl transition-all duration-300 hover:scale-105 hover:shadow-[0_15px_30px_-8px_rgba(0,0,0,0.3)] border border-white/10 glass-shine">
                                 <img src="https://upload.wikimedia.org/wikipedia/commons/3/3c/Download_on_the_App_Store_Badge.svg" alt="App Store" className="h-[44px]" />
                             </a>
                         </motion.div>

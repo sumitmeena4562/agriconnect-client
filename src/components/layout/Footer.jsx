@@ -12,8 +12,8 @@ const Footer = () => {
                     <div className="space-y-4">
                         <Logo variant="dark" size="md" />
                         
-                        <p className="text-white/40 text-[12.5px] leading-relaxed max-w-[220px]">
-                            Empowering Indian agriculture through technology. Direct farm-to-table connection.
+                        <p className="text-white/40 text-[12.5px] leading-relaxed max-w-[220px] italic">
+                            Digital Infrastructure for India's Agricultural Future. Scaling direct-trade for a profitable, middleman-free ecosystem.
                         </p>
 
                         <div className="flex items-center gap-3">
@@ -90,7 +90,7 @@ const Footer = () => {
 
                 <div className="pt-6 border-t border-white/5 flex flex-col md:flex-row justify-between items-center gap-4">
                     <p className="text-white/20 text-[11px] font-medium">
-                        © 2025 AgriConnect Technologies Pvt Ltd. All rights reserved.
+                        © 2026 AgriConnect Technologies Pvt Ltd. All rights reserved.
                     </p>
                     
                     <div className="flex items-center gap-8">
