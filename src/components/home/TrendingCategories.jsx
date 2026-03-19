@@ -126,13 +126,13 @@ const TrendingCategories = () => {
             <div className="bg-[#111827] w-full overflow-hidden relative flex items-center shadow-inner">
 
                 {/* Fixed "LIVE" Button on the left */}
-                <div className="absolute left-0 top-0 bottom-0 bg-[#111827] z-20 flex items-center pl-6 sm:pl-8 lg:pl-10 pr-4 shadow-[15px_0_25px_-5px_#111827]">
+                <div className="absolute left-0 top-0 bottom-0 bg-[#0A2616] z-20 flex items-center pl-6 sm:pl-8 lg:pl-10 pr-4 shadow-[20px_0_30px_-5px_#0A2616]">
                     <div className="flex items-center gap-2">
-                        <div className="flex items-center gap-1.5 px-3 py-1.5 bg-red-500/10 border border-red-500/20 rounded-lg">
-                            <span className="w-1.5 h-1.5 bg-red-500 rounded-full animate-pulse shadow-[0_0_10px_rgba(239,68,68,0.8)]" />
-                            <span className="text-red-500 font-black text-[10px] tracking-widest uppercase">Live Mandi</span>
+                        <div className="flex items-center gap-1.5 px-3 py-1.5 bg-green-500/10 border border-green-500/20 rounded-lg">
+                            <span className="w-1.5 h-1.5 bg-green-500 rounded-full animate-pulse shadow-[0_0_10px_rgba(34,197,94,0.8)]" />
+                            <span className="text-green-500 font-black text-[10px] tracking-widest uppercase italic">Market Pulse</span>
                         </div>
-                        <span className="hidden sm:block text-[9px] font-bold text-gray-500 uppercase tracking-tighter">Updated 2m ago</span>
+                        <span className="hidden sm:block text-[9px] font-bold text-gray-400 uppercase tracking-tighter">Real-time Trading Live</span>
                     </div>
                 </div>
 
