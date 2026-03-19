@@ -84,17 +84,23 @@ const Header = () => {
                 <AnimatePresence>
                   {isCatOpen && (
                     <motion.div 
-                      initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: 10 }}
+                      initial={{ opacity: 0, y: 8, scale: 0.98 }} animate={{ opacity: 1, y: 0, scale: 1 }} exit={{ opacity: 0, y: 8, scale: 0.98 }}
                       onMouseLeave={() => setIsCatOpen(false)}
-                      className="absolute top-full left-0 mt-2 w-56 bg-white rounded-2xl shadow-2xl border border-slate-100 py-3 z-50"
+                      className="absolute top-full left-0 mt-3 w-64 bg-white rounded-3xl shadow-[0_20px_50px_rgba(0,0,0,0.12)] border border-slate-100 py-4 z-50 overflow-hidden"
                     >
+                      <div className="px-5 pb-3 mb-2 border-b border-slate-50">
+                        <h3 className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Market Categories</h3>
+                      </div>
                       {categories.map((cat, i) => (
-                        <button key={i} className="w-full text-left px-5 py-2.5 hover:bg-slate-50 transition-colors group/item">
-                          <div className="flex items-center gap-3">
-                            <div className="w-8 h-8 rounded-lg bg-green-50 flex items-center justify-center group-hover/item:bg-[#00B464] transition-colors">
-                              <span className="material-symbols-outlined text-[#00B464] text-[18px] group-hover/item:text-white">{cat.icon}</span>
+                        <button key={i} className="w-full text-left px-5 py-3 hover:bg-slate-50 transition-all group/item">
+                          <div className="flex items-center gap-4">
+                            <div className="w-10 h-10 rounded-xl bg-slate-50 flex items-center justify-center group-hover/item:bg-[#00B464] transition-all group-hover/item:shadow-lg group-hover/item:shadow-green-200">
+                              <span className="material-symbols-outlined text-[#00B464] text-[20px] group-hover/item:text-white transition-colors">{cat.icon}</span>
                             </div>
-                            <span className="text-[13px] font-bold text-slate-700 group-hover/item:text-[#00B464]">{cat.name}</span>
+                            <div className="flex flex-col">
+                              <span className="text-[14px] font-bold text-slate-700 group-hover/item:text-slate-900 transition-colors uppercase tracking-tight">{cat.name.split(' ')[1]}</span>
+                              <span className="text-[11px] font-medium text-slate-400 group-hover/item:text-[#00B464] transition-colors">Browse all {cat.name.split(' ')[1]}</span>
+                            </div>
                           </div>
                         </button>
                       ))}
@@ -105,29 +111,30 @@ const Header = () => {
             </div>
 
             {/* Center: Smart Search (Location + Search) */}
-            <div className="hidden md:flex flex-1 max-w-sm lg:max-w-md xl:max-w-xl items-center bg-slate-100 rounded-xl px-2 py-1 border border-transparent focus-within:border-[#00B464]/30 focus-within:bg-white focus-within:shadow-sm transition-all h-10">
+            <div className="hidden md:flex flex-1 max-w-sm lg:max-w-md xl:max-w-lg items-center bg-slate-50 border border-slate-200/60 rounded-xl px-1 py-1 hover:border-[#00B464]/30 focus-within:border-[#00B464]/30 focus-within:bg-white focus-within:shadow-md focus-within:shadow-green-100/50 transition-all h-10 group/search">
               {/* Location Part */}
               <div className="relative shrink-0">
                 <button 
-                  onClick={() => setIsLocationOpen(!isLocationOpen)}
-                  className="flex items-center gap-1.5 px-3 py-1 hover:bg-slate-200 rounded-lg transition-colors text-slate-600"
+                  onClick={(e) => { e.stopPropagation(); setIsLocationOpen(!isLocationOpen); }}
+                  className="flex items-center gap-1.5 px-3 py-1.5 hover:bg-slate-200/50 rounded-lg transition-colors text-slate-500 hover:text-slate-900 group-focus-within/search:text-slate-900"
                 >
                   <span className="material-symbols-outlined text-[18px] text-[#00B464]">location_on</span>
-                  <span className="text-[12px] font-bold truncate max-w-[80px] xl:max-w-[120px]">{location}</span>
-                  <span className={`material-symbols-outlined text-[16px] transition-transform ${isLocationOpen ? 'rotate-180' : ''}`}>expand_more</span>
+                  <span className="text-[12px] font-extrabold truncate max-w-[70px] xl:max-w-[110px]">{location}</span>
+                  <span className={`material-symbols-outlined text-[16px] transition-transform duration-200 ${isLocationOpen ? 'rotate-180' : ''}`}>expand_more</span>
                 </button>
                 <AnimatePresence>
                   {isLocationOpen && (
                     <>
                       <div className="fixed inset-0 z-40" onClick={() => setIsLocationOpen(false)} />
-                      <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: 10 }}
-                        className="absolute top-full left-0 mt-2 w-48 bg-white rounded-xl shadow-2xl border border-slate-100 z-50 py-2 scrollbar-none max-h-60 overflow-y-auto"
+                      <motion.div initial={{ opacity: 0, y: 5, scale: 0.95 }} animate={{ opacity: 1, y: 0, scale: 1 }} exit={{ opacity: 0, y: 5, scale: 0.95 }}
+                        className="absolute top-full left-0 mt-3 w-52 bg-white rounded-2xl shadow-2xl border border-slate-100 z-50 py-2.5 overflow-hidden"
                       >
+                        <div className="px-4 py-1.5 text-[10px] font-black text-slate-400 uppercase tracking-widest">Select Market</div>
                         {mandis.map((m) => (
                           <button key={m} onClick={() => { setLocation(m); setIsLocationOpen(false); }}
-                            className="w-full text-left px-4 py-2 hover:bg-slate-50 text-[12px] font-bold transition-colors flex items-center justify-between"
+                            className="w-full text-left px-4 py-2 hover:bg-slate-50 text-[12px] font-bold transition-colors flex items-center justify-between group/item"
                           >
-                            {m}
+                            <span className={location === m ? 'text-[#00B464]' : 'text-slate-600 transition-colors group-hover/item:text-slate-900'}>{m}</span>
                             {location === m && <span className="material-symbols-outlined text-[#00B464] text-[16px]">check_circle</span>}
                           </button>
                         ))}
@@ -137,13 +144,13 @@ const Header = () => {
                 </AnimatePresence>
               </div>
 
-              <div className="w-[1px] h-5 bg-slate-300 mx-2" />
+              <div className="w-[1.5px] h-4 bg-slate-300 mx-1.5" />
 
               {/* Search Part */}
-              <div className="flex flex-1 items-center min-w-0">
-                <span className="material-symbols-outlined text-slate-400 text-[20px] ml-1">search</span>
-                <input type="text" placeholder="Search tomatoes, potatoes..." 
-                  className="bg-transparent border-none focus:outline-none text-[13px] font-medium text-slate-700 ml-2 w-full placeholder:text-slate-400"
+              <div className="flex flex-1 items-center min-w-0 pr-2">
+                <span className="material-symbols-outlined text-slate-400 text-[18px] ml-1 group-focus-within/search:text-[#00B464]">search</span>
+                <input type="text" placeholder="Search tomatoes, potatoes, mandis..." 
+                  className="bg-transparent border-none focus:outline-none text-[13px] font-semibold text-slate-700 ml-2 w-full placeholder:text-slate-400 placeholder:font-medium"
                 />
               </div>
             </div>
@@ -161,13 +168,13 @@ const Header = () => {
                 ))}
               </nav>
 
-              <div className="hidden xl:block h-6 w-[1px] bg-slate-200" />
+              <div className="hidden xl:block h-6 w-[1.5px] bg-slate-200" />
 
               {/* Language Switcher */}
-              <div className="hidden sm:flex items-center bg-slate-100 rounded-lg p-0.5">
+              <div className="hidden sm:flex items-center bg-slate-50 border border-slate-200/60 rounded-lg p-0.5">
                 {['EN', 'हिं'].map((l) => (
                   <button key={l} onClick={() => setLang(l)}
-                    className={`px-2.5 py-1 rounded-md text-[11px] font-black transition-all ${lang === l ? 'bg-[#00B464] text-white shadow-sm' : 'text-slate-500 hover:text-slate-800'}`}
+                    className={`px-3 py-1.5 rounded-md text-[11px] font-black transition-all ${lang === l ? 'bg-white text-[#00B464] shadow-sm' : 'text-slate-400 hover:text-slate-800'}`}
                   >
                     {l}
                   </button>
@@ -176,18 +183,19 @@ const Header = () => {
 
               {/* WhatsApp Support */}
               <a href="https://wa.me/91000000000" target="_blank" rel="noreferrer"
-                className="hidden lg:flex w-9 h-9 items-center justify-center bg-green-50 text-[#25D366] rounded-xl hover:bg-[#25D366] hover:text-white transition-all group"
+                className="hidden lg:flex w-10 h-10 items-center justify-center bg-green-50 text-[#00B464] border border-green-100 rounded-xl hover:bg-[#25D366] hover:text-white transition-all group"
               >
                 <span className="material-symbols-outlined text-[20px] group-hover:scale-110 transition-transform">chat</span>
               </a>
 
               {/* Action Buttons */}
               <div className="flex items-center gap-2">
-                <Link to="/login" className="hidden sm:block px-4 py-2 text-[13px] font-bold text-slate-700 bg-slate-100 hover:bg-slate-200 rounded-xl transition-all">
+                <Link to="/login" className="hidden sm:block px-5 py-2.5 text-[13px] font-bold text-slate-700 bg-slate-50 border border-slate-200 hover:bg-white hover:border-slate-300 rounded-xl transition-all">
                   Log in
                 </Link>
-                <Link to="/farmer-registration" className="px-4 py-2 text-[13px] font-bold text-white bg-[#00B464] hover:bg-[#009c56] rounded-xl shadow-lg shadow-green-200/50 transition-all active:scale-[0.97]">
+                <Link to="/farmer-registration" className="px-5 py-2.5 text-[13px] font-bold text-white bg-[#00B464] hover:bg-[#009c56] rounded-xl shadow-lg shadow-green-200/40 transition-all active:scale-[0.97] flex items-center gap-1.5">
                   Join Free
+                  <span className="material-symbols-outlined text-[16px]">arrow_forward</span>
                 </Link>
               </div>
 
