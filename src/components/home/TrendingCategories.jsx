@@ -42,37 +42,37 @@ const TrendingCategories = () => {
             name: 'Red Onions',
             supply: '80T+',
             price: '₹25/kg',
-            img: 'https://images.unsplash.com/photo-1618512496248-a07fe83aa8cb?auto=format&fit=crop&q=80&w=400&h=300'
+            img: 'https://s.alicdn.com/@sc04/kf/A811ead8abd94495ca526992452f0f645W.jpg'
         },
         {
             name: 'Exotic Greens',
             supply: '10T+',
             price: '₹150/kg',
-            img: 'https://images.unsplash.com/photo-1540420773420-3366772f4999?auto=format&fit=crop&q=80&w=400&h=300'
+            img: 'https://5.imimg.com/data5/ANDROID/Default/2021/5/FN/SD/SN/22022401/product-jpeg.jpg'
         },
         {
             name: 'Organic Carrots',
             supply: '30T+',
             price: '₹40/kg',
-            img: 'https://images.unsplash.com/photo-1598170845058-32b9d6a5da37?auto=format&fit=crop&q=80&w=400&h=300'
+            img: 'https://5.imimg.com/data5/UM/AY/MY-3018052/organic-carrots.jpg'
         },
         {
             name: 'Green Cabbage',
             supply: '40T+',
             price: '₹15/kg',
-            img: 'https://images.unsplash.com/photo-1628773822503-ae3ddf235d94?auto=format&fit=crop&q=80&w=400&h=300'
+            img: 'https://tiimg.tistatic.com/fp/1/009/170/green-cabbage-297.jpg'
         },
         {
             name: 'Crisp Capsicum',
             supply: '25T+',
             price: '₹30/kg',
-            img: 'https://images.unsplash.com/photo-1526346698789-22fd84314424?auto=format&fit=crop&q=80&w=400&h=300'
+            img: 'https://5.imimg.com/data5/SELLER/Default/2024/5/415703280/EK/TS/LQ/212628420/green-capsicum-500x500.webp'
         },
         {
             name: 'Spicy Chilies',
             supply: '15T+',
             price: '₹35/kg',
-            img: 'https://images.unsplash.com/photo-1588614639912-ee989adab8bb?auto=format&fit=crop&q=80&w=400&h=300'
+            img: 'https://www.snexplores.org/wp-content/uploads/sites/3/2019/11/header-860-Red_Peppers.jpg'
         },
     ];
 

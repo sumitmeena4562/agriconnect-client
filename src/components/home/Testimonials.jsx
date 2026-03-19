@@ -11,7 +11,7 @@ const Testimonials = () => {
             roleColor: "bg-[#FFF3E5] text-[#FA8231]",
             roleIcon: "agriculture",
             stars: 5,
-            img: "https://images.unsplash.com/photo-1544005313-94ddf0286df2?fit=crop&w=100&h=100"
+            img: "https://i.pravatar.cc/150?u=ram"
         },
         {
             quote: "Buying bulk vegetables is now super easy. Quality is always fresh because it comes straight from the farm.",
@@ -21,7 +21,7 @@ const Testimonials = () => {
             roleColor: "bg-[#EFF5FF] text-[#2D80E3]",
             roleIcon: "storefront",
             stars: 5,
-            img: "https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?fit=crop&w=100&h=100"
+            img: "https://i.pravatar.cc/150?u=suresh"
         },
         {
             quote: "I love knowing exactly where my food comes from. The QR code traceability is amazing!",
@@ -31,7 +31,7 @@ const Testimonials = () => {
             roleColor: "bg-[#EAF6ED] text-[#28A745]",
             roleIcon: "shopping_basket",
             stars: 4,
-            img: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?fit=crop&w=100&h=100"
+            img: "https://i.pravatar.cc/150?u=priya"
         }
     ];
 

@@ -5,6 +5,7 @@ import TrendingCategories from "../components/home/TrendingCategories";
 import HowItWorks from "../components/home/HowItWorks";
 import FeaturesSection from "../components/home/FeaturesSection";
 import Testimonials from "../components/home/Testimonials";
+import NewsSection from "../components/home/NewsSection";
 import Footer from "../components/layout/Footer";
 
 const LandingPage = () => {
@@ -16,6 +17,7 @@ const LandingPage = () => {
                 <TrendingCategories />
                 <FeaturesSection />
                 <Testimonials />
+                <NewsSection />
                 <HowItWorks />
             </main>
             <Footer />
