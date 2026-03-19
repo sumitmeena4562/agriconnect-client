@@ -1,5 +1,6 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
+import Logo from '../common/Logo';
 
 const Footer = () => {
     return (
@@ -9,14 +10,7 @@ const Footer = () => {
                     
                     {/* Brand Section */}
                     <div className="space-y-4">
-                        <Link to="/" className="flex items-center gap-2 group">
-                            <div className="w-8 h-8 bg-[#00B464] rounded-lg flex items-center justify-center shadow-lg transition-transform duration-300 group-hover:scale-105 shrink-0">
-                                <span className="material-symbols-outlined text-white text-[18px]">agriculture</span>
-                            </div>
-                            <span className="text-xl font-black tracking-tight font-heading">
-                                AgriConnect
-                            </span>
-                        </Link>
+                        <Logo variant="dark" size="md" />
                         
                         <p className="text-white/40 text-[12.5px] leading-relaxed max-w-[220px]">
                             Empowering Indian agriculture through technology. Direct farm-to-table connection.

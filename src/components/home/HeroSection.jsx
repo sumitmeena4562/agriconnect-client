@@ -57,11 +57,11 @@ const HeroSection = () => {
                                 whileInView={{ opacity: 1, y: 0 }}
                                 viewport={{ once: true }}
                                 transition={{ duration: 0.5, delay: 0.45, ease: "easeOut" }}
-                                className="grid grid-cols-3 gap-3 sm:gap-4 max-w-[420px] mx-auto lg:mx-0">
+                                className="grid grid-cols-3 gap-3 sm:gap-4 max-w-[420px]  mx-auto lg:mx-0">
                                 {[
-                                    { to: '/customer-registration', icon: 'shopping_basket', label: 'Customer', desc: 'Buy Fresh', bgText: 'bg-[#EAF6ED] text-[#28A745]' },
-                                    { to: '/farmer-registration', icon: 'agriculture', label: 'Farmer', desc: 'Sell Produce', bgText: 'bg-[#FFF3E5] text-[#FA8231]' },
-                                    { to: '/vendor-registration', icon: 'storefront', label: 'Vendor', desc: 'Bulk Buy', bgText: 'bg-[#EFF5FF] text-[#2D80E3]' },
+                                    { to: '/customer-registration', icon: 'shopping_basket', label: 'Customer', desc: 'Buy Fresh', bgText: 'bg-[#EAF6ED] text-[#28A745] shadow-[var(--shadow-card)]' },
+                                    { to: '/farmer-registration', icon: 'agriculture', label: 'Farmer', desc: 'Sell Produce', bgText: 'bg-[#FFF3E5] text-[#FA8231] shadow-[var(--shadow-card)]' },
+                                    { to: '/vendor-registration', icon: 'storefront', label: 'Vendor', desc: 'Bulk Buy', bgText: 'bg-[#EFF5FF] text-[#2D80E3] shadow-[var(--shadow-card)]' },
                                 ].map(cta => (
                                     <Link key={cta.label} to={cta.to}
                                         className="group relative p-3 sm:p-4 rounded-xl bg-white border border-gray-100 hover:border-transparent hover:shadow-[0_8px_30px_rgb(0,0,0,0.06)] transition-all duration-300 text-center active:scale-[0.98]">

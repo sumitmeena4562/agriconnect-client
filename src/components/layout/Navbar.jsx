@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
+import Logo from '../common/Logo';
 
 const Header = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -51,17 +52,13 @@ const Header = () => {
         : 'bg-transparent'
         }`}>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex h-[55px] items-center justify-between">
+          <div className="flex h-[48px] items-center justify-between">
 
             {/* Logo */}
-            <button onClick={() => scrollToSection('home')} className="flex items-center gap-3 group focus:outline-none">
-              <div className="w-[38px] h-[38px] bg-[#00B464] rounded-[12px] flex items-center justify-center shadow-lg shadow-green-200/50 group-hover:shadow-green-300/60 transition-shadow">
-                <span className="material-symbols-outlined text-white text-[24px]">eco</span>
-              </div>
-              <span className="text-[22px] font-black tracking-tight text-slate-800 leading-none mt-0.5">
-                Agri<span className="text-[#00B464]">Connect</span>
-              </span>
-            </button>
+            <Logo 
+              size="md" 
+              onClick={() => scrollToSection('home')} 
+            />
 
             {/* Desktop Nav */}
             <nav className="hidden md:flex items-center gap-8 relative">
@@ -69,11 +66,11 @@ const Header = () => {
                 <button
                   key={link.id}
                   onClick={() => scrollToSection(link.id)}
-                  className={`text-[15px] font-medium transition-colors duration-200 relative ${activeSection === link.id ? 'text-[#00B464]' : 'text-slate-600 hover:text-[#00B464]'}`}
+                  className={`text-[14px] font-medium transition-colors duration-200 relative ${activeSection === link.id ? 'text-[#00B464]' : 'text-slate-600 hover:text-[#00B464]'}`}
                 >
                   {link.label}
                   {activeSection === link.id && (
-                    <span className="absolute -bottom-1.5 left-1/2 w-1 h-1 bg-[#00B464] rounded-full transform -translate-x-1/2" />
+                    <span className="absolute -bottom-1 w-1 h-1 bg-[#00B464] rounded-full transform -translate-x-1/2" />
                   )}
                 </button>
               ))}
@@ -82,11 +79,11 @@ const Header = () => {
             {/* Desktop Actions */}
             <div className="hidden md:flex items-center gap-4">
               <Link to="/login"
-                className="px-6 py-2.5 text-[15px] font-bold text-slate-700 bg-slate-100 hover:bg-slate-200 rounded-xl transition-all">
+                className="px-5 py-2 text-[14px] font-bold text-slate-700 bg-slate-100 hover:bg-slate-200 rounded-xl transition-all">
                 Log in
               </Link>
               <Link to="/farmer-registration"
-                className="px-6 py-2.5 text-[15px] font-bold text-white bg-[#00B464] hover:bg-[#009c56] rounded-xl shadow-lg shadow-green-200/50 transition-all active:scale-[0.97]">
+                className="px-5 py-2 text-[14px] font-bold text-white bg-[#00B464] hover:bg-[#009c56] rounded-xl shadow-lg shadow-green-200/50 transition-all active:scale-[0.97]">
                 Get Started
               </Link>
             </div>
@@ -97,7 +94,7 @@ const Header = () => {
               aria-expanded={isMenuOpen}
               aria-controls="mobile-menu"
               aria-label={isMenuOpen ? "Close menu" : "Open menu"}
-              className="md:hidden w-11 h-11 flex items-center justify-center rounded-xl bg-slate-100 hover:bg-slate-200 transition-colors focus:outline-none"
+              className="md:hidden w-9 h-9 flex items-center justify-center rounded-xl bg-slate-100 hover:bg-slate-200 transition-colors focus:outline-none"
             >
               <span className="material-symbols-outlined text-slate-700">
                 {isMenuOpen ? 'close' : 'menu'}
@@ -111,7 +108,7 @@ const Header = () => {
       {isMenuOpen && (
         <div className="fixed inset-0 z-40 md:hidden">
           <div className="absolute inset-0 bg-black/20 backdrop-blur-sm" onClick={() => setIsMenuOpen(false)} />
-          <div id="mobile-menu" className="absolute top-[55px] left-0 right-0 bg-white border-b border-gray-100 shadow-2xl"
+          <div id="mobile-menu" className="absolute top-[48px] left-0 right-0 bg-white border-b border-gray-100 shadow-2xl"
             style={{ animation: 'slideDown 0.25s ease-out' }}>
             <div className="px-5 py-2 space-y-1">
               {navLinks.map(link => (
@@ -140,7 +137,7 @@ const Header = () => {
       )}
 
       {/* Spacer */}
-      <div className="h-[55px]" />
+      <div className="h-[48px]" />
 
       <style>{`
         @keyframes slideDown {
