@@ -78,6 +78,35 @@ const Testimonials = () => {
                     </motion.p>
                 </div>
 
+                {/* Featured Video Success Story */}
+                <motion.div 
+                    initial={{ opacity: 0, scale: 0.95 }}
+                    whileInView={{ opacity: 1, scale: 1 }}
+                    viewport={{ once: true }}
+                    className="max-w-4xl mx-auto mb-16 lg:mb-20 relative group"
+                >
+                    <div className="aspect-video rounded-[32px] overflow-hidden bg-slate-900 shadow-2xl relative border-8 border-white">
+                        <img 
+                            src="https://images.unsplash.com/photo-1523348837708-15d4a09cfac2?ixlib=rb-4.0.3&auto=format&fit=crop&w=1200&q=80" 
+                            alt="Farmer Success Story" 
+                            className="w-full h-full object-cover opacity-60 group-hover:scale-105 transition-transform duration-1000"
+                        />
+                        <div className="absolute inset-0 flex flex-col items-center justify-center p-6 text-center">
+                            <motion.button 
+                                whileHover={{ scale: 1.1 }}
+                                whileTap={{ scale: 0.9 }}
+                                className="w-20 h-20 sm:w-24 sm:h-24 bg-[#00B464] text-white rounded-full flex items-center justify-center shadow-[0_0_30px_rgba(0,180,100,0.5)] mb-6 glass-shine"
+                            >
+                                <span className="material-symbols-outlined text-[40px] sm:text-[48px] fill-1">play_arrow</span>
+                            </motion.button>
+                            <h3 className="text-white text-xl sm:text-2xl lg:text-3xl font-black mb-2 drop-shadow-lg">Watch: How Ram became a Digital Farmer</h3>
+                            <p className="text-white/80 text-[13px] sm:text-[14px] font-bold uppercase tracking-widest drop-shadow-md">Verified Success Story • Nashik, Maharashtra</p>
+                        </div>
+                    </div>
+                    {/* Decorative element */}
+                    <div className="absolute -z-10 -bottom-6 -right-6 w-32 h-32 bg-[#2F80ED]/10 rounded-full blur-2xl" />
+                </motion.div>
+
                 {/* Grid */}
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5 sm:gap-6">
                     {reviews.map((review, index) => (
