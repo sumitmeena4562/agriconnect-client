@@ -215,14 +215,19 @@ const TrendingCategories = () => {
 
                             {/* Content */}
                             <div className="p-4 sm:p-5 flex flex-col flex-grow">
-                                <h3 className="text-[15px] font-bold text-gray-900 mb-3 group-hover:text-[#00B464] transition-colors">{cat.name}</h3>
+                                <div className="flex items-center justify-between mb-3">
+                                  <h3 className="text-[15px] font-black text-gray-900 group-hover:text-[#00B464] transition-colors line-clamp-1">{cat.name}</h3>
+                                  <span className="text-[10px] font-black text-blue-600 bg-blue-50 px-2 py-0.5 rounded-full uppercase tracking-tighter shrink-0">Verified</span>
+                                </div>
 
-                                <div className="mt-auto flex items-center justify-between text-[10px] sm:text-[11px]">
-                                    <div className="text-gray-500 font-medium">
-                                        Daily Supply: {cat.supply}
+                                <div className="mt-auto pt-3 border-t border-slate-50 flex items-center justify-between">
+                                    <div className="flex flex-col">
+                                        <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-0.5">Supply</span>
+                                        <span className="text-[12px] font-bold text-slate-700">{cat.supply}</span>
                                     </div>
-                                    <div className="font-bold text-[#00B464]">
-                                        From {cat.price}
+                                    <div className="flex flex-col items-end">
+                                        <span className="text-[10px] font-black text-[#00B464] uppercase tracking-widest mb-0.5">Best Price</span>
+                                        <span className="text-[14px] font-black text-[#0A2616]">{cat.price}</span>
                                     </div>
                                 </div>
                             </div>

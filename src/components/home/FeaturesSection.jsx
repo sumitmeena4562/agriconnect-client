@@ -5,39 +5,39 @@ const FeaturesSection = () => {
     const features = [
         {
             title: "Verified Community",
-            description: "100% KYC verified Farmers and Vendors for safe trading.",
-            icon: "verified_user", // Material symbol
-            colorClass: "bg-blue-500"
+            description: "Interact with 100% KYC verified Farmers and bulk buyers for a stress-free experience.",
+            icon: "verified_user",
+            colorClass: "bg-blue-50 text-blue-600"
         },
         {
             title: "Live Mandi Rates",
-            description: "Real-time APMC market prices for smarter selling.",
+            description: "Access real-time APMC market prices across India to time your sales perfectly.",
             icon: "monitoring",
-            colorClass: "bg-emerald-500"
+            colorClass: "bg-emerald-50 text-emerald-600"
         },
         {
             title: "Smart Logistics",
-            description: "Farm gate to vendor doorstep — zero transport hassle.",
+            description: "Farm gate to vendor doorstep. We handle everything including Mandi tax and paperwork.",
             icon: "local_shipping",
-            colorClass: "bg-orange-500"
+            colorClass: "bg-orange-50 text-orange-600"
         },
         {
             title: "QR Traceability",
-            description: "Scan QR code to see farm origin and harvest date.",
+            description: "Farmers can build a brand. Buyers scan QR to see soil report, farm origin and harvest date.",
             icon: "qr_code_scanner",
-            colorClass: "bg-purple-500"
+            colorClass: "bg-purple-50 text-purple-600"
         },
         {
-            title: "Multilingual App",
-            description: "Available in 8+ regional Indian languages for ease of use.",
+            title: "Regional Language Support",
+            description: "Available in Hindi, Marathi, Telugu and 5+ more regional languages for every Indian farmer.",
             icon: "translate",
-            colorClass: "bg-pink-500"
+            colorClass: "bg-pink-50 text-pink-600"
         },
         {
-            title: "Weather Alerts",
-            description: "Hyper-local weather updates and harvesting predictions.",
-            icon: "cloudy_snowing", // Or another weather icon
-            colorClass: "bg-cyan-500"
+            title: "Weather Predictions",
+            description: "Hyper-local weather updates and smart harvesting advice based on AI satellite data.",
+            icon: "cloudy_snowing",
+            colorClass: "bg-cyan-50 text-cyan-600"
         }
     ];
 
