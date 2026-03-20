@@ -9,20 +9,20 @@ import { Link } from 'react-router-dom';
  * @param {string} props.className - Additional classes for the container
  * @param {function} props.onClick - Optional click handler (renders as button instead of Link)
  */
-const Logo = ({ 
-  variant = 'light', 
-  size = 'md', 
+const Logo = ({
+  variant = 'light',
+  size = 'md',
   className = '',
   onClick
 }) => {
   const isDark = variant === 'dark';
-  
+
   const iconSizes = {
     sm: { box: 'w-6 h-6', icon: 'text-[14px]', border: 'rounded-md' },
     md: { box: 'w-8 h-8', icon: 'text-[18px]', border: 'rounded-lg' },
     lg: { box: 'w-[38px] h-[38px]', icon: 'text-[24px]', border: 'rounded-[12px]' }
   };
-  
+
   const textSizes = {
     sm: 'text-sm',
     md: 'text-xl font-black',
