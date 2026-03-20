@@ -1,5 +1,7 @@
 import React from 'react';
 import { motion } from 'framer-motion';
+import Badge from '../ui/Badge';
+import Button from '../ui/Button';
 
 const MobileAppSection = () => {
     return (
@@ -15,15 +17,13 @@ const MobileAppSection = () => {
                     
                     {/* Content Side */}
                     <div className="text-center lg:text-left order-2 lg:order-1">
-                        <motion.div 
-                            initial={{ opacity: 0, scale: 0.9 }}
-                            whileInView={{ opacity: 1, scale: 1 }}
-                            viewport={{ once: true }}
-                            className="inline-flex items-center gap-2 px-3 py-1 bg-white/10 backdrop-blur-xl rounded-full mb-6 border border-white/20 shadow-xl shadow-black/5"
+                        <Badge 
+                            variant="glass" 
+                            icon="cell_tower"
+                            className="mb-6 !rounded-full !py-1.5 !px-4 !bg-white/10 !text-white border-white/20 shadow-xl"
                         >
-                            <span className="material-symbols-outlined text-white text-[16px]">cell_tower</span>
-                            <span className="text-white font-black text-[9px] tracking-[0.2em] uppercase">ALWAYS CONNECTED</span>
-                        </motion.div>
+                            ALWAYS CONNECTED
+                        </Badge>
 
                         <motion.h2 
                             initial={{ opacity: 0, y: 20 }}
@@ -52,13 +52,21 @@ const MobileAppSection = () => {
                             transition={{ duration: 0.6, delay: 0.2 }}
                             className="flex flex-wrap items-center gap-4 justify-center lg:justify-start"
                         >
-                            <a href="#" className="group relative flex items-center justify-center bg-white p-0.5 rounded-xl transition-all duration-300 hover:scale-105 hover:shadow-[0_15px_30px_-8px_rgba(255,255,255,0.3)] glass-shine">
+                            <Button 
+                                href="#" 
+                                variant="glass" 
+                                className="!p-0.5 !bg-white border-none hover:shadow-[0_15px_30px_-8px_rgba(255,255,255,0.3)]"
+                            >
                                 <img src="https://upload.wikimedia.org/wikipedia/commons/7/78/Google_Play_Store_badge_EN.svg" alt="Google Play" className="h-[44px]" />
-                            </a>
+                            </Button>
 
-                            <a href="#" className="group relative flex items-center justify-center bg-black p-0.5 rounded-xl transition-all duration-300 hover:scale-105 hover:shadow-[0_15px_30px_-8px_rgba(0,0,0,0.3)] border border-white/10 glass-shine">
+                            <Button 
+                                href="#" 
+                                variant="glass" 
+                                className="!p-0.5 !bg-black !border-white/10 hover:shadow-[0_15px_30px_-8px_rgba(0,0,0,0.3)]"
+                            >
                                 <img src="https://upload.wikimedia.org/wikipedia/commons/3/3c/Download_on_the_App_Store_Badge.svg" alt="App Store" className="h-[44px]" />
-                            </a>
+                            </Button>
                         </motion.div>
                         
                         {/* Stats Summary */}

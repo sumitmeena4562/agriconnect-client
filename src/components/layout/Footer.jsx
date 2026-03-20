@@ -1,6 +1,7 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import Logo from '../common/Logo';
+import Button from '../ui/Button';
 
 const Footer = () => {
     return (
@@ -31,7 +32,7 @@ const Footer = () => {
                                     path: "M19 3a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h14m-.5 15.5v-5.4a2.21 2.21 0 0 0-2.22-2.22c-.76 0-1.4.37-1.78.93V10h-2.2v8.5h2.2v-4.6c0-.6.48-1.07 1.07-1.07s1.07.47 1.07 1.07v4.6h2.2M8 18.5v-8.5H5.8v8.5H8M6.9 8.6c.7 0 1.25-.56 1.25-1.25S7.6 6.1 6.9 6.1s-1.25.56-1.25 1.25s.56 1.25 1.25 1.25z"
                                 }
                             ].map((social, i) => (
-                                <a key={i} href="#" aria-label={social.name} className="w-8 h-8 rounded-full bg-white/5 border border-white/5 flex items-center justify-center hover:bg-[#00B464] hover:border-[#00B464] transition-all duration-300 group">
+                                <a key={i} href="#" aria-label={social.name} className="w-8 h-8 rounded-full bg-white/5 border border-white/5 flex items-center justify-center hover:bg-primary-600 hover:border-primary-600 transition-all duration-300 group">
                                     <svg 
                                         viewBox="0 0 24 24" 
                                         className="w-3.5 h-3.5 fill-white/30 group-hover:fill-white transition-colors"
@@ -53,7 +54,7 @@ const Footer = () => {
                             <ul className="space-y-3">
                                 {section.links.map(link => (
                                     <li key={link}>
-                                        <Link to="#" className="text-white/40 hover:text-[#00B464] transition-colors text-[13.5px] font-medium block">
+                                        <Link to="#" className="text-white/40 hover:text-primary-600 transition-colors text-[13.5px] font-medium block">
                                             {link}
                                         </Link>
                                     </li>
@@ -67,23 +68,23 @@ const Footer = () => {
                         <h4 className="text-[12px] font-black mb-5 text-white uppercase tracking-[0.1em]">CONTACT</h4>
                         <div className="space-y-4">
                             <div className="flex items-center gap-3 text-white/40 cursor-default group">
-                                <span className="material-symbols-outlined text-[18px] group-hover:text-[#00B464] transition-colors font-normal">call</span>
+                                <span className="material-symbols-outlined text-[18px] group-hover:text-primary-600 transition-colors font-normal">call</span>
                                 <span className="text-[13.5px] font-medium">+91 6261 652446</span>
                             </div>
                             <div className="flex items-center gap-3 text-white/40 cursor-default group">
-                                <span className="material-symbols-outlined text-[18px] group-hover:text-[#00B464] transition-colors font-normal">mail</span>
+                                <span className="material-symbols-outlined text-[18px] group-hover:text-primary-600 transition-colors font-normal">mail</span>
                                 <span className="text-[13.5px] font-medium truncate">agriconnect.tech@gmail.com</span>
                             </div>
                             
-                            <a 
+                            <Button 
                                 href="https://wa.me/916261652446" 
-                                target="_blank" 
-                                rel="noopener noreferrer"
-                                className="inline-flex items-center gap-2 px-4 py-2.5 bg-white/5 border border-white/10 rounded-lg hover:bg-white/10 transition-all duration-300 group"
+                                variant="dark"
+                                size="sm"
+                                icon="chat"
+                                className="!bg-white/5 !border-white/10 !text-white/70 hover:!bg-white/10 hover:!text-white !py-2 !px-4"
                             >
-                                <span className="material-symbols-outlined text-[#00B464] text-[18px] font-normal">chat</span>
-                                <span className="text-[13.5px] font-bold text-white/70 group-hover:text-white leading-none">WhatsApp Support</span>
-                            </a>
+                                WhatsApp Support
+                            </Button>
                         </div>
                     </div>
                 </div>
@@ -95,7 +96,7 @@ const Footer = () => {
                     
                     <div className="flex items-center gap-8">
                         {['Terms', 'Privacy', 'Cookies'].map(legal => (
-                            <Link key={legal} to="#" className="text-white/20 hover:text-[#00B464] text-[11px] font-medium transition-colors">
+                            <Link key={legal} to="#" className="text-white/20 hover:text-primary-600 text-[11px] font-medium transition-colors">
                                 {legal}
                             </Link>
                         ))}

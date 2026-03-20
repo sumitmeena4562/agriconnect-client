@@ -1,6 +1,8 @@
 import React from 'react';
-import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
+import Card from '../ui/Card';
+import Button from '../ui/Button';
+import SectionHeader from '../ui/SectionHeader';
 
 const HowItWorks = () => {
     const steps = [
@@ -50,59 +52,28 @@ const HowItWorks = () => {
 
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
                 {/* Header */}
-                <div className="text-center max-w-xl mx-auto mb-12 sm:mb-16">
-                    <motion.div 
-                        initial={{ opacity: 0, y: 20 }}
-                        whileInView={{ opacity: 1, y: 0 }}
-                        viewport={{ once: true }}
-                        transition={{ duration: 0.5 }}
-                        className="inline-flex items-center gap-1.5 px-3 py-1 bg-[#EEFDF3] rounded-md mb-4"
-                    >
-                        <span className="material-symbols-outlined text-[#00B464] text-[13px]">route</span>
-                        <span className="text-[#00B464] font-bold text-[9px] tracking-[0.1em] uppercase">
-                            Simple Process
-                        </span>
-                    </motion.div>
-                    
-                    <motion.h2 
-                        initial={{ opacity: 0, y: 20 }}
-                        whileInView={{ opacity: 1, y: 0 }}
-                        viewport={{ once: true }}
-                        transition={{ duration: 0.5, delay: 0.1 }}
-                        className="text-2xl sm:text-3xl lg:text-4xl font-black text-[#0A2616] mb-4 font-heading tracking-tight"
-                    >
-                        How <span className="text-[#00B464]">AgriConnect</span> Works
-                    </motion.h2>
-                    
-                    <motion.p 
-                        initial={{ opacity: 0, y: 20 }}
-                        whileInView={{ opacity: 1, y: 0 }}
-                        viewport={{ once: true }}
-                        transition={{ duration: 0.5, delay: 0.2 }}
-                        className="text-slate-500 text-[14px] sm:text-[15px] leading-[1.6]"
-                    >
-                        We’ve removed the complexity to bring you closer to fresh produce. 
-                        Follow these simple steps and start trading today.
-                    </motion.p>
-                </div>
+                <SectionHeader 
+                    badge="Simple Process"
+                    badgeIcon="route"
+                    badgeClassName="!bg-[#EEFDF3] !text-[#00B464] border-none"
+                    title={<>How <span className="text-[#00B464]">AgriConnect</span> Works</>}
+                    description="We’ve removed the complexity to bring you closer to fresh produce. Follow these simple steps and start trading today."
+                />
 
                 {/* Steps Grid */}
                 <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 lg:gap-8">
                     {steps.map((step, index) => (
-                        <motion.div
-                            key={index}
-                            initial={{ opacity: 0, y: 30 }}
-                            whileInView={{ opacity: 1, y: 0 }}
-                            viewport={{ once: true }}
-                            transition={{ duration: 0.6, delay: index * 0.1 }}
-                            className="group relative"
-                        >
+                        <div key={index} className="group relative">
                             {/* Connector line for desktop */}
                             {index < steps.length - 1 && (
                                 <div className="hidden lg:block absolute top-[44px] left-full w-full h-[2px] border-t-2 border-dashed border-gray-200 z-0 transform -translate-x-4" />
                             )}
 
-                            <div className="relative z-10 bg-white p-5 sm:p-6 rounded-2xl shadow-[var(--shadow-card)] group-hover:shadow-[var(--shadow-card-hover)] transition-all duration-300 border border-gray-100/50 group-hover:-translate-y-1.5 h-full flex flex-col glass-shine">
+                            <Card
+                                className="h-full flex flex-col glass-shine"
+                                transition={{ duration: 0.6, delay: index * 0.1 }}
+                                padding="p-5 sm:p-6"
+                            >
                                 <div className={`w-12 h-12 sm:w-14 sm:h-14 rounded-xl ${step.color} flex items-center justify-center mb-5 relative overflow-hidden transition-transform duration-500 group-hover:scale-110 group-hover:rotate-3`}>
                                     <span className="material-symbols-outlined text-[24px] sm:text-[28px] z-10 icon-pop">{step.icon}</span>
                                 </div>
@@ -119,18 +90,17 @@ const HowItWorks = () => {
                                 <p className="text-slate-500 text-[12px] sm:text-[13px] leading-[1.5] relative z-10">
                                     {step.description}
                                 </p>
-                            </div>
-                        </motion.div>
+                            </Card>
+                        </div>
                     ))}
                 </div>
 
                 {/* Bottom CTA */}
-                <motion.div 
-                    initial={{ opacity: 0, scale: 0.95 }}
-                    whileInView={{ opacity: 1, scale: 1 }}
-                    viewport={{ once: true }}
+                <Card 
+                    variant="dark"
+                    padding="p-6 sm:p-8 lg:p-10"
+                    className="mt-12 sm:mt-16 lg:mt-20 relative overflow-hidden flex flex-col lg:flex-row items-center justify-between gap-6 sm:gap-8 !rounded-[36px]"
                     transition={{ duration: 0.5, delay: 0.3 }}
-                    className="mt-12 sm:mt-16 lg:mt-20 p-6 sm:p-8 lg:p-10 rounded-[28px] sm:rounded-[36px] bg-[#0A2616] relative overflow-hidden flex flex-col lg:flex-row items-center justify-between gap-6 sm:gap-8 shadow-[var(--shadow-premium)]"
                 >
                     <div className="absolute top-0 right-0 w-64 h-64 bg-[#00B464]/20 rounded-full blur-[100px] transform translate-x-1/2 -translate-y-1/2" />
                     <div className="absolute bottom-0 left-0 w-64 h-64 bg-blue-500/10 rounded-full blur-[100px] transform -translate-x-1/2 translate-y-1/2" />
@@ -141,14 +111,10 @@ const HowItWorks = () => {
                     </div>
 
                     <div className="relative z-10 flex flex-col sm:flex-row gap-3 w-full lg:w-auto mt-4 lg:mt-0">
-                        <Link to="/farmer-registration" className="px-6 py-3.5 bg-[#00B464] hover:bg-[#009c56] text-white font-bold text-[13px] sm:text-[14px] rounded-xl shadow-lg shadow-[#00B464]/20 transition-all hover:-translate-y-1 text-center whitespace-nowrap glass-shine">
-                            Join the Network
-                        </Link>
-                        <Link to="/about" className="px-6 py-3.5 bg-white/10 hover:bg-white/15 text-white font-bold text-[13px] sm:text-[14px] rounded-xl backdrop-blur-md transition-all hover:-translate-y-1 text-center border border-white/10 whitespace-nowrap">
-                            Learn More
-                        </Link>
+                        <Button to="/farmer-registration" variant="primary" className="glass-shine !px-8">Join the Network</Button>
+                        <Button to="/theme-preview" variant="glass" className="!text-white !border-white/20 !bg-white/10 hover:!bg-white/20">Learn More</Button>
                     </div>
-                </motion.div>
+                </Card>
             </div>
         </section>
     );

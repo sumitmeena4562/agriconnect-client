@@ -1,6 +1,7 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
+import Badge from '../ui/Badge';
 
 const HeroSection = () => {
     return (
@@ -16,17 +17,14 @@ const HeroSection = () => {
                     {/* Content */}
                     <div className="text-center lg:text-left">
                         {/* Badge */}
-                        <motion.div 
-                            initial={{ opacity: 0, y: 20 }}
-                            whileInView={{ opacity: 1, y: 0 }}
-                            viewport={{ once: true }}
-                            transition={{ duration: 0.5, ease: "easeOut" }}
-                            className="inline-flex items-center gap-2 px-3 py-1.5 bg-[#EEFDF3] rounded-full mb-5 max-w-fit mx-auto lg:mx-0">
-                            <span className="w-1.5 h-1.5 bg-[#00B464] rounded-full animate-pulse" />
-                            <span className="text-[#00B464] font-bold text-[10px] sm:text-[11px] tracking-[0.05em] uppercase">
-                                India's Direct Farm-to-Market Network
-                            </span>
-                        </motion.div>
+                        <Badge 
+                            variant="success" 
+                            size="md" 
+                            className="mb-5 !bg-[#EEFDF3] !text-[#00B464] border-none"
+                            animate={true}
+                        >
+                            India's Direct Farm-to-Market Network
+                        </Badge>
 
                         {/* Headline */}
                         <motion.h1 
@@ -57,9 +55,9 @@ const HeroSection = () => {
                             transition={{ duration: 0.5, delay: 0.45, ease: "easeOut" }}
                             className="grid grid-cols-3 gap-3 sm:gap-4 max-w-[440px] mx-auto lg:mx-0">
                             {[
-                                { to: '/farmer-registration', icon: 'agriculture', label: 'Farmer', desc: 'Top Rates', color: 'text-[#00B464]', bg: 'bg-[#ECFDF5]' },
-                                { to: '/vendor-registration', icon: 'storefront', label: 'Vendor', desc: 'Bulk Deals', color: 'text-[#2F80ED]', bg: 'bg-[#EFF6FF]' },
-                                { to: '/customer-registration', icon: 'shopping_basket', label: 'Customer', desc: 'Zero Fees', color: 'text-[#F59E0B]', bg: 'bg-[#FFFBEB]' },
+                                { to: '/farmer-registration', icon: 'agriculture', label: 'Farmer', desc: 'Top Rates', color: 'text-primary-600', bg: 'bg-primary-50' },
+                                { to: '/vendor-registration', icon: 'storefront', label: 'Vendor', desc: 'Bulk Deals', color: 'text-info-600', bg: 'bg-info-50' },
+                                { to: '/customer-registration', icon: 'shopping_basket', label: 'Customer', desc: 'Zero Fees', color: 'text-accent-500', bg: 'bg-accent-50' },
                             ].map(cta => (
                                 <Link key={cta.label} to={cta.to}
                                     className="group relative p-3 sm:p-4 rounded-2xl bg-white border border-gray-100 hover:border-[#00B464]/30 hover:shadow-xl hover:shadow-green-50 transition-all duration-300 text-center active:scale-[0.98] glass-shine">

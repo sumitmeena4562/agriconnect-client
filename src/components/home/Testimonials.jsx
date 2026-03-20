@@ -1,5 +1,8 @@
 import React from 'react';
 import { motion } from 'framer-motion';
+import Card from '../ui/Card';
+import Button from '../ui/Button';
+import SectionHeader from '../ui/SectionHeader';
 
 const Testimonials = () => {
     const reviews = [
@@ -43,40 +46,13 @@ const Testimonials = () => {
             <div className="max-w-7xl mx-auto px-5 sm:px-6 lg:px-8 relative z-10">
                 
                 {/* Header */}
-                <div className="text-center max-w-xl mx-auto mb-10 sm:mb-14">
-                    <motion.div 
-                        initial={{ opacity: 0, y: 20 }}
-                        whileInView={{ opacity: 1, y: 0 }}
-                        viewport={{ once: true }}
-                        transition={{ duration: 0.5 }}
-                        className="inline-flex items-center gap-1.5 px-3 py-1 bg-[#FEF9C3] rounded-md mb-4"
-                    >
-                        <span className="material-symbols-outlined text-[#CA8A04] text-[13px]">grade</span>
-                        <span className="text-[#CA8A04] font-bold text-[9px] tracking-[0.1em] uppercase">
-                            TESTIMONIALS
-                        </span>
-                    </motion.div>
-                    
-                    <motion.h2 
-                        initial={{ opacity: 0, y: 20 }}
-                        whileInView={{ opacity: 1, y: 0 }}
-                        viewport={{ once: true }}
-                        transition={{ duration: 0.5, delay: 0.1 }}
-                        className="text-2xl sm:text-3xl lg:text-4xl font-black text-[#0A2616] mb-4 font-heading tracking-tight leading-tight"
-                    >
-                        Trusted by <span className="text-[#00B464]">Thousands</span>
-                    </motion.h2>
-                    
-                    <motion.p 
-                        initial={{ opacity: 0, y: 20 }}
-                        whileInView={{ opacity: 1, y: 0 }}
-                        viewport={{ once: true }}
-                        transition={{ duration: 0.5, delay: 0.2 }}
-                        className="text-slate-500 text-[13px] sm:text-[14px] leading-[1.6]"
-                    >
-                        Hear from the community changing Indian agriculture.
-                    </motion.p>
-                </div>
+                <SectionHeader 
+                    badge="TESTIMONIALS"
+                    badgeIcon="grade"
+                    badgeClassName="!bg-yellow-100 !text-yellow-700 border-none"
+                    title={<>Trusted by <span className="text-primary-600">Thousands</span></>}
+                    description="Hear from the community changing Indian agriculture."
+                />
 
                 {/* Featured Video Success Story */}
                 <motion.div 
@@ -92,13 +68,13 @@ const Testimonials = () => {
                             className="w-full h-full object-cover opacity-60 group-hover:scale-105 transition-transform duration-1000"
                         />
                         <div className="absolute inset-0 flex flex-col items-center justify-center p-6 text-center">
-                            <motion.button 
-                                whileHover={{ scale: 1.1 }}
-                                whileTap={{ scale: 0.9 }}
-                                className="w-20 h-20 sm:w-24 sm:h-24 bg-[#00B464] text-white rounded-full flex items-center justify-center shadow-[0_0_30px_rgba(0,180,100,0.5)] mb-6 glass-shine"
-                            >
-                                <span className="material-symbols-outlined text-[40px] sm:text-[48px] fill-1">play_arrow</span>
-                            </motion.button>
+                            <Button 
+                                variant="primary"
+                                className="!w-20 !h-20 sm:!w-24 sm:!h-24 !rounded-full !shadow-[0_0_30px_rgba(0,180,100,0.5)] mb-6 glass-shine"
+                                icon="play_arrow"
+                                iconPosition="right"
+                                style={{ '--icon-size': '40px' }}
+                            />
                             <h3 className="text-white text-xl sm:text-2xl lg:text-3xl font-black mb-2 drop-shadow-lg">Watch: How Ram became a Digital Farmer</h3>
                             <p className="text-white/80 text-[13px] sm:text-[14px] font-bold uppercase tracking-widest drop-shadow-md">Verified Success Story • Nashik, Maharashtra</p>
                         </div>
@@ -110,13 +86,10 @@ const Testimonials = () => {
                 {/* Grid */}
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5 sm:gap-6">
                     {reviews.map((review, index) => (
-                        <motion.div
+                        <Card
                             key={index}
-                            initial={{ opacity: 0, y: 30 }}
-                            whileInView={{ opacity: 1, y: 0 }}
-                            viewport={{ once: true }}
+                            className="flex flex-col items-start glass-shine"
                             transition={{ duration: 0.5, delay: index * 0.1 }}
-                            className="bg-white rounded-2xl p-5 sm:p-6 shadow-[var(--shadow-card)] hover:shadow-[var(--shadow-card-hover)] transition-all duration-500 border border-gray-100/50 group flex flex-col items-start glass-shine"
                         >
                             {/* Quote Icon & Role */}
                             <div className="w-full flex items-center justify-between mb-5">
@@ -153,7 +126,7 @@ const Testimonials = () => {
                                     </div>
                                 </div>
                             </div>
-                        </motion.div>
+                        </Card>
                     ))}
                 </div>
             </div>

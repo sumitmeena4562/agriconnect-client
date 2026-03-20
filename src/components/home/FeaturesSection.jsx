@@ -1,5 +1,6 @@
 import React from 'react';
-import { motion } from 'framer-motion';
+import Card from '../ui/Card';
+import SectionHeader from '../ui/SectionHeader';
 
 const FeaturesSection = () => {
     const features = [
@@ -46,51 +47,21 @@ const FeaturesSection = () => {
             <div className="max-w-7xl mx-auto px-5 sm:px-6 lg:px-8">
                 
                 {/* Header */}
-                <div className="text-center max-w-xl mx-auto mb-10 sm:mb-14">
-                    <motion.div 
-                        initial={{ opacity: 0, y: 20 }}
-                        whileInView={{ opacity: 1, y: 0 }}
-                        viewport={{ once: true }}
-                        transition={{ duration: 0.5 }}
-                        className="inline-flex items-center gap-1.5 px-3 py-1 bg-[#F3E8FF] rounded-md mb-4"
-                    >
-                        <span className="text-[#A855F7] font-black text-[12px] leading-none mb-[2px]">#</span>
-                        <span className="text-[#A855F7] font-bold text-[9px] tracking-[0.1em] uppercase">
-                            FEATURES
-                        </span>
-                    </motion.div>
-                    
-                    <motion.h2 
-                        initial={{ opacity: 0, y: 20 }}
-                        whileInView={{ opacity: 1, y: 0 }}
-                        viewport={{ once: true }}
-                        transition={{ duration: 0.5, delay: 0.1 }}
-                        className="text-2xl sm:text-3xl lg:text-4xl font-black text-[#0A2616] mb-4 font-heading tracking-tight leading-tight"
-                    >
-                        Powerful Features, <span className="text-slate-300">Simple to Use</span>
-                    </motion.h2>
-                    
-                    <motion.p 
-                        initial={{ opacity: 0, y: 20 }}
-                        whileInView={{ opacity: 1, y: 0 }}
-                        viewport={{ once: true }}
-                        transition={{ duration: 0.5, delay: 0.2 }}
-                        className="text-slate-500 text-[14px] sm:text-[15px] leading-[1.6]"
-                    >
-                        Everything you need to buy and sell agricultural produce efficiently.
-                    </motion.p>
-                </div>
+                <SectionHeader 
+                    badge="# FEATURES"
+                    badgeVariant="slate"
+                    badgeClassName="!bg-[#F3E8FF] !text-[#A855F7] border-none font-black"
+                    title={<>Powerful Features, <span className="text-slate-300">Simple to Use</span></>}
+                    description="Everything you need to buy and sell agricultural produce efficiently."
+                />
 
                 {/* Features Grid */}
                 <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
                     {features.map((feature, index) => (
-                        <motion.div
+                        <Card
                             key={index}
-                            initial={{ opacity: 0, y: 30 }}
-                            whileInView={{ opacity: 1, y: 0 }}
-                            viewport={{ once: true }}
+                            className="group cursor-default glass-shine"
                             transition={{ duration: 0.5, delay: index * 0.1 }}
-                            className="bg-white rounded-2xl p-5 sm:p-6 shadow-[0_8px_30px_rgb(0,0,0,0.04)] hover:shadow-[0_20px_40px_rgba(0,180,100,0.08)] transition-all duration-300 border border-gray-100 group cursor-default hover:-translate-y-1.5 glass-shine"
                         >
                             {/* Icon Container - Higher Contrast */}
                             <div className={`w-12 h-12 sm:w-14 sm:h-14 rounded-xl ${feature.colorClass.split(' ')[0]} flex items-center justify-center mb-5 transition-transform duration-500 group-hover:scale-110 group-hover:rotate-3`}>
@@ -107,7 +78,7 @@ const FeaturesSection = () => {
                             <p className="text-[#556070] text-[13px] sm:text-[14px] leading-[1.6] font-medium">
                                 {feature.description}
                             </p>
-                        </motion.div>
+                        </Card>
                     ))}
                 </div>
 

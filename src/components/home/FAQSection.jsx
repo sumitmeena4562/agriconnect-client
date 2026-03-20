@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import SectionHeader from '../ui/SectionHeader';
 
 const FAQSection = () => {
     const [activeIndex, setActiveIndex] = useState(0);
@@ -32,40 +33,14 @@ const FAQSection = () => {
             <div className="max-w-3xl mx-auto px-5 sm:px-6 lg:px-8">
                 
                 {/* Header */}
-                <div className="text-center max-w-xl mx-auto mb-10 sm:mb-12">
-                    <motion.div 
-                        initial={{ opacity: 0, y: 20 }}
-                        whileInView={{ opacity: 1, y: 0 }}
-                        viewport={{ once: true }}
-                        transition={{ duration: 0.5 }}
-                        className="inline-flex items-center gap-1.5 px-2.5 py-0.5 bg-[#F1F5F9] rounded-md mb-3"
-                    >
-                        <span className="material-symbols-outlined text-slate-600 text-[12px]">schedule</span>
-                        <span className="text-slate-600 font-bold text-[8px] tracking-[0.1em] uppercase">
-                            FAQ
-                        </span>
-                    </motion.div>
-                    
-                    <motion.h2 
-                        initial={{ opacity: 0, y: 20 }}
-                        whileInView={{ opacity: 1, y: 0 }}
-                        viewport={{ once: true }}
-                        transition={{ duration: 0.5, delay: 0.1 }}
-                        className="text-xl sm:text-2xl lg:text-3xl font-black text-[#0A2616] mb-3 font-heading tracking-tight"
-                    >
-                        Frequently Asked Questions
-                    </motion.h2>
-                    
-                    <motion.p 
-                        initial={{ opacity: 0, y: 20 }}
-                        whileInView={{ opacity: 1, y: 0 }}
-                        viewport={{ once: true }}
-                        transition={{ duration: 0.5, delay: 0.2 }}
-                        className="text-slate-500 text-[13px] sm:text-[14px] leading-relaxed"
-                    >
-                        Everything you need to know about trading on AgriConnect.
-                    </motion.p>
-                </div>
+                <SectionHeader 
+                    badge="FAQ"
+                    badgeIcon="schedule"
+                    badgeVariant="slate"
+                    badgeClassName="!bg-slate-100 !text-slate-600 border-none"
+                    title="Frequently Asked Questions"
+                    description="Everything you need to know about trading on AgriConnect."
+                />
 
                 {/* FAQ List */}
                 <div className="space-y-3">

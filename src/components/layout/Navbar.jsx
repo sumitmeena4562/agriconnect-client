@@ -2,6 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import Logo from '../common/Logo';
+import Button from '../ui/Button';
+import Badge from '../ui/Badge';
 
 const Header = () => {
   // --- States ---
@@ -207,8 +209,8 @@ const Header = () => {
               </div>
 
               <div className="hidden sm:flex items-center gap-1.5 lg:gap-2">
-                <Link to="/login" className="px-3 lg:px-4 py-2.5 text-[13px] font-bold text-slate-700 hover:bg-white rounded-xl transition-all">Log in</Link>
-                <Link to="/farmer-registration" className="px-5 py-2.5 text-[14px] font-black text-white bg-[#00B464] rounded-xl shadow-lg shadow-green-200/40 hover:scale-[1.02] active:scale-[0.98] transition-all whitespace-nowrap">Join Free</Link>
+                <Button to="/login" variant="outline" size="md" className="!rounded-xl border-none hover:bg-slate-50">Log in</Button>
+                <Button to="/farmer-registration" variant="primary" size="md" className="!rounded-xl !px-5 whitespace-nowrap">Join Free</Button>
               </div>
 
               <button onClick={() => setIsMenuOpen(true)} className="md:hidden w-10 h-10 flex items-center justify-center rounded-xl bg-slate-900 text-white shadow-xl">
@@ -273,10 +275,10 @@ const Header = () => {
               </nav>
 
               <div className="space-y-4 pt-6 border-t border-gray-50">
-                  <Link to="/farmer-registration" onClick={() => setIsMenuOpen(false)} className="block w-full text-center py-5 bg-[#00B464] text-white font-black rounded-2xl shadow-xl shadow-green-100 text-[16px]">FARMER REGISTRATION</Link>
+                  <Button to="/farmer-registration" onClick={() => setIsMenuOpen(false)} fullWidth size="lg" className="!rounded-2xl">FARMER REGISTRATION</Button>
                   <div className="grid grid-cols-2 gap-4">
-                      <Link to="/login" className="flex items-center justify-center py-4 bg-slate-900 text-white font-black rounded-xl text-[14px]">LOGIN</Link>
-                      <a href="https://wa.me/91000000000" className="flex items-center justify-center py-4 bg-[#25D366] text-white font-black rounded-xl text-[14px]">WHATSAPP</a>
+                      <Button to="/login" variant="dark" fullWidth className="!rounded-xl">LOGIN</Button>
+                      <Button href="https://wa.me/91000000000" variant="accent" fullWidth className="!rounded-xl !bg-[#25D366] !shadow-none">WHATSAPP</Button>
                   </div>
               </div>
             </motion.div>

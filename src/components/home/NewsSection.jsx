@@ -1,5 +1,7 @@
 import React from 'react';
-import { motion } from 'framer-motion';
+import Card from '../ui/Card';
+import SectionHeader from '../ui/SectionHeader';
+import Badge from '../ui/Badge';
 
 const NewsSection = () => {
     const articles = [
@@ -28,51 +30,22 @@ const NewsSection = () => {
             <div className="max-w-7xl mx-auto px-5 sm:px-6 lg:px-8">
                 
                 {/* Header */}
-                <div className="text-center max-w-xl mx-auto mb-10 sm:mb-14">
-                    <motion.div 
-                        initial={{ opacity: 0, y: 20 }}
-                        whileInView={{ opacity: 1, y: 0 }}
-                        viewport={{ once: true }}
-                        transition={{ duration: 0.5 }}
-                        className="inline-flex items-center gap-1.5 px-3 py-1 bg-[#EEF2FF] rounded-md mb-4"
-                    >
-                        <span className="material-symbols-outlined text-[#6366F1] text-[13px]">update</span>
-                        <span className="text-[#6366F1] font-bold text-[9px] tracking-[0.1em] uppercase">
-                            UPDATES
-                        </span>
-                    </motion.div>
-                    
-                    <motion.h2 
-                        initial={{ opacity: 0, y: 20 }}
-                        whileInView={{ opacity: 1, y: 0 }}
-                        viewport={{ once: true }}
-                        transition={{ duration: 0.5, delay: 0.1 }}
-                        className="text-2xl sm:text-3xl lg:text-4xl font-black text-[#0A2616] mb-4 font-heading tracking-tight"
-                    >
-                        Elite Market <span className="text-[#00B464]">Insights</span>
-                    </motion.h2>
-                    
-                    <motion.p 
-                        initial={{ opacity: 0, y: 20 }}
-                        whileInView={{ opacity: 1, y: 0 }}
-                        viewport={{ once: true }}
-                        transition={{ duration: 0.5, delay: 0.2 }}
-                        className="text-slate-500 text-[13px] sm:text-[14px] italic"
-                    >
-                        Stay ahead of the curve with the latest trends and data in high-scale agricultural trading.
-                    </motion.p>
-                </div>
+                <SectionHeader 
+                    badge="UPDATES"
+                    badgeIcon="update"
+                    badgeVariant="slate"
+                    badgeClassName="!bg-indigo-50 !text-indigo-600 border-none px-3"
+                    title={<>Elite Market <span className="text-primary-600">Insights</span></>}
+                    description="Stay ahead of the curve with the latest trends and data in high-scale agricultural trading."
+                />
 
                 {/* News Grid */}
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8">
                     {articles.map((article, index) => (
-                        <motion.div
+                        <Card
                             key={index}
-                            initial={{ opacity: 0, y: 30 }}
-                            whileInView={{ opacity: 1, y: 0 }}
-                            viewport={{ once: true }}
+                            className="flex flex-col group cursor-pointer glass-shine p-4"
                             transition={{ duration: 0.5, delay: index * 0.1 }}
-                            className="flex flex-col group cursor-pointer glass-shine p-4 rounded-3xl bg-white border border-gray-50 shadow-sm hover:shadow-xl hover:shadow-green-50/50 transition-all duration-500"
                         >
                             <div className="relative aspect-[16/10] rounded-2xl overflow-hidden mb-4">
                                 <img 
@@ -81,9 +54,9 @@ const NewsSection = () => {
                                     className="w-full h-full object-cover transition-transform duration-1000 ease-out icon-pop"
                                 />
                                 <div className="absolute top-4 left-4">
-                                    <span className="px-3 py-1 bg-white/90 backdrop-blur-sm rounded-lg text-[10px] font-black uppercase tracking-wider text-[#0A2616] shadow-sm">
+                                    <Badge variant="glass" size="xs" className="!bg-white/90 !text-slate-900 shadow-sm border-none">
                                         {article.category}
-                                    </span>
+                                    </Badge>
                                 </div>
                             </div>
                             
@@ -92,15 +65,15 @@ const NewsSection = () => {
                                 <span className="text-[10px] font-bold uppercase tracking-wider">{article.date}</span>
                             </div>
                             
-                            <h3 className="text-[16px] sm:text-[17px] font-black text-[#0A2616] leading-[1.4] mb-3 group-hover:text-[#00B464] transition-colors">
+                            <h3 className="text-[16px] sm:text-[17px] font-black text-[#0A2616] leading-[1.4] mb-3 group-hover:text-primary-600 transition-colors tracking-tight">
                                 {article.title}
                             </h3>
                             
-                            <div className="mt-auto flex items-center gap-1 text-[#00B464] group/link">
+                            <div className="mt-auto flex items-center gap-1 text-primary-600 group/link">
                                 <span className="text-[11px] font-black uppercase tracking-widest">Read Article</span>
                                 <span className="material-symbols-outlined text-[16px] transform group-hover/link:translate-x-1 transition-transform">arrow_right_alt</span>
                             </div>
-                        </motion.div>
+                        </Card>
                     ))}
                 </div>
             </div>
