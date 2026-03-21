@@ -1,29 +1,33 @@
-import React from 'react';
+import React, { forwardRef } from 'react';
 
-const Select = ({ 
+const Select = forwardRef(({ 
     label, 
     value, 
     onChange, 
     options = [], 
     name, 
+    id,
     placeholder = 'Choose Option', 
     disabled = false, 
     className = '', 
     error = null,
     fullWidth = true,
     ...props 
-}) => {
+}, ref) => {
     const widthStyle = fullWidth ? "w-full" : "";
+    const selectId = id || name || `select-${Math.random().toString(36).substring(2, 9)}`;
 
     return (
         <div className={`space-y-1.5 ${widthStyle} ${className}`}>
             {label && (
-                <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest px-1 opacity-70">
+                <label htmlFor={selectId} className="text-[10px] font-black text-slate-500 uppercase tracking-widest px-1 opacity-70">
                     {label}
                 </label>
             )}
             <div className="relative group/select">
                 <select 
+                    ref={ref}
+                    id={selectId}
                     name={name}
                     value={value}
                     onChange={onChange}
@@ -52,6 +56,6 @@ const Select = ({
             {error && <p className="text-red-500 text-[9px] font-bold px-1 uppercase tracking-widest">{error}</p>}
         </div>
     );
-};
+});
 
 export default Select;

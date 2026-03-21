@@ -1,12 +1,13 @@
-import React from 'react';
+import React, { forwardRef } from 'react';
 
-const Input = ({ 
+const Input = forwardRef(({ 
     label, 
     value, 
     onChange, 
     type = 'text', 
     placeholder = '', 
     name, 
+    id,
     maxLength, 
     className = '', 
     icon = null,
@@ -15,20 +16,21 @@ const Input = ({
     fullWidth = true,
     autoFocus = false,
     ...props 
-}) => {
+}, ref) => {
     const widthStyle = fullWidth ? "w-full" : "";
+    const inputId = id || name || `input-${Math.random().toString(36).substring(2, 9)}`;
     
     return (
         <div className={`space-y-1.5 ${widthStyle} ${className}`}>
             {label && (
-                <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest px-1 opacity-70">
+                <label htmlFor={inputId} className="text-[10px] font-black text-slate-500 uppercase tracking-widest px-1 opacity-70">
                     {label}
                 </label>
             )}
             <div className={`
                 group flex items-center bg-slate-50 border-2 border-slate-100 rounded-xl px-4 py-2 
                 focus-within:border-primary-500 focus-within:bg-white focus-within:shadow-[0_0_0_4px_rgba(22,163,74,0.06)] 
-                transition-all duration-400
+                transition-all duration-300
                 ${error ? 'border-red-300 bg-red-50/30' : ''}
             `}>
                 {icon && (
@@ -42,7 +44,9 @@ const Input = ({
                     </span>
                 )}
                 <input 
+                    ref={ref}
                     type={type}
+                    id={inputId}
                     name={name}
                     value={value}
                     onChange={onChange}
@@ -56,6 +60,6 @@ const Input = ({
             {error && <p className="text-red-500 text-[9px] font-bold px-1 uppercase tracking-widest">{error}</p>}
         </div>
     );
-};
+});
 
 export default Input;

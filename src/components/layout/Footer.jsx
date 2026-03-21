@@ -1,5 +1,4 @@
 import React from 'react';
-import { Link } from 'react-router-dom';
 import Logo from '../common/Logo';
 import Button from '../ui/Button';
 
@@ -54,9 +53,9 @@ const Footer = () => {
                             <ul className="space-y-3">
                                 {section.links.map(link => (
                                     <li key={link}>
-                                        <Link to="#" className="text-white/40 hover:text-primary-600 transition-colors text-[13.5px] font-medium block">
+                                        <a href="#" className="text-white/40 hover:text-primary-600 transition-colors text-[13.5px] font-medium block">
                                             {link}
-                                        </Link>
+                                        </a>
                                     </li>
                                 ))}
                             </ul>
@@ -96,9 +95,9 @@ const Footer = () => {
                     
                     <div className="flex items-center gap-8">
                         {['Terms', 'Privacy', 'Cookies'].map(legal => (
-                            <Link key={legal} to="#" className="text-white/20 hover:text-primary-600 text-[11px] font-medium transition-colors">
+                            <a key={legal} href="#" className="text-white/20 hover:text-primary-600 text-[11px] font-medium transition-colors">
                                 {legal}
-                            </Link>
+                            </a>
                         ))}
                     </div>
                 </div>

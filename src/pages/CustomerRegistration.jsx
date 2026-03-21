@@ -29,16 +29,25 @@ const CustomerRegistration = () => {
 
     // Timer Logic for OTP
     useEffect(() => {
+        if (step !== 2) return;
+        
         let interval;
-        if (step === 2 && timer > 0) {
+        if (timer > 0) {
             interval = setInterval(() => {
-                setTimer((prev) => prev - 1);
+                setTimer((prev) => {
+                    if (prev <= 1) {
+                        clearInterval(interval);
+                        setCanResend(true);
+                        return 0;
+                    }
+                    return prev - 1;
+                });
             }, 1000);
-        } else if (timer === 0) {
+        } else {
             setCanResend(true);
         }
         return () => clearInterval(interval);
-    }, [step, timer]);
+    }, [step]);
 
     const handleChange = (e) => {
         const { name, value } = e.target;
@@ -55,13 +64,13 @@ const CustomerRegistration = () => {
         setFormData({ ...formData, otp: newOtp });
 
         if (value && index < 5) {
-            otpRefs.current[index + 1].focus();
+            otpRefs.current[index + 1]?.focus();
         }
     };
 
     const handleOtpKeyDown = (index, e) => {
         if (e.key === 'Backspace' && !formData.otp[index] && index > 0) {
-            otpRefs.current[index - 1].focus();
+            otpRefs.current[index - 1]?.focus();
         }
     };
 
