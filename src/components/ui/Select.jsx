@@ -18,9 +18,9 @@ const Select = forwardRef(({
     const selectId = id || name || `select-${Math.random().toString(36).substring(2, 9)}`;
 
     return (
-        <div className={`space-y-1.5 ${widthStyle} ${className}`}>
+        <div className={`space-y-1 ${widthStyle} ${className}`}>
             {label && (
-                <label htmlFor={selectId} className="text-[10px] font-black text-slate-500 uppercase tracking-widest px-1 opacity-70">
+                <label htmlFor={selectId} className="text-[9px] font-black text-slate-500 uppercase tracking-widest px-1 opacity-70">
                     {label}
                 </label>
             )}
@@ -33,8 +33,8 @@ const Select = forwardRef(({
                     onChange={onChange}
                     disabled={disabled}
                     className={`
-                        w-full bg-slate-50 border-2 border-slate-100 rounded-xl px-4 py-2 
-                        font-black text-slate-800 text-sm 
+                        w-full bg-slate-50 border-2 border-slate-100 rounded-xl px-3 py-1.5 
+                        font-black text-slate-800 text-[13px] 
                         appearance-none focus:border-primary-500 
                         transition-all outline-none 
                         disabled:opacity-30
@@ -49,7 +49,7 @@ const Select = forwardRef(({
                         </option>
                     ))}
                 </select>
-                <span className="material-symbols-outlined text-slate-400 absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none group-focus-within/select:rotate-180 transition-transform font-bold text-lg">
+                <span className="material-symbols-outlined text-slate-400 absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none group-focus-within/select:rotate-180 transition-transform font-bold text-base">
                     expand_more
                 </span>
             </div>

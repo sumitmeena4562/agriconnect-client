@@ -87,14 +87,14 @@ const FarmerRegistration = () => {
     };
 
     return (
-        <div className="min-h-screen bg-[#e9faf4] flex flex-col font-sans">
-            <nav className="w-full bg-white/90 backdrop-blur-2xl border-b border-slate-100 py-4 px-6 sm:px-12 flex justify-between items-center sticky top-0 z-50">
+        <div className="h-[100dvh] overflow-hidden bg-[#e9faf4] flex flex-col font-sans">
+            <nav className="w-full shrink-0 bg-white/90 backdrop-blur-2xl border-b border-slate-100 py-4 px-4 sm:px-12 flex justify-between items-center sticky top-0 z-50">
                 <div className="flex items-center gap-3">
                     <Logo size="md" />
                     <div className="h-5 w-[1.5px] bg-slate-200 mx-1 hidden sm:block" />
                     <div className="hidden sm:flex flex-col">
-                        <span className="text-[11px] font-[900] text-slate-800 uppercase tracking-[0.25em] leading-tight">Farmer Portal</span>
-                        <Badge variant="slate" size="xs" animate={false}>Verified Access</Badge>
+                        <span className="text-[11px] font-[900] text-slate-800 uppercase tracking-[0.25em] leading-tight">Farmer Registration</span>
+                        <Badge variant="slate" size="xs" animate={false}>Verified Account</Badge>
                     </div>
                 </div>
                 
@@ -111,12 +111,12 @@ const FarmerRegistration = () => {
                 </div>
             </nav>
             
-            <main className="flex-1 flex flex-col items-center justify-center p-6 sm:p-10 relative overflow-hidden">
+            <main className="flex-1 flex flex-col items-center justify-center p-2 sm:p-10 relative overflow-hidden w-full">
                 <div className="absolute top-1/4 -right-20 w-60 h-60 bg-primary-100/20 rounded-full blur-[80px] -z-10" />
                 <div className="absolute bottom-1/4 -left-20 w-60 h-60 bg-green-100/20 rounded-full blur-[80px] -z-10" />
 
                 <Card 
-                    className="w-full max-w-[420px] !overflow-hidden border-slate-100/80 !rounded-[28px]"
+                    className="w-full max-w-[380px] !overflow-hidden border-slate-100/80 !rounded-[24px]"
                     padding="p-0"
                     animate={true}
                     transition={{ duration: 0.5 }}
@@ -136,17 +136,17 @@ const FarmerRegistration = () => {
                         ))}
                     </div>
 
-                    <div className="px-7 py-9 sm:px-8 sm:py-10">
+                    <div className="px-5 py-6 sm:px-7 sm:py-8">
                         <AnimatePresence mode="wait">
                             {step === 1 && (
-                                <motion.div key="step1" initial={{ opacity: 0, x: 10 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -10 }} className="space-y-6">
+                                <motion.div key="step1" initial={{ opacity: 0, x: 10 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -10 }} className="space-y-4">
                                     <div className="space-y-1">
-                                        <h1 className="text-[22px] font-[1000] text-slate-900 tracking-[-0.03em] leading-none">Portal <span className="text-primary-600 italic">Access.</span></h1>
-                                        <p className="text-slate-400 text-[8px] font-black uppercase tracking-[0.3em]">SECURE AUTHENTICATION — PHASE 01</p>
+                                        <h1 className="text-[20px] font-[1000] text-slate-900 tracking-[-0.03em] leading-none">Welcome to <span className="text-primary-600 italic">AgriConnect.</span></h1>
+                                        <p className="text-slate-400 text-[9px] font-black uppercase tracking-[0.1em]">Please enter your mobile number</p>
                                     </div>
 
                                     <Input 
-                                        label="Authentication Phone"
+                                        label="Mobile Number"
                                         name="mobile"
                                         maxLength="10"
                                         placeholder="00000 00000"
@@ -163,25 +163,25 @@ const FarmerRegistration = () => {
                                         fullWidth
                                         icon="shield_lock"
                                     >
-                                        GENERATE OTP
+                                        GET OTP
                                     </Button>
                                     
                                     <div className="flex items-center justify-center gap-4 py-1">
-                                        <Badge variant="slate" size="xs" icon="verified_user" animate={false}>Encrypted</Badge>
+                                        <Badge variant="slate" size="xs" icon="verified_user" animate={false}>Secure</Badge>
                                         <div className="w-[1px] h-3 bg-slate-200" />
-                                        <Badge variant="slate" size="xs" icon="groups" animate={false}>10k+ Active</Badge>
+                                        <Badge variant="slate" size="xs" icon="groups" animate={false}>10k+ Farmers</Badge>
                                     </div>
                                 </motion.div>
                             )}
 
                             {step === 2 && (
-                                <motion.div key="step2" initial={{ opacity: 0, x: 10 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -10 }} className="space-y-6">
+                                <motion.div key="step2" initial={{ opacity: 0, x: 10 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -10 }} className="space-y-4">
                                     <button onClick={prevStep} className="inline-flex items-center gap-1.5 text-slate-400 hover:text-primary-600 font-black text-[8px] uppercase tracking-widest group transition-all">
                                         <span className="material-symbols-outlined text-[10px] group-hover:-translate-x-0.5 transition-transform">arrow_back</span> Change Number
                                     </button>
                                     
                                     <div className="space-y-1">
-                                        <h1 className="text-xl font-[1000] text-slate-900 tracking-tight leading-none">Verify <span className="text-primary-600 italic">Code.</span></h1>
+                                        <h1 className="text-[18px] font-[1000] text-slate-900 tracking-tight leading-none">Verify <span className="text-primary-600 italic">OTP.</span></h1>
                                         <p className="text-slate-400 text-[9px] font-bold uppercase tracking-widest mt-1">Sent to +91 {formData.mobile}</p>
                                     </div>
 
@@ -192,7 +192,7 @@ const FarmerRegistration = () => {
                                         otpRefs={otpRefs}
                                     />
 
-                                    <div className="space-y-4">
+                                    <div className="space-y-3">
                                         <Button 
                                             onClick={nextStep}
                                             disabled={formData.otp.join('').length < 6}
@@ -216,13 +216,13 @@ const FarmerRegistration = () => {
                             )}
 
                             {step === 3 && (
-                                <motion.div key="step3" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }} className="space-y-6">
+                                <motion.div key="step3" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }} className="space-y-3.5">
                                     <div className="space-y-1">
-                                        <h1 className="text-xl font-[1000] text-slate-900 tracking-tight leading-none">Your <span className="text-primary-600 italic">Profile.</span></h1>
-                                        <p className="text-slate-400 text-[9px] font-black uppercase tracking-[0.2em]">Identity Link: +91 {formData.mobile}</p>
+                                        <h1 className="text-[18px] font-[1000] text-slate-900 tracking-tight leading-none">Your <span className="text-primary-600 italic">Profile.</span></h1>
+                                        <p className="text-slate-400 text-[9px] font-bold uppercase tracking-[0.1em]">Linked to +91 {formData.mobile}</p>
                                     </div>
 
-                                    <div className="space-y-4">
+                                    <div className="space-y-2.5">
                                         <Input 
                                             label="Full Name"
                                             name="fullName"
@@ -232,7 +232,7 @@ const FarmerRegistration = () => {
                                             icon="person"
                                         />
 
-                                        <div className="grid grid-cols-2 gap-4">
+                                        <div className="grid grid-cols-2 gap-3">
                                             <Select 
                                                 label="State"
                                                 name="state"
@@ -269,9 +269,9 @@ const FarmerRegistration = () => {
                                         disabled={!formData.fullName || !formData.state || !formData.district || formData.pincode.length < 6}
                                         fullWidth
                                         className="mt-2"
-                                        icon="bolt"
+                                        icon="check_circle"
                                     >
-                                        INITIALIZE ACCESS
+                                        COMPLETE REGISTRATION
                                     </Button>
                                 </motion.div>
                             )}
@@ -280,9 +280,9 @@ const FarmerRegistration = () => {
                 </Card>
             </main>
 
-            <div className="flex justify-center pb-12">
+            <div className="flex justify-center py-2 shrink-0 sm:pb-8">
                 <Button variant="glass" size="sm" icon="help_center" iconPosition="left">
-                    AgriConnect Support Center
+                    Help & Support
                 </Button>
             </div>
         </div>

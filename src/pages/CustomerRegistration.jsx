@@ -86,13 +86,13 @@ const CustomerRegistration = () => {
     const prevStep = () => setStep(prev => prev - 1);
 
     return (
-        <div className="min-h-screen bg-[#fffbeb] flex flex-col font-sans">
-            <nav className="w-full bg-white/90 backdrop-blur-2xl border-b border-slate-100 py-4 px-6 sm:px-12 flex justify-between items-center sticky top-0 z-50">
+        <div className="h-[100dvh] overflow-hidden bg-[#fffbeb] flex flex-col font-sans">
+            <nav className="w-full shrink-0 bg-white/90 backdrop-blur-2xl border-b border-slate-100 py-4 px-4 sm:px-12 flex justify-between items-center sticky top-0 z-50">
                 <div className="flex items-center gap-3">
                     <Logo size="md" />
                     <div className="h-5 w-[1.5px] bg-slate-200 mx-1 hidden sm:block" />
                     <div className="hidden sm:flex flex-col">
-                        <span className="text-[11px] font-[900] text-slate-800 uppercase tracking-[0.25em] leading-tight text-accent-600">Customer Portal</span>
+                        <span className="text-[11px] font-[900] text-slate-800 uppercase tracking-[0.25em] leading-tight text-accent-600">Customer Registration</span>
                         <Badge variant="warning" size="xs" animate={false} className="!bg-yellow-100 !text-yellow-700 border-none">Personal Account</Badge>
                     </div>
                 </div>
@@ -110,7 +110,7 @@ const CustomerRegistration = () => {
                 </div>
             </nav>
             
-            <main className="flex-1 flex flex-col items-center justify-center p-6 sm:p-10 relative overflow-hidden">
+            <main className="flex-1 flex flex-col items-center justify-center p-2 sm:p-10 relative overflow-hidden w-full">
                 <div className="absolute top-1/4 -right-20 w-60 h-60 bg-yellow-100/20 rounded-full blur-[80px] -z-10" />
                 <div className="absolute bottom-1/4 -left-20 w-60 h-60 bg-accent-100/20 rounded-full blur-[80px] -z-10" />
 
@@ -135,13 +135,13 @@ const CustomerRegistration = () => {
                         ))}
                     </div>
 
-                    <div className="px-7 py-9 sm:px-8 sm:py-10">
+                    <div className="px-5 py-6 sm:px-7 sm:py-8">
                         <AnimatePresence mode="wait">
                             {step === 1 && (
-                                <motion.div key="step1" initial={{ opacity: 0, x: 10 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -10 }} className="space-y-6">
+                                <motion.div key="step1" initial={{ opacity: 0, x: 10 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -10 }} className="space-y-4">
                                     <div className="space-y-1">
-                                        <h1 className="text-[22px] font-[1000] text-slate-900 tracking-[-0.03em] leading-none">Customer <span className="text-accent-600 italic">Access.</span></h1>
-                                        <p className="text-slate-400 text-[8px] font-black uppercase tracking-[0.3em]">SECURE AUTH — PHASE 01</p>
+                                        <h1 className="text-[22px] font-[1000] text-slate-900 tracking-[-0.03em] leading-none">Welcome to <span className="text-accent-600 italic">AgriConnect.</span></h1>
+                                        <p className="text-slate-400 text-[9px] font-black uppercase tracking-[0.1em]">Please enter your mobile number</p>
                                     </div>
 
                                     <Input 
@@ -163,25 +163,25 @@ const CustomerRegistration = () => {
                                         fullWidth
                                         icon="person_add"
                                     >
-                                        GENERATE OTP
+                                        GET OTP
                                     </Button>
                                     
                                     <div className="flex items-center justify-center gap-4 py-1">
                                         <Badge variant="slate" size="xs" icon="lock" animate={false}>Secure</Badge>
                                         <div className="w-[1px] h-3 bg-slate-200" />
-                                        <Badge variant="slate" size="xs" icon="shopping_cart" animate={false}>Direct Farm</Badge>
+                                        <Badge variant="slate" size="xs" icon="shopping_cart" animate={false}>Fresh Produce</Badge>
                                     </div>
                                 </motion.div>
                             )}
 
                             {step === 2 && (
-                                <motion.div key="step2" initial={{ opacity: 0, x: 10 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -10 }} className="space-y-6">
+                                <motion.div key="step2" initial={{ opacity: 0, x: 10 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -10 }} className="space-y-4">
                                     <button onClick={prevStep} className="inline-flex items-center gap-1.5 text-slate-400 hover:text-accent-600 font-black text-[8px] uppercase tracking-widest group transition-all">
                                         <span className="material-symbols-outlined text-[10px] group-hover:-translate-x-0.5 transition-transform">arrow_back</span> Change Number
                                     </button>
                                     
                                     <div className="space-y-1">
-                                        <h1 className="text-xl font-[1000] text-slate-900 tracking-tight leading-none">Verify <span className="text-accent-600 italic">Code.</span></h1>
+                                        <h1 className="text-xl font-[1000] text-slate-900 tracking-tight leading-none">Verify <span className="text-accent-600 italic">OTP.</span></h1>
                                         <p className="text-slate-400 text-[9px] font-bold uppercase tracking-widest mt-1">Sent to +91 {formData.mobile}</p>
                                     </div>
 
@@ -218,14 +218,14 @@ const CustomerRegistration = () => {
                             )}
 
                             {step === 3 && (
-                                <motion.div key="step3" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }} className="space-y-6">
+                                <motion.div key="step3" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }} className="space-y-3.5">
                                     <div className="space-y-1">
-                                        <h1 className="text-xl font-[1000] text-slate-900 tracking-tight leading-none">Personal <span className="text-accent-600 italic">Profile.</span></h1>
-                                        <p className="text-slate-400 text-[9px] font-black uppercase tracking-[0.2em]">Join the Agri-Revolution</p>
+                                        <h1 className="text-xl font-[1000] text-slate-900 tracking-tight leading-none">Your <span className="text-accent-600 italic">Profile.</span></h1>
+                                        <p className="text-slate-400 text-[9px] font-bold uppercase tracking-[0.1em]">Tell us a bit about yourself</p>
                                     </div>
 
-                                    <div className="space-y-4">
-                                        <div className="grid grid-cols-2 gap-4">
+                                    <div className="space-y-2.5">
+                                        <div className="grid grid-cols-2 gap-3">
                                             <Input 
                                                 label="First Name"
                                                 name="firstName"
@@ -261,7 +261,7 @@ const CustomerRegistration = () => {
                                         className="mt-2 !bg-accent-600"
                                         icon="shopping_basket"
                                     >
-                                        START SHOPPING
+                                        REGISTER & START SHOPPING
                                     </Button>
                                 </motion.div>
                             )}
@@ -270,9 +270,9 @@ const CustomerRegistration = () => {
                 </Card>
             </main>
 
-            <div className="flex justify-center pb-12">
+            <div className="flex justify-center py-2 shrink-0 sm:pb-8">
                 <Button variant="glass" size="sm" icon="shopping_bag" iconPosition="left" className="!text-accent-700 !border-accent-100">
-                    Browse Fresh Catalog
+                    Browse Catalog
                 </Button>
             </div>
         </div>
