@@ -63,10 +63,15 @@ const VendorRegistration = () => {
         if (name === 'mobile' || name === 'pincode') {
             if (!/^\d*$/.test(value)) return;
         }
+        setError("");
         setFormData(prev => ({ ...prev, [name]: value }));
     };
 
     const handleSendOtp = async () => {
+        if (formData.mobile.length !== 10) {
+            setError("Please enter a valid 10-digit mobile number");
+            return;
+        }
         setLoading(true);
         setError("");
         try {
@@ -253,7 +258,7 @@ const VendorRegistration = () => {
 
                                                 <Button 
                                                     onClick={handleSendOtp}
-                                                    disabled={formData.mobile.length < 10 || loading}
+                                                    disabled={loading}
                                                     fullWidth
                                                     className="!bg-blue-600 hover:!bg-blue-700"
                                                     icon={loading ? "autorenew" : "arrow_forward"}

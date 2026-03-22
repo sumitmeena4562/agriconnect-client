@@ -63,6 +63,7 @@ const FarmerRegistration = () => {
         if (name === 'mobile' || name === 'pincode') {
             if (!/^\d*$/.test(value)) return;
         }
+        setError(""); // Clear error when user starts typing
         setFormData(prev => ({ ...prev, [name]: value }));
     };
 
@@ -116,12 +117,17 @@ const FarmerRegistration = () => {
     };
 
     const handleSendOtp = async () => {
+        if (formData.mobile.length !== 10) {
+            setError("Please enter a valid 10-digit mobile number");
+            return;
+        }
         setLoading(true);
         setError("");
         try {
             const response = await sendOtp(formData.mobile);
             if (response.data.success) {
-                startTimer();
+                setTimer(30);
+                setCanResend(false);
                 setStep(2);
             }
         } catch (err) {
@@ -251,7 +257,7 @@ const FarmerRegistration = () => {
 
                                                 <Button 
                                                     onClick={handleSendOtp}
-                                                    disabled={formData.mobile.length < 10 || loading}
+                                                    disabled={loading}
                                                     fullWidth
                                                     icon={loading ? "autorenew" : "arrow_forward"}
                                                 >
