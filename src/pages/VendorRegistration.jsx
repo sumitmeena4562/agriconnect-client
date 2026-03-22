@@ -2,7 +2,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import Logo from '../components/common/Logo';
-import { registerUser } from '../services/api';
+import { registerUser, sendOtp, verifyOtp } from '../services/api';
 
 // UI Components
 import Button from '../components/ui/Button';
@@ -20,6 +20,7 @@ const VendorRegistration = () => {
     const [error, setError] = useState("");
     const [timer, setTimer] = useState(30);
     const [canResend, setCanResend] = useState(false);
+    const [verificationToken, setVerificationToken] = useState("");
     
     // Automatic redirection after success
     useEffect(() => {
@@ -65,11 +66,44 @@ const VendorRegistration = () => {
         setFormData(prev => ({ ...prev, [name]: value }));
     };
 
+    const handleSendOtp = async () => {
+        setLoading(true);
+        setError("");
+        try {
+            const response = await sendOtp(formData.mobile);
+            if (response.data.success) {
+                setTimer(30);
+                setCanResend(false);
+                setStep(2);
+            }
+        } catch (err) {
+            setError(err.response?.data?.message || "Failed to send OTP");
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const handleVerifyOtp = async () => {
+        setLoading(true);
+        setError("");
+        try {
+            const otpCode = formData.otp.join('');
+            const response = await verifyOtp(formData.mobile, otpCode);
+            if (response.data.success) {
+                setVerificationToken(response.data.verificationToken);
+                setStep(3);
+            }
+        } catch (err) {
+            setError(err.response?.data?.message || "Invalid OTP");
+        } finally {
+            setLoading(false);
+        }
+    };
+
     const handleSubmit = async () => {
         setLoading(true);
         setError("");
         try {
-            // Mapping businessName to 'name' as per the 'common data' rule
             const userData = {
                 name: formData.businessName,
                 mobile: formData.mobile,
@@ -79,7 +113,8 @@ const VendorRegistration = () => {
                 state: formData.state,
                 district: formData.district,
                 pincode: formData.pincode,
-                language: formData.language
+                language: formData.language,
+                verificationToken: verificationToken
             };
 
             const response = await registerUser(userData);
@@ -114,16 +149,10 @@ const VendorRegistration = () => {
         }
     };
 
-    const startTimer = () => {
-        setTimer(30);
-        setCanResend(false);
+    const prevStep = () => {
+        setError("");
+        setStep(prev => prev - 1);
     };
-
-    const nextStep = () => {
-        if (step === 1) startTimer();
-        setStep(prev => prev + 1);
-    };
-    const prevStep = () => setStep(prev => prev - 1);
 
     const statesData = {
         "Maharashtra": ["Nashik", "Pune", "Nagpur", "Ahmednagar"],
@@ -223,13 +252,13 @@ const VendorRegistration = () => {
                                                 />
 
                                                 <Button 
-                                                    onClick={nextStep}
-                                                    disabled={formData.mobile.length < 10}
+                                                    onClick={handleSendOtp}
+                                                    disabled={formData.mobile.length < 10 || loading}
                                                     fullWidth
                                                     className="!bg-blue-600 hover:!bg-blue-700"
-                                                    icon="arrow_forward"
+                                                    icon={loading ? "autorenew" : "arrow_forward"}
                                                 >
-                                                    CONTINUE
+                                                    {loading ? "SENDING..." : "CONTINUE"}
                                                 </Button>
                                             </div>
                                             
@@ -266,17 +295,18 @@ const VendorRegistration = () => {
 
                                                 <div className="space-y-4">
                                                     <Button 
-                                                        onClick={nextStep}
-                                                        disabled={formData.otp.join('').length < 6}
+                                                        onClick={handleVerifyOtp}
+                                                        disabled={formData.otp.join('').length < 6 || loading}
                                                         fullWidth
                                                         className="!bg-blue-600 hover:!bg-blue-700"
+                                                        icon={loading ? "autorenew" : undefined}
                                                     >
-                                                        VERIFY OTP
+                                                        {loading ? "VERIFYING..." : "VERIFY OTP"}
                                                     </Button>
 
                                                     <div className="text-center">
                                                         {canResend ? (
-                                                            <button onClick={startTimer} className="text-blue-600 font-bold text-sm hover:underline">Resend Code</button>
+                                                            <button onClick={handleSendOtp} disabled={loading} className="text-blue-600 font-bold text-sm hover:underline">Resend Code</button>
                                                         ) : (
                                                             <p className="text-slate-400 text-xs font-medium">Resend in <span className="text-slate-900 font-mono">0:{timer < 10 ? `0${timer}` : timer}</span></p>
                                                         )}

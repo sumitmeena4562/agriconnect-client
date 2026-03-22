@@ -20,6 +20,7 @@ const FarmerRegistration = () => {
     const [error, setError] = useState("");
     const [timer, setTimer] = useState(30);
     const [canResend, setCanResend] = useState(false);
+    const [verificationToken, setVerificationToken] = useState("");
     
     // Automatic redirection after success
     useEffect(() => {
@@ -78,7 +79,8 @@ const FarmerRegistration = () => {
                 state: formData.state,
                 district: formData.district,
                 pincode: formData.pincode,
-                language: formData.language
+                language: formData.language,
+                verificationToken: verificationToken
             };
 
             const response = await registerUser(userData);
@@ -136,6 +138,7 @@ const FarmerRegistration = () => {
             const otpCode = formData.otp.join('');
             const response = await verifyOtp(formData.mobile, otpCode);
             if (response.data.success) {
+                setVerificationToken(response.data.verificationToken);
                 setStep(3);
             }
         } catch (err) {
