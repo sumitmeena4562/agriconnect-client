@@ -2,10 +2,12 @@ import React, { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import Logo from '../components/common/Logo';
+import { registerUser } from '../services/api';
 
 // UI Components
 import Button from '../components/ui/Button';
 import Input from '../components/ui/Input';
+import Select from '../components/ui/Select';
 import Badge from '../components/ui/Badge';
 import OTPInput from '../components/ui/OTPInput';
 import Card from '../components/ui/Card';
@@ -13,15 +15,30 @@ import Card from '../components/ui/Card';
 const CustomerRegistration = () => {
     const navigate = useNavigate();
     const [step, setStep] = useState(1);
+    const [loading, setLoading] = useState(false);
+    const [isSuccess, setIsSuccess] = useState(false);
+    const [error, setError] = useState("");
     const [timer, setTimer] = useState(30);
     const [canResend, setCanResend] = useState(false);
     
+    // Automatic redirection after success
+    useEffect(() => {
+        if (isSuccess) {
+            const redirectTimer = setTimeout(() => {
+                navigate('/dashboard');
+            }, 5000);
+            return () => clearTimeout(redirectTimer);
+        }
+    }, [isSuccess, navigate]);
+
     const [formData, setFormData] = useState({
         mobile: '',
         otp: ['', '', '', '', '', ''],
-        firstName: '',
-        lastName: '',
+        fullName: '',
         email: '',
+        state: '',
+        district: '',
+        pincode: '',
         language: 'English'
     });
 
@@ -29,32 +46,54 @@ const CustomerRegistration = () => {
 
     // Timer Logic for OTP
     useEffect(() => {
-        if (step !== 2) return;
-        
         let interval;
-        if (timer > 0) {
+        if (step === 2 && timer > 0) {
             interval = setInterval(() => {
-                setTimer((prev) => {
-                    if (prev <= 1) {
-                        clearInterval(interval);
-                        setCanResend(true);
-                        return 0;
-                    }
-                    return prev - 1;
-                });
+                setTimer((prev) => prev - 1);
             }, 1000);
-        } else {
+        } else if (timer === 0) {
             setCanResend(true);
         }
         return () => clearInterval(interval);
-    }, [step]);
+    }, [step, timer]);
 
     const handleChange = (e) => {
         const { name, value } = e.target;
-        if (name === 'mobile') {
+        if (name === 'mobile' || name === 'pincode') {
             if (!/^\d*$/.test(value)) return;
         }
         setFormData(prev => ({ ...prev, [name]: value }));
+    };
+
+    const handleSubmit = async () => {
+        setLoading(true);
+        setError("");
+        try {
+            const userData = {
+                name: formData.fullName,
+                mobile: formData.mobile,
+                email: formData.email, 
+                password: "password123", 
+                role: "buyer",
+                state: formData.state,
+                district: formData.district,
+                pincode: formData.pincode,
+                language: formData.language
+            };
+
+            const response = await registerUser(userData);
+            
+            if (response.data.success) {
+                localStorage.setItem('token', response.data.token);
+                localStorage.setItem('user', JSON.stringify(response.data.user));
+                setIsSuccess(true);
+            }
+        } catch (err) {
+            console.error("Registration Error:", err);
+            setError(err.response?.data?.message || "Something went wrong. Please try again.");
+        } finally {
+            setLoading(false);
+        }
     };
 
     const handleOtpChange = (index, value) => {
@@ -64,13 +103,13 @@ const CustomerRegistration = () => {
         setFormData({ ...formData, otp: newOtp });
 
         if (value && index < 5) {
-            otpRefs.current[index + 1]?.focus();
+            otpRefs.current[index + 1].focus();
         }
     };
 
     const handleOtpKeyDown = (index, e) => {
         if (e.key === 'Backspace' && !formData.otp[index] && index > 0) {
-            otpRefs.current[index - 1]?.focus();
+            otpRefs.current[index - 1].focus();
         }
     };
 
@@ -85,196 +124,248 @@ const CustomerRegistration = () => {
     };
     const prevStep = () => setStep(prev => prev - 1);
 
+    const statesData = {
+        "Maharashtra": ["Nashik", "Pune", "Nagpur", "Ahmednagar"],
+        "Madhya Pradesh": ["Indore", "Bhopal", "Ujjain", "Ratlam"],
+        "Punjab": ["Amritsar", "Ludhiana", "Patiala", "Jalandhar"],
+        "Gujarat": ["Surat", "Ahmedabad", "Rajkot", "Vadodara"],
+        "Uttar Pradesh": ["Lucknow", "Kanpur", "Varanasi", "Agra"]
+    };
+
     return (
-        <div className="h-[100dvh] overflow-hidden bg-[#fffbeb] flex flex-col font-sans">
-            <nav className="w-full shrink-0 bg-white/90 backdrop-blur-2xl border-b border-slate-100 py-4 px-4 sm:px-12 flex justify-between items-center sticky top-0 z-50">
+        <div className="h-[100dvh] overflow-hidden bg-slate-50 flex flex-col font-sans antialiased">
+            <nav className="w-full bg-white border-b border-slate-200 py-4 px-6 sm:px-12 flex justify-between items-center z-50">
                 <div className="flex items-center gap-3">
                     <Logo size="md" />
-                    <div className="h-5 w-[1.5px] bg-slate-200 mx-1 hidden sm:block" />
+                    <div className="h-5 w-[1.5px] bg-slate-100 mx-1 hidden sm:block" />
                     <div className="hidden sm:flex flex-col">
-                        <span className="text-[11px] font-[900] text-slate-800 uppercase tracking-[0.25em] leading-tight text-accent-600">Customer Registration</span>
-                        <Badge variant="warning" size="xs" animate={false} className="!bg-yellow-100 !text-yellow-700 border-none">Personal Account</Badge>
+                        <span className="text-[11px] font-black text-slate-800 uppercase tracking-widest leading-tight">Buyer Registration</span>
+                        <Badge variant="warning" size="xs" animate={false} className="!bg-yellow-50 !text-yellow-600 border-none">Personal Account</Badge>
                     </div>
                 </div>
                 
-                <div className="flex items-center gap-4">
-                    <div className="flex bg-slate-100/80 p-1.5 rounded-full border border-slate-200/60 shadow-inner">
-                        {['Hindi', 'English'].map(l => (
-                            <button 
-                                key={l}
-                                onClick={() => setFormData({...formData, language: l})}
-                                className={`px-4 py-1.5 rounded-full text-[10px] font-black transition-all duration-300 ${formData.language === l ? 'bg-white text-accent-600 shadow-md border border-accent-50 scale-105' : 'text-slate-400 hover:text-slate-600'}`}
-                            >{l === 'Hindi' ? 'हिन्दी' : 'ENGLISH'}</button>
-                        ))}
-                    </div>
+                <div className="flex bg-slate-100 p-1 rounded-full border border-slate-200">
+                    {['Hindi', 'English'].map(l => (
+                        <button 
+                            key={l}
+                            onClick={() => setFormData({...formData, language: l})}
+                            className={`px-4 py-1.5 rounded-full text-[10px] font-bold transition-all ${formData.language === l ? 'bg-white text-yellow-600 shadow-sm' : 'text-slate-400'}`}
+                        >{l === 'Hindi' ? 'हिन्दी' : 'ENGLISH'}</button>
+                    ))}
                 </div>
             </nav>
             
-            <main className="flex-1 flex flex-col items-center justify-center p-2 sm:p-10 relative overflow-hidden w-full">
-                <div className="absolute top-1/4 -right-20 w-60 h-60 bg-yellow-100/20 rounded-full blur-[80px] -z-10" />
-                <div className="absolute bottom-1/4 -left-20 w-60 h-60 bg-accent-100/20 rounded-full blur-[80px] -z-10" />
-
+            <main className="flex-1 flex flex-col items-center justify-center p-4">
                 <Card 
-                    className="w-full max-w-[420px] !overflow-hidden border-slate-100/80 !rounded-[28px]"
+                    className="w-full max-w-[390px] !rounded-[16px] border-none shadow-xl shadow-slate-200/50"
                     padding="p-0"
-                    animate={true}
-                    transition={{ duration: 0.5 }}
+                    animate={false}
                 >
-                    <div className="flex w-full bg-slate-50 h-[3px]">
+                    <div className="flex w-full bg-slate-100 h-1">
                         {[1, 2, 3].map((s) => (
-                            <div key={s} className="flex-1 overflow-hidden">
-                                <motion.div 
-                                    initial={false}
-                                    animate={{ 
-                                        width: step >= s ? "100%" : "0%",
-                                        backgroundColor: step >= s ? "#F59E0B" : "#f1f5f9"
-                                    }}
-                                    className="h-full transition-all duration-1000 cubic-bezier(0.4, 0, 0.2, 1)"
-                                />
-                            </div>
+                            <div key={s} className={`flex-1 ${step >= s ? 'bg-yellow-500' : 'bg-transparent'} transition-colors duration-500`} />
                         ))}
                     </div>
 
-                    <div className="px-5 py-6 sm:px-7 sm:py-8">
+                    <div className="px-6 py-8 sm:px-8 sm:py-10">
                         <AnimatePresence mode="wait">
-                            {step === 1 && (
-                                <motion.div key="step1" initial={{ opacity: 0, x: 10 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -10 }} className="space-y-4">
-                                    <div className="space-y-1">
-                                        <h1 className="text-[22px] font-[1000] text-slate-900 tracking-[-0.03em] leading-none">Welcome to <span className="text-accent-600 italic">AgriConnect.</span></h1>
-                                        <p className="text-slate-400 text-[9px] font-black uppercase tracking-[0.1em]">Please enter your mobile number</p>
+                            {isSuccess ? (
+                                <motion.div 
+                                    key="success-card" 
+                                    initial={{ opacity: 0 }} 
+                                    animate={{ opacity: 1 }} 
+                                    className="flex flex-col items-center text-center space-y-6"
+                                >
+                                    <div className="w-16 h-16 bg-yellow-50 rounded-full flex items-center justify-center text-yellow-600">
+                                        <span className="material-symbols-outlined text-[40px]">check_circle</span>
+                                    </div>
+                                    
+                                    <div className="space-y-2">
+                                        <h1 className="text-2xl font-bold text-slate-900">Welcome, {formData.fullName.split(' ')[0] || 'Member'}!</h1>
+                                        <p className="text-slate-500 text-sm">Your registration is complete.</p>
                                     </div>
 
-                                    <Input 
-                                        label="Mobile Number"
-                                        name="mobile"
-                                        maxLength="10"
-                                        placeholder="00000 00000"
-                                        value={formData.mobile}
-                                        onChange={handleChange}
-                                        prefix="IN +91"
-                                        autoFocus
-                                    />
-
-                                    <Button 
-                                        onClick={nextStep}
-                                        disabled={formData.mobile.length < 10}
-                                        variant="dark"
-                                        className="!bg-[#0B1527]"
-                                        fullWidth
-                                        icon="person_add"
-                                    >
-                                        GET OTP
-                                    </Button>
-                                    
-                                    <div className="flex items-center justify-center gap-4 py-1">
-                                        <Badge variant="slate" size="xs" icon="lock" animate={false}>Secure</Badge>
-                                        <div className="w-[1px] h-3 bg-slate-200" />
-                                        <Badge variant="slate" size="xs" icon="shopping_cart" animate={false}>Fresh Produce</Badge>
+                                    <div className="w-full space-y-4 pt-4">
+                                        <Button 
+                                            onClick={() => navigate('/dashboard')}
+                                            fullWidth
+                                            variant="dark"
+                                            className="!bg-yellow-600 hover:!bg-yellow-700"
+                                            icon="shopping_basket"
+                                        >
+                                            START SHOPPING
+                                        </Button>
+                                        <p className="text-slate-400 text-[10px] italic">Redirecting automatically in 5s...</p>
                                     </div>
                                 </motion.div>
-                            )}
+                            ) : (
+                                <>
+                                    {step === 1 && (
+                                        <motion.div key="step1" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="space-y-6">
+                                            <div className="space-y-1">
+                                                <h1 className="text-2xl font-bold text-slate-900 tracking-tight">Buy <span className="text-yellow-600 italic text-[24px]">Fresh.</span></h1>
+                                                <p className="text-slate-500 text-sm">Direct from farm to your kitchen.</p>
+                                            </div>
 
-                            {step === 2 && (
-                                <motion.div key="step2" initial={{ opacity: 0, x: 10 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -10 }} className="space-y-4">
-                                    <button onClick={prevStep} className="inline-flex items-center gap-1.5 text-slate-400 hover:text-accent-600 font-black text-[8px] uppercase tracking-widest group transition-all">
-                                        <span className="material-symbols-outlined text-[10px] group-hover:-translate-x-0.5 transition-transform">arrow_back</span> Change Number
-                                    </button>
-                                    
-                                    <div className="space-y-1">
-                                        <h1 className="text-xl font-[1000] text-slate-900 tracking-tight leading-none">Verify <span className="text-accent-600 italic">OTP.</span></h1>
-                                        <p className="text-slate-400 text-[9px] font-bold uppercase tracking-widest mt-1">Sent to +91 {formData.mobile}</p>
-                                    </div>
+                                            <div className="space-y-4">
+                                                <Input 
+                                                    label="Mobile Number"
+                                                    name="mobile"
+                                                    maxLength="10"
+                                                    placeholder="00000 00000"
+                                                    value={formData.mobile}
+                                                    onChange={handleChange}
+                                                    prefix="+91"
+                                                    inputMode="numeric"
+                                                    pattern="[0-9]*"
+                                                    autoFocus
+                                                />
 
-                                    <OTPInput 
-                                        otp={formData.otp}
-                                        onChange={handleOtpChange}
-                                        onKeyDown={handleOtpKeyDown}
-                                        otpRefs={otpRefs}
-                                        focusColor="border-accent-500"
-                                    />
+                                                <Button 
+                                                    onClick={nextStep}
+                                                    disabled={formData.mobile.length < 10}
+                                                    fullWidth
+                                                    className="!bg-yellow-600 hover:!bg-yellow-700"
+                                                    icon="arrow_forward"
+                                                >
+                                                    CONTINUE
+                                                </Button>
+                                            </div>
+                                            
+                                            <div className="flex items-center justify-center gap-6 pt-4 border-t border-slate-50">
+                                                <div className="flex items-center gap-1.5 text-slate-400 text-xs font-medium">
+                                                    <span className="material-symbols-outlined text-sm">verified</span> Verified
+                                                </div>
+                                                <div className="flex items-center gap-1.5 text-slate-400 text-xs font-medium">
+                                                    <span className="material-symbols-outlined text-sm">shopping_cart</span> Premium
+                                                </div>
+                                            </div>
+                                        </motion.div>
+                                    )}
 
-                                    <div className="space-y-4">
-                                        <Button 
-                                            onClick={nextStep}
-                                            disabled={formData.otp.join('').length < 6}
-                                            fullWidth
-                                            className="!bg-accent-600"
-                                        >
-                                            VERIFY & CONTINUE
-                                        </Button>
+                                    {step === 2 && (
+                                        <motion.div key="step2" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="space-y-6">
+                                            <button onClick={prevStep} className="inline-flex items-center gap-1 text-slate-400 hover:text-yellow-600 text-xs font-bold transition-colors">
+                                                <span className="material-symbols-outlined text-sm">arrow_back</span> Back
+                                            </button>
+                                            
+                                            <div className="space-y-1">
+                                                <h1 className="text-2xl font-bold text-slate-900 tracking-tight">Verify <span className="text-yellow-600 italic text-[24px]">Identity.</span></h1>
+                                                <p className="text-slate-500 text-sm">OTP sent to +91 {formData.mobile}</p>
+                                            </div>
 
-                                        <div className="text-center">
-                                            {canResend ? (
-                                                <button onClick={startTimer} className="text-accent-600 font-black text-[9px] underline underline-offset-8 decoration-2 uppercase tracking-[0.2em] hover:text-accent-700 transition-colors">Resend Code</button>
-                                            ) : (
-                                                <div className="flex items-center justify-center gap-2">
-                                                    <div className="w-1 h-1 bg-accent-600 rounded-full animate-pulse" />
-                                                    <p className="text-slate-400 font-black text-[9px] uppercase tracking-widest leading-none">Resend in <span className="text-slate-900 font-mono tracking-normal">0:{timer < 10 ? `0${timer}` : timer}</span></p>
+                                            <div className="space-y-6">
+                                                <OTPInput 
+                                                    otp={formData.otp}
+                                                    onChange={handleOtpChange}
+                                                    onKeyDown={handleOtpKeyDown}
+                                                    otpRefs={otpRefs}
+                                                    focusColor="border-yellow-500"
+                                                />
+
+                                                <div className="space-y-4">
+                                                    <Button 
+                                                        onClick={nextStep}
+                                                        disabled={formData.otp.join('').length < 6}
+                                                        fullWidth
+                                                        className="!bg-yellow-600 hover:!bg-yellow-700"
+                                                    >
+                                                        VERIFY OTP
+                                                    </Button>
+
+                                                    <div className="text-center">
+                                                        {canResend ? (
+                                                            <button onClick={startTimer} className="text-yellow-600 font-bold text-sm hover:underline">Resend Code</button>
+                                                        ) : (
+                                                            <p className="text-slate-400 text-xs font-medium">Resend in <span className="text-slate-900 font-mono">0:{timer < 10 ? `0${timer}` : timer}</span></p>
+                                                        )}
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </motion.div>
+                                    )}
+
+                                    {step === 3 && (
+                                        <motion.div key="step3" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="space-y-6">
+                                            <div className="space-y-1">
+                                                <h1 className="text-2xl font-bold text-slate-900 tracking-tight">Profile <span className="text-yellow-600 italic text-[24px]">Setup.</span></h1>
+                                                <p className="text-slate-500 text-sm">Tell us where to deliver.</p>
+                                            </div>
+
+                                            <div className="space-y-4">
+                                                <Input 
+                                                    label="Full Name"
+                                                    name="fullName"
+                                                    value={formData.fullName}
+                                                    onChange={handleChange}
+                                                    placeholder="Enter your name"
+                                                    icon="person"
+                                                />
+
+                                                <Input 
+                                                    label="Email ID"
+                                                    type="email"
+                                                    name="email"
+                                                    value={formData.email}
+                                                    onChange={handleChange}
+                                                    placeholder="name@example.com"
+                                                    icon="mail"
+                                                />
+
+                                                <div className="grid grid-cols-2 gap-4">
+                                                    <Select 
+                                                        label="State"
+                                                        name="state"
+                                                        value={formData.state}
+                                                        onChange={handleChange}
+                                                        options={Object.keys(statesData)}
+                                                    />
+                                                    <Select 
+                                                        label="District"
+                                                        name="district"
+                                                        value={formData.district}
+                                                        onChange={handleChange}
+                                                        disabled={!formData.state}
+                                                        options={formData.state ? statesData[formData.state] : []}
+                                                    />
+                                                </div>
+
+                                                <Input 
+                                                    label="Pincode"
+                                                    name="pincode"
+                                                    value={formData.pincode}
+                                                    onChange={handleChange}
+                                                    maxLength="6"
+                                                    placeholder="6-digit code"
+                                                    icon="location_on"
+                                                    inputMode="numeric"
+                                                    pattern="[0-9]*"
+                                                />
+                                            </div>
+
+                                            {error && (
+                                                <div className="text-red-500 text-xs font-bold text-center py-2 bg-red-50 rounded-lg">
+                                                    {error}
                                                 </div>
                                             )}
-                                        </div>
-                                    </div>
-                                </motion.div>
-                            )}
 
-                            {step === 3 && (
-                                <motion.div key="step3" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }} className="space-y-3.5">
-                                    <div className="space-y-1">
-                                        <h1 className="text-xl font-[1000] text-slate-900 tracking-tight leading-none">Your <span className="text-accent-600 italic">Profile.</span></h1>
-                                        <p className="text-slate-400 text-[9px] font-bold uppercase tracking-[0.1em]">Tell us a bit about yourself</p>
-                                    </div>
-
-                                    <div className="space-y-2.5">
-                                        <div className="grid grid-cols-2 gap-3">
-                                            <Input 
-                                                label="First Name"
-                                                name="firstName"
-                                                value={formData.firstName}
-                                                onChange={handleChange}
-                                                placeholder="Rajesh"
-                                                icon="person"
-                                            />
-                                            <Input 
-                                                label="Last Name"
-                                                name="lastName"
-                                                value={formData.lastName}
-                                                onChange={handleChange}
-                                                placeholder="Kumar"
-                                            />
-                                        </div>
-
-                                        <Input 
-                                            label="Email ID (Optional)"
-                                            name="email"
-                                            type="email"
-                                            value={formData.email}
-                                            onChange={handleChange}
-                                            placeholder="rajesh@example.com"
-                                            icon="alternate_email"
-                                        />
-                                    </div>
-
-                                    <Button 
-                                        onClick={() => navigate('/dashboard')}
-                                        disabled={!formData.firstName || !formData.lastName}
-                                        fullWidth
-                                        className="mt-2 !bg-accent-600"
-                                        icon="shopping_basket"
-                                    >
-                                        REGISTER & START SHOPPING
-                                    </Button>
-                                </motion.div>
+                                            <Button 
+                                                onClick={handleSubmit}
+                                                disabled={!formData.fullName || !formData.email || !formData.state || !formData.district || formData.pincode.length < 6 || loading}
+                                                fullWidth
+                                                className="!bg-yellow-600 hover:!bg-yellow-700"
+                                                icon={loading ? "autorenew" : "done_all"}
+                                            >
+                                                {loading ? "SAVING..." : "COMPLETE REGISTRATION"}
+                                            </Button>
+                                        </motion.div>
+                                    )}
+                                </>
                             )}
                         </AnimatePresence>
                     </div>
                 </Card>
             </main>
-
-            <div className="flex justify-center py-2 shrink-0 sm:pb-8">
-                <Button variant="glass" size="sm" icon="shopping_bag" iconPosition="left" className="!text-accent-700 !border-accent-100">
-                    Browse Catalog
-                </Button>
-            </div>
         </div>
     );
 };
