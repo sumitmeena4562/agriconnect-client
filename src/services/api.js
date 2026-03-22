@@ -6,5 +6,7 @@ const API = axios.create({
 });
 
 export const registerUser = (userData) => API.post("/auth/register", userData);
+export const sendOtp = (mobile) => API.post("/auth/send-otp", { mobile });
+export const verifyOtp = (mobile, otp) => API.post("/auth/verify-otp", { mobile, otp });
 
 export default API;

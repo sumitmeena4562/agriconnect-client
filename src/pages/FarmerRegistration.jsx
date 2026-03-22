@@ -2,7 +2,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import Logo from '../components/common/Logo';
-import { registerUser } from '../services/api';
+import { registerUser, sendOtp, verifyOtp } from '../services/api';
 
 // UI Components
 import Button from '../components/ui/Button';
@@ -113,16 +113,42 @@ const FarmerRegistration = () => {
         }
     };
 
-    const startTimer = () => {
-        setTimer(30);
-        setCanResend(false);
+    const handleSendOtp = async () => {
+        setLoading(true);
+        setError("");
+        try {
+            const response = await sendOtp(formData.mobile);
+            if (response.data.success) {
+                startTimer();
+                setStep(2);
+            }
+        } catch (err) {
+            setError(err.response?.data?.message || "Failed to send OTP");
+        } finally {
+            setLoading(false);
+        }
     };
 
-    const nextStep = () => {
-        if (step === 1) startTimer();
-        setStep(prev => prev + 1);
+    const handleVerifyOtp = async () => {
+        setLoading(true);
+        setError("");
+        try {
+            const otpCode = formData.otp.join('');
+            const response = await verifyOtp(formData.mobile, otpCode);
+            if (response.data.success) {
+                setStep(3);
+            }
+        } catch (err) {
+            setError(err.response?.data?.message || "Invalid OTP");
+        } finally {
+            setLoading(false);
+        }
     };
-    const prevStep = () => setStep(prev => prev - 1);
+
+    const prevStep = () => {
+        setError("");
+        setStep(prev => prev - 1);
+    };
 
     const statesData = {
         "Maharashtra": ["Nashik", "Pune", "Nagpur", "Ahmednagar"],
@@ -221,12 +247,12 @@ const FarmerRegistration = () => {
                                                 />
 
                                                 <Button 
-                                                    onClick={nextStep}
-                                                    disabled={formData.mobile.length < 10}
+                                                    onClick={handleSendOtp}
+                                                    disabled={formData.mobile.length < 10 || loading}
                                                     fullWidth
-                                                    icon="arrow_forward"
+                                                    icon={loading ? "autorenew" : "arrow_forward"}
                                                 >
-                                                    CONTINUE
+                                                    {loading ? "SENDING..." : "CONTINUE"}
                                                 </Button>
                                             </div>
                                             
@@ -262,16 +288,17 @@ const FarmerRegistration = () => {
 
                                                 <div className="space-y-4">
                                                     <Button 
-                                                        onClick={nextStep}
-                                                        disabled={formData.otp.join('').length < 6}
+                                                        onClick={handleVerifyOtp}
+                                                        disabled={formData.otp.join('').length < 6 || loading}
                                                         fullWidth
+                                                        icon={loading ? "autorenew" : undefined}
                                                     >
-                                                        VERIFY OTP
+                                                        {loading ? "VERIFYING..." : "VERIFY OTP"}
                                                     </Button>
 
                                                     <div className="text-center">
                                                         {canResend ? (
-                                                            <button onClick={startTimer} className="text-primary-600 font-bold text-sm hover:underline">Resend Code</button>
+                                                            <button onClick={handleSendOtp} disabled={loading} className="text-primary-600 font-bold text-sm hover:underline">Resend Code</button>
                                                         ) : (
                                                             <p className="text-slate-400 text-xs font-medium">Resend in <span className="text-slate-900 font-mono">0:{timer < 10 ? `0${timer}` : timer}</span></p>
                                                         )}
