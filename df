@@ -1,0 +1,225 @@
+[33mcommit c830c67ef5991c08f30a5d4c98489c9c62908317[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mfarmer-singup-page-ui[m[33m, [m[1;31morigin/farmer-singup-page-ui[m[33m)[m
+Author: Sumit Meena <sumitmeena4562@gmail.com>
+Date:   Fri Mar 20 21:23:13 2026 +0530
+
+    feat: polish Phase 1 Farmer Registration with OTP auto-focus, timer, and validations
+
+[33mcommit 1b537ee727c8ace551f958713726a258d76beac9[m
+Author: Sumit Meena <sumitmeena4562@gmail.com>
+Date:   Fri Mar 20 21:17:44 2026 +0530
+
+    feat: complete Phase 1 Farmer Registration UI with compact theme-aligned design
+
+[33mcommit ae3d939ae550a02000619896c5d500d568ae341c[m[33m ([m[1;31morigin/singup-page-ui[m[33m, [m[1;31morigin/landing-page-ui[m[33m, [m[1;32msingup-page-ui[m[33m, [m[1;32mlanding-page-ui[m[33m)[m
+Author: Sumit Meena <sumitmeena4562@gmail.com>
+Date:   Fri Mar 20 19:41:10 2026 +0530
+
+    UI: Synchronize brand logo and favicon with official assets
+
+[33mcommit eeac279bc0cf826dca61d8f5b5a9be729d2a11ca[m
+Author: Sumit Meena <sumitmeena4562@gmail.com>
+Date:   Fri Mar 20 00:15:53 2026 +0530
+
+    (feat) aline nav size
+
+[33mcommit e0ebaa409d828809ee757d8a427aefbee958630a[m
+Author: Sumit Meena <sumitmeena4562@gmail.com>
+Date:   Fri Mar 20 00:00:28 2026 +0530
+
+    UI: Increase Navbar internal sizing for better visibility
+
+[33mcommit 716132906378302db62561161e8722806f015ba9[m
+Author: Sumit Meena <sumitmeena4562@gmail.com>
+Date:   Thu Mar 19 23:16:24 2026 +0530
+
+    Fix navbar: Restore mobile search bar and refine compact layout
+
+[33mcommit 672e57cbe735f2e8fd10015b5c6ef1132c53e8d1[m
+Author: Sumit Meena <sumitmeena4562@gmail.com>
+Date:   Thu Mar 19 22:56:31 2026 +0530
+
+    UI: Navbar fully interactive with scroll tracking, hover effects, and search hooks
+
+[33mcommit c835459c3078e8f4a9cc74886dc2aa538b43495b[m
+Author: Sumit Meena <sumitmeena4562@gmail.com>
+Date:   Thu Mar 19 22:54:52 2026 +0530
+
+    UI: Optimized Navbar spacing and search bar width for cleaner header layout
+
+[33mcommit a4a7b413a1a64b45755e89bd0b0c27ae0b868732[m
+Author: Sumit Meena <sumitmeena4562@gmail.com>
+Date:   Thu Mar 19 22:41:17 2026 +0530
+
+    UI: Fixed critical mobile responsiveness issues across Header and Hero CTAs
+
+[33mcommit e5af520fb1bbfdf1ca6cc4b097e737dd04a6b511[m
+Author: Sumit Meena <sumitmeena4562@gmail.com>
+Date:   Thu Mar 19 22:33:39 2026 +0530
+
+    UI: Navbar upgraded to Elite status with glassmorphism and layout animations
+
+[33mcommit 0007cf761e465d1eb5e8675ae92a323096c99028[m
+Author: Sumit Meena <sumitmeena4562@gmail.com>
+Date:   Thu Mar 19 22:30:22 2026 +0530
+
+    Fix: Restored corrupted TrendingCategories and finalized unified trust marquee
+
+[33mcommit 790cc3489c0577e82ac734a1453945ae95c2c8e8[m
+Author: Sumit Meena <sumitmeena4562@gmail.com>
+Date:   Thu Mar 19 22:25:46 2026 +0530
+
+    UI/UX: Final Elite Review & Polish Pass complete for all sections
+
+[33mcommit 72ac971369619b39b5d06c4b27e38e3f4af6feb8[m
+Author: Sumit Meena <sumitmeena4562@gmail.com>
+Date:   Thu Mar 19 22:23:52 2026 +0530
+
+    UI/UX: Full Elite Overhaul finalized and documented
+
+[33mcommit fcdef6589662e5814a2e853e3ea29b19a4cab02e[m
+Author: Sumit Meena <sumitmeena4562@gmail.com>
+Date:   Thu Mar 19 22:23:08 2026 +0530
+
+    UI/UX: Add Video Success Story and elite interactions to Testimonials
+
+[33mcommit e2d94d09011c59997f63c5720c9bea237431adca[m
+Author: Sumit Meena <sumitmeena4562@gmail.com>
+Date:   Thu Mar 19 22:22:25 2026 +0530
+
+    UI/UX: Elite FeaturesSection copy and interactions
+
+[33mcommit 20707556db6d4814a2e3beb5fd43f2cfe7785739[m
+Author: Sumit Meena <sumitmeena4562@gmail.com>
+Date:   Thu Mar 19 22:22:01 2026 +0530
+
+    UI/UX: Finalized TrendingCategories elite interactions
+
+[33mcommit 1f493f3dee0af91a63163afc4abc5100b155e235[m
+Author: Sumit Meena <sumitmeena4562@gmail.com>
+Date:   Thu Mar 19 22:21:28 2026 +0530
+
+    UI/UX: Elite TrendingCategories interactions and Market Pulse pulse
+
+[33mcommit 0186f2a20ded819e6d916ec492ccc6c1aa937576[m
+Author: Sumit Meena <sumitmeena4562@gmail.com>
+Date:   Thu Mar 19 22:20:45 2026 +0530
+
+    UI/UX: Hero/Trending Elite Copy & Interaction Overhaul
+
+[33mcommit 1519a51b87239844d1fe759dfd2b246b49e9fec5[m
+Author: Sumit Meena <sumitmeena4562@gmail.com>
+Date:   Thu Mar 19 22:20:01 2026 +0530
+
+    UI/UX: Integrate TrustLogos and Elite CSS utilities
+
+[33mcommit 99adbe5bb51b3ddbc38d1e5390e79031aad659ff[m
+Author: Sumit Meena <sumitmeena4562@gmail.com>
+Date:   Thu Mar 19 22:19:37 2026 +0530
+
+    UI/UX: Add Elite glass-shine utilities and TrustLogos component
+
+[33mcommit 30db3f393d17c27fb04374a04730be101f2cbfd1[m
+Author: Sumit Meena <sumitmeena4562@gmail.com>
+Date:   Thu Mar 19 22:16:50 2026 +0530
+
+    UI/UX: Final landing page polish with balanced Hero layout (English)
+
+[33mcommit df9dc264a7433add5dc8bda98a838fe0f5fedcd6[m
+Author: Sumit Meena <sumitmeena4562@gmail.com>
+Date:   Thu Mar 19 22:09:42 2026 +0530
+
+    UI/UX: Fix FeaturesSection icon contrast and title consistency
+
+[33mcommit ee586f4127babaa0d78e64970e4b102d1bc003c0[m
+Author: Sumit Meena <sumitmeena4562@gmail.com>
+Date:   Thu Mar 19 22:07:11 2026 +0530
+
+    UI/UX: Polish FAQSection with farmer-centric content
+
+[33mcommit dc8f7bd7ff78e0a9f81ae4ba623429dae37d7338[m
+Author: Sumit Meena <sumitmeena4562@gmail.com>
+Date:   Thu Mar 19 22:06:27 2026 +0530
+
+    UI/UX: Polish TrendingCategories and FeaturesSection aesthetics
+
+[33mcommit 5b15a2ac81a1335b38d8d0fe242aba7d012be467[m
+Author: Sumit Meena <sumitmeena4562@gmail.com>
+Date:   Thu Mar 19 22:06:02 2026 +0530
+
+    UI/UX: Add real-time vibes to TrendingCategories
+
+[33mcommit e8adec51b8c5eff3a295a13f76803eec8650c6a4[m
+Author: Sumit Meena <sumitmeena4562@gmail.com>
+Date:   Thu Mar 19 22:05:46 2026 +0530
+
+    UI/UX: Refine Hero Section and Landing reorder
+
+[33mcommit b2bc909250e7a2b9c3403d9f67fb27a591b2c7f7[m
+Author: Sumit Meena <sumitmeena4562@gmail.com>
+Date:   Thu Mar 19 22:03:36 2026 +0530
+
+    UI/UX: Extreme Mobile Header overhaul for direct Farmer access
+
+[33mcommit 00da293379238a3f11e8a14358447ebb8b788812[m
+Author: Sumit Meena <sumitmeena4562@gmail.com>
+Date:   Thu Mar 19 21:57:41 2026 +0530
+
+    UI/UX: Refine unified Navbar for premium feel
+
+[33mcommit b44363fb40aa500fe7059241e5cdbd7b9018a711[m
+Author: Sumit Meena <sumitmeena4562@gmail.com>
+Date:   Thu Mar 19 21:55:55 2026 +0530
+
+    Feat: Unify Marketplace Features into single-row Navbar
+
+[33mcommit 64a8db8aec269be1dc53621be03951de31bd7b26[m
+Author: Sumit Meena <sumitmeena4562@gmail.com>
+Date:   Thu Mar 19 21:42:54 2026 +0530
+
+    Fix: Center Navbar active indicator dot
+
+[33mcommit c3d6183b4da47fa4f3d488c2357529ef6e6bc10d[m
+Author: Sumit Meena <sumitmeena4562@gmail.com>
+Date:   Thu Mar 19 21:41:26 2026 +0530
+
+    Expand Navbar navigation to include all landing page sections
+
+[33mcommit 0e05e8728f5cd1f9bd9a8e53fd285e0b0fb7dee9[m
+Author: Sumit Meena <sumitmeena4562@gmail.com>
+Date:   Thu Mar 19 21:36:47 2026 +0530
+
+    Refactor: Extract Logo component and refine Navbar height for a more compact UI
+
+[33mcommit 04d545a97f1b4f8751e5205db50e345dfaadb5df[m
+Author: Sumit Meena <sumitmeena4562@gmail.com>
+Date:   Thu Mar 19 21:22:54 2026 +0530
+
+    Restore original 'eco' icon and text branding to Logo component
+
+[33mcommit 5eb9e6e213e4c6ca3cc1f669fbce55d62bf883a4[m
+Author: Sumit Meena <sumitmeena4562@gmail.com>
+Date:   Thu Mar 19 21:14:19 2026 +0530
+
+    Refine footer design: fix social icon text overlay and adjust scaling for optimal balance
+
+[33mcommit aeff0b8daf4b9f519b349fef8850634d809a2dcb[m
+Author: Sumit Meena <sumitmeena4562@gmail.com>
+Date:   Thu Mar 19 21:00:42 2026 +0530
+
+    Scale down Mobile App section to a more compact size while maintaining premium UI
+
+[33mcommit 33028ffeb3d75b563596efc93d6d4430e3e1f6d1[m
+Author: Sumit Meena <sumitmeena4562@gmail.com>
+Date:   Thu Mar 19 20:49:01 2026 +0530
+
+    Optimize FAQ section sizing and add premium accent styling
+
+[33mcommit d461822e552023605c00603ba670eb2c85689478[m
+Author: Sumit Meena <sumitmeena4562@gmail.com>
+Date:   Thu Mar 19 20:43:51 2026 +0530
+
+    Finalize section IDs for navigation
+
+[33mcommit 60238fcbffaba6275ccfa219729649f63082bafc[m
+Author: Sumit Meena <sumitmeena4562@gmail.com>
+Date:   Thu 
