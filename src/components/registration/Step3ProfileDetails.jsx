@@ -1,15 +1,26 @@
 import React from 'react';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import Input from '../ui/Input';
 import Select from '../ui/Select';
 import Button from '../ui/Button';
 import { STATES_DATA } from '../../constants/registration';
+import { validateName, validateEmail, validatePassword, validatePincode } from '../../utils/validation';
 
 const Step3ProfileDetails = ({ formData, onChange, onSubmit, loading, error, fieldErrors, title, subtitle }) => {
+    // Real-time validation checks
+    const isNameValid = formData.fullName?.length >= 3 && !validateName(formData.fullName);
+    const isEmailValid = formData.email?.length > 5 && !validateEmail(formData.email);
+    const isPasswordValid = formData.password?.length >= 8 && !validatePassword(formData.password);
+    const isConfirmValid = formData.confirmPassword === formData.password && formData.confirmPassword.length > 0;
+    const isPincodeValid = formData.pincode?.length === 6 && !validatePincode(formData.pincode);
+    const isLocationValid = formData.state && formData.district;
+
+    const allValid = isNameValid && isEmailValid && isPasswordValid && isConfirmValid && isPincodeValid && isLocationValid;
+
     return (
         <motion.div key="step3" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="space-y-6">
             <div className="space-y-1">
-                <h1 className="text-2xl font-bold text-slate-900">{title || "Your Profile."}</h1>
+                <h1 className="text-2xl font-bold text-slate-900 tracking-tight">{title || "Your Profile."}</h1>
                 <p className="text-slate-500 text-sm">{subtitle || "Completing your profile."}</p>
             </div>
 
@@ -19,9 +30,10 @@ const Step3ProfileDetails = ({ formData, onChange, onSubmit, loading, error, fie
                     name="fullName"
                     value={formData.fullName}
                     onChange={onChange}
-                    placeholder="Enter your full name"
+                    placeholder="First Last Name"
                     icon="person"
                     error={fieldErrors.fullName}
+                    success={isNameValid}
                 />
 
                 <Input 
@@ -33,6 +45,7 @@ const Step3ProfileDetails = ({ formData, onChange, onSubmit, loading, error, fie
                     placeholder="name@example.com"
                     icon="mail"
                     error={fieldErrors.email}
+                    success={isEmailValid}
                 />
 
                 <div className="grid grid-cols-2 gap-4">
@@ -42,9 +55,10 @@ const Step3ProfileDetails = ({ formData, onChange, onSubmit, loading, error, fie
                         name="password"
                         value={formData.password}
                         onChange={onChange}
-                        placeholder="••••••"
+                        placeholder="Min 8 chars"
                         icon="lock"
                         error={fieldErrors.password}
+                        success={isPasswordValid}
                     />
                     <Input 
                         label="Confirm"
@@ -52,9 +66,10 @@ const Step3ProfileDetails = ({ formData, onChange, onSubmit, loading, error, fie
                         name="confirmPassword"
                         value={formData.confirmPassword}
                         onChange={onChange}
-                        placeholder="••••••"
+                        placeholder="Re-enter"
                         icon="lock_reset"
                         error={fieldErrors.confirmPassword}
+                        success={isConfirmValid}
                     />
                 </div>
 
@@ -89,22 +104,31 @@ const Step3ProfileDetails = ({ formData, onChange, onSubmit, loading, error, fie
                     inputMode="numeric"
                     pattern="[0-9]*"
                     error={fieldErrors.pincode}
+                    success={isPincodeValid}
                 />
             </div>
 
-            {error && (
-                <div className="text-red-500 text-xs font-bold text-center py-2 bg-red-50 rounded-lg">
-                    {error}
-                </div>
-            )}
+            <AnimatePresence>
+                {error && (
+                    <motion.div 
+                        initial={{ opacity: 0, height: 0 }}
+                        animate={{ opacity: 1, height: 'auto' }}
+                        exit={{ opacity: 0, height: 0 }}
+                        className="text-red-500 text-[11px] font-black text-center py-2 bg-red-50/50 rounded-lg uppercase tracking-widest"
+                    >
+                        {error}
+                    </motion.div>
+                )}
+            </AnimatePresence>
 
             <Button 
                 onClick={onSubmit}
                 disabled={loading}
                 fullWidth
+                variant={allValid ? 'primary' : 'dark'}
                 icon={loading ? "autorenew" : "done_all"}
             >
-                {loading ? "SAVING..." : "FINISH"}
+                {loading ? "SAVING..." : "CREATE ACCOUNT"}
             </Button>
         </motion.div>
     );
