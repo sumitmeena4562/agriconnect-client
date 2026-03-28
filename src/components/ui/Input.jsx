@@ -1,4 +1,4 @@
-import React, { forwardRef } from 'react';
+import React, { forwardRef, useRef, useImperativeHandle } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 
 const getStrengthColor = (strength) => {
@@ -29,6 +29,9 @@ const Input = forwardRef(({
     colors = null,
     ...props 
 }, ref) => {
+    const inputRef = useRef();
+    useImperativeHandle(ref, () => inputRef.current);
+
     const widthStyle = fullWidth ? "w-full" : "";
     const inputId = id || name || `input-${Math.random().toString(36).substring(2, 9)}`;
     
@@ -79,11 +82,11 @@ const Input = forwardRef(({
                 {icon && (
                     <span 
                         onClick={() => {
-                            if (type === 'date' && ref?.current?.showPicker) {
-                                try { ref.current.showPicker(); } catch (err) {}
+                            if (type === 'date' && inputRef.current?.showPicker) {
+                                try { inputRef.current.showPicker(); } catch (err) {}
                             }
                         }}
-                        className={`material-symbols-outlined mr-2.5 text-base font-bold transition-colors ${type === 'date' ? 'cursor-pointer hover:scale-110 active:scale-95' : ''} ${error ? 'text-red-400' : success ? activeColors.text : 'text-slate-300'}`}
+                        className={`material-symbols-outlined mr-2.5 text-base font-bold transition-colors ${type === 'date' ? 'cursor-pointer hover:scale-110 active:scale-95 text-primary-500' : 'text-slate-300'} ${error ? 'text-red-400' : success ? activeColors.text : ''}`}
                     >
                         {icon}
                     </span>
@@ -96,7 +99,7 @@ const Input = forwardRef(({
                     </div>
                 )}
                 <input 
-                    ref={ref}
+                    ref={inputRef}
                     type={type}
                     id={inputId}
                     name={name}
