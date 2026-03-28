@@ -22,6 +22,7 @@ export const useRegistrationForm = (initialData) => {
     const [fieldErrors, setFieldErrors] = useState({});
     const [timer, setTimer] = useState(30);
     const [canResend, setCanResend] = useState(false);
+    const [cooldown, setCooldown] = useState(0); // For Step 1 rate limiting
     const [verificationToken, setVerificationToken] = useState("");
     const [formData, setFormData] = useState(initialData);
     const otpRefs = useRef([]);
@@ -56,7 +57,7 @@ export const useRegistrationForm = (initialData) => {
         }
     };
 
-    // Timer Logic for OTP
+    // Timer Logic for OTP Verification (Step 2)
     useEffect(() => {
         let interval;
         if (step === 2 && timer > 0) {
@@ -68,6 +69,17 @@ export const useRegistrationForm = (initialData) => {
         }
         return () => clearInterval(interval);
     }, [step, timer]);
+
+    // Cooldown Logic for Step 1 (Rate Limiting)
+    useEffect(() => {
+        let interval;
+        if (cooldown > 0) {
+            interval = setInterval(() => {
+                setCooldown((prev) => prev - 1);
+            }, 1000);
+        }
+        return () => clearInterval(interval);
+    }, [cooldown]);
 
     const handleChange = (e) => {
         const { name, value } = e.target;
@@ -99,9 +111,17 @@ export const useRegistrationForm = (initialData) => {
                 setTimer(30);
                 setCanResend(false);
                 setStep(2);
+                setCooldown(0);
             }
         } catch (err) {
             const msg = err.response?.data?.message || "Failed to send OTP";
+            
+            // Extract seconds if rate limited (Z+ logic)
+            const waitMatch = msg.match(/wait (\d+)/i);
+            if (waitMatch && waitMatch[1]) {
+                setCooldown(parseInt(waitMatch[1]));
+            }
+            
             setError(msg);
             toast.error(msg);
         } finally {
@@ -210,6 +230,7 @@ export const useRegistrationForm = (initialData) => {
         fieldErrors, setFieldErrors,
         timer, setTimer,
         canResend, setCanResend,
+        cooldown, setCooldown,
         verificationToken, setVerificationToken,
         formData, setFormData,
         otpRefs,

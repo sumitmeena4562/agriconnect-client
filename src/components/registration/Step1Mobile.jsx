@@ -5,7 +5,7 @@ import Button from '../ui/Button';
 import { validateMobile, validateEmail } from '../../utils/validation';
 import { checkAvailability } from '../../services/api';
 
-const Step1Mobile = ({ mobile, email, onChange, onContinue, loading, error, fieldErrors, colors }) => {
+const Step1Mobile = ({ mobile, email, onChange, onContinue, loading, error, fieldErrors, colors, cooldown = 0 }) => {
     const [mobileLoading, setMobileLoading] = useState(false);
     const [mobileAvailable, setMobileAvailable] = useState(null); // null, true, false
     const [mobileCheckError, setMobileCheckError] = useState("");
@@ -103,15 +103,21 @@ const Step1Mobile = ({ mobile, email, onChange, onContinue, loading, error, fiel
                 </Button>
             </div>
             
-            <AnimatePresence>
-                {error && (
+            <AnimatePresence mode="wait">
+                {(cooldown > 0 || error) && (
                     <motion.div 
-                        initial={{ opacity: 0, y: -10 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        exit={{ opacity: 0, y: -10 }}
-                        className="bg-red-50 text-red-500 p-3 rounded-xl text-[11px] font-black text-center uppercase tracking-widest border border-red-100"
+                        key={cooldown > 0 ? `cooldown-${cooldown}` : 'error'}
+                        initial={{ opacity: 0, scale: 0.95 }}
+                        animate={{ opacity: 1, scale: 1 }}
+                        exit={{ opacity: 0, scale: 0.95 }}
+                        className={`${cooldown > 0 ? 'bg-amber-50 text-amber-600 border-amber-100' : 'bg-red-50 text-red-500 border-red-100'} p-3 rounded-xl text-[11px] font-black text-center uppercase tracking-widest border transition-colors duration-300`}
                     >
-                        {error}
+                        {cooldown > 0 ? (
+                            <div className="flex items-center justify-center gap-2">
+                                <span className="material-symbols-outlined text-[14px]">hourglass_empty</span>
+                                Please wait {cooldown} seconds...
+                            </div>
+                        ) : error}
                     </motion.div>
                 )}
             </AnimatePresence>

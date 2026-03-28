@@ -29,6 +29,7 @@ const Input = forwardRef(({
     colors = null,
     ...props 
 }, ref) => {
+    const [showPassword, setShowPassword] = React.useState(false);
     const inputRef = useRef();
     useImperativeHandle(ref, () => inputRef.current);
 
@@ -44,6 +45,9 @@ const Input = forwardRef(({
         const colorBase = activeColors.text.replace('text-', '');
         return `border-${colorBase.replace('-600', '-500')} shadow-[0_0_15px_-3px_rgba(0,210,120,0.12)]`;
     };
+
+    const isPassword = type === 'password';
+    const currentType = isPassword ? (showPassword ? 'text' : 'password') : type;
 
     return (
         <div className={`space-y-1.5 ${widthStyle} ${className}`}>
@@ -93,7 +97,7 @@ const Input = forwardRef(({
                 )}
                 <input 
                     ref={inputRef}
-                    type={type}
+                    type={currentType}
                     id={inputId}
                     name={name}
                     value={value || ''}
@@ -105,6 +109,18 @@ const Input = forwardRef(({
                     className="w-full bg-transparent border-none outline-none font-bold text-slate-800 text-[14px] placeholder:text-slate-300/80 tracking-tight"
                     {...props}
                 />
+
+                {isPassword && value && !error && (
+                    <button
+                        type="button"
+                        onClick={() => setShowPassword(!showPassword)}
+                        className={`ml-2 text-slate-300 hover:${activeColors.text} transition-colors focus:outline-none`}
+                    >
+                        <span className="material-symbols-outlined text-[18px] font-bold">
+                            {showPassword ? 'visibility_off' : 'visibility'}
+                        </span>
+                    </button>
+                )}
 
                 {success && !error && !loading && (
                     <motion.div 
@@ -120,7 +136,7 @@ const Input = forwardRef(({
             </div>
             
             {/* Password Strength Meter */}
-            {type === 'password' && value && (
+            {isPassword && value && (
                 <div className="px-1 space-y-1">
                     <div className="h-1 w-full bg-slate-100 rounded-full overflow-hidden">
                         <motion.div 

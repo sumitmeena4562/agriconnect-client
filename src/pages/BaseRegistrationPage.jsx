@@ -25,7 +25,7 @@ const BaseRegistrationPage = ({ role, config }) => {
         step, loading, error, timer, canResend, fieldErrors,
         formData, setFormData, handleChange, handleSendOtp, handleVerifyOtp, 
         handleOtpPaste, handleOtpChange, handleOtpKeyDown, handleSubmit: hookSubmit, prevStep,
-        otpRefs
+        otpRefs, cooldown
     } = useRegistrationForm({
         mobile: '',
         otp: ['', '', '', '', '', ''],
@@ -143,6 +143,7 @@ const BaseRegistrationPage = ({ role, config }) => {
                                             error={error} 
                                             fieldErrors={fieldErrors} 
                                             colors={colors}
+                                            cooldown={cooldown}
                                         />
                                     )}
 

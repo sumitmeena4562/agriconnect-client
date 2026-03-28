@@ -22,8 +22,9 @@ const Step3ProfileDetails = ({ formData, onChange, onSubmit, loading, error, fie
     const isNameValid = formData.fullName?.length >= 3 && !validateName(formData.fullName);
     const isEmailValid = formData.email?.length > 5 && !validateEmail(formData.email) && (emailAvailable !== false);
     const isPasswordValid = formData.password?.length >= 8 && !validatePassword(formData.password);
-    const isConfirmValid = formData.confirmPassword === formData.password && formData.confirmPassword.length > 0;
-    const isPincodeValid = formData.pincode?.length === 6 && !validatePincode(formData.pincode);
+    const isConfirmValid = formData.confirmPassword === formData.password && formData.confirmPassword.length >= 8;
+    const isConfirmTouched = formData.confirmPassword?.length > 0;
+    const confirmError = isConfirmTouched && formData.confirmPassword !== formData.password ? "Passwords do not match" : fieldErrors.confirmPassword;
     const isLocationValid = formData.state && formData.district;
     const isDOBValid = formData.dob && !validateDOB(formData.dob);
     const isGenderValid = formData.gender && !validateGender(formData.gender);
@@ -189,7 +190,7 @@ const Step3ProfileDetails = ({ formData, onChange, onSubmit, loading, error, fie
                             onChange={onChange}
                             placeholder="Repeat password"
                             icon="lock_reset"
-                            error={fieldErrors.confirmPassword}
+                            error={confirmError}
                             success={isConfirmValid}
                             colors={colors}
                         />
