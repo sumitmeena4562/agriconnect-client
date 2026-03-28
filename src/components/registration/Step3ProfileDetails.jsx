@@ -25,6 +25,7 @@ const Step3ProfileDetails = ({ formData, onChange, onSubmit, loading, error, fie
     const isConfirmValid = formData.confirmPassword === formData.password && formData.confirmPassword.length >= 8;
     const isConfirmTouched = formData.confirmPassword?.length > 0;
     const confirmError = isConfirmTouched && formData.confirmPassword !== formData.password ? "Passwords do not match" : fieldErrors.confirmPassword;
+    const isPincodeValid = formData.pincode?.length === 6 && !validatePincode(formData.pincode);
     const isLocationValid = formData.state && formData.district;
     const isDOBValid = formData.dob && !validateDOB(formData.dob);
     const isGenderValid = formData.gender && !validateGender(formData.gender);

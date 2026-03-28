@@ -112,6 +112,10 @@ export const useRegistrationForm = (initialData) => {
                 setCanResend(false);
                 setStep(2);
                 setCooldown(0);
+                // Clear existing OTP inputs for a fresh start
+                setFormData(prev => ({ ...prev, otp: ['', '', '', '', '', ''] }));
+                // Reset focus to the first input if refs exist
+                setTimeout(() => otpRefs.current[0]?.focus(), 100);
             }
         } catch (err) {
             const msg = err.response?.data?.message || "Failed to send OTP";
@@ -130,6 +134,9 @@ export const useRegistrationForm = (initialData) => {
     };
 
     const handleVerifyOtp = async () => {
+        console.log("🚀 [DEBUG] Initiating OTP Verification...");
+        console.log("Data:", { mobile: formData.mobile, otp: formData.otp.join('') });
+
         if (!formData.otp.every(v => v !== "")) {
             toast.error("Please enter the complete OTP");
             return;
@@ -139,6 +146,8 @@ export const useRegistrationForm = (initialData) => {
         try {
             const otpCode = formData.otp.join('');
             const response = await apiVerifyOtp(formData.mobile, otpCode);
+            console.log("✅ [DEBUG] Verification Response:", response.data);
+
             if (response.data.success) {
                 toast.success("Identity verified successfully!");
                 setVerificationToken(response.data.verificationToken);
@@ -148,6 +157,7 @@ export const useRegistrationForm = (initialData) => {
                 setStep(3);
             }
         } catch (err) {
+            console.error("❌ [DEBUG] Verification Error:", err);
             const msg = err.response?.data?.message || "Invalid OTP code";
             setError(msg);
             toast.error(msg);
