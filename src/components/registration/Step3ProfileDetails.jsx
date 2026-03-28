@@ -66,131 +66,137 @@ const Step3ProfileDetails = ({ formData, onChange, onSubmit, loading, error, fie
                 <p className="text-slate-500 text-sm">{subtitle || "Complete your profile to get started."}</p>
             </div>
 
-            <div className="space-y-4">
-                <AvatarPicker 
-                    selectedAvatar={formData.profilePic} 
-                    onSelect={(id) => onChange({ target: { name: 'profilePic', value: id } })} 
-                    colors={colors}
-                />
-
-                <Input 
-                    label="Full Name"
-                    name="fullName"
-                    value={formData.fullName}
-                    onChange={onChange}
-                    placeholder="Enter full name"
-                    icon="person"
-                    error={fieldErrors.fullName}
-                    success={isNameValid}
-                    colors={colors}
-                />
-
-                <div className="grid grid-cols-2 gap-4">
-                    <DateInput 
-                        label="Date of Birth"
-                        value={formData.dob}
-                        onChange={onChange}
-                        error={fieldErrors.dob}
-                        success={isDOBValid}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-10 gap-y-4">
+                {/* Left Column: Personality & Basic Info */}
+                <div className="space-y-4">
+                    <AvatarPicker 
+                        selectedAvatar={formData.profilePic} 
+                        onSelect={(id) => onChange({ target: { name: 'profilePic', value: id } })} 
                         colors={colors}
                     />
-                    <Select 
-                        label="Gender"
-                        name="gender"
-                        value={formData.gender}
-                        onChange={onChange}
-                        options={["Male", "Female", "Other", "Prefer not to say"]}
-                        error={fieldErrors.gender}
-                        success={isGenderValid}
-                        colors={colors}
-                    />
-                </div>
 
-                <Input 
-                    label="Email Id"
-                    type="email"
-                    name="email"
-                    value={formData.email}
-                    onChange={onChange}
-                    placeholder="name@example.com"
-                    icon="mail"
-                    error={fieldErrors.email || emailCheckError}
-                    success={isEmailValid && emailAvailable}
-                    loading={emailLoading}
-                    colors={colors}
-                />
-
-                <div className="grid grid-cols-2 gap-4">
                     <Input 
-                        label="Password"
-                        type="password"
-                        name="password"
-                        value={formData.password}
+                        label="Full Name"
+                        name="fullName"
+                        value={formData.fullName}
                         onChange={onChange}
-                        placeholder="Min 8 chars"
-                        icon="lock"
-                        error={fieldErrors.password}
-                        success={isPasswordValid}
-                        strength={passwordStrength}
+                        placeholder="Enter full name"
+                        icon="person"
+                        error={fieldErrors.fullName}
+                        success={isNameValid}
                         colors={colors}
                     />
+
+                    <div className="grid grid-cols-2 gap-4">
+                        <DateInput 
+                            label="Date of Birth"
+                            value={formData.dob}
+                            onChange={onChange}
+                            error={fieldErrors.dob}
+                            success={isDOBValid}
+                            colors={colors}
+                        />
+                        <Select 
+                            label="Gender"
+                            name="gender"
+                            value={formData.gender}
+                            onChange={onChange}
+                            options={["Male", "Female", "Other", "Prefer not to say"]}
+                            error={fieldErrors.gender}
+                            success={isGenderValid}
+                            colors={colors}
+                        />
+                    </div>
+
                     <Input 
-                        label="Confirm"
-                        type="password"
-                        name="confirmPassword"
-                        value={formData.confirmPassword}
+                        label="Email Id"
+                        type="email"
+                        name="email"
+                        value={formData.email}
                         onChange={onChange}
-                        placeholder="Repeat password"
-                        icon="lock_reset"
-                        error={fieldErrors.confirmPassword}
-                        success={isConfirmValid}
+                        placeholder="name@example.com"
+                        icon="mail"
+                        error={fieldErrors.email || emailCheckError}
+                        success={isEmailValid && emailAvailable}
+                        loading={emailLoading}
                         colors={colors}
                     />
                 </div>
 
-                <div className="grid grid-cols-2 gap-4">
-                    <Select 
-                        label="State"
-                        name="state"
-                        value={formData.state}
+                {/* Right Column: Security & Location */}
+                <div className="space-y-4">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <Input 
+                            label="Password"
+                            type="password"
+                            name="password"
+                            value={formData.password}
+                            onChange={onChange}
+                            placeholder="Min 8 chars"
+                            icon="lock"
+                            error={fieldErrors.password}
+                            success={isPasswordValid}
+                            strength={passwordStrength}
+                            colors={colors}
+                        />
+                        <Input 
+                            label="Confirm"
+                            type="password"
+                            name="confirmPassword"
+                            value={formData.confirmPassword}
+                            onChange={onChange}
+                            placeholder="Repeat"
+                            icon="lock_reset"
+                            error={fieldErrors.confirmPassword}
+                            success={isConfirmValid}
+                            colors={colors}
+                        />
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-4">
+                        <Select 
+                            label="State"
+                            name="state"
+                            value={formData.state}
+                            onChange={onChange}
+                            options={Object.keys(STATES_DATA)}
+                            error={fieldErrors.state}
+                            success={!!formData.state}
+                            colors={colors}
+                        />
+                        <Select 
+                            label="District"
+                            name="district"
+                            value={formData.district}
+                            onChange={onChange}
+                            disabled={!formData.state}
+                            options={formData.state ? STATES_DATA[formData.state] : []}
+                            error={fieldErrors.district}
+                            success={!!formData.district}
+                            colors={colors}
+                        />
+                    </div>
+
+                    <Input 
+                        label="Pincode"
+                        name="pincode"
+                        value={formData.pincode}
                         onChange={onChange}
-                        options={Object.keys(STATES_DATA)}
-                        error={fieldErrors.state}
-                        success={!!formData.state}
+                        maxLength="6"
+                        placeholder="6-digit code"
+                        icon="location_on"
+                        inputMode="numeric"
+                        pattern="[0-9]*"
+                        error={fieldErrors.pincode}
+                        success={isPincodeValid}
                         colors={colors}
                     />
-                    <Select 
-                        label="District"
-                        name="district"
-                        value={formData.district}
-                        onChange={onChange}
-                        disabled={!formData.state}
-                        options={formData.state ? STATES_DATA[formData.state] : []}
-                        error={fieldErrors.district}
-                        success={!!formData.district}
+
+                    <LiveLocationDetector 
+                        onLocationDetected={(coords) => onChange({ target: { name: 'location', value: coords } })} 
                         colors={colors}
                     />
                 </div>
-
-                <Input 
-                    label="Pincode"
-                    name="pincode"
-                    value={formData.pincode}
-                    onChange={onChange}
-                    maxLength="6"
-                    placeholder="6-digit code"
-                    icon="location_on"
-                    inputMode="numeric"
-                    pattern="[0-9]*"
-                    error={fieldErrors.pincode}
-                    success={isPincodeValid}
-                    colors={colors}
-                />
-
-                <LiveLocationDetector 
-                    onLocationDetected={(coords) => onChange({ target: { name: 'location', value: coords } })} 
-                    colors={colors}
-                />
             </div>
 
             <AnimatePresence>
