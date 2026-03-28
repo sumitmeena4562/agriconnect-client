@@ -39,9 +39,9 @@ const AvatarPicker = ({ selectedAvatar, onSelect, colors = null }) => {
                         {selectedAvatar === avatar.id && (
                             <motion.div 
                                 layoutId="avatar-check"
-                                className={`absolute -top-1 -right-1 w-4 h-4 bg-white ${activeColors.text} rounded-full flex items-center justify-center border ${borderClass} shadow-sm`}
+                                className={`absolute -top-1.5 -right-1.5 w-5 h-5 ${activeColors.bg} text-white rounded-full flex items-center justify-center border-2 border-white shadow-md z-10`}
                             >
-                                <span className="material-symbols-outlined text-[10px] font-black">check</span>
+                                <span className="material-symbols-outlined text-[11px] font-black">check</span>
                             </motion.div>
                         )}
                     </motion.button>
