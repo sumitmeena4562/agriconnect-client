@@ -36,21 +36,25 @@ const Button = ({
     const widthStyle = fullWidth ? "w-full" : "";
     const combinedClassName = `${baseStyles} ${variants[variant]} ${sizes[size]} ${widthStyle} ${className}`;
 
+    const renderIcon = () => {
+        if (!icon) return null;
+        if (typeof icon === 'string') {
+            return (
+                <span className={`material-symbols-outlined text-[1.25em] transition-transform ${iconPosition === 'right' ? 'group-hover:translate-x-1' : 'group-hover:-translate-x-1'}`}>
+                    {icon}
+                </span>
+            );
+        }
+        return <span className="flex items-center justify-center shrink-0">{icon}</span>;
+    };
+
     const content = (
         <>
-            {icon && iconPosition === 'left' && (
-                <span className="material-symbols-outlined text-[1.2em] group-hover:-translate-x-0.5 transition-transform">
-                    {icon}
-                </span>
-            )}
+            {icon && iconPosition === 'left' && renderIcon()}
             
-            <span>{children}</span>
+            <span className="leading-none select-none">{children}</span>
 
-            {icon && iconPosition === 'right' && (
-                <span className="material-symbols-outlined text-[1.2em] group-hover:translate-x-1 transition-transform">
-                    {icon}
-                </span>
-            )}
+            {icon && iconPosition === 'right' && renderIcon()}
             
             {/* Subtle Shine Effect for Premium Feel */}
             <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000 ease-in-out pointer-events-none" />

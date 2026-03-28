@@ -215,7 +215,11 @@ const Step3ProfileDetails = ({ formData, onChange, onSubmit, loading, error, fie
                     disabled={loading || emailLoading}
                     fullWidth
                     variant={allValid ? (colors.text.includes('primary') ? 'primary' : colors.text.includes('accent') ? 'accent' : 'dark') : 'dark'}
-                    icon={loading ? "autorenew" : "done_all"}
+                    icon={loading ? "autorenew" : (
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="4.5" strokeLinecap="round" strokeLinejoin="round" className="w-4 h-4 translate-y-[0.5px]">
+                        <polyline points="20 6 9 17 4 12" />
+                    </svg>
+                )}
                 >
                     {loading ? "SAVING..." : "CREATE ACCOUNT"}
                 </Button>
