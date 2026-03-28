@@ -3,7 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import OTPInput from '../ui/OTPInput';
 import Button from '../ui/Button';
 
-const Step2OTP = ({ mobile, otp, onOtpChange, onOtpKeyDown, otpRefs, onVerify, onResend, timer, canResend, loading, onBack }) => {
+const Step2OTP = ({ mobile, email, otp, onOtpChange, onOtpKeyDown, otpRefs, onVerify, onResend, timer, canResend, loading, onBack }) => {
     const isOtpComplete = otp.join('').length === 6;
 
     return (
@@ -19,7 +19,7 @@ const Step2OTP = ({ mobile, otp, onOtpChange, onOtpKeyDown, otpRefs, onVerify, o
                     <span className="text-[10px] font-black text-primary-600 uppercase tracking-[0.2em]">Security Check</span>
                 </div>
                 <h1 className="text-2xl font-bold text-slate-900 tracking-tight">Verify Identity.</h1>
-                <p className="text-slate-500 text-sm">We've sent a 6-digit code to <span className="text-slate-900 font-bold">+91 {mobile}</span></p>
+                <p className="text-slate-500 text-sm">We've sent a 6-digit code to <span className="text-slate-900 font-bold">{email}</span></p>
             </div>
 
             <div className="space-y-8 py-2">

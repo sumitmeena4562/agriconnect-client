@@ -322,46 +322,21 @@ const CustomerRegistration = () => {
                                     )}
 
                                     {step === 2 && (
-                                        <motion.div key="step2" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="space-y-6">
-                                            <button onClick={prevStep} className="inline-flex items-center gap-1 text-slate-400 hover:text-yellow-600 text-xs font-bold transition-colors">
-                                                <span className="material-symbols-outlined text-sm">arrow_back</span> Back
-                                            </button>
-                                            
-                                            <div className="space-y-1">
-                                                <h1 className="text-2xl font-bold text-slate-900 tracking-tight">Verify <span className="text-yellow-600 italic text-[24px]">Identity.</span></h1>
-                                                <p className="text-slate-500 text-sm">OTP sent to +91 {formData.mobile}</p>
-                                            </div>
-
-                                            <div className="space-y-6">
-                                                <OTPInput 
-                                                    otp={formData.otp}
-                                                    onChange={handleOtpChange}
-                                                    onKeyDown={handleOtpKeyDown}
-                                                    otpRefs={otpRefs}
-                                                    focusColor="border-yellow-500"
-                                                />
-
-                                                <div className="space-y-4">
-                                                    <Button 
-                                                        onClick={handleVerifyOtp}
-                                                        disabled={formData.otp.join('').length < 6 || loading}
-                                                        fullWidth
-                                                        className="!bg-yellow-600 hover:!bg-yellow-700"
-                                                        icon={loading ? "autorenew" : undefined}
-                                                    >
-                                                        {loading ? "VERIFYING..." : "VERIFY OTP"}
-                                                    </Button>
-
-                                                    <div className="text-center">
-                                                        {canResend ? (
-                                                            <button onClick={handleSendOtp} disabled={loading} className="text-yellow-600 font-bold text-sm hover:underline">Resend Code</button>
-                                                        ) : (
-                                                            <p className="text-slate-400 text-xs font-medium">Resend in <span className="text-slate-900 font-mono">0:{timer < 10 ? `0${timer}` : timer}</span></p>
-                                                        )}
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </motion.div>
+                                        <Step2OTP 
+                                            mobile={formData.mobile}
+                                            email={formData.email}
+                                            otp={formData.otp}
+                                            onOtpChange={handleOtpChange}
+                                            onOtpKeyDown={handleOtpKeyDown}
+                                            otpRefs={otpRefs}
+                                            onVerify={handleVerifyOtp}
+                                            onResend={handleSendOtp}
+                                            timer={timer}
+                                            canResend={canResend}
+                                            loading={loading}
+                                            error={error}
+                                            onBack={prevStep}
+                                        />
                                     )}
 
                                     {step === 3 && (

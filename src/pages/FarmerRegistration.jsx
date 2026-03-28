@@ -112,6 +112,7 @@ const FarmerRegistration = () => {
                                     {step === 2 && (
                                         <Step2OTP 
                                             mobile={formData.mobile}
+                                            email={formData.email}
                                             otp={formData.otp}
                                             onOtpChange={handleOtpChange}
                                             onOtpKeyDown={handleOtpKeyDown}
