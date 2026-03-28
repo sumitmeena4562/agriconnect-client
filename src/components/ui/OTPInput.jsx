@@ -48,7 +48,7 @@ const OTPInput = ({
                             focus:bg-white outline-none transition-all duration-300
                             ${error ? 'border-red-300 bg-red-50/20 text-red-500' : 
                               digit ? `${borderClass.replace('-600', '-200')} ${activeColors.lightBg}/10` : 
-                              `border-slate-100 focus:${borderClass}`}
+                              `border-slate-100 focus:${borderClass.replace('-600', '-400')}`}
                         `}
                         inputMode="numeric"
                         pattern="[0-9]*"

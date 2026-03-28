@@ -69,8 +69,8 @@ const Select = forwardRef(({
                         appearance-none transition-all duration-300 outline-none 
                         disabled:opacity-30 min-h-[48px]
                         ${error ? 'border-red-300 bg-red-50/10 focus:border-red-500' : 
-                          success ? `${focusBorderClass.replace('-600', '-300')} ${activeColors.lightBg}/10 focus:border-${focusBorderClass}` :
-                          `border-slate-100 focus:border-${focusBorderClass.replace('border-', '')} focus:bg-white`}
+                          success ? `${focusBorderClass.replace('-600', '-300')} ${activeColors.lightBg}/10 focus:border-${focusBorderClass.replace('-600', '-400')}` :
+                          `border-slate-100 focus:border-${focusBorderClass.replace('border-', '').replace('-600', '-400')} focus:bg-white`}
                     `}
                     {...props}
                 >

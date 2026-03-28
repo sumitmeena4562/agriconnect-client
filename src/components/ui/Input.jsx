@@ -73,8 +73,8 @@ const Input = forwardRef(({
                 group flex items-center bg-slate-50 border-2 rounded-xl px-3 py-1.5 
                 focus-within:bg-white transition-all duration-300 min-h-[48px]
                 ${error ? 'border-red-300 bg-red-50/10 focus-within:border-red-500' : 
-                  success ? `${successBorderClass.replace('-600', '-300')} ${successBgClass}/10 focus-within:${successBorderClass}` : 
-                  `border-slate-100 focus-within:${activeColors.text.replace('text-', 'border-')}`}
+                  success ? `${successBorderClass.replace('-600', '-300')} ${successBgClass}/10 focus-within:${successBorderClass.replace('-600', '-400')}` : 
+                  `border-slate-100 focus-within:${activeColors.text.replace('text-', 'border-').replace('-600', '-400')}`}
             `}>
                 {icon && (
                     <span 
