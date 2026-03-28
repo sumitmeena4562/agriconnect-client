@@ -77,7 +77,14 @@ const Input = forwardRef(({
                   `border-slate-100 focus-within:${activeColors.text.replace('text-', 'border-')}`}
             `}>
                 {icon && (
-                    <span className={`material-symbols-outlined mr-2.5 text-base font-bold transition-colors ${error ? 'text-red-400' : success ? activeColors.text : 'text-slate-300'}`}>
+                    <span 
+                        onClick={() => {
+                            if (type === 'date' && ref?.current?.showPicker) {
+                                try { ref.current.showPicker(); } catch (err) {}
+                            }
+                        }}
+                        className={`material-symbols-outlined mr-2.5 text-base font-bold transition-colors ${type === 'date' ? 'cursor-pointer hover:scale-110 active:scale-95' : ''} ${error ? 'text-red-400' : success ? activeColors.text : 'text-slate-300'}`}
+                    >
                         {icon}
                     </span>
                  )}
@@ -98,19 +105,7 @@ const Input = forwardRef(({
                     maxLength={maxLength}
                     placeholder={placeholder}
                     autoFocus={autoFocus}
-                    onClick={(e) => {
-                        if (type === 'date' && e.target.showPicker) {
-                            try { e.target.showPicker(); } catch (err) { console.warn("showPicker not supported", err); }
-                        }
-                        if (props.onClick) props.onClick(e);
-                    }}
-                    onFocus={(e) => {
-                        if (type === 'date' && e.target.showPicker) {
-                            try { e.target.showPicker(); } catch (err) {}
-                        }
-                        if (props.onFocus) props.onFocus(e);
-                    }}
-                    className="w-full bg-transparent border-none outline-none font-bold text-slate-800 text-[14px] placeholder:text-slate-300/80 tracking-tight cursor-pointer"
+                    className="w-full bg-transparent border-none outline-none font-bold text-slate-800 text-[14px] placeholder:text-slate-300/80 tracking-tight"
                     {...props}
                 />
             </div>
