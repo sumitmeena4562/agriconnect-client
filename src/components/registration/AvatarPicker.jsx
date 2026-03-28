@@ -41,7 +41,17 @@ const AvatarPicker = ({ selectedAvatar, onSelect, colors = null }) => {
                                 layoutId="avatar-check"
                                 className={`absolute -top-1.5 -right-1.5 w-5 h-5 ${activeColors.bg} text-white rounded-full flex items-center justify-center border-2 border-white shadow-md z-10`}
                             >
-                                <span className="material-symbols-outlined text-[11px] font-black">check</span>
+                                <svg 
+                                    viewBox="0 0 24 24" 
+                                    fill="none" 
+                                    stroke="currentColor" 
+                                    strokeWidth="4.5" 
+                                    strokeLinecap="round" 
+                                    strokeLinejoin="round" 
+                                    className="w-2.5 h-2.5"
+                                >
+                                    <polyline points="20 6 9 17 4 12" />
+                                </svg>
                             </motion.div>
                         )}
                     </motion.button>
