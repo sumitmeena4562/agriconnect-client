@@ -64,13 +64,13 @@ const Select = forwardRef(({
                     onChange={onChange}
                     disabled={disabled}
                     className={`
-                        w-full bg-slate-50 border-2 rounded-xl px-3 pr-10 py-1.5 
+                        w-full bg-white border rounded-xl px-3 pr-10 py-1.5 
                         font-bold text-slate-800 text-[14px] 
                         appearance-none transition-all duration-300 outline-none 
                         disabled:opacity-30 min-h-[48px]
-                        ${error ? 'border-red-300 bg-red-50/10 focus:border-red-500' : 
-                          success ? `${focusBorderClass.replace('-600', '-300')} ${activeColors.lightBg}/10 focus:border-${focusBorderClass.replace('-600', '-400')}` :
-                          `border-slate-100 focus:border-${focusBorderClass.replace('border-', '').replace('-600', '-400')} focus:bg-white`}
+                        ${error ? 'border-red-200 bg-red-50/10 focus:border-red-400 focus:ring-4 focus:ring-red-50' : 
+                          success ? `border-slate-200 focus:border-${activeColors.text.replace('text-', '').replace('-600', '-300')} focus:ring-4 focus:ring-${activeColors.text.replace('text-', '').replace('-600', '-50')}` :
+                          `border-slate-200 focus:border-${activeColors.text.replace('text-', '').replace('-600', '-300')} focus:ring-4 focus:ring-${activeColors.text.replace('text-', '').replace('-600', '-50')}`}
                     `}
                     {...props}
                 >

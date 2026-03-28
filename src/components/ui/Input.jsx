@@ -38,9 +38,12 @@ const Input = forwardRef(({
     // Default to primary if no colors passed
     const activeColors = colors || { text: 'text-primary-500', bg: 'bg-primary-500', lightBg: 'bg-primary-50' };
 
-    // Success colors based on the theme
-    const successBorderClass = activeColors.text.replace('text-', 'border-');
-    const successBgClass = activeColors.lightBg;
+    // Focus and Success color helpers
+    const getSoftBorder = () => {
+        if (error) return 'border-red-300 ring-red-50';
+        if (success) return `${activeColors.text.replace('text-', 'border-').replace('-600', '-200')} ${activeColors.text.replace('text-', 'ring-').replace('-600', '-50')}`;
+        return `${activeColors.text.replace('text-', 'border-').replace('-600', '-300')} ${activeColors.text.replace('text-', 'ring-').replace('-600', '-50')}`;
+    };
 
     return (
         <div className={`space-y-1.5 ${widthStyle} ${className}`}>
@@ -73,11 +76,11 @@ const Input = forwardRef(({
             </div>
             
             <div className={`
-                group flex items-center bg-slate-50 border-2 rounded-xl px-3 py-1.5 
-                focus-within:bg-white transition-all duration-300 min-h-[48px]
-                ${error ? 'border-red-300 bg-red-50/10 focus-within:border-red-500' : 
-                  success ? `${successBorderClass.replace('-600', '-300')} ${successBgClass}/10 focus-within:${successBorderClass.replace('-600', '-400')}` : 
-                  `border-slate-100 focus-within:${activeColors.text.replace('text-', 'border-').replace('-600', '-400')}`}
+                group flex items-center bg-white border rounded-xl px-3 py-1.5 
+                transition-all duration-300 min-h-[48px]
+                ${error ? 'border-red-200 bg-red-50/10 focus-within:border-red-400 focus-within:ring-4 focus-within:ring-red-50' : 
+                  success ? `border-slate-200 focus-within:${getSoftBorder().split(' ')[0]} focus-within:ring-4 focus-within:${getSoftBorder().split(' ')[1]}` : 
+                  `border-slate-200 focus-within:${getSoftBorder().split(' ')[0]} focus-within:ring-4 focus-within:${getSoftBorder().split(' ')[1]}`}
             `}>
                 {icon && (
                     <span 

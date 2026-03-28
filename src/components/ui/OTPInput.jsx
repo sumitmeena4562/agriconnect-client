@@ -43,12 +43,12 @@ const OTPInput = ({
                         onChange={(e) => onChange(i, e.target.value)}
                         onKeyDown={(e) => onKeyDown(i, e)}
                         className={`
-                            w-full aspect-square bg-slate-50 border-2 rounded-xl 
+                            w-full aspect-square bg-white border rounded-xl 
                             text-center font-black text-xl text-slate-800 
-                            focus:bg-white outline-none transition-all duration-300
-                            ${error ? 'border-red-300 bg-red-50/20 text-red-500' : 
-                              digit ? `${borderClass.replace('-600', '-200')} ${activeColors.lightBg}/10` : 
-                              `border-slate-100 focus:${borderClass.replace('-600', '-400')}`}
+                            outline-none transition-all duration-300
+                            ${error ? 'border-red-200 bg-red-50/20 text-red-500 focus:border-red-400 focus:ring-4 focus:ring-red-50' : 
+                              digit ? `border-${activeColors.text.replace('text-', '').replace('-600', '-200')} ${activeColors.lightBg}/10` : 
+                              `border-slate-200 focus:border-${activeColors.text.replace('text-', '').replace('-600', '-300')} focus:ring-4 focus:ring-${activeColors.text.replace('text-', '').replace('-600', '-50')}`}
                         `}
                         inputMode="numeric"
                         pattern="[0-9]*"
