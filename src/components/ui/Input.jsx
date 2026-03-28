@@ -111,6 +111,7 @@ const Input = forwardRef(({
                     maxLength={maxLength}
                     placeholder={placeholder}
                     autoFocus={autoFocus}
+                    autoComplete="off"
                     className="w-full bg-transparent border-none outline-none font-bold text-slate-800 text-[14px] placeholder:text-slate-300/80 tracking-tight"
                     {...props}
                 />
