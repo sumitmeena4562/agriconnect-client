@@ -180,7 +180,7 @@ const Step3ProfileDetails = ({ formData, onChange, onSubmit, loading, error, fie
                             icon="lock"
                             error={fieldErrors.password}
                             success={isPasswordValid}
-                            strength={passwordStrength}
+                            strength={calculatePasswordStrength(formData.password)}
                             colors={colors}
                         />
 
@@ -194,6 +194,7 @@ const Step3ProfileDetails = ({ formData, onChange, onSubmit, loading, error, fie
                             icon="lock_reset"
                             error={confirmError}
                             success={isConfirmValid}
+                            strength={calculatePasswordStrength(formData.confirmPassword)}
                             colors={colors}
                         />
                     </div>
