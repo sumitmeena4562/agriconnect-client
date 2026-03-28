@@ -16,7 +16,7 @@ const AvatarPicker = ({ selectedAvatar, onSelect, colors = null }) => {
 
     return (
         <div className="space-y-3">
-            <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Chitra Chuno (Choose Avatar)</p>
+            <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Identity Selection (Choose Avatar)</p>
             <div className="grid grid-cols-6 gap-2">
                 {AVATARS.map((avatar) => (
                     <motion.button

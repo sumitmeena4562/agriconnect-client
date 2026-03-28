@@ -11,21 +11,49 @@ const Select = forwardRef(({
     disabled = false, 
     className = '', 
     error = null,
+    success = false,
+    loading = false,
     fullWidth = true,
     colors = null,
     ...props 
 }, ref) => {
     const widthStyle = fullWidth ? "w-full" : "";
     const selectId = id || name || `select-${Math.random().toString(36).substring(2, 9)}`;
-    const focusBorderClass = colors?.text ? colors.text.replace('text-', 'border-') : 'border-primary-500';
+    
+    // Default theme colors
+    const activeColors = colors || { text: 'text-primary-500', bg: 'bg-primary-500', lightBg: 'bg-primary-50' };
+    const focusBorderClass = activeColors.text.replace('text-', 'border-');
 
     return (
-        <div className={`space-y-1 ${widthStyle} ${className}`}>
-            {label && (
-                <label htmlFor={selectId} className="text-[9px] font-black text-slate-500 uppercase tracking-widest px-1 opacity-70">
-                    {label}
-                </label>
-            )}
+        <div className={`space-y-1.5 ${widthStyle} ${className}`}>
+            <div className="flex items-center justify-between px-1">
+                {label && (
+                    <label htmlFor={selectId} className="text-[11px] font-black text-slate-500 uppercase tracking-widest opacity-70">
+                        {label}
+                    </label>
+                )}
+                <div className="flex items-center gap-2">
+                    {loading && (
+                        <motion.span 
+                            animate={{ rotate: 360 }}
+                            transition={{ repeat: Infinity, duration: 1, ease: "linear" }}
+                            className={`material-symbols-outlined ${activeColors.text} text-xs font-black`}
+                        >
+                            autorenew
+                        </motion.span>
+                    )}
+                    {success && !error && !loading && (
+                        <motion.span 
+                            initial={{ scale: 0 }} 
+                            animate={{ scale: 1 }} 
+                            className={`material-symbols-outlined ${activeColors.text} text-sm font-black`}
+                        >
+                            check_circle
+                        </motion.span>
+                    )}
+                </div>
+            </div>
+
             <div className="relative group/select">
                 <select 
                     ref={ref}
@@ -35,27 +63,39 @@ const Select = forwardRef(({
                     onChange={onChange}
                     disabled={disabled}
                     className={`
-                        w-full bg-slate-50 border-2 border-slate-100 rounded-xl px-3 py-1.5 
-                        font-black text-slate-800 text-[13px] 
-                        appearance-none transition-all outline-none 
-                        disabled:opacity-30
-                        ${error ? 'border-red-300 bg-red-50/30 focus:border-red-500' : `focus:${focusBorderClass}`}
-                        ${className}
+                        w-full bg-slate-50 border-2 rounded-xl px-3 pr-10 py-1.5 
+                        font-bold text-slate-800 text-[14px] 
+                        appearance-none transition-all duration-300 outline-none 
+                        disabled:opacity-30 min-h-[48px]
+                        ${error ? 'border-red-300 bg-red-50/10 focus:border-red-500' : 
+                          success ? `${focusBorderClass.replace('-600', '-300')} ${activeColors.lightBg}/10 focus:border-${focusBorderClass}` :
+                          `border-slate-100 focus:border-${focusBorderClass.replace('border-', '')} focus:bg-white`}
                     `}
                     {...props}
                 >
-                    <option value="">{placeholder}</option>
+                    <option value="" disabled className="text-slate-400">{placeholder}</option>
                     {options.map((opt, i) => (
                         <option key={i} value={typeof opt === 'string' ? opt : opt.value}>
                             {typeof opt === 'string' ? opt : opt.label}
                         </option>
                     ))}
                 </select>
-                <span className="material-symbols-outlined text-slate-400 absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none group-focus-within/select:rotate-180 transition-transform font-bold text-base">
+                <span className={`material-symbols-outlined absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none group-focus-within/select:rotate-180 transition-transform font-bold text-base ${error ? 'text-red-400' : success ? activeColors.text : 'text-slate-300'}`}>
                     expand_more
                 </span>
             </div>
-            {error && <p className="text-red-500 text-[9px] font-bold px-1 uppercase tracking-widest">{error}</p>}
+            <AnimatePresence>
+                {error && (
+                    <motion.p 
+                        initial={{ opacity: 0, y: -5 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0, y: -5 }}
+                        className="text-red-500 text-[11px] font-bold px-1 uppercase tracking-widest"
+                    >
+                        {error}
+                    </motion.p>
+                )}
+            </AnimatePresence>
         </div>
     );
 });

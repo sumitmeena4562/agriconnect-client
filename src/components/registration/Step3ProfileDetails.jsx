@@ -19,13 +19,13 @@ const Step3ProfileDetails = ({ formData, onChange, onSubmit, loading, error, fie
 
     // Real-time validation checks
     const isNameValid = formData.fullName?.length >= 3 && !validateName(formData.fullName);
-    const isEmailValid = formData.email?.length > 5 && !validateEmail(formData.email) && emailAvailable;
+    const isEmailValid = formData.email?.length > 5 && !validateEmail(formData.email) && (emailAvailable !== false);
     const isPasswordValid = formData.password?.length >= 8 && !validatePassword(formData.password);
     const isConfirmValid = formData.confirmPassword === formData.password && formData.confirmPassword.length > 0;
     const isPincodeValid = formData.pincode?.length === 6 && !validatePincode(formData.pincode);
     const isLocationValid = formData.state && formData.district;
-    const isDOBValid = !validateDOB(formData.dob);
-    const isGenderValid = !validateGender(formData.gender);
+    const isDOBValid = formData.dob && !validateDOB(formData.dob);
+    const isGenderValid = formData.gender && !validateGender(formData.gender);
     
     const passwordStrength = calculatePasswordStrength(formData.password);
 
@@ -103,6 +103,7 @@ const Step3ProfileDetails = ({ formData, onChange, onSubmit, loading, error, fie
                         onChange={onChange}
                         options={["Male", "Female", "Other", "Prefer not to say"]}
                         error={fieldErrors.gender}
+                        success={isGenderValid}
                         colors={colors}
                     />
                 </div>
@@ -157,6 +158,7 @@ const Step3ProfileDetails = ({ formData, onChange, onSubmit, loading, error, fie
                         onChange={onChange}
                         options={Object.keys(STATES_DATA)}
                         error={fieldErrors.state}
+                        success={!!formData.state}
                         colors={colors}
                     />
                     <Select 
@@ -167,6 +169,7 @@ const Step3ProfileDetails = ({ formData, onChange, onSubmit, loading, error, fie
                         disabled={!formData.state}
                         options={formData.state ? STATES_DATA[formData.state] : []}
                         error={fieldErrors.district}
+                        success={!!formData.district}
                         colors={colors}
                     />
                 </div>
