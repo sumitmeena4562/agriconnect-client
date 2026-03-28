@@ -98,7 +98,19 @@ const Input = forwardRef(({
                     maxLength={maxLength}
                     placeholder={placeholder}
                     autoFocus={autoFocus}
-                    className="w-full bg-transparent border-none outline-none font-bold text-slate-800 text-[14px] placeholder:text-slate-300/80 tracking-tight"
+                    onClick={(e) => {
+                        if (type === 'date' && e.target.showPicker) {
+                            try { e.target.showPicker(); } catch (err) { console.warn("showPicker not supported", err); }
+                        }
+                        if (props.onClick) props.onClick(e);
+                    }}
+                    onFocus={(e) => {
+                        if (type === 'date' && e.target.showPicker) {
+                            try { e.target.showPicker(); } catch (err) {}
+                        }
+                        if (props.onFocus) props.onFocus(e);
+                    }}
+                    className="w-full bg-transparent border-none outline-none font-bold text-slate-800 text-[14px] placeholder:text-slate-300/80 tracking-tight cursor-pointer"
                     {...props}
                 />
             </div>
