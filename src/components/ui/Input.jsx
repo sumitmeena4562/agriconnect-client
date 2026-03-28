@@ -38,18 +38,18 @@ const Input = forwardRef(({
     // Default to primary if no colors passed
     const activeColors = colors || { text: 'text-primary-500', bg: 'bg-primary-500', lightBg: 'bg-primary-50' };
 
-    // Focus and Success color helpers
-    const getSoftBorder = () => {
-        if (error) return 'border-red-300 ring-red-50';
-        if (success) return `${activeColors.text.replace('text-', 'border-').replace('-600', '-200')} ${activeColors.text.replace('text-', 'ring-').replace('-600', '-50')}`;
-        return `${activeColors.text.replace('text-', 'border-').replace('-600', '-300')} ${activeColors.text.replace('text-', 'ring-').replace('-600', '-50')}`;
+    // Elite focus styles helpers
+    const getFocusStyles = () => {
+        if (error) return 'border-red-400 shadow-[0_0_15px_-3px_rgba(239,68,68,0.1)]';
+        const colorBase = activeColors.text.replace('text-', '');
+        return `border-${colorBase.replace('-600', '-500')} shadow-[0_0_15px_-3px_rgba(0,210,120,0.12)]`;
     };
 
     return (
         <div className={`space-y-1.5 ${widthStyle} ${className}`}>
             <div className="flex items-center justify-between px-1">
                 {label && (
-                    <label htmlFor={inputId} className="text-[11px] font-black text-slate-500 uppercase tracking-widest opacity-70">
+                    <label htmlFor={inputId} className="text-[11px] font-black text-slate-500 uppercase tracking-widest opacity-60">
                         {label}
                     </label>
                 )}
@@ -76,11 +76,10 @@ const Input = forwardRef(({
             </div>
             
             <div className={`
-                group flex items-center bg-white border rounded-xl px-3 py-1.5 
-                transition-all duration-300 min-h-[48px]
-                ${error ? 'border-red-200 bg-red-50/10 focus-within:border-red-400 focus-within:ring-4 focus-within:ring-red-50' : 
-                  success ? `border-slate-200 focus-within:${getSoftBorder().split(' ')[0]} focus-within:ring-4 focus-within:${getSoftBorder().split(' ')[1]}` : 
-                  `border-slate-200 focus-within:${getSoftBorder().split(' ')[0]} focus-within:ring-4 focus-within:${getSoftBorder().split(' ')[1]}`}
+                group flex items-center bg-white border rounded-xl px-4 py-1.5 
+                transition-all duration-300 min-h-[50px] outline-none
+                ${error ? 'border-red-200 focus-within:border-red-400 focus-within:shadow-[0_0_15px_-3px_rgba(239,68,68,0.15)]' : 
+                  `border-slate-200 focus-within:${getFocusStyles().split(' ')[0]} focus-within:${getFocusStyles().split(' ')[1]}`}
             `}>
                 {icon && (
                     <span 

@@ -55,7 +55,11 @@ const Select = forwardRef(({
                 </div>
             </div>
 
-            <div className="relative group/select">
+            <div className={`
+                relative group/select border rounded-xl transition-all duration-300
+                ${error ? 'border-red-200 focus-within:border-red-400 focus-within:shadow-[0_0_15px_-3px_rgba(239,68,68,0.15)]' : 
+                  `border-slate-200 focus-within:border-${activeColors.text.replace('text-', '').replace('-600', '-500')} focus-within:shadow-[0_0_15px_-3px_rgba(0,210,120,0.12)]`}
+            `}>
                 <select 
                     ref={ref}
                     id={selectId}
@@ -63,15 +67,7 @@ const Select = forwardRef(({
                     value={value}
                     onChange={onChange}
                     disabled={disabled}
-                    className={`
-                        w-full bg-white border rounded-xl px-3 pr-10 py-1.5 
-                        font-bold text-slate-800 text-[14px] 
-                        appearance-none transition-all duration-300 outline-none 
-                        disabled:opacity-30 min-h-[48px]
-                        ${error ? 'border-red-200 bg-red-50/10 focus:border-red-400 focus:ring-4 focus:ring-red-50' : 
-                          success ? `border-slate-200 focus:border-${activeColors.text.replace('text-', '').replace('-600', '-300')} focus:ring-4 focus:ring-${activeColors.text.replace('text-', '').replace('-600', '-50')}` :
-                          `border-slate-200 focus:border-${activeColors.text.replace('text-', '').replace('-600', '-300')} focus:ring-4 focus:ring-${activeColors.text.replace('text-', '').replace('-600', '-50')}`}
-                    `}
+                    className="w-full bg-white rounded-xl px-4 pr-10 py-1.5 font-bold text-slate-800 text-[14px] appearance-none outline-none disabled:opacity-30 min-h-[50px]"
                     {...props}
                 >
                     <option value="" disabled className="text-slate-400">{placeholder}</option>
