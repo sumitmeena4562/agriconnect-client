@@ -50,65 +50,65 @@ const Input = forwardRef(({
     const currentType = isPassword ? (showPassword ? 'text' : 'password') : type;
 
     return (
-        <div className={`space-y-1.5 ${widthStyle} ${className}`}>
-            <div className="flex items-center justify-between px-1">
-                {label && (
-                    <label htmlFor={inputId} className="text-[11px] font-black text-slate-500 uppercase tracking-widest opacity-60">
-                        {label}
-                    </label>
-                )}
-                <div className="flex items-center gap-2">
-                    {loading && (
-                        <motion.span 
-                            animate={{ rotate: 360 }}
-                            transition={{ repeat: Infinity, duration: 1, ease: "linear" }}
-                            className={`material-symbols-outlined ${activeColors.text} text-xs font-black`}
-                        >
-                            autorenew
-                        </motion.span>
+            <div className={`space-y-1.5 ${widthStyle} ${className}`}>
+                <div className="flex items-center justify-between px-1">
+                    {label && (
+                        <label htmlFor={inputId} className="text-[11px] font-black text-slate-600 uppercase tracking-widest">
+                            {label}
+                        </label>
                     )}
-                </div>
-            </div>
-            
-            <div className={`
-                group flex items-center bg-white border rounded-xl px-4 py-1.5 
-                transition-all duration-300 min-h-[50px] outline-none
-                ${error ? 'border-red-200 focus-within:border-red-400 focus-within:shadow-[0_0_15px_-3px_rgba(239,68,68,0.15)]' : 
-                  `border-slate-200 focus-within:${getFocusStyles().split(' ')[0]} focus-within:${getFocusStyles().split(' ')[1]}`}
-            `}>
-                {icon && (
-                    <span 
-                        onClick={() => {
-                            if (type === 'date' && inputRef.current?.showPicker) {
-                                try { inputRef.current.showPicker(); } catch (err) {}
-                            }
-                        }}
-                        className={`material-symbols-outlined mr-2.5 text-base font-bold transition-colors ${type === 'date' ? 'cursor-pointer hover:scale-110 active:scale-95 text-primary-500' : 'text-slate-300'} ${error ? 'text-red-400' : success ? activeColors.text : ''}`}
-                    >
-                        {icon}
-                    </span>
-                 )}
-                {prefix && (
-                    <div className="flex items-center self-stretch mr-3 pr-3 border-r-[1.5px] border-slate-200/60">
-                        <span className="font-black text-slate-400 text-[11px] tracking-tight whitespace-nowrap opacity-70">
-                            {prefix}
-                        </span>
+                    <div className="flex items-center gap-2">
+                        {loading && (
+                            <motion.span 
+                                animate={{ rotate: 360 }}
+                                transition={{ repeat: Infinity, duration: 1, ease: "linear" }}
+                                className={`material-symbols-outlined ${activeColors.text} text-xs font-black`}
+                            >
+                                autorenew
+                            </motion.span>
+                        )}
                     </div>
-                )}
-                <input 
-                    ref={inputRef}
-                    type={currentType}
-                    id={inputId}
-                    name={name}
-                    value={value || ''}
-                    onChange={onChange}
-                    maxLength={maxLength}
-                    placeholder={placeholder}
-                    autoFocus={autoFocus}
-                    autoComplete="on"
-                    className="w-full bg-transparent border-none outline-none font-bold text-slate-800 text-[14px] placeholder:text-slate-300/80 tracking-tight"
-                    {...props}
-                />
+                </div>
+                
+                <div className={`
+                    group flex items-center bg-white border rounded-xl px-4 py-1.5 
+                    transition-all duration-300 min-h-[50px] outline-none
+                    ${error ? 'border-red-200 focus-within:border-red-400 focus-within:shadow-[0_0_15px_-3px_rgba(239,68,68,0.15)]' : 
+                      `border-slate-200 focus-within:${getFocusStyles().split(' ')[0]} focus-within:${getFocusStyles().split(' ')[1]}`}
+                `}>
+                    {icon && (
+                        <span 
+                            onClick={() => {
+                                if (type === 'date' && inputRef.current?.showPicker) {
+                                    try { inputRef.current.showPicker(); } catch (err) {}
+                                }
+                            }}
+                            className={`material-symbols-outlined mr-2.5 text-base font-bold transition-colors ${type === 'date' ? 'cursor-pointer hover:scale-110 active:scale-95 text-primary-500' : 'text-slate-400'} ${error ? 'text-red-400' : success ? activeColors.text : ''}`}
+                        >
+                            {icon}
+                        </span>
+                     )}
+                    {prefix && (
+                        <div className="flex items-center self-stretch mr-3 pr-3 border-r-[1.5px] border-slate-200/60">
+                            <span className="font-black text-slate-500 text-[11px] tracking-tight whitespace-nowrap">
+                                {prefix}
+                            </span>
+                        </div>
+                    )}
+                    <input 
+                        ref={inputRef}
+                        type={currentType}
+                        id={inputId}
+                        name={name}
+                        value={value || ''}
+                        onChange={onChange}
+                        maxLength={maxLength}
+                        placeholder={placeholder}
+                        autoFocus={autoFocus}
+                        autoComplete="on"
+                        className="w-full bg-transparent border-none outline-none font-bold text-slate-800 text-[14px] placeholder:text-slate-400 tracking-tight"
+                        {...props}
+                    />
 
                 {isPassword && value && !error && (
                     <button

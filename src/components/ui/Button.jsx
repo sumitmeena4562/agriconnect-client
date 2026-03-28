@@ -17,7 +17,7 @@ const Button = ({
     fullWidth = false,
     ...props 
 }) => {
-    const baseStyles = "relative font-black transition-all duration-300 flex items-center justify-center gap-2 active:scale-[0.98] disabled:opacity-20 disabled:grayscale disabled:pointer-events-none group overflow-hidden cursor-pointer";
+    const baseStyles = "relative font-black transition-all duration-300 flex items-center justify-center gap-2 active:scale-[0.98] disabled:opacity-50 disabled:grayscale disabled:pointer-events-none group overflow-hidden cursor-pointer";
     
     const variants = {
         primary: "bg-primary-600 text-white shadow-lg shadow-green-200/40 hover:bg-primary-700 hover:shadow-xl hover:shadow-green-200/60",
