@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import Button from '../ui/Button';
 
 const LiveLocationDetector = ({ onLocationDetected, colors = null }) => {
     const activeColors = colors || { text: 'text-primary-500', bg: 'bg-primary-500', lightBg: 'bg-primary-50' };
@@ -50,22 +50,19 @@ const LiveLocationDetector = ({ onLocationDetected, colors = null }) => {
                     </div>
                 </div>
                 
-                <motion.button
-                    type="button"
-                    whileHover={{ scale: 1.05 }}
-                    whileTap={{ scale: 0.95 }}
+                <Button
                     onClick={detectLocation}
                     disabled={status === 'detecting' || status === 'success'}
-                    className={`
-                        px-4 py-2.5 rounded-xl text-[11px] font-black transition-all shadow-sm tracking-widest
-                        ${status === 'success' ? 'bg-slate-100 text-slate-400 cursor-default' : `${activeColors.bg} text-white hover:brightness-110`}
-                    `}
+                    size="sm"
+                    variant={status === 'success' ? 'glass' : (colors.text.includes('primary') ? 'primary' : colors.text.includes('accent') ? 'accent' : 'dark')}
+                    icon={status === 'detecting' ? "autorenew" : status === 'success' ? "done" : null}
+                    className="min-w-[100px]"
                 >
                     {status === 'idle' && "DETECT"}
                     {status === 'detecting' && "..."}
                     {status === 'success' && "DONE"}
                     {status === 'error' && "RETRY"}
-                </motion.button>
+                </Button>
             </div>
 
             <AnimatePresence>

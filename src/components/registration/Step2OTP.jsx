@@ -7,9 +7,19 @@ const Step2OTP = ({ mobile, email, otp, onOtpChange, onOtpPaste, onOtpKeyDown, o
     const isOtpComplete = otp.join('').length === 6;
 
     return (
-        <motion.div key="step2" initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }} className="space-y-6">
+        <motion.div 
+            key="step2" 
+            initial={{ opacity: 0, y: 15 }} 
+            animate={{ opacity: 1, y: 0 }} 
+            exit={{ opacity: 0, y: -15 }} 
+            transition={{ duration: 0.4, ease: [0.23, 1, 0.32, 1] }}
+            className="space-y-6"
+        >
             <button onClick={onBack} className={`inline-flex items-center gap-1.5 text-slate-400 hover:${colors.text} text-[11px] font-black uppercase tracking-widest transition-colors group`}>
-                <span className="material-symbols-outlined text-sm transition-transform group-hover:-translate-x-0.5">arrow_back</span> 
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="4" strokeLinecap="round" strokeLinejoin="round" className="w-3.5 h-3.5 transition-transform group-hover:-translate-x-1">
+                    <line x1="19" y1="12" x2="5" y2="12"></line>
+                    <polyline points="12 19 5 12 12 5"></polyline>
+                </svg>
                 Go Back
             </button>
             
@@ -38,7 +48,12 @@ const Step2OTP = ({ mobile, email, otp, onOtpChange, onOtpPaste, onOtpKeyDown, o
                         disabled={!isOtpComplete || loading}
                         fullWidth
                         variant={isOtpComplete ? (colors.text.includes('primary') ? 'primary' : colors.text.includes('accent') ? 'accent' : 'dark') : 'dark'}
-                        icon={loading ? "autorenew" : "verified_user"}
+                        icon={loading ? "autorenew" : (
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="4" strokeLinecap="round" strokeLinejoin="round" className="w-4 h-4">
+                                <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
+                                <polyline points="9 12 11 14 15 10"></polyline>
+                            </svg>
+                        )}
                     >
                         {loading ? "VERIFYING..." : "CONFIRM & PROCEED"}
                     </Button>
