@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import Logo from '../components/common/Logo';
 import { registerUser, sendOtp, verifyOtp } from '../services/api';
+import { validateMobile, validateEmail, validatePincode, validateName, validatePassword } from '../utils/validation';
 
 // UI Components
 import Button from '../components/ui/Button';
@@ -21,6 +22,7 @@ const CustomerRegistration = () => {
     const [timer, setTimer] = useState(30);
     const [canResend, setCanResend] = useState(false);
     const [verificationToken, setVerificationToken] = useState("");
+    const [fieldErrors, setFieldErrors] = useState({});
     
     // Automatic redirection after success
     useEffect(() => {
@@ -40,6 +42,8 @@ const CustomerRegistration = () => {
         state: '',
         district: '',
         pincode: '',
+        password: '',
+        confirmPassword: '',
         language: 'English'
     });
 
@@ -64,12 +68,14 @@ const CustomerRegistration = () => {
             if (!/^\d*$/.test(value)) return;
         }
         setError("");
+        setFieldErrors(prev => ({ ...prev, [name]: "" }));
         setFormData(prev => ({ ...prev, [name]: value }));
     };
 
     const handleSendOtp = async () => {
-        if (formData.mobile.length !== 10) {
-            setError("Please enter a valid 10-digit mobile number");
+        const mobileErr = validateMobile(formData.mobile);
+        if (mobileErr) {
+            setFieldErrors({ mobile: mobileErr });
             return;
         }
         setLoading(true);
@@ -106,6 +112,20 @@ const CustomerRegistration = () => {
     };
 
     const handleSubmit = async () => {
+        const errors = {};
+        if (validateName(formData.fullName)) errors.fullName = validateName(formData.fullName);
+        if (validateEmail(formData.email)) errors.email = validateEmail(formData.email);
+        if (validatePincode(formData.pincode)) errors.pincode = validatePincode(formData.pincode);
+        if (validatePassword(formData.password)) errors.password = validatePassword(formData.password);
+        if (formData.password !== formData.confirmPassword) errors.confirmPassword = "Passwords do not match";
+        if (!formData.state) errors.state = "Required";
+        if (!formData.district) errors.district = "Required";
+
+        if (Object.keys(errors).length > 0) {
+            setFieldErrors(errors);
+            return;
+        }
+
         setLoading(true);
         setError("");
         try {
@@ -113,7 +133,7 @@ const CustomerRegistration = () => {
                 name: formData.fullName,
                 mobile: formData.mobile,
                 email: formData.email, 
-                password: "password123", 
+                password: formData.password, 
                 role: "buyer",
                 state: formData.state,
                 district: formData.district,
@@ -122,6 +142,8 @@ const CustomerRegistration = () => {
                 verificationToken: verificationToken
             };
 
+            console.log("%c🚀 Z+ SECURITY: SUBMITTING FULL DATA (BUYER)", "color: #eab308; font-weight: bold; font-size: 14px;");
+            console.table(userData);
             const response = await registerUser(userData);
             
             if (response.data.success) {
@@ -254,6 +276,7 @@ const CustomerRegistration = () => {
                                                     inputMode="numeric"
                                                     pattern="[0-9]*"
                                                     autoFocus
+                                                    error={fieldErrors.mobile}
                                                 />
 
                                                 <Button 
@@ -336,17 +359,42 @@ const CustomerRegistration = () => {
                                                     onChange={handleChange}
                                                     placeholder="Enter your name"
                                                     icon="person"
+                                                    error={fieldErrors.fullName}
                                                 />
 
                                                 <Input 
-                                                    label="Email ID"
+                                                    label="Personal Email"
                                                     type="email"
                                                     name="email"
                                                     value={formData.email}
                                                     onChange={handleChange}
                                                     placeholder="name@example.com"
                                                     icon="mail"
+                                                    error={fieldErrors.email}
                                                 />
+
+                                                <div className="grid grid-cols-2 gap-4">
+                                                    <Input 
+                                                        label="Create Password"
+                                                        type="password"
+                                                        name="password"
+                                                        value={formData.password}
+                                                        onChange={handleChange}
+                                                        placeholder="••••••"
+                                                        icon="lock"
+                                                        error={fieldErrors.password}
+                                                    />
+                                                    <Input 
+                                                        label="Verify Password"
+                                                        type="password"
+                                                        name="confirmPassword"
+                                                        value={formData.confirmPassword}
+                                                        onChange={handleChange}
+                                                        placeholder="••••••"
+                                                        icon="lock_reset"
+                                                        error={fieldErrors.confirmPassword}
+                                                    />
+                                                </div>
 
                                                 <div className="grid grid-cols-2 gap-4">
                                                     <Select 
@@ -355,6 +403,7 @@ const CustomerRegistration = () => {
                                                         value={formData.state}
                                                         onChange={handleChange}
                                                         options={Object.keys(statesData)}
+                                                        error={fieldErrors.state}
                                                     />
                                                     <Select 
                                                         label="District"
@@ -363,6 +412,7 @@ const CustomerRegistration = () => {
                                                         onChange={handleChange}
                                                         disabled={!formData.state}
                                                         options={formData.state ? statesData[formData.state] : []}
+                                                        error={fieldErrors.district}
                                                     />
                                                 </div>
 
@@ -376,6 +426,7 @@ const CustomerRegistration = () => {
                                                     icon="location_on"
                                                     inputMode="numeric"
                                                     pattern="[0-9]*"
+                                                    error={fieldErrors.pincode}
                                                 />
                                             </div>
 
@@ -387,7 +438,7 @@ const CustomerRegistration = () => {
 
                                             <Button 
                                                 onClick={handleSubmit}
-                                                disabled={!formData.fullName || !formData.email || !formData.state || !formData.district || formData.pincode.length < 6 || loading}
+                                                disabled={loading}
                                                 fullWidth
                                                 className="!bg-yellow-600 hover:!bg-yellow-700"
                                                 icon={loading ? "autorenew" : "done_all"}

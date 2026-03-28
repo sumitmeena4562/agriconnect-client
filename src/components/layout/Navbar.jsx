@@ -203,7 +203,7 @@ const Header = () => {
                     ))}
                 </div>
 
-                <a href="https://wa.me/91000000000" className="w-9 h-9 flex items-center justify-center bg-white border border-gray-200 text-[#00B464] rounded-xl hover:bg-[#25D366] hover:text-white transition-all shadow-sm">
+                <a href="https://wa.me/91 6261652446" className="w-9 h-9 flex items-center justify-center bg-white border border-gray-200 text-[#00B464] rounded-xl hover:bg-[#25D366] hover:text-white transition-all shadow-sm">
                     <span className="material-symbols-outlined text-[18px]">chat</span>
                 </a>
               </div>

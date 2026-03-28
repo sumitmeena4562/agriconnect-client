@@ -23,14 +23,14 @@ const Input = forwardRef(({
     return (
         <div className={`space-y-1 ${widthStyle} ${className}`}>
             {label && (
-                <label htmlFor={inputId} className="text-[9px] font-black text-slate-500 uppercase tracking-widest px-1 opacity-70">
+                <label htmlFor={inputId} className="text-[11px] font-black text-slate-500 uppercase tracking-widest px-1 opacity-70">
                     {label}
                 </label>
             )}
             <div className={`
                 group flex items-center bg-slate-50 border-2 border-slate-100 rounded-xl px-3 py-1.5 
                 focus-within:border-primary-500 focus-within:bg-white focus-within:shadow-[0_0_0_4px_rgba(22,163,74,0.06)] 
-                transition-all duration-300
+                transition-all duration-300 min-h-[48px]
                 ${error ? 'border-red-300 bg-red-50/30' : ''}
             `}>
                 {icon && (
@@ -39,9 +39,11 @@ const Input = forwardRef(({
                     </span>
                  )}
                 {prefix && (
-                    <span className="font-black text-slate-400 mr-2 border-r-[1.5px] border-slate-200 pr-3 text-[12px] tracking-tighter opacity-60">
-                        {prefix}
-                    </span>
+                    <div className="flex items-center self-stretch mr-3 pr-3 border-r-[1.5px] border-slate-200/60">
+                        <span className="font-black text-slate-400 text-[11px] tracking-tight whitespace-nowrap opacity-70">
+                            {prefix}
+                        </span>
+                    </div>
                 )}
                 <input 
                     ref={ref}
@@ -53,11 +55,11 @@ const Input = forwardRef(({
                     maxLength={maxLength}
                     placeholder={placeholder}
                     autoFocus={autoFocus}
-                    className="w-full bg-transparent border-none outline-none font-black text-slate-800 text-[13px] placeholder:text-slate-200 pl-1"
+                    className="w-full bg-transparent border-none outline-none font-bold text-slate-800 text-[14px] placeholder:text-slate-300/80 tracking-tight"
                     {...props}
                 />
             </div>
-            {error && <p className="text-red-500 text-[9px] font-bold px-1 uppercase tracking-widest">{error}</p>}
+            {error && <p className="text-red-500 text-[11px] font-bold px-1 uppercase tracking-widest">{error}</p>}
         </div>
     );
 });

@@ -6,16 +6,21 @@ import FarmerRegistration from './pages/FarmerRegistration';
 import VendorRegistration from './pages/VendorRegistration';
 import CustomerRegistration from './pages/CustomerRegistration';
 
+import { Toaster } from 'react-hot-toast';
+
 function App() {
   return (
-    <Routes>
-      <Route path="/" element={<LandingPage />} />
-      <Route path="/theme" element={<ThemePreview />} />
-      <Route path="/farmer-registration" element={<FarmerRegistration/>} />
-      <Route path="/vendor-registration" element={<VendorRegistration/>} />
-      <Route path="/customer-registration" element={<CustomerRegistration/>} />
-      <Route path="/dashboard" element={<div className="p-8"><h1>Dashboard Coming Soon...</h1></div>} />
-    </Routes>
+    <>
+      <Toaster position="top-center" toastOptions={{ duration: 4000, style: { background: '#334155', color: '#fff', fontSize: '14px', borderRadius: '12px' } }} />
+      <Routes>
+        <Route path="/" element={<LandingPage />} />
+        <Route path="/theme" element={<ThemePreview />} />
+        <Route path="/farmer-registration" element={<FarmerRegistration/>} />
+        <Route path="/vendor-registration" element={<VendorRegistration/>} />
+        <Route path="/customer-registration" element={<CustomerRegistration/>} />
+        <Route path="/dashboard" element={<div className="p-8"><h1>Dashboard Coming Soon...</h1></div>} />
+      </Routes>
+    </>
   );
 }
 
