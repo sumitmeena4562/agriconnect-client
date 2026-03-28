@@ -1,22 +1,25 @@
-import React from 'react';
+import React, { Suspense } from 'react';
 import { Routes, Route, Navigate } from 'react-router-dom';
-import LandingPage from './pages/LandingPage';
-import FarmerRegistration from './pages/FarmerRegistration';
-import CustomerRegistration from './pages/CustomerRegistration';
-import VendorRegistration from './pages/VendorRegistration';
-import ThemePreview from './pages/ThemePreview';
+
+const LandingPage = React.lazy(() => import('./pages/LandingPage'));
+const FarmerRegistration = React.lazy(() => import('./pages/FarmerRegistration'));
+const CustomerRegistration = React.lazy(() => import('./pages/CustomerRegistration'));
+const VendorRegistration = React.lazy(() => import('./pages/VendorRegistration'));
+const ThemePreview = React.lazy(() => import('./pages/ThemePreview'));
 
 const App = () => {
   return (
-    <Routes>
-      <Route path="/" element={<LandingPage />} />
-      {/* Top-level routes to match existing Navbar/Footer links */}
-      <Route path="/farmer-registration" element={<FarmerRegistration />} />
-      <Route path="/customer-registration" element={<CustomerRegistration />} />
-      <Route path="/vendor-registration" element={<VendorRegistration />} />
-      <Route path="/theme" element={<ThemePreview />} />
-      <Route path="*" element={<Navigate to="/" replace />} />
-    </Routes>
+    <Suspense fallback={<div className="min-h-screen flex items-center justify-center bg-slate-50"><span className="material-symbols-outlined animate-spin text-primary-500 text-3xl">autorenew</span></div>}>
+      <Routes>
+        <Route path="/" element={<LandingPage />} />
+        {/* Top-level routes to match existing Navbar/Footer links */}
+        <Route path="/farmer-registration" element={<FarmerRegistration />} />
+        <Route path="/customer-registration" element={<CustomerRegistration />} />
+        <Route path="/vendor-registration" element={<VendorRegistration />} />
+        <Route path="/theme" element={<ThemePreview />} />
+        <Route path="*" element={<Navigate to="/" replace />} />
+      </Routes>
+    </Suspense>
   );
 };
 

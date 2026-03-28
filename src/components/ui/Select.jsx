@@ -1,4 +1,4 @@
-import React, { forwardRef } from 'react';
+import React, { forwardRef, useId } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 
 const Select = forwardRef(({ 
@@ -19,11 +19,11 @@ const Select = forwardRef(({
     ...props 
 }, ref) => {
     const widthStyle = fullWidth ? "w-full" : "";
-    const selectId = id || name || `select-${Math.random().toString(36).substring(2, 9)}`;
+    const reactId = useId();
+    const selectId = id || name || reactId;
     
     // Default theme colors
     const activeColors = colors || { text: 'text-primary-500', bg: 'bg-primary-500', lightBg: 'bg-primary-50' };
-    const focusBorderClass = activeColors.text.replace('text-', 'border-');
 
     return (
         <div className={`space-y-1.5 ${widthStyle} ${className}`}>
