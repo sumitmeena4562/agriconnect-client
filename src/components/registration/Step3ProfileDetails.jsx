@@ -66,7 +66,7 @@ const Step3ProfileDetails = ({ formData, onChange, onSubmit, loading, error, fie
                 <p className="text-slate-500 text-sm">{subtitle || "Complete your profile to get started."}</p>
             </div>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-10 gap-y-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-12 gap-y-4">
                 {/* Left Column: Personality & Basic Info */}
                 <div className="space-y-4">
                     <AvatarPicker 
@@ -87,26 +87,25 @@ const Step3ProfileDetails = ({ formData, onChange, onSubmit, loading, error, fie
                         colors={colors}
                     />
 
-                    <div className="grid grid-cols-2 gap-4">
-                        <DateInput 
-                            label="Date of Birth"
-                            value={formData.dob}
-                            onChange={onChange}
-                            error={fieldErrors.dob}
-                            success={isDOBValid}
-                            colors={colors}
-                        />
-                        <Select 
-                            label="Gender"
-                            name="gender"
-                            value={formData.gender}
-                            onChange={onChange}
-                            options={["Male", "Female", "Other", "Prefer not to say"]}
-                            error={fieldErrors.gender}
-                            success={isGenderValid}
-                            colors={colors}
-                        />
-                    </div>
+                    <DateInput 
+                        label="Date of Birth"
+                        value={formData.dob}
+                        onChange={onChange}
+                        error={fieldErrors.dob}
+                        success={isDOBValid}
+                        colors={colors}
+                    />
+
+                    <Select 
+                        label="Gender"
+                        name="gender"
+                        value={formData.gender}
+                        onChange={onChange}
+                        options={["Male", "Female", "Other", "Prefer not to say"]}
+                        error={fieldErrors.gender}
+                        success={isGenderValid}
+                        colors={colors}
+                    />
 
                     <Input 
                         label="Email Id"
@@ -125,33 +124,32 @@ const Step3ProfileDetails = ({ formData, onChange, onSubmit, loading, error, fie
 
                 {/* Right Column: Security & Location */}
                 <div className="space-y-4">
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                        <Input 
-                            label="Password"
-                            type="password"
-                            name="password"
-                            value={formData.password}
-                            onChange={onChange}
-                            placeholder="Min 8 chars"
-                            icon="lock"
-                            error={fieldErrors.password}
-                            success={isPasswordValid}
-                            strength={passwordStrength}
-                            colors={colors}
-                        />
-                        <Input 
-                            label="Confirm"
-                            type="password"
-                            name="confirmPassword"
-                            value={formData.confirmPassword}
-                            onChange={onChange}
-                            placeholder="Repeat"
-                            icon="lock_reset"
-                            error={fieldErrors.confirmPassword}
-                            success={isConfirmValid}
-                            colors={colors}
-                        />
-                    </div>
+                    <Input 
+                        label="Password"
+                        type="password"
+                        name="password"
+                        value={formData.password}
+                        onChange={onChange}
+                        placeholder="Min 8 chars"
+                        icon="lock"
+                        error={fieldErrors.password}
+                        success={isPasswordValid}
+                        strength={passwordStrength}
+                        colors={colors}
+                    />
+
+                    <Input 
+                        label="Confirm Password"
+                        type="password"
+                        name="confirmPassword"
+                        value={formData.confirmPassword}
+                        onChange={onChange}
+                        placeholder="Repeat"
+                        icon="lock_reset"
+                        error={fieldErrors.confirmPassword}
+                        success={isConfirmValid}
+                        colors={colors}
+                    />
 
                     <div className="grid grid-cols-2 gap-4">
                         <Select 
@@ -200,6 +198,7 @@ const Step3ProfileDetails = ({ formData, onChange, onSubmit, loading, error, fie
             </div>
 
             <AnimatePresence>
+                {/* ... (keep error handling as is) */}
                 {error && (
                     <motion.div 
                         initial={{ opacity: 0, height: 0 }}
@@ -212,15 +211,17 @@ const Step3ProfileDetails = ({ formData, onChange, onSubmit, loading, error, fie
                 )}
             </AnimatePresence>
 
-            <Button 
-                onClick={onSubmit}
-                disabled={loading || emailLoading}
-                fullWidth
-                variant={allValid ? (colors.text.includes('primary') ? 'primary' : colors.text.includes('accent') ? 'accent' : 'dark') : 'dark'}
-                icon={loading ? "autorenew" : "done_all"}
-            >
-                {loading ? "SAVING..." : "CREATE ACCOUNT"}
-            </Button>
+            <div className="pt-2">
+                <Button 
+                    onClick={onSubmit}
+                    disabled={loading || emailLoading}
+                    fullWidth
+                    variant={allValid ? (colors.text.includes('primary') ? 'primary' : colors.text.includes('accent') ? 'accent' : 'dark') : 'dark'}
+                    icon={loading ? "autorenew" : "done_all"}
+                >
+                    {loading ? "SAVING..." : "CREATE ACCOUNT"}
+                </Button>
+            </div>
         </motion.div>
     );
 };
