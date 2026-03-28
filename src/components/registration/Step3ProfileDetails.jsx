@@ -4,6 +4,7 @@ import Input from '../ui/Input';
 import Select from '../ui/Select';
 import Button from '../ui/Button';
 import AvatarPicker from './AvatarPicker';
+import DateInput from '../ui/DateInput';
 import LiveLocationDetector from './LiveLocationDetector';
 import { STATES_DATA } from '../../constants/registration';
 import { checkAvailability } from '../../services/api';
@@ -85,13 +86,10 @@ const Step3ProfileDetails = ({ formData, onChange, onSubmit, loading, error, fie
                 />
 
                 <div className="grid grid-cols-2 gap-4">
-                    <Input 
+                    <DateInput 
                         label="Date of Birth"
-                        type="date"
-                        name="dob"
                         value={formData.dob}
                         onChange={onChange}
-                        icon="calendar_today"
                         error={fieldErrors.dob}
                         success={isDOBValid}
                         colors={colors}
