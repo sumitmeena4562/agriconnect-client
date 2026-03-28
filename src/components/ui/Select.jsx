@@ -43,15 +43,6 @@ const Select = forwardRef(({
                             autorenew
                         </motion.span>
                     )}
-                    {success && !error && !loading && (
-                        <motion.span 
-                            initial={{ scale: 0 }} 
-                            animate={{ scale: 1 }} 
-                            className={`material-symbols-outlined ${activeColors.text} text-sm font-black`}
-                        >
-                            check_circle
-                        </motion.span>
-                    )}
                 </div>
             </div>
 
@@ -77,9 +68,22 @@ const Select = forwardRef(({
                         </option>
                     ))}
                 </select>
-                <span className={`material-symbols-outlined absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none group-focus-within/select:rotate-180 transition-transform font-bold text-base ${error ? 'text-red-400' : success ? activeColors.text : 'text-slate-300'}`}>
-                    expand_more
-                </span>
+                <div className="absolute right-3 top-1/2 -translate-y-1/2 flex items-center gap-2 pointer-events-none">
+                    {success && !error && !loading && (
+                        <motion.div 
+                            initial={{ scale: 0 }} 
+                            animate={{ scale: 1 }}
+                            className={`w-4 h-4 ${activeColors.bg} text-white rounded-full flex items-center justify-center border border-white shadow-sm shrink-0`}
+                        >
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="5" strokeLinecap="round" strokeLinejoin="round" className="w-2.5 h-2.5">
+                                <polyline points="20 6 9 17 4 12" />
+                            </svg>
+                        </motion.div>
+                    )}
+                    <span className={`material-symbols-outlined transition-transform font-bold text-base group-focus-within/select:rotate-180 ${error ? 'text-red-400' : success ? activeColors.text : 'text-slate-300'}`}>
+                        expand_more
+                    </span>
+                </div>
             </div>
             <AnimatePresence>
                 {error && (

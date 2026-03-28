@@ -63,15 +63,6 @@ const Input = forwardRef(({
                             autorenew
                         </motion.span>
                     )}
-                    {success && !error && !loading && (
-                        <motion.span 
-                            initial={{ scale: 0 }} 
-                            animate={{ scale: 1 }} 
-                            className={`material-symbols-outlined ${activeColors.text} text-sm font-black`}
-                        >
-                            check_circle
-                        </motion.span>
-                    )}
                 </div>
             </div>
             
@@ -114,6 +105,18 @@ const Input = forwardRef(({
                     className="w-full bg-transparent border-none outline-none font-bold text-slate-800 text-[14px] placeholder:text-slate-300/80 tracking-tight"
                     {...props}
                 />
+
+                {success && !error && !loading && (
+                    <motion.div 
+                        initial={{ scale: 0 }} 
+                        animate={{ scale: 1 }}
+                        className={`w-4 h-4 ${activeColors.bg} text-white rounded-full flex items-center justify-center border border-white shadow-sm ml-2 shrink-0`}
+                    >
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="5" strokeLinecap="round" strokeLinejoin="round" className="w-2.5 h-2.5">
+                            <polyline points="20 6 9 17 4 12" />
+                        </svg>
+                    </motion.div>
+                )}
             </div>
             
             {/* Password Strength Meter */}

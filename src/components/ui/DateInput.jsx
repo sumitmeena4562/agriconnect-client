@@ -51,17 +51,6 @@ const DateInput = ({ label, value, onChange, error, success, colors }) => {
                         {label}
                     </label>
                 )}
-                {success && !error && (
-                    <motion.div 
-                        initial={{ scale: 0 }} 
-                        animate={{ scale: 1 }}
-                        className={`w-4 h-4 ${activeColors.bg} text-white rounded-full flex items-center justify-center border border-white shadow-sm`}
-                    >
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="5" strokeLinecap="round" strokeLinejoin="round" className="w-2.5 h-2.5">
-                            <polyline points="20 6 9 17 4 12" />
-                        </svg>
-                    </motion.div>
-                )}
             </div>
 
             <div className={`
@@ -81,6 +70,18 @@ const DateInput = ({ label, value, onChange, error, success, colors }) => {
                     onChange={handleInput}
                     className="flex-1 bg-transparent border-none outline-none font-bold text-slate-800 text-[14px] placeholder:text-slate-300 tracking-wider"
                 />
+
+                {success && !error && (
+                    <motion.div 
+                        initial={{ scale: 0 }} 
+                        animate={{ scale: 1 }}
+                        className={`w-4 h-4 ${activeColors.bg} text-white rounded-full flex items-center justify-center border border-white shadow-sm ml-2 shrink-0`}
+                    >
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="5" strokeLinecap="round" strokeLinejoin="round" className="w-2.5 h-2.5">
+                            <polyline points="20 6 9 17 4 12" />
+                        </svg>
+                    </motion.div>
+                )}
             </div>
             {error && <p className="text-red-500 text-[10px] font-black px-1 uppercase tracking-tight">{error}</p>}
         </div>
