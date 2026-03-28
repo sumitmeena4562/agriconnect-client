@@ -175,13 +175,13 @@ const CustomerRegistration = () => {
         setFormData({ ...formData, otp: newOtp });
 
         if (value && index < 5) {
-            otpRefs.current[index + 1].focus();
+            otpRefs.current[index + 1]?.focus();
         }
     };
 
     const handleOtpKeyDown = (index, e) => {
         if (e.key === 'Backspace' && !formData.otp[index] && index > 0) {
-            otpRefs.current[index - 1].focus();
+            otpRefs.current[index - 1]?.focus();
         }
     };
 

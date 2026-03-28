@@ -21,7 +21,8 @@ const FarmerRegistration = () => {
     const navigate = useNavigate();
     const {
         step, loading, error, timer, canResend, verificationToken, fieldErrors,
-        formData, setFormData, handleChange, handleSendOtp, handleVerifyOtp, handleSubmit: hookSubmit, prevStep
+        formData, setFormData, handleChange, handleSendOtp, handleVerifyOtp, handleSubmit: hookSubmit, prevStep,
+        otpRefs, handleOtpChange, handleOtpKeyDown
     } = useRegistrationForm({
         mobile: '',
         otp: ['', '', '', '', '', ''],
@@ -50,23 +51,6 @@ const FarmerRegistration = () => {
 
     const handleSubmit = () => {
         hookSubmit(REGISTRATION_ROLES.FARMER, () => setSuccess(true));
-    };
-
-    const handleOtpChange = (index, value) => {
-        if (!/^\d*$/.test(value)) return;
-        const newOtp = [...formData.otp];
-        newOtp[index] = value.slice(-1);
-        setFormData({ ...formData, otp: newOtp });
-
-        if (value && index < 5) {
-            otpRefs.current[index + 1].focus();
-        }
-    };
-
-    const handleOtpKeyDown = (index, e) => {
-        if (e.key === 'Backspace' && !formData.otp[index] && index > 0) {
-            otpRefs.current[index - 1].focus();
-        }
     };
 
     return (
@@ -127,14 +111,18 @@ const FarmerRegistration = () => {
 
                                     {step === 2 && (
                                         <Step2OTP 
+                                            mobile={formData.mobile}
                                             otp={formData.otp}
-                                            onChange={setFormData}
+                                            onOtpChange={handleOtpChange}
+                                            onOtpKeyDown={handleOtpKeyDown}
+                                            otpRefs={otpRefs}
                                             onVerify={handleVerifyOtp}
                                             onResend={handleSendOtp}
                                             timer={timer}
                                             canResend={canResend}
                                             loading={loading}
                                             error={error}
+                                            onBack={prevStep}
                                         />
                                     )}
 

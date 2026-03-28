@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { 
     sendOtp as apiSendOtp, 
     verifyOtp as apiVerifyOtp, 
@@ -22,6 +22,24 @@ export const useRegistrationForm = (initialData) => {
     const [canResend, setCanResend] = useState(false);
     const [verificationToken, setVerificationToken] = useState("");
     const [formData, setFormData] = useState(initialData);
+    const otpRefs = useRef([]);
+
+    const handleOtpChange = (index, value) => {
+        if (!/^\d*$/.test(value)) return;
+        const newOtp = [...formData.otp];
+        newOtp[index] = value.slice(-1);
+        setFormData(prev => ({ ...prev, otp: newOtp }));
+
+        if (value && index < 5) {
+            otpRefs.current[index + 1]?.focus();
+        }
+    };
+
+    const handleOtpKeyDown = (index, e) => {
+        if (e.key === 'Backspace' && !formData.otp[index] && index > 0) {
+            otpRefs.current[index - 1]?.focus();
+        }
+    };
 
     // Timer Logic for OTP
     useEffect(() => {
@@ -173,9 +191,12 @@ export const useRegistrationForm = (initialData) => {
         canResend, setCanResend,
         verificationToken, setVerificationToken,
         formData, setFormData,
+        otpRefs,
         handleChange,
         handleSendOtp,
         handleVerifyOtp,
+        handleOtpChange,
+        handleOtpKeyDown,
         handleSubmit,
         prevStep
     };

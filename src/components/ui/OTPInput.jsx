@@ -15,7 +15,7 @@ const OTPInput = ({
                 {otp.map((digit, i) => (
                     <input 
                         key={i}
-                        ref={el => otpRefs.current[i] = el}
+                        ref={el => { if (otpRefs?.current) otpRefs.current[i] = el; }}
                         type="tel"
                         maxLength="1"
                         value={digit}
