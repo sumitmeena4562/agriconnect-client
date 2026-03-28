@@ -73,15 +73,19 @@ const VendorRegistration = () => {
     };
 
     const handleSendOtp = async () => {
-        const mobileErr = validateMobile(formData.mobile);
-        if (mobileErr) {
-            setFieldErrors({ mobile: mobileErr });
+        const { mobile, email } = formData;
+        const mobileErr = /^[6-9]\d{9}$/.test(mobile) ? "" : "Enter valid 10-digit mobile";
+        const emailErr = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email) ? "" : "Enter valid email";
+
+        if (mobileErr || emailErr) {
+            setFieldErrors({ mobile: mobileErr, email: emailErr });
             return;
         }
+
         setLoading(true);
         setError("");
         try {
-            const response = await sendOtp(formData.mobile);
+            const response = await sendOtp({ mobile, email });
             if (response.data.success) {
                 setTimer(30);
                 setCanResend(false);
@@ -95,6 +99,7 @@ const VendorRegistration = () => {
     };
 
     const handleVerifyOtp = async () => {
+        if (formData.otp.join('').length < 6) return;
         setLoading(true);
         setError("");
         try {
@@ -102,6 +107,10 @@ const VendorRegistration = () => {
             const response = await verifyOtp(formData.mobile, otpCode);
             if (response.data.success) {
                 setVerificationToken(response.data.verificationToken);
+                // Pre-fill email if verified
+                if (response.data.email) {
+                    setFormData(prev => ({ ...prev, email: response.data.email }));
+                }
                 setStep(3);
             }
         } catch (err) {
@@ -266,7 +275,7 @@ const VendorRegistration = () => {
 
                                             <div className="space-y-4">
                                                 <Input 
-                                                    label="Business Phone"
+                                                    label="Business Mobile"
                                                     name="mobile"
                                                     maxLength="10"
                                                     placeholder="00000 00000"
@@ -277,6 +286,17 @@ const VendorRegistration = () => {
                                                     pattern="[0-9]*"
                                                     autoFocus
                                                     error={fieldErrors.mobile}
+                                                />
+
+                                                <Input 
+                                                    label="Business Email"
+                                                    name="email"
+                                                    type="email"
+                                                    placeholder="biz@example.com"
+                                                    value={formData.email}
+                                                    onChange={handleChange}
+                                                    icon="mail"
+                                                    error={fieldErrors.email}
                                                 />
 
                                                 <Button 

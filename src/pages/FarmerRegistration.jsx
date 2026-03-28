@@ -116,6 +116,7 @@ const FarmerRegistration = () => {
                                     {step === 1 && (
                                         <Step1Mobile 
                                             mobile={formData.mobile}
+                                            email={formData.email}
                                             onChange={handleChange}
                                             onContinue={handleSendOtp}
                                             loading={loading}

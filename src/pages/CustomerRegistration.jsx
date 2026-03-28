@@ -73,15 +73,19 @@ const CustomerRegistration = () => {
     };
 
     const handleSendOtp = async () => {
-        const mobileErr = validateMobile(formData.mobile);
-        if (mobileErr) {
-            setFieldErrors({ mobile: mobileErr });
+        const { mobile, email } = formData;
+        const mobileErr = /^[6-9]\d{9}$/.test(mobile) ? "" : "Enter valid 10-digit mobile";
+        const emailErr = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email) ? "" : "Enter valid email";
+
+        if (mobileErr || emailErr) {
+            setFieldErrors({ mobile: mobileErr, email: emailErr });
             return;
         }
+
         setLoading(true);
         setError("");
         try {
-            const response = await sendOtp(formData.mobile);
+            const response = await sendOtp({ mobile, email });
             if (response.data.success) {
                 setTimer(30);
                 setCanResend(false);
@@ -95,6 +99,7 @@ const CustomerRegistration = () => {
     };
 
     const handleVerifyOtp = async () => {
+        if (formData.otp.join('').length < 6) return;
         setLoading(true);
         setError("");
         try {
@@ -102,6 +107,10 @@ const CustomerRegistration = () => {
             const response = await verifyOtp(formData.mobile, otpCode);
             if (response.data.success) {
                 setVerificationToken(response.data.verificationToken);
+                // Pre-fill email if verified
+                if (response.data.email) {
+                    setFormData(prev => ({ ...prev, email: response.data.email }));
+                }
                 setStep(3);
             }
         } catch (err) {
@@ -277,6 +286,17 @@ const CustomerRegistration = () => {
                                                     pattern="[0-9]*"
                                                     autoFocus
                                                     error={fieldErrors.mobile}
+                                                />
+
+                                                <Input 
+                                                    label="Email Address"
+                                                    name="email"
+                                                    type="email"
+                                                    placeholder="name@example.com"
+                                                    value={formData.email}
+                                                    onChange={handleChange}
+                                                    icon="mail"
+                                                    error={fieldErrors.email}
                                                 />
 
                                                 <Button 

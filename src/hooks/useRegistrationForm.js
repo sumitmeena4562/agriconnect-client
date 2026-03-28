@@ -47,18 +47,23 @@ export const useRegistrationForm = (initialData) => {
     };
 
     const handleSendOtp = async () => {
-        const mobileErr = validateMobile(formData.mobile);
-        if (mobileErr) {
-            setFieldErrors({ mobile: mobileErr });
-            toast.error(mobileErr);
+        const { mobile, email } = formData;
+        const mobileErr = /^[6-9]\d{9}$/.test(mobile) ? "" : "Enter valid 10-digit mobile";
+        const emailErr = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email) ? "" : "Enter valid email";
+
+        if (mobileErr || emailErr) {
+            setFieldErrors({ mobile: mobileErr, email: emailErr });
+            toast.error("Please fill all details correctly");
             return;
         }
+
         setLoading(true);
         setError("");
         try {
-            const response = await apiSendOtp(formData.mobile);
+            // Send both to backend
+            const response = await apiSendOtp({ mobile, email });
             if (response.data.success) {
-                toast.success("OTP sent successfully!");
+                toast.success(response.data.message || "OTP sent to your email!");
                 setTimer(30);
                 setCanResend(false);
                 setStep(2);
@@ -83,8 +88,12 @@ export const useRegistrationForm = (initialData) => {
             const otpCode = formData.otp.join('');
             const response = await apiVerifyOtp(formData.mobile, otpCode);
             if (response.data.success) {
-                toast.success("Mobile verified!");
+                toast.success("Identity verified!");
                 setVerificationToken(response.data.verificationToken);
+                // Pre-fill email if it was verified
+                if (response.data.email) {
+                    setFormData(prev => ({ ...prev, email: response.data.email }));
+                }
                 setStep(3);
             }
         } catch (err) {
