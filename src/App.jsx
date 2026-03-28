@@ -6,6 +6,7 @@ const FarmerRegistration = React.lazy(() => import('./pages/FarmerRegistration')
 const CustomerRegistration = React.lazy(() => import('./pages/CustomerRegistration'));
 const VendorRegistration = React.lazy(() => import('./pages/VendorRegistration'));
 const ThemePreview = React.lazy(() => import('./pages/ThemePreview'));
+const Login = React.lazy(() => import('./pages/Login'));
 
 const App = () => {
   return (
@@ -13,6 +14,7 @@ const App = () => {
       <Routes>
         <Route path="/" element={<LandingPage />} />
         {/* Top-level routes to match existing Navbar/Footer links */}
+        <Route path="/login" element={<Login />} />
         <Route path="/farmer-registration" element={<FarmerRegistration />} />
         <Route path="/customer-registration" element={<CustomerRegistration />} />
         <Route path="/vendor-registration" element={<VendorRegistration />} />

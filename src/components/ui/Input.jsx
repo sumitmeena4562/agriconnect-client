@@ -23,7 +23,7 @@ const Input = forwardRef(({
     error = null,
     success = false,
     loading = false,
-    strength = 0,
+    strength = null,
     fullWidth = true,
     autoFocus = false,
     colors = null,
@@ -136,7 +136,7 @@ const Input = forwardRef(({
             </div>
             
             {/* Password Strength Meter */}
-            {isPassword && value && (
+            {isPassword && value && strength !== null && (
                 <div className="px-1 space-y-1">
                     <div className="h-1 w-full bg-slate-100 rounded-full overflow-hidden">
                         <motion.div 

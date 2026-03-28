@@ -209,8 +209,8 @@ const Header = () => {
               </div>
 
               <div className="hidden sm:flex items-center gap-1.5 lg:gap-2">
-                <Button to="/login" variant="outline" size="md" className="!rounded-xl border-none hover:bg-slate-50">Log in</Button>
-                <Button to="/farmer-registration" variant="primary" size="md" className="!rounded-xl !px-5 whitespace-nowrap">Join Free</Button>
+                <Button to="/farmer-registration" variant="outline" size="md" className="!rounded-xl border-none hover:bg-slate-50">Register</Button>
+                <Button to="/login" variant="primary" size="md" className="!rounded-xl !px-5 whitespace-nowrap outline-none focus:outline-none focus:ring-4 focus:ring-primary-500/20">Login</Button>
               </div>
 
               <button onClick={() => setIsMenuOpen(true)} className="md:hidden w-10 h-10 flex items-center justify-center rounded-xl bg-slate-900 text-white shadow-xl">
@@ -275,9 +275,9 @@ const Header = () => {
               </nav>
 
               <div className="space-y-4 pt-6 border-t border-gray-50">
-                  <Button to="/farmer-registration" onClick={() => setIsMenuOpen(false)} fullWidth size="lg" className="!rounded-2xl">FARMER REGISTRATION</Button>
+                  <Button to="/login" onClick={() => setIsMenuOpen(false)} fullWidth size="lg" className="!rounded-2xl">LOGIN</Button>
                   <div className="grid grid-cols-2 gap-4">
-                      <Button to="/login" variant="dark" fullWidth className="!rounded-xl">LOGIN</Button>
+                      <Button to="/farmer-registration" onClick={() => setIsMenuOpen(false)} variant="dark" fullWidth className="!rounded-xl">REGISTER</Button>
                       <Button href="https://wa.me/91000000000" variant="accent" fullWidth className="!rounded-xl !bg-[#25D366] !shadow-none">WHATSAPP</Button>
                   </div>
               </div>
