@@ -166,6 +166,7 @@ const Step3ProfileDetails = ({ formData, onChange, onSubmit, loading, error, fie
                     <LiveLocationDetector 
                         onLocationDetected={(coords) => onChange({ target: { name: 'location', value: coords } })} 
                         colors={colors}
+                        pincode={formData.pincode}
                     />
 
                     <div className="pt-2 border-t border-slate-50 mt-2 space-y-4">
