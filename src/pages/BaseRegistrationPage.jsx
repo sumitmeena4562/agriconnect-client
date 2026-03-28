@@ -190,19 +190,60 @@ const BaseRegistrationPage = ({ role, config }) => {
 };
 
 const SuccessScreen = ({ fullName, onDashboardClick, config, colors, themeColor }) => (
-    <motion.div initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} className="flex flex-col items-center text-center space-y-6">
-        <div className={`w-16 h-16 ${colors.lightBg} rounded-full flex items-center justify-center ${colors.text}`}>
-            <span className="material-symbols-outlined text-[40px]">check_circle</span>
+    <motion.div 
+        initial={{ opacity: 0, scale: 0.9, y: 20 }} 
+        animate={{ opacity: 1, scale: 1, y: 0 }} 
+        transition={{ duration: 0.6, ease: [0.23, 1, 0.32, 1] }}
+        className="flex flex-col items-center text-center space-y-8 py-4"
+    >
+        <div className="relative">
+            <motion.div 
+                initial={{ scale: 0 }}
+                animate={{ scale: 1 }}
+                transition={{ delay: 0.2, type: "spring", stiffness: 200, damping: 15 }}
+                className={`w-20 h-20 ${colors.bg} rounded-full flex items-center justify-center text-white shadow-2xl shadow-emerald-500/20`}
+            >
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="4" strokeLinecap="round" strokeLinejoin="round" className="w-10 h-10">
+                    <polyline points="20 6 9 17 4 12" />
+                </svg>
+            </motion.div>
+            <motion.div 
+                animate={{ scale: [1, 1.2, 1], opacity: [0.5, 0, 0.5] }}
+                transition={{ duration: 2, repeat: Infinity }}
+                className={`absolute inset-0 ${colors.bg} rounded-full -z-10`}
+            />
         </div>
+
         <div className="space-y-2">
-            <h1 className="text-2xl font-bold text-slate-900">{(config?.title || "Welcome!").replace('{name}', fullName.split(' ')[0] || 'Member')}</h1>
-            <p className="text-slate-500 text-sm">{config?.subtitle || "Registration complete."}</p>
+            <h1 className="text-3xl font-bold text-slate-900 tracking-tight leading-none">
+                {(config?.title || "Welcome!").replace('{name}', fullName.split(' ')[0] || 'Member')}
+            </h1>
+            <p className="text-slate-500 text-sm max-w-[280px] mx-auto leading-relaxed">
+                {config?.subtitle || "Your AgriConnect account has been created successfully."}
+            </p>
         </div>
-        <div className="w-full space-y-4 pt-4">
-            <Button onClick={onDashboardClick} fullWidth variant={themeColor === 'primary' ? 'primary' : 'dark'} icon={config?.icon || 'done_all'}>
-                {config?.buttonText || "CONTINUE"}
+
+        <div className="w-full space-y-4 pt-2">
+            <Button 
+                onClick={onDashboardClick} 
+                fullWidth 
+                variant={themeColor === 'primary' ? 'primary' : 'dark'} 
+                size="lg"
+                icon={(
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="4" strokeLinecap="round" strokeLinejoin="round" className="w-4 h-4">
+                        <line x1="5" y1="12" x2="19" y2="12"></line>
+                        <polyline points="12 5 19 12 12 19"></polyline>
+                    </svg>
+                )}
+            >
+                {config?.buttonText || "GO TO DASHBOARD"}
             </Button>
-            <p className="text-slate-400 text-[10px] italic">Redirecting automatically in 5s...</p>
+            <div className="flex items-center justify-center gap-2">
+                <span className="w-1.5 h-1.5 bg-slate-200 rounded-full animate-bounce" style={{ animationDelay: '0s' }} />
+                <span className="w-1.5 h-1.5 bg-slate-200 rounded-full animate-bounce" style={{ animationDelay: '0.2s' }} />
+                <span className="w-1.5 h-1.5 bg-slate-200 rounded-full animate-bounce" style={{ animationDelay: '0.4s' }} />
+                <p className="text-slate-400 text-[10px] font-bold uppercase tracking-widest pl-2">Syncing your workspace...</p>
+            </div>
         </div>
     </motion.div>
 );
