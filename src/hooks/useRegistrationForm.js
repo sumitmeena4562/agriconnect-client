@@ -9,7 +9,9 @@ import {
     validateEmail, 
     validatePincode, 
     validateName, 
-    validatePassword 
+    validatePassword,
+    validateDOB,
+    validateGender
 } from '../utils/validation';
 import { toast } from 'react-hot-toast';
 
@@ -33,6 +35,19 @@ export const useRegistrationForm = (initialData) => {
         if (value && index < 5) {
             otpRefs.current[index + 1]?.focus();
         }
+    };
+
+    const handleOtpPaste = (pastedData) => {
+        const digits = pastedData.split('').slice(0, 6);
+        const newOtp = [...formData.otp];
+        digits.forEach((char, i) => {
+            newOtp[i] = char;
+        });
+        setFormData(prev => ({ ...prev, otp: newOtp }));
+        
+        // Focus the last filled input or the first empty one
+        const nextIndex = Math.min(digits.length, 5);
+        otpRefs.current[nextIndex]?.focus();
     };
 
     const handleOtpKeyDown = (index, e) => {
@@ -66,22 +81,21 @@ export const useRegistrationForm = (initialData) => {
 
     const handleSendOtp = async () => {
         const { mobile, email } = formData;
-        const mobileErr = /^[6-9]\d{9}$/.test(mobile) ? "" : "Enter valid 10-digit mobile";
-        const emailErr = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email) ? "" : "Enter valid email";
+        const mobileErr = validateMobile(mobile);
+        const emailErr = validateEmail(email);
 
         if (mobileErr || emailErr) {
             setFieldErrors({ mobile: mobileErr, email: emailErr });
-            toast.error("Please fill all details correctly");
+            toast.error("Please provide valid details");
             return;
         }
 
         setLoading(true);
         setError("");
         try {
-            // Send both to backend
             const response = await apiSendOtp({ mobile, email });
             if (response.data.success) {
-                toast.success(response.data.message || "OTP sent to your email!");
+                toast.success(response.data.message || "OTP sent successfully!");
                 setTimer(30);
                 setCanResend(false);
                 setStep(2);
@@ -106,16 +120,15 @@ export const useRegistrationForm = (initialData) => {
             const otpCode = formData.otp.join('');
             const response = await apiVerifyOtp(formData.mobile, otpCode);
             if (response.data.success) {
-                toast.success("Identity verified!");
+                toast.success("Identity verified successfully!");
                 setVerificationToken(response.data.verificationToken);
-                // Pre-fill email if it was verified
                 if (response.data.email) {
                     setFormData(prev => ({ ...prev, email: response.data.email }));
                 }
                 setStep(3);
             }
         } catch (err) {
-            const msg = err.response?.data?.message || "Invalid OTP";
+            const msg = err.response?.data?.message || "Invalid OTP code";
             setError(msg);
             toast.error(msg);
         } finally {
@@ -129,18 +142,22 @@ export const useRegistrationForm = (initialData) => {
         const emailErr = validateEmail(formData.email);
         const pinErr = validatePincode(formData.pincode);
         const passErr = validatePassword(formData.password);
+        const dobErr = validateDOB(formData.dob);
+        const genderErr = validateGender(formData.gender);
         
         if (nameErr) errors.fullName = nameErr;
         if (emailErr) errors.email = emailErr;
         if (pinErr) errors.pincode = pinErr;
         if (passErr) errors.password = passErr;
+        if (dobErr) errors.dob = dobErr;
+        if (genderErr) errors.gender = genderErr;
         if (formData.password !== formData.confirmPassword) errors.confirmPassword = "Passwords do not match";
-        if (!formData.state) errors.state = "Required";
-        if (!formData.district) errors.district = "Required";
+        if (!formData.state) errors.state = "State is required";
+        if (!formData.district) errors.district = "District is required";
 
         if (Object.keys(errors).length > 0) {
             setFieldErrors(errors);
-            toast.error("Please fix the errors in the form");
+            toast.error("Please fix the validation errors");
             return;
         }
 
@@ -157,6 +174,10 @@ export const useRegistrationForm = (initialData) => {
                 district: formData.district,
                 pincode: formData.pincode,
                 language: formData.language,
+                gender: formData.gender,
+                dob: formData.dob,
+                profilePic: formData.profilePic,
+                location: formData.location,
                 verificationToken: verificationToken
             };
 
@@ -196,6 +217,7 @@ export const useRegistrationForm = (initialData) => {
         handleSendOtp,
         handleVerifyOtp,
         handleOtpChange,
+        handleOtpPaste,
         handleOtpKeyDown,
         handleSubmit,
         prevStep

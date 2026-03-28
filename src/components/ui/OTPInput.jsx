@@ -5,16 +5,25 @@ const OTPInput = ({
     otp, 
     onChange, 
     onKeyDown, 
+    onPaste,
     otpRefs, 
     className = '',
     error = null,
+    colors = null,
     ...props 
 }) => {
+    // Default theme colors
+    const activeColors = colors || { text: 'text-primary-500', bg: 'bg-primary-500', lightBg: 'bg-primary-50' };
+    const borderClass = activeColors.text.replace('text-', 'border-');
+
+    // ... (handlePaste remains same)
+    // ...
+
     return (
         <div className={`space-y-4 ${className}`}>
             <motion.div 
                 className="grid grid-cols-6 gap-2"
-                animate={error ? { x: [-2, 2, -2, 2, 0] } : {}}
+                animate={error ? { x: [-4, 4, -4, 4, 0], scale: [1, 1.02, 1] } : {}}
                 transition={{ duration: 0.4 }}
             >
                 {otp.map((digit, i) => (
@@ -25,15 +34,16 @@ const OTPInput = ({
                         type="tel"
                         maxLength="1"
                         value={digit}
+                        onPaste={handlePaste}
                         onChange={(e) => onChange(i, e.target.value)}
                         onKeyDown={(e) => onKeyDown(i, e)}
                         className={`
                             w-full aspect-square bg-slate-50 border-2 rounded-xl 
                             text-center font-black text-xl text-slate-800 
-                            focus:border-primary-500 focus:bg-white 
-                            focus:shadow-[0_10px_15px_-3px_rgba(22,163,74,0.1),0_4px_6px_-4px_rgba(22,163,74,0.1)]
-                            outline-none transition-all duration-300
-                            ${error ? 'border-red-300 bg-red-50/20' : 'border-slate-100'}
+                            focus:bg-white outline-none transition-all duration-300
+                            ${error ? 'border-red-300 bg-red-50/20 text-red-500' : 
+                              digit ? `${borderClass.replace('-600', '-200')} ${activeColors.lightBg}/10` : 
+                              `border-slate-100 focus:${borderClass}`}
                         `}
                         inputMode="numeric"
                         pattern="[0-9]*"

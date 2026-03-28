@@ -15,42 +15,62 @@ const Input = forwardRef(({
     prefix = null,
     error = null,
     success = false,
+    loading = false,
+    strength = 0,
     fullWidth = true,
     autoFocus = false,
+    colors = null,
     ...props 
 }, ref) => {
     const widthStyle = fullWidth ? "w-full" : "";
     const inputId = id || name || `input-${Math.random().toString(36).substring(2, 9)}`;
     
+    // Default to primary if no colors passed
+    const activeColors = colors || { text: 'text-primary-500', bg: 'bg-primary-500', lightBg: 'bg-primary-50' };
+
+    // Success colors based on the theme
+    const successBorderClass = activeColors.text.replace('text-', 'border-');
+    const successBgClass = activeColors.lightBg;
+
     return (
-        <div className={`space-y-1 ${widthStyle} ${className}`}>
+        <div className={`space-y-1.5 ${widthStyle} ${className}`}>
             <div className="flex items-center justify-between px-1">
                 {label && (
                     <label htmlFor={inputId} className="text-[11px] font-black text-slate-500 uppercase tracking-widest opacity-70">
                         {label}
                     </label>
                 )}
-                {success && !error && (
-                    <motion.span 
-                        initial={{ scale: 0 }} 
-                        animate={{ scale: 1 }} 
-                        className="material-symbols-outlined text-green-500 text-sm font-black"
-                    >
-                        check_circle
-                    </motion.span>
-                )}
+                <div className="flex items-center gap-2">
+                    {loading && (
+                        <motion.span 
+                            animate={{ rotate: 360 }}
+                            transition={{ repeat: Infinity, duration: 1, ease: "linear" }}
+                            className={`material-symbols-outlined ${activeColors.text} text-xs font-black`}
+                        >
+                            autorenew
+                        </motion.span>
+                    )}
+                    {success && !error && !loading && (
+                        <motion.span 
+                            initial={{ scale: 0 }} 
+                            animate={{ scale: 1 }} 
+                            className={`material-symbols-outlined ${activeColors.text} text-sm font-black`}
+                        >
+                            check_circle
+                        </motion.span>
+                    )}
+                </div>
             </div>
             
             <div className={`
                 group flex items-center bg-slate-50 border-2 rounded-xl px-3 py-1.5 
-                focus-within:bg-white focus-within:shadow-[0_0_0_4px_rgba(22,163,74,0.06)] 
-                transition-all duration-300 min-h-[48px]
+                focus-within:bg-white transition-all duration-300 min-h-[48px]
                 ${error ? 'border-red-300 bg-red-50/10 focus-within:border-red-500' : 
-                  success ? 'border-green-300 bg-green-50/10 focus-within:border-green-500' : 
-                  'border-slate-100 focus-within:border-primary-500'}
+                  success ? `${successBorderClass.replace('-600', '-300')} ${successBgClass}/10 focus-within:${successBorderClass}` : 
+                  `border-slate-100 focus-within:${activeColors.text.replace('text-', 'border-')}`}
             `}>
                 {icon && (
-                    <span className={`material-symbols-outlined mr-2.5 text-base font-bold transition-colors ${error ? 'text-red-400' : success ? 'text-green-500' : 'text-slate-300'}`}>
+                    <span className={`material-symbols-outlined mr-2.5 text-base font-bold transition-colors ${error ? 'text-red-400' : success ? activeColors.text : 'text-slate-300'}`}>
                         {icon}
                     </span>
                  )}
@@ -76,6 +96,19 @@ const Input = forwardRef(({
                 />
             </div>
             
+            {/* Password Strength Meter */}
+            {type === 'password' && value && (
+                <div className="px-1 space-y-1">
+                    <div className="h-1 w-full bg-slate-100 rounded-full overflow-hidden">
+                        <motion.div 
+                            initial={{ width: 0 }}
+                            animate={{ width: `${strength}%` }}
+                            className={`h-full transition-colors duration-500 ${getStrengthColor(strength)}`}
+                        />
+                    </div>
+                </div>
+            )}
+
             <AnimatePresence>
                 {error && (
                     <motion.p 

@@ -1,27 +1,23 @@
-import { Routes, Route } from 'react-router-dom';
-import ThemePreview from './pages/ThemePreview';
+import React from 'react';
+import { Routes, Route, Navigate } from 'react-router-dom';
 import LandingPage from './pages/LandingPage';
-import './App.css';
 import FarmerRegistration from './pages/FarmerRegistration';
-import VendorRegistration from './pages/VendorRegistration';
 import CustomerRegistration from './pages/CustomerRegistration';
+import VendorRegistration from './pages/VendorRegistration';
+import ThemePreview from './pages/ThemePreview';
 
-import { Toaster } from 'react-hot-toast';
-
-function App() {
+const App = () => {
   return (
-    <>
-      <Toaster position="top-center" toastOptions={{ duration: 4000, style: { background: '#334155', color: '#fff', fontSize: '14px', borderRadius: '12px' } }} />
-      <Routes>
-        <Route path="/" element={<LandingPage />} />
-        <Route path="/theme" element={<ThemePreview />} />
-        <Route path="/farmer-registration" element={<FarmerRegistration/>} />
-        <Route path="/vendor-registration" element={<VendorRegistration/>} />
-        <Route path="/customer-registration" element={<CustomerRegistration/>} />
-        <Route path="/dashboard" element={<div className="p-8"><h1>Dashboard Coming Soon...</h1></div>} />
-      </Routes>
-    </>
+    <Routes>
+      <Route path="/" element={<LandingPage />} />
+      {/* Top-level routes to match existing Navbar/Footer links */}
+      <Route path="/farmer-registration" element={<FarmerRegistration />} />
+      <Route path="/customer-registration" element={<CustomerRegistration />} />
+      <Route path="/vendor-registration" element={<VendorRegistration />} />
+      <Route path="/theme" element={<ThemePreview />} />
+      <Route path="*" element={<Navigate to="/" replace />} />
+    </Routes>
   );
-}
+};
 
 export default App;

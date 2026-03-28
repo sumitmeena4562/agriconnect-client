@@ -12,10 +12,12 @@ const Select = forwardRef(({
     className = '', 
     error = null,
     fullWidth = true,
+    colors = null,
     ...props 
 }, ref) => {
     const widthStyle = fullWidth ? "w-full" : "";
     const selectId = id || name || `select-${Math.random().toString(36).substring(2, 9)}`;
+    const focusBorderClass = colors?.text ? colors.text.replace('text-', 'border-') : 'border-primary-500';
 
     return (
         <div className={`space-y-1 ${widthStyle} ${className}`}>
@@ -35,10 +37,10 @@ const Select = forwardRef(({
                     className={`
                         w-full bg-slate-50 border-2 border-slate-100 rounded-xl px-3 py-1.5 
                         font-black text-slate-800 text-[13px] 
-                        appearance-none focus:border-primary-500 
-                        transition-all outline-none 
+                        appearance-none transition-all outline-none 
                         disabled:opacity-30
-                        ${error ? 'border-red-300 bg-red-50/30' : ''}
+                        ${error ? 'border-red-300 bg-red-50/30 focus:border-red-500' : `focus:${focusBorderClass}`}
+                        ${className}
                     `}
                     {...props}
                 >
