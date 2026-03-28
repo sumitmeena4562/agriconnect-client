@@ -16,8 +16,13 @@ const OTPInput = ({
     const activeColors = colors || { text: 'text-primary-500', bg: 'bg-primary-500', lightBg: 'bg-primary-50' };
     const borderClass = activeColors.text.replace('text-', 'border-');
 
-    // ... (handlePaste remains same)
-    // ...
+    const handlePaste = (e) => {
+        e.preventDefault();
+        const pastedData = e.clipboardData.getData('text/plain').replace(/\D/g, '').slice(0, 6);
+        if (pastedData && onPaste) {
+            onPaste(pastedData);
+        }
+    };
 
     return (
         <div className={`space-y-4 ${className}`}>
