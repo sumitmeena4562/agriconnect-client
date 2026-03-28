@@ -122,35 +122,8 @@ const Step3ProfileDetails = ({ formData, onChange, onSubmit, loading, error, fie
                     />
                 </div>
 
-                {/* Right Column: Security & Location */}
+                {/* Right Column: Location & Security */}
                 <div className="space-y-4">
-                    <Input 
-                        label="Password"
-                        type="password"
-                        name="password"
-                        value={formData.password}
-                        onChange={onChange}
-                        placeholder="Min 8 chars"
-                        icon="lock"
-                        error={fieldErrors.password}
-                        success={isPasswordValid}
-                        strength={passwordStrength}
-                        colors={colors}
-                    />
-
-                    <Input 
-                        label="Confirm Password"
-                        type="password"
-                        name="confirmPassword"
-                        value={formData.confirmPassword}
-                        onChange={onChange}
-                        placeholder="Repeat"
-                        icon="lock_reset"
-                        error={fieldErrors.confirmPassword}
-                        success={isConfirmValid}
-                        colors={colors}
-                    />
-
                     <Select 
                         label="State"
                         name="state"
@@ -192,6 +165,35 @@ const Step3ProfileDetails = ({ formData, onChange, onSubmit, loading, error, fie
                         onLocationDetected={(coords) => onChange({ target: { name: 'location', value: coords } })} 
                         colors={colors}
                     />
+
+                    <div className="pt-2 border-t border-slate-50 mt-2 space-y-4">
+                        <Input 
+                            label="Set Password"
+                            type="password"
+                            name="password"
+                            value={formData.password}
+                            onChange={onChange}
+                            placeholder="Min 8 chars"
+                            icon="lock"
+                            error={fieldErrors.password}
+                            success={isPasswordValid}
+                            strength={passwordStrength}
+                            colors={colors}
+                        />
+
+                        <Input 
+                            label="Confirm Password"
+                            type="password"
+                            name="confirmPassword"
+                            value={formData.confirmPassword}
+                            onChange={onChange}
+                            placeholder="Repeat password"
+                            icon="lock_reset"
+                            error={fieldErrors.confirmPassword}
+                            success={isConfirmValid}
+                            colors={colors}
+                        />
+                    </div>
                 </div>
             </div>
 
