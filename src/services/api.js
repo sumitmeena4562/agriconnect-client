@@ -9,5 +9,10 @@ export const registerUser = (userData) => API.post("/auth/register", userData);
 export const sendOtp = (data) => API.post("/auth/send-otp", data);
 export const verifyOtp = (identifier, otp) => API.post("/auth/verify-otp", { identifier, otp });
 export const checkAvailability = (data) => API.post("/auth/check-availability", data);
+export const uploadAvatar = (formData) => API.post("/upload/avatar", formData, {
+  headers: {
+    'Content-Type': 'multipart/form-data'
+  }
+});
 
 export default API;

@@ -1,5 +1,6 @@
 import React, { useState, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { uploadAvatar } from '../../services/api';
 
 const AVATARS = [
     { id: 'farmer_1', icon: 'agriculture', label: 'Classic Farmer' },
@@ -29,21 +30,17 @@ const AvatarPicker = ({ selectedAvatar, onSelect, colors = null }) => {
         formData.append('image', file);
 
         try {
-            // Adjust fetch URL base as per your api setup. Defaults to current host or proxy.
-            const response = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/upload/avatar`, {
-                method: 'POST',
-                body: formData,
-            });
-            const data = await response.json();
+            const response = await uploadAvatar(formData);
             
-            if (data.success && data.url) {
-                onSelect(data.url);
+            if (response.data.success && response.data.url) {
+                onSelect(response.data.url);
             } else {
-                alert(data.message || 'Upload failed');
+                alert(response.data.message || 'Upload failed');
             }
         } catch (error) {
             console.error('Upload Error:', error);
-            alert('Failed to upload image. Please try again.');
+            const msg = error.response?.data?.message || 'Failed to upload image. Please try again.';
+            alert(msg);
         } finally {
             setUploading(false);
             if (fileInputRef.current) fileInputRef.current.value = '';
