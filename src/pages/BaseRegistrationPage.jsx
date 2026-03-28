@@ -110,7 +110,11 @@ const BaseRegistrationPage = ({ role, config }) => {
             </nav>
             
             <main className="flex-1 flex flex-col items-center justify-center p-4">
-                <Card className="w-full max-w-[390px] !rounded-[16px] border-none shadow-xl shadow-slate-200/50" padding="p-0" animate={false}>
+                <Card 
+                    className={`w-full transition-all duration-500 !rounded-[16px] border-none shadow-xl shadow-slate-200/50 ${step === 3 && !success ? 'max-w-[700px]' : 'max-w-[390px]'}`} 
+                    padding="p-0" 
+                    animate={false}
+                >
                     <div className="flex w-full bg-slate-100 h-1">
                         {[1, 2, 3].map((s) => (
                             <div key={s} className={`flex-1 ${step >= s ? colors.bg : 'bg-transparent'} transition-colors duration-500`} />
