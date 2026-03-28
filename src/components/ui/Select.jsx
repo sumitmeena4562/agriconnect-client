@@ -58,7 +58,7 @@ const Select = forwardRef(({
                     value={value}
                     onChange={onChange}
                     disabled={disabled}
-                    className="w-full bg-white rounded-xl px-4 pr-10 py-1.5 font-bold text-slate-800 text-[14px] appearance-none outline-none disabled:opacity-30 min-h-[50px]"
+                    className={`w-full bg-white rounded-xl px-4 ${success ? 'pr-14' : 'pr-10'} py-1.5 font-bold text-slate-800 text-[14px] appearance-none outline-none disabled:opacity-30 min-h-[50px]`}
                     {...props}
                 >
                     <option value="" disabled className="text-slate-400">{placeholder}</option>

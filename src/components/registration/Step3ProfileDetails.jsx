@@ -151,29 +151,27 @@ const Step3ProfileDetails = ({ formData, onChange, onSubmit, loading, error, fie
                         colors={colors}
                     />
 
-                    <div className="grid grid-cols-2 gap-4">
-                        <Select 
-                            label="State"
-                            name="state"
-                            value={formData.state}
-                            onChange={onChange}
-                            options={Object.keys(STATES_DATA)}
-                            error={fieldErrors.state}
-                            success={!!formData.state}
-                            colors={colors}
-                        />
-                        <Select 
-                            label="District"
-                            name="district"
-                            value={formData.district}
-                            onChange={onChange}
-                            disabled={!formData.state}
-                            options={formData.state ? STATES_DATA[formData.state] : []}
-                            error={fieldErrors.district}
-                            success={!!formData.district}
-                            colors={colors}
-                        />
-                    </div>
+                    <Select 
+                        label="State"
+                        name="state"
+                        value={formData.state}
+                        onChange={onChange}
+                        options={Object.keys(STATES_DATA)}
+                        error={fieldErrors.state}
+                        success={!!formData.state}
+                        colors={colors}
+                    />
+                    <Select 
+                        label="District"
+                        name="district"
+                        value={formData.district}
+                        onChange={onChange}
+                        disabled={!formData.state}
+                        options={formData.state ? STATES_DATA[formData.state] : []}
+                        error={fieldErrors.district}
+                        success={!!formData.district}
+                        colors={colors}
+                    />
 
                     <Input 
                         label="Pincode"
