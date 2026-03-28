@@ -31,46 +31,54 @@ const LiveLocationDetector = ({ onLocationDetected, colors = null }) => {
     };
 
     return (
-        <div className="p-4 bg-slate-50 rounded-[28px] border border-slate-100 space-y-3">
+        <div className={`p-4 bg-white rounded-2xl border transition-all duration-500 overflow-hidden ${status === 'success' ? `border-${activeColors.text.replace('text-', '').replace('-600', '-300')} shadow-[0_0_20px_-5px_rgba(0,210,120,0.12)]` : 'border-slate-200'}`}>
             <div className="flex items-center justify-between">
-                <div className="flex items-center gap-3">
-                    <div className={`w-10 h-10 rounded-xl flex items-center justify-center transition-colors ${status === 'success' ? 'bg-green-100 text-green-600' : `${activeColors.lightBg} ${activeColors.text}`}`}>
-                        <span className="material-symbols-outlined">
-                            {status === 'success' ? 'check_circle' : 'location_on'}
+                <div className="flex items-center gap-4">
+                    <div className={`w-12 h-12 rounded-2xl flex items-center justify-center transition-all duration-500 ${status === 'success' ? activeColors.bg : 'bg-slate-100'}`}>
+                        <span className={`material-symbols-outlined ${status === 'success' ? 'text-white' : 'text-slate-400'} text-2xl`}>
+                            {status === 'success' ? 'verified_user' : status === 'detecting' ? 'sync' : 'location_on'}
                         </span>
                     </div>
                     <div>
-                        <p className="text-[12px] font-black text-slate-800 tracking-tight leading-none mb-1">LIVE LOCATION</p>
-                        <p className="text-[10px] font-bold text-slate-400 uppercase italic">Z+ Real-time Tracking</p>
+                        <p className="text-[11px] font-black text-slate-400 uppercase tracking-widest leading-none mb-1.5">Real-time Location</p>
+                        <p className={`text-[14px] font-bold ${status === 'success' ? 'text-slate-800' : 'text-slate-500'}`}>
+                            {status === 'idle' && "Not Verified"}
+                            {status === 'detecting' && "Pinpointing..."}
+                            {status === 'success' && "Location Verified"}
+                            {status === 'error' && "Detection Failed"}
+                        </p>
                     </div>
                 </div>
                 
                 <motion.button
                     type="button"
+                    whileHover={{ scale: 1.05 }}
                     whileTap={{ scale: 0.95 }}
                     onClick={detectLocation}
                     disabled={status === 'detecting' || status === 'success'}
                     className={`
-                        px-4 py-2 rounded-xl text-[10px] font-black transition-all shadow-sm
-                        ${status === 'success' ? 'bg-green-500 text-white' : 'bg-white text-slate-800 hover:bg-slate-100'}
+                        px-4 py-2.5 rounded-xl text-[11px] font-black transition-all shadow-sm tracking-widest
+                        ${status === 'success' ? 'bg-slate-100 text-slate-400 cursor-default' : `${activeColors.bg} text-white hover:brightness-110`}
                     `}
                 >
-                    {status === 'idle' && "DETECT NOW"}
-                    {status === 'detecting' && "SEARCHING..."}
-                    {status === 'success' && "VERIFIED"}
+                    {status === 'idle' && "DETECT"}
+                    {status === 'detecting' && "..."}
+                    {status === 'success' && "DONE"}
                     {status === 'error' && "RETRY"}
                 </motion.button>
             </div>
 
             <AnimatePresence>
                 {address && (
-                    <motion.p 
-                        initial={{ opacity: 0, y: -5 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        className="text-[11px] font-bold text-green-600 bg-white/50 py-1.5 px-3 rounded-lg border border-green-100 text-center"
+                    <motion.div 
+                        initial={{ opacity: 0, height: 0 }}
+                        animate={{ opacity: 1, height: 'auto' }}
+                        className="mt-3 overflow-hidden"
                     >
-                        {address}
-                    </motion.p>
+                        <div className={`text-[11px] font-bold ${activeColors.text} bg-slate-50 py-2 px-3 rounded-xl border border-dashed border-slate-200 text-center italic`}>
+                            {address}
+                        </div>
+                    </motion.div>
                 )}
             </AnimatePresence>
         </div>
