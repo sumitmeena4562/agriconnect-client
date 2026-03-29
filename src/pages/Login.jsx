@@ -28,8 +28,8 @@ const Login = () => {
 
     // Forgot Password States
     const [forgotMode, setForgotMode] = useState(false);
-    const [forgotStep, setForgotStep] = useState(1); // 1: ID entry, 2: OTP + New Password
-    const [otp, setOtp] = useState(['', '', '', '', '', '']); // 6-digit array
+    const [forgotStep, setForgotStep] = useState(1); // 1: ID, 2: OTP, 3: Reset
+    const [otp, setOtp] = useState(['', '', '', '', '', '']); 
     const [newPassword, setNewPassword] = useState('');
     const [confirmPassword, setConfirmPassword] = useState('');
     const [forgotTimer, setForgotTimer] = useState(0);
@@ -360,7 +360,7 @@ const Login = () => {
                                             </div>
 
                                             <div className="space-y-6">
-                                                {forgotStep === 1 ? (
+                                                {forgotStep === 1 && (
                                                      <Input 
                                                         label="Mobile or Email"
                                                         name="identifier"
@@ -373,7 +373,9 @@ const Login = () => {
                                                         success={isValidIdentifier}
                                                         colors={colors}
                                                     />
-                                                ) : (
+                                                )}
+
+                                                {forgotStep === 2 && (
                                                     <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} className="space-y-6">
                                                         <div className="space-y-1">
                                                             <div className="flex flex-col mb-4">
@@ -401,8 +403,16 @@ const Login = () => {
                                                                 </button>
                                                             )}
                                                         </div>
+                                                    </motion.div>
+                                                )}
 
-                                                        <div className="space-y-4 pt-2 border-t border-slate-50">
+                                                {forgotStep === 3 && (
+                                                    <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} className="space-y-6">
+                                                        <div className="space-y-1 mb-2">
+                                                            <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest leading-none">Access Recovery</p>
+                                                            <h3 className="text-lg font-bold text-slate-800">Set New Password</h3>
+                                                        </div>
+                                                        <div className="space-y-4">
                                                             <Input 
                                                                 label="New Password"
                                                                 name="newPassword"
@@ -431,7 +441,7 @@ const Login = () => {
                                                         </div>
                                                     </motion.div>
                                                 )}
-
+                                                
                                                 {error && (
                                                     <div className="text-rose-600 text-[11px] font-black text-center py-3 bg-rose-50 rounded-xl border border-rose-100 uppercase tracking-widest leading-none">
                                                         {error}
@@ -440,14 +450,30 @@ const Login = () => {
 
                                                 <div className="pt-4">
                                                     <Button 
-                                                        onClick={forgotStep === 1 ? handleSendForgotOtp : handleResetPassword}
-                                                        disabled={loading || (forgotStep === 1 ? !isValidIdentifier : (!isOtpComplete || !isNewPasswordValid || !isConfirmValid))}
+                                                        onClick={() => {
+                                                            if (forgotStep === 1) handleSendForgotOtp();
+                                                            else if (forgotStep === 2) setForgotStep(3);
+                                                            else handleResetPassword();
+                                                        }}
+                                                        disabled={loading || (
+                                                            forgotStep === 1 ? !isValidIdentifier : 
+                                                            forgotStep === 2 ? !isOtpComplete : 
+                                                            (!isNewPasswordValid || !isConfirmValid)
+                                                        )}
                                                         fullWidth
-                                                        variant={(forgotStep === 1 ? isValidIdentifier : (isOtpComplete && isNewPasswordValid && isConfirmValid)) ? activeVariant : 'dark'}
-                                                        icon={loading ? "autorenew" : (forgotStep === 1 ? "arrow_forward" : "task_alt")}
+                                                        variant={(
+                                                            forgotStep === 1 ? isValidIdentifier : 
+                                                            forgotStep === 2 ? isOtpComplete : 
+                                                            (isNewPasswordValid && isConfirmValid)
+                                                        ) ? activeVariant : 'dark'}
+                                                        icon={loading ? "autorenew" : (forgotStep === 3 ? "task_alt" : "arrow_forward")}
                                                         size="lg"
                                                     >
-                                                        {loading ? (forgotStep === 1 ? "SENDING..." : "RESETTING...") : (forgotStep === 1 ? "GET SECURE OTP" : "RESET PASSWORD")}
+                                                        {loading ? "PROCESSING..." : (
+                                                            forgotStep === 1 ? "GET SECURE OTP" : 
+                                                            forgotStep === 2 ? "VERIFY & CONTINUE" : 
+                                                            "RESET PASSWORD"
+                                                        )}
                                                     </Button>
                                                 </div>
                                             </div>
