@@ -9,6 +9,9 @@ const Step1Mobile = ({ mobile, email, onChange, onContinue, loading, error, fiel
     const [mobileLoading, setMobileLoading] = useState(false);
     const [mobileAvailable, setMobileAvailable] = useState(null); // null, true, false
     const [mobileCheckError, setMobileCheckError] = useState("");
+    const [emailLoading, setEmailLoading] = useState(false);
+    const [emailAvailable, setEmailAvailable] = useState(null);
+    const [emailCheckError, setEmailCheckError] = useState("");
 
     const isMobileFormatValid = mobile.length === 10 && !validateMobile(mobile);
     const isEmailValid = email.length > 5 && !validateEmail(email);
@@ -31,7 +34,25 @@ const Step1Mobile = ({ mobile, email, onChange, onContinue, loading, error, fiel
         }
     };
 
-    // Auto check after typing stops (debounce)
+    const checkEmailAvailability = async () => {
+        if (!email || validateEmail(email)) return;
+        
+        setEmailLoading(true);
+        setEmailCheckError("");
+        try {
+            const response = await checkAvailability({ email });
+            setEmailAvailable(response.data.available);
+            if (!response.data.available) {
+                setEmailCheckError("This email is already registered");
+            }
+        } catch (err) {
+            console.error("Email check failed:", err);
+        } finally {
+            setEmailLoading(false);
+        }
+    };
+
+    // Auto check mobile after typing stops (debounce)
     useEffect(() => {
         const timer = setTimeout(() => {
             if (mobile && isMobileFormatValid) {
@@ -41,7 +62,17 @@ const Step1Mobile = ({ mobile, email, onChange, onContinue, loading, error, fiel
         return () => clearTimeout(timer);
     }, [mobile]);
 
-    const canContinue = isMobileFormatValid && isEmailValid && mobileAvailable;
+    // Auto check email after typing stops (debounce)
+    useEffect(() => {
+        const timer = setTimeout(() => {
+            if (email && isEmailValid) {
+                checkEmailAvailability();
+            }
+        }, 800);
+        return () => clearTimeout(timer);
+    }, [email]);
+
+    const canContinue = isMobileFormatValid && isEmailValid && mobileAvailable && emailAvailable;
     return (
         <motion.div 
             key="step1" 
@@ -82,8 +113,9 @@ const Step1Mobile = ({ mobile, email, onChange, onContinue, loading, error, fiel
                     value={email}
                     onChange={onChange}
                     icon="mail"
-                    error={fieldErrors?.email}
-                    success={isEmailValid}
+                    error={fieldErrors?.email || emailCheckError}
+                    success={isEmailValid && emailAvailable}
+                    loading={emailLoading}
                     colors={colors}
                 />
 
