@@ -25,7 +25,11 @@ const Step1Mobile = ({ mobile, email, onChange, onContinue, loading, error, fiel
             const response = await checkAvailability({ mobile });
             setMobileAvailable(response.data.available);
             if (!response.data.available) {
-                setMobileCheckError("This number is already registered");
+                setMobileCheckError(
+                    <span className="flex items-center gap-1 justify-center">
+                        Already registered. <button onClick={() => window.location.href='/login'} className="underline font-black outline-none">Login instead?</button>
+                    </span>
+                );
             }
         } catch (err) {
             console.error("Availability check failed:", err);
@@ -43,7 +47,12 @@ const Step1Mobile = ({ mobile, email, onChange, onContinue, loading, error, fiel
             const response = await checkAvailability({ email });
             setEmailAvailable(response.data.available);
             if (!response.data.available) {
-                setEmailCheckError("This email is already registered");
+                setEmailAvailable(false);
+                setEmailCheckError(
+                    <span className="flex items-center gap-1 justify-center">
+                        Already registered. <button onClick={() => window.location.href='/login'} className="underline font-black outline-none">Login instead?</button>
+                    </span>
+                );
             }
         } catch (err) {
             console.error("Email check failed:", err);
@@ -133,6 +142,12 @@ const Step1Mobile = ({ mobile, email, onChange, onContinue, loading, error, fiel
                 >
                     {loading ? "SENDING..." : "SEND OTP"}
                 </Button>
+
+                <div className="text-center pt-2">
+                    <p className="text-slate-400 text-[11px] font-bold uppercase tracking-widest">
+                        Already have an account? <button onClick={() => window.location.href='/login'} className={`${colors.text} hover:underline font-black`}>Login here</button>
+                    </p>
+                </div>
             </div>
             
             <AnimatePresence mode="wait">
