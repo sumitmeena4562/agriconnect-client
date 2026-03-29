@@ -469,7 +469,7 @@ const Login = () => {
                                                             className="h-4 w-4 rounded-md border-slate-300 text-primary-600 focus:ring-primary-100 cursor-pointer"
                                                         />
                                                         <label htmlFor="remember-me" className="ml-2 block text-[13px] font-semibold text-slate-500 cursor-pointer select-none">
-                                                            Trust device
+                                                            Remember me
                                                         </label>
                                                     </div>
                                                     <button 
@@ -477,7 +477,7 @@ const Login = () => {
                                                         onClick={() => { setForgotMode(true); setError(''); }}
                                                         className="font-bold text-primary-600 hover:text-primary-500 text-[11px] transition-colors uppercase tracking-tight"
                                                     >
-                                                        Lost Access?
+                                                        Forgot password?
                                                     </button>
                                                 </div>
                                             )}
