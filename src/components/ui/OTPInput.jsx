@@ -13,8 +13,8 @@ const OTPInput = ({
     ...props 
 }) => {
     // Default theme colors
-    const activeColors = colors || { text: 'text-primary-500', bg: 'bg-primary-500', lightBg: 'bg-primary-50' };
-    const borderClass = activeColors.text.replace('text-', 'border-');
+    const activeColors = colors || { text: 'text-primary-600', bg: 'bg-primary-500', lightBg: 'bg-primary-50' };
+    const baseColorName = activeColors.text.split('-')[1]; // e.g., 'primary', 'accent', 'secondary'
 
     const handlePaste = (e) => {
         e.preventDefault();
@@ -47,8 +47,8 @@ const OTPInput = ({
                             text-center font-black text-xl text-slate-800 
                             outline-none transition-all duration-300
                             ${error ? 'border-red-300 text-red-500 focus:border-red-500 focus:shadow-[0_0_15px_-3px_rgba(239,68,68,0.2)]' : 
-                              digit ? `border-${activeColors.text.replace('text-', '').replace('-600', '-400')} bg-slate-50/50` : 
-                              `border-slate-200 focus:border-${activeColors.text.replace('text-', '').replace('-600', '-500')} focus:shadow-[0_0_15px_-3px_rgba(0,210,120,0.15)]`}
+                              digit ? `border-${baseColorName}-400 bg-slate-50/50` : 
+                              `border-slate-200 focus:border-${baseColorName}-500 focus:shadow-[0_0_15px_-3px_rgba(0,210,120,0.15)]`}
                         `}
                         inputMode="numeric"
                         pattern="[0-9]*"

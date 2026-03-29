@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Link, useNavigate } from 'react-router-dom';
 import { toast } from 'react-hot-toast';
@@ -8,6 +8,7 @@ import Badge from '../components/ui/Badge';
 import Card from '../components/ui/Card';
 import Input from '../components/ui/Input';
 import Button from '../components/ui/Button';
+import OTPInput from '../components/ui/OTPInput';
 import { loginUser as apiLoginUser, sendForgotPasswordOtp, resetPassword, sendLoginOtp, verifyLoginOtp, checkAvailability } from '../services/api';
 
 const Login = () => {
@@ -27,9 +28,13 @@ const Login = () => {
 
     // Forgot Password States
     const [forgotMode, setForgotMode] = useState(false);
-    const [forgotStep, setForgotStep] = useState(1); 
-    const [otp, setOtp] = useState('');
+    const [forgotStep, setForgotStep] = useState(1); // 1: ID entry, 2: OTP + New Password
+    const [otp, setOtp] = useState(['', '', '', '', '', '']); // 6-digit array
     const [newPassword, setNewPassword] = useState('');
+    const [confirmPassword, setConfirmPassword] = useState('');
+    const [forgotTimer, setForgotTimer] = useState(0);
+    const [canResendForgot, setCanResendForgot] = useState(true);
+    const forgotRefs = useRef([]);
 
     const [themeRole, setThemeRole] = useState(null);
 
@@ -37,6 +42,41 @@ const Login = () => {
     const isValidIdentifier = identifier.length > 0 && (isEmail ? /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(identifier) : /^[6-9]\d{9}$/.test(identifier));
     const isPasswordValid = password.length >= 6; 
     const isNewPasswordValid = newPassword.length >= 8;
+    const isConfirmValid = confirmPassword === newPassword && confirmPassword.length >= 8;
+    const isOtpComplete = otp.join('').length === 6;
+    
+    // Z+ Intelligence: Strength calculation from validation utils replacement
+    const calculateStrength = (p) => {
+        if (!p) return 0;
+        let s = 0;
+        if (p.length >= 8) s += 25;
+        if (/[A-Z]/.test(p)) s += 25;
+        if (/[0-9]/.test(p)) s += 25;
+        if (/[^A-Za-z0-9]/.test(p)) s += 25;
+        return s;
+    };
+
+    const maskIdentifier = (id) => {
+        if (!id) return '';
+        if (id.includes('@')) {
+            const [user, domain] = id.split('@');
+            return `${user.slice(0, 1)}***@${domain.slice(0, 1)}***.${domain.split('.').pop()}`;
+        }
+        return `${id.slice(0, 2)}******${id.slice(-2)}`;
+    };
+
+    // Z+ UI: Self-cleaning timer
+    useEffect(() => {
+        let interval;
+        if (forgotTimer > 0) {
+            interval = setInterval(() => {
+                setForgotTimer((prev) => prev - 1);
+            }, 1000);
+        } else {
+            setCanResendForgot(true);
+        }
+        return () => clearInterval(interval);
+    }, [forgotTimer]);
 
     const roleColors = {
         farmer: { text: 'text-primary-600', bg: 'bg-primary-500', lightBg: 'bg-primary-50' },
@@ -99,7 +139,8 @@ const Login = () => {
             if (!isPasswordValid) return;
             setLoading(true);
             try {
-                const response = await apiLoginUser({ identifier, password });
+                // Z+ UI: Trim for frontend speed/reliability
+                const response = await apiLoginUser({ identifier: identifier.trim(), password });
                 if (response.data.success) {
                     handleSuccessLogin(response.data);
                 }
@@ -143,45 +184,66 @@ const Login = () => {
     };
 
     const handleSendForgotOtp = async () => {
-        if (!isValidIdentifier) {
-            setError("Enter a valid registered mobile number or email");
-            return;
-        }
+        if (!isValidIdentifier) return;
         setLoading(true);
-        setError('');
         try {
-            const res = await sendForgotPasswordOtp({ identifier });
-            if (res.data.success) {
-                toast.success(res.data.message || "OTP sent if the account exists");
+            const response = await sendForgotPasswordOtp({ identifier: identifier.trim() });
+            if (response.data.success) {
+                toast.success("Identity verified! Check your inbox.");
                 setForgotStep(2);
+                setForgotTimer(60);
+                setCanResendForgot(false);
             }
         } catch (err) {
-            const msg = err.response?.data?.message || "Failed to send OTP";
-            setError(msg);
-            toast.error(msg);
+            toast.error(err.response?.data?.message || "Failed to send OTP.");
         } finally {
             setLoading(false);
         }
     };
 
-    const handleResetPasswordSubmit = async () => {
-        if (otp.length !== 6 || !isNewPasswordValid) return;
+
+    const handleForgotOtpChange = (index, value) => {
+        if (!/^\d*$/.test(value)) return;
+        const newOtp = [...otp];
+        newOtp[index] = value.slice(-1);
+        setOtp(newOtp);
+        if (value && index < 5) forgotRefs.current[index + 1]?.focus();
+    };
+
+    const handleForgotOtpKeyDown = (index, e) => {
+        if (e.key === 'Backspace' && !otp[index] && index > 0) {
+            forgotRefs.current[index - 1]?.focus();
+        }
+    };
+
+    const handleForgotOtpPaste = (pastedData) => {
+        const digits = pastedData.split('').slice(0, 6);
+        const newOtp = [...otp];
+        digits.forEach((d, i) => { newOtp[i] = d; });
+        setOtp(newOtp);
+        const nextIndex = Math.min(digits.length, 5);
+        forgotRefs.current[nextIndex]?.focus();
+    };
+
+    const handleResetPassword = async () => {
+        if (!isOtpComplete || !isNewPasswordValid || !isConfirmValid) return;
         setLoading(true);
-        setError('');
         try {
-            const res = await resetPassword({ identifier, otp, newPassword });
-            if (res.data.success) {
-                toast.success("Password reset successfully! Please login.");
+            const response = await resetPassword({ 
+                identifier: identifier.trim(), 
+                otp: otp.join(''), 
+                newPassword 
+            });
+            if (response.data.success) {
+                toast.success("Password reset successful! Please login.");
                 setForgotMode(false);
                 setForgotStep(1);
-                setPassword('');
-                setOtp('');
+                setOtp(['', '', '', '', '', '']);
                 setNewPassword('');
+                setConfirmPassword('');
             }
         } catch (err) {
-            const msg = err.response?.data?.message || "Failed to reset password. Check your OTP.";
-            setError(msg);
-            toast.error(msg);
+            toast.error(err.response?.data?.message || "Reset failed.");
         } finally {
             setLoading(false);
         }
@@ -298,47 +360,75 @@ const Login = () => {
                                             </div>
 
                                             <div className="space-y-6">
-                                                <Input 
-                                                    label="Mobile or Email"
-                                                    name="identifier"
-                                                    autoComplete="username"
-                                                    type={isEmail ? 'email' : 'tel'}
-                                                    value={identifier}
-                                                    onChange={(e) => { setIdentifier(e.target.value); setError(''); }}
-                                                    placeholder="Phone or Email"
-                                                    icon={isEmail ? "mail" : identifier.length > 0 ? "phone_iphone" : "account_circle"}
-                                                    success={isValidIdentifier}
-                                                    colors={colors}
-                                                    disabled={forgotStep === 2}
-                                                />
+                                                {forgotStep === 1 ? (
+                                                     <Input 
+                                                        label="Mobile or Email"
+                                                        name="identifier"
+                                                        autoComplete="username"
+                                                        type={isEmail ? 'email' : 'tel'}
+                                                        value={identifier}
+                                                        onChange={(e) => { setIdentifier(e.target.value); setError(''); }}
+                                                        placeholder="Phone or Email"
+                                                        icon={isEmail ? "mail" : identifier.length > 0 ? "phone_iphone" : "account_circle"}
+                                                        success={isValidIdentifier}
+                                                        colors={colors}
+                                                    />
+                                                ) : (
+                                                    <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} className="space-y-6">
+                                                        <div className="space-y-1">
+                                                            <div className="flex flex-col mb-4">
+                                                                <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Verify Identity</p>
+                                                                <p className="text-[12px] font-medium text-slate-500 mt-1">Code sent to <span className="text-slate-900 font-bold">{maskIdentifier(identifier)}</span></p>
+                                                            </div>
+                                                            <div className="flex justify-between items-center mb-1 pr-1">
+                                                                <span></span>
+                                                                {!canResendForgot && (
+                                                                    <p className="text-[10px] font-bold text-slate-400 uppercase">Wait {forgotTimer}s</p>
+                                                                )}
+                                                            </div>
+                                                            <OTPInput 
+                                                                otp={otp}
+                                                                onChange={handleForgotOtpChange}
+                                                                onKeyDown={handleForgotOtpKeyDown}
+                                                                onPaste={handleForgotOtpPaste}
+                                                                otpRefs={forgotRefs}
+                                                                colors={colors}
+                                                            />
+                                                            {canResendForgot && (
+                                                                <button onClick={handleSendForgotOtp} className={`text-[10px] font-black ${colors.text} uppercase tracking-widest mt-2 hover:underline inline-flex items-center gap-1`}>
+                                                                    <span className="material-symbols-outlined text-sm">refresh</span>
+                                                                    Resend Code
+                                                                </button>
+                                                            )}
+                                                        </div>
 
-                                                {forgotStep === 2 && (
-                                                    <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="space-y-6">
-                                                        <Input 
-                                                            label="Verification Pin"
-                                                            name="otp"
-                                                            autoComplete="one-time-code"
-                                                            value={otp}
-                                                            onChange={(e) => { setOtp(e.target.value); setError(''); }}
-                                                            placeholder="6-Digits"
-                                                            icon="pin"
-                                                            maxLength={6}
-                                                            inputMode="numeric"
-                                                            success={otp.length === 6}
-                                                            colors={colors}
-                                                        />
-                                                        <Input 
-                                                            label="New Credentials"
-                                                            name="newPassword"
-                                                            autoComplete="new-password"
-                                                            type="password"
-                                                            value={newPassword}
-                                                            onChange={(e) => { setNewPassword(e.target.value); setError(''); }}
-                                                            placeholder="Set new secret"
-                                                            icon="verified_user"
-                                                            success={isNewPasswordValid}
-                                                            colors={colors}
-                                                        />
+                                                        <div className="space-y-4 pt-2 border-t border-slate-50">
+                                                            <Input 
+                                                                label="New Password"
+                                                                name="newPassword"
+                                                                autoComplete="new-password"
+                                                                type="password"
+                                                                value={newPassword}
+                                                                onChange={(e) => { setNewPassword(e.target.value); setError(''); }}
+                                                                placeholder="Create strong secret"
+                                                                icon="lock_reset"
+                                                                success={isNewPasswordValid}
+                                                                strength={calculateStrength(newPassword)}
+                                                                colors={colors}
+                                                            />
+                                                            <Input 
+                                                                label="Confirm New Password"
+                                                                name="confirmPassword"
+                                                                autoComplete="new-password"
+                                                                type="password"
+                                                                value={confirmPassword}
+                                                                onChange={(e) => { setConfirmPassword(e.target.value); setError(''); }}
+                                                                placeholder="Repeat your secret"
+                                                                icon="verified"
+                                                                success={isConfirmValid}
+                                                                colors={colors}
+                                                            />
+                                                        </div>
                                                     </motion.div>
                                                 )}
 
@@ -349,29 +439,16 @@ const Login = () => {
                                                 )}
 
                                                 <div className="pt-4">
-                                                    {forgotStep === 1 ? (
-                                                                                        <Button 
-                                                            onClick={handleSendForgotOtp}
-                                                            disabled={loading || !isValidIdentifier}
-                                                            fullWidth
-                                                            variant={isValidIdentifier ? activeVariant : 'dark'}
-                                                            icon={loading ? "sync" : "arrow_forward"}
-                                                            className="!py-3.5 !text-[12px]"
-                                                        >
-                                                            {loading ? "PROCESSING..." : "GET OTP"}
-                                                        </Button>
-                                                    ) : (
-                                                                                        <Button 
-                                                            onClick={handleResetPasswordSubmit}
-                                                            disabled={loading || otp.length !== 6 || !isNewPasswordValid}
-                                                            fullWidth
-                                                            variant={(otp.length === 6 && isNewPasswordValid) ? activeVariant : 'dark'}
-                                                            icon={loading ? "sync" : "task_alt"}
-                                                            className="!py-3.5 !text-[12px]"
-                                                        >
-                                                            {loading ? "UPDATING..." : "RESET PASSWORD"}
-                                                        </Button>
-                                                    )}
+                                                    <Button 
+                                                        onClick={forgotStep === 1 ? handleSendForgotOtp : handleResetPassword}
+                                                        disabled={loading || (forgotStep === 1 ? !isValidIdentifier : (!isOtpComplete || !isNewPasswordValid || !isConfirmValid))}
+                                                        fullWidth
+                                                        variant={(forgotStep === 1 ? isValidIdentifier : (isOtpComplete && isNewPasswordValid && isConfirmValid)) ? activeVariant : 'dark'}
+                                                        icon={loading ? "autorenew" : (forgotStep === 1 ? "arrow_forward" : "task_alt")}
+                                                        size="lg"
+                                                    >
+                                                        {loading ? (forgotStep === 1 ? "SENDING..." : "RESETTING...") : (forgotStep === 1 ? "GET SECURE OTP" : "RESET PASSWORD")}
+                                                    </Button>
                                                 </div>
                                             </div>
                                         </motion.div>
