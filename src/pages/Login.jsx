@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Link, useNavigate } from 'react-router-dom';
 import { toast } from 'react-hot-toast';
+import { useAuth } from '../context/AuthContext';
 
 import Logo from '../components/common/Logo';
 import Badge from '../components/ui/Badge';
@@ -9,10 +10,12 @@ import Card from '../components/ui/Card';
 import Input from '../components/ui/Input';
 import Button from '../components/ui/Button';
 import OTPInput from '../components/ui/OTPInput';
-import { loginUser as apiLoginUser, sendForgotPasswordOtp, resetPassword, sendLoginOtp, verifyLoginOtp, checkAvailability } from '../services/api';
+import OTPVerificationView from '../components/common/OTPVerificationView';
+import { loginUser as apiLoginUser, sendForgotPasswordOtp, resetPassword, verifyOtp as apiVerifyOtp, checkAvailability } from '../services/api';
 
 const Login = () => {
     const navigate = useNavigate();
+    const { login } = useAuth();
     const [loading, setLoading] = useState(false);
     
     // Auth States
@@ -34,9 +37,19 @@ const Login = () => {
     const [confirmPassword, setConfirmPassword] = useState('');
     const [forgotTimer, setForgotTimer] = useState(0);
     const [canResendForgot, setCanResendForgot] = useState(true);
+    const [resetToken, setResetToken] = useState(null);
     const forgotRefs = useRef([]);
 
     const [themeRole, setThemeRole] = useState(null);
+
+    // Z+ UI: Persistence for 'Remember Me'
+    useEffect(() => {
+        const remembered = localStorage.getItem('agriconnect_remembered_id');
+        if (remembered) {
+            setIdentifier(remembered);
+            setRememberMe(true);
+        }
+    }, []);
 
     const isEmail = identifier.includes('@');
     const isValidIdentifier = identifier.length > 0 && (isEmail ? /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(identifier) : /^[6-9]\d{9}$/.test(identifier));
@@ -111,58 +124,55 @@ const Login = () => {
 
 
     const handleSuccessLogin = (data) => {
-        const storage = rememberMe ? localStorage : sessionStorage;
-        storage.setItem('token', data.token);
-        storage.setItem('user', JSON.stringify(data.user));
+        // Handling Remember Me Logic
+        if (rememberMe) {
+            localStorage.setItem('agriconnect_remembered_id', identifier.trim());
+        } else {
+            localStorage.removeItem('agriconnect_remembered_id');
+        }
+
+        // Global Auth Login (persists in localStorage & Axios headers)
+        login(data.user, data.token);
         
-        toast.success(`Welcome back, ${data.user.name.split(' ')[0]}!`);
-        
-        setTimeout(() => {
-            const role = data.user.role;
-            if (role === 'admin') navigate('/admin/dashboard');
-            else if (role === 'farmer') navigate('/farmer/dashboard');
-            else if (role === 'vendor') navigate('/vendor/dashboard');
-            else navigate('/customer/dashboard');
-        }, 1000);
+        // Role-Specific Redirect
+        const role = data.user.role;
+        if (role === 'admin') navigate('/admin/dashboard');
+        else if (role === 'farmer') navigate('/farmer/dashboard');
+        else if (role === 'vendor') navigate('/vendor/dashboard');
+        else navigate('/customer/dashboard');
     };
 
     const handleLoginSubmit = async (e) => {
-        e.preventDefault();
+        if (e) e.preventDefault();
         setError('');
 
-        if (!isValidIdentifier) {
-            toast.error("Please ensure your identifier is valid.");
-            return;
-        }
-
         if (loginMethod === 'password') {
-            if (!isPasswordValid) return;
+            if (!isValidIdentifier || !isPasswordValid) return;
             setLoading(true);
             try {
-                // Z+ UI: Trim for frontend speed/reliability
                 const response = await apiLoginUser({ identifier: identifier.trim(), password });
                 if (response.data.success) {
                     handleSuccessLogin(response.data);
                 }
             } catch (err) {
-                const msg = err.response?.data?.message || "Login failed. Please check your credentials.";
+                const msg = err.response?.data?.message || "Login failed. Check your credentials.";
                 setError(msg);
-                toast.error(msg);
             } finally {
                 setLoading(false);
             }
         } else {
-            // OTP Password-less execution
+            // OTP Password-less Login
             if (!otpSent) {
                 setLoading(true);
                 try {
                     const res = await sendLoginOtp({ identifier });
                     if (res.data.success) {
-                        toast.success(res.data.message || "Login OTP Sent!");
+                        toast.success(res.data.message || "OTP Sent!");
                         setOtpSent(true);
                     }
                 } catch(err) {
-                    setError(err.response?.data?.message || "Failed to send OTP");
+                    const msg = err.response?.data?.message || "Failed to send OTP";
+                    setError(msg);
                 } finally {
                     setLoading(false);
                 }
@@ -175,7 +185,8 @@ const Login = () => {
                         handleSuccessLogin(res.data);
                     }
                 } catch(err) {
-                    setError(err.response?.data?.message || "Invalid OTP");
+                    const msg = err.response?.data?.message || "Invalid OTP";
+                    setError(msg);
                 } finally {
                     setLoading(false);
                 }
@@ -195,7 +206,8 @@ const Login = () => {
                 setCanResendForgot(false);
             }
         } catch (err) {
-            toast.error(err.response?.data?.message || "Failed to send OTP.");
+            const msg = err.response?.data?.message || "Failed to send OTP.";
+            toast.error(msg);
         } finally {
             setLoading(false);
         }
@@ -225,13 +237,33 @@ const Login = () => {
         forgotRefs.current[nextIndex]?.focus();
     };
 
+    const handleVerifyForgotOtp = async () => {
+        if (!isOtpComplete) return;
+        setLoading(true);
+        try {
+            const response = await apiVerifyOtp({ 
+                identifier: identifier.trim(), 
+                otp: otp.join('') 
+            });
+            if (response.data.success) {
+                toast.success("Identity verified! Set your new password.");
+                setResetToken(response.data.verificationToken);
+                setForgotStep(3);
+            }
+        } catch (err) {
+            // Error handled by global interceptor
+        } finally {
+            setLoading(false);
+        }
+    };
+
     const handleResetPassword = async () => {
-        if (!isOtpComplete || !isNewPasswordValid || !isConfirmValid) return;
+        if (!resetToken || !isNewPasswordValid || !isConfirmValid) return;
         setLoading(true);
         try {
             const response = await resetPassword({ 
                 identifier: identifier.trim(), 
-                otp: otp.join(''), 
+                token: resetToken, 
                 newPassword 
             });
             if (response.data.success) {
@@ -241,9 +273,10 @@ const Login = () => {
                 setOtp(['', '', '', '', '', '']);
                 setNewPassword('');
                 setConfirmPassword('');
+                setResetToken(null);
             }
         } catch (err) {
-            toast.error(err.response?.data?.message || "Reset failed.");
+            // Error handled by global interceptor
         } finally {
             setLoading(false);
         }
@@ -376,34 +409,24 @@ const Login = () => {
                                                 )}
 
                                                 {forgotStep === 2 && (
-                                                    <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} className="space-y-6">
-                                                        <div className="space-y-1">
-                                                            <div className="flex flex-col mb-4">
-                                                                <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Verify Identity</p>
-                                                                <p className="text-[12px] font-medium text-slate-500 mt-1">Code sent to <span className="text-slate-900 font-bold">{maskIdentifier(identifier)}</span></p>
-                                                            </div>
-                                                            <div className="flex justify-between items-center mb-1 pr-1">
-                                                                <span></span>
-                                                                {!canResendForgot && (
-                                                                    <p className="text-[10px] font-bold text-slate-400 uppercase">Wait {forgotTimer}s</p>
-                                                                )}
-                                                            </div>
-                                                            <OTPInput 
-                                                                otp={otp}
-                                                                onChange={handleForgotOtpChange}
-                                                                onKeyDown={handleForgotOtpKeyDown}
-                                                                onPaste={handleForgotOtpPaste}
-                                                                otpRefs={forgotRefs}
-                                                                colors={colors}
-                                                            />
-                                                            {canResendForgot && (
-                                                                <button onClick={handleSendForgotOtp} className={`text-[10px] font-black ${colors.text} uppercase tracking-widest mt-2 hover:underline inline-flex items-center gap-1`}>
-                                                                    <span className="material-symbols-outlined text-sm">refresh</span>
-                                                                    Resend Code
-                                                                </button>
-                                                            )}
-                                                        </div>
-                                                    </motion.div>
+                                                    <OTPVerificationView 
+                                                        title="Verify Identity"
+                                                        subtitle="We've sent a recovery code to"
+                                                        identifier={maskIdentifier(identifier)}
+                                                        otp={otp}
+                                                        onOtpChange={handleForgotOtpChange}
+                                                        onOtpPaste={handleForgotOtpPaste}
+                                                        onOtpKeyDown={handleForgotOtpKeyDown}
+                                                        otpRefs={forgotRefs}
+                                                        onVerify={handleVerifyForgotOtp}
+                                                        onResend={handleSendForgotOtp}
+                                                        timer={forgotTimer}
+                                                        canResend={canResendForgot}
+                                                        loading={loading}
+                                                        onBack={() => setForgotStep(1)}
+                                                        colors={colors}
+                                                        icon="shield_lock"
+                                                    />
                                                 )}
 
                                                 {forgotStep === 3 && (
@@ -449,32 +472,21 @@ const Login = () => {
                                                 )}
 
                                                 <div className="pt-4">
-                                                    <Button 
-                                                        onClick={() => {
-                                                            if (forgotStep === 1) handleSendForgotOtp();
-                                                            else if (forgotStep === 2) setForgotStep(3);
-                                                            else handleResetPassword();
-                                                        }}
-                                                        disabled={loading || (
-                                                            forgotStep === 1 ? !isValidIdentifier : 
-                                                            forgotStep === 2 ? !isOtpComplete : 
-                                                            (!isNewPasswordValid || !isConfirmValid)
-                                                        )}
-                                                        fullWidth
-                                                        variant={(
-                                                            forgotStep === 1 ? isValidIdentifier : 
-                                                            forgotStep === 2 ? isOtpComplete : 
-                                                            (isNewPasswordValid && isConfirmValid)
-                                                        ) ? activeVariant : 'dark'}
-                                                        icon={loading ? "autorenew" : (forgotStep === 3 ? "task_alt" : "arrow_forward")}
-                                                        size="lg"
-                                                    >
-                                                        {loading ? "PROCESSING..." : (
-                                                            forgotStep === 1 ? "GET SECURE OTP" : 
-                                                            forgotStep === 2 ? "VERIFY & CONTINUE" : 
-                                                            "RESET PASSWORD"
-                                                        )}
-                                                    </Button>
+                                                    {forgotStep !== 2 && (
+                                                        <Button 
+                                                            onClick={forgotStep === 1 ? handleSendForgotOtp : handleResetPassword}
+                                                            disabled={loading || (forgotStep === 1 ? !isValidIdentifier : (!isNewPasswordValid || !isConfirmValid))}
+                                                            fullWidth
+                                                            variant={(forgotStep === 1 ? isValidIdentifier : (isNewPasswordValid && isConfirmValid)) ? activeVariant : 'dark'}
+                                                            icon={loading ? "autorenew" : (forgotStep === 3 ? "task_alt" : "arrow_forward")}
+                                                            size="lg"
+                                                        >
+                                                            {loading ? "PROCESSING..." : (
+                                                                forgotStep === 1 ? "GET SECURE OTP" : 
+                                                                "RESET PASSWORD"
+                                                            )}
+                                                        </Button>
+                                                    )}
                                                 </div>
                                             </div>
                                         </motion.div>

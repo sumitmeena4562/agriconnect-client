@@ -1,9 +1,35 @@
 import axios from "axios";
+import { toast } from 'react-hot-toast';
 
-// Backend ka base URL (humara backend port 5000 par chal raha hai)
+// Backend ka base URL
 const API = axios.create({
   baseURL: import.meta.env.VITE_API_URL || "http://localhost:5000/api",
 });
+
+// Z+ Security: Global Request Interceptor for JWT
+API.interceptors.request.use((config) => {
+  const token = localStorage.getItem('agriconnect_token');
+  if (token) {
+    config.headers.Authorization = `Bearer ${token}`;
+  }
+  return config;
+});
+
+// Z+ Proper: Global Response Interceptor for Universal Error Toasts
+API.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    // Extract human-readable error message
+    const message = error.response?.data?.message || 
+                   (error.message === "Network Error" ? "Connection lost. Please check your internet and try again." : error.message) || 
+                   "Something went wrong on our end. Please try again in a moment.";
+    
+    // Universal Toast: Har Jagah error dikhayega automatically
+    toast.error(message);
+    
+    return Promise.reject(error);
+  }
+);
 
 export const registerUser = (userData) => API.post("/auth/register", userData);
 export const loginUser = (credentials) => API.post("/auth/login", credentials);

@@ -4,8 +4,10 @@ import { motion, AnimatePresence } from 'framer-motion';
 import Logo from '../common/Logo';
 import Button from '../ui/Button';
 import Badge from '../ui/Badge';
+import { useAuth } from '../../context/AuthContext';
 
 const Header = () => {
+  const { user, isAuthenticated, logout } = useAuth();
   // --- States ---
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isCatOpen, setIsCatOpen] = useState(false);
@@ -208,9 +210,26 @@ const Header = () => {
                 </a>
               </div>
 
-              <div className="hidden sm:flex items-center gap-1.5 lg:gap-2">
-                <Button to="/farmer-registration" variant="outline" size="md" className="!rounded-xl border-none hover:bg-slate-50">Register</Button>
-                <Button to="/login" variant="primary" size="md" className="!rounded-xl !px-5 whitespace-nowrap outline-none focus:outline-none focus:ring-4 focus:ring-primary-500/20">Login</Button>
+              <div className="hidden sm:flex items-center gap-1.5 lg:gap-3">
+                {isAuthenticated ? (
+                  <div className="flex items-center gap-3">
+                    <div className="flex flex-col items-end mr-1">
+                      <p className="text-[11px] font-black text-slate-900 uppercase tracking-tight leading-none">{user?.name?.split(' ')[0]}</p>
+                      <p className="text-[9px] font-bold text-[#00B464] uppercase tracking-widest mt-1">{user?.role}</p>
+                    </div>
+                    <Link to={`/${user?.role}/dashboard`} className="w-10 h-10 rounded-xl bg-slate-100 flex items-center justify-center hover:bg-[#00B464] hover:text-white transition-all group">
+                      <span className="material-symbols-outlined text-[20px]">person</span>
+                    </Link>
+                    <button onClick={logout} className="w-10 h-10 rounded-xl bg-slate-50 flex items-center justify-center hover:bg-red-50 hover:text-red-500 transition-all text-slate-400" title="Logout">
+                      <span className="material-symbols-outlined text-[20px]">logout</span>
+                    </button>
+                  </div>
+                ) : (
+                  <>
+                    <Button to="/farmer-registration" variant="outline" size="md" className="!rounded-xl border-none hover:bg-slate-50">Register</Button>
+                    <Button to="/login" variant="primary" size="md" className="!rounded-xl !px-5 whitespace-nowrap outline-none focus:outline-none focus:ring-4 focus:ring-primary-500/20">Login</Button>
+                  </>
+                )}
               </div>
 
               <button onClick={() => setIsMenuOpen(true)} className="md:hidden w-10 h-10 flex items-center justify-center rounded-xl bg-slate-900 text-white shadow-xl">
@@ -275,11 +294,29 @@ const Header = () => {
               </nav>
 
               <div className="space-y-4 pt-6 border-t border-gray-50">
-                  <Button to="/login" onClick={() => setIsMenuOpen(false)} fullWidth size="lg" className="!rounded-2xl">LOGIN</Button>
-                  <div className="grid grid-cols-2 gap-4">
-                      <Button to="/farmer-registration" onClick={() => setIsMenuOpen(false)} variant="dark" fullWidth className="!rounded-xl">REGISTER</Button>
-                      <Button href="https://wa.me/91000000000" variant="accent" fullWidth className="!rounded-xl !bg-[#25D366] !shadow-none">WHATSAPP</Button>
-                  </div>
+                  {isAuthenticated ? (
+                    <>
+                      <div className="flex items-center gap-4 p-4 bg-slate-50 rounded-2xl mb-4">
+                        <div className="w-12 h-12 rounded-xl bg-[#00B464] flex items-center justify-center text-white">
+                          <span className="material-symbols-outlined">person</span>
+                        </div>
+                        <div>
+                          <p className="text-[16px] font-black text-slate-900">{user?.name}</p>
+                          <p className="text-[12px] font-bold text-[#00B464] uppercase tracking-widest">{user?.role}</p>
+                        </div>
+                      </div>
+                      <Button to={`/${user?.role}/dashboard`} onClick={() => setIsMenuOpen(false)} fullWidth size="lg" className="!rounded-2xl uppercase">DASHBOARD</Button>
+                      <Button onClick={() => { logout(); setIsMenuOpen(false); }} variant="outline" fullWidth className="!rounded-xl !border-red-100 !text-red-500">LOGOUT</Button>
+                    </>
+                  ) : (
+                    <>
+                      <Button to="/login" onClick={() => setIsMenuOpen(false)} fullWidth size="lg" className="!rounded-2xl">LOGIN</Button>
+                      <div className="grid grid-cols-2 gap-4">
+                        <Button to="/farmer-registration" onClick={() => setIsMenuOpen(false)} variant="dark" fullWidth className="!rounded-xl">REGISTER</Button>
+                        <Button href="https://wa.me/91000000000" variant="accent" fullWidth className="!rounded-xl !bg-[#25D366] !shadow-none">WHATSAPP</Button>
+                      </div>
+                    </>
+                  )}
               </div>
             </motion.div>
           </div>

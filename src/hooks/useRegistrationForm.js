@@ -127,7 +127,6 @@ export const useRegistrationForm = (initialData) => {
             }
             
             setError(msg);
-            toast.error(msg);
         } finally {
             setLoading(false);
         }
@@ -160,7 +159,6 @@ export const useRegistrationForm = (initialData) => {
             console.error("❌ [DEBUG] Verification Error:", err);
             const msg = err.response?.data?.message || "Invalid OTP code";
             setError(msg);
-            toast.error(msg);
         } finally {
             setLoading(false);
         }
@@ -224,7 +222,6 @@ export const useRegistrationForm = (initialData) => {
         } catch (err) {
             const msg = err.response?.data?.message || "Registration failed. Please try again.";
             setError(msg);
-            toast.error(msg);
         } finally {
             setLoading(false);
         }
