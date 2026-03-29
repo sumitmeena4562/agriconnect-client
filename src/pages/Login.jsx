@@ -188,288 +188,340 @@ const Login = () => {
     };
 
     return (
-        <div className="min-h-screen bg-slate-50 flex flex-col font-sans antialiased overflow-y-auto pb-10">
-            <nav className="w-full bg-white border-b border-slate-200 py-4 px-6 sm:px-12 flex justify-between items-center z-50 sticky top-0">
-                <div className="flex items-center gap-3">
-                    <Logo size="md" />
-                    <div className="h-5 w-[1.5px] bg-slate-100 mx-1 hidden sm:block" />
-                    <div className="hidden sm:flex flex-col">
-                        <span className="text-[11px] font-black text-slate-800 uppercase tracking-widest leading-tight">Secure Login</span>
-                        <Badge variant="slate" size="xs" animate={false}>Z+ Protected</Badge>
-                    </div>
-                </div>
-                
-                <div className="flex bg-slate-100 p-0.5 rounded-full border border-slate-200 hover:bg-slate-200 transition-colors">
-                    <Link to="/farmer-registration" className="px-4 py-1.5 rounded-full text-[10px] font-black transition-all text-slate-600 hover:text-primary-700 uppercase tracking-tighter">
-                        Register Instead
-                    </Link>
-                </div>
-            </nav>
-            
-            <main className="flex-1 flex flex-col items-center justify-center p-4">
-                <AnimatePresence mode="wait">
-                    <Card 
-                        key={forgotMode ? 'forgot' : 'login'}
-                        initial={{ opacity: 0, y: 10 }}
+        <div className="min-h-screen bg-white flex font-sans antialiased overflow-hidden">
+            {/* Left Panel - Minimal Branding (Desktop Only) */}
+            <div className="hidden lg:flex w-[35%] bg-slate-50 relative overflow-hidden flex-col justify-center border-r border-slate-100 p-16">
+                <div className="space-y-12">
+                    <motion.div 
+                        initial={{ opacity: 0, y: -20 }}
                         animate={{ opacity: 1, y: 0 }}
-                        exit={{ opacity: 0, y: -10 }}
-                        transition={{ duration: 0.3 }}
-                        className="w-full transition-all duration-500 !rounded-[16px] border-none shadow-xl shadow-slate-200/50 max-w-[390px] overflow-hidden bg-white" 
-                        padding="p-0" 
+                        transition={{ duration: 0.6 }}
                     >
-                        <div className="flex w-full bg-slate-100 h-1">
-                            <div className={`flex-1 ${colors.bg} transition-colors duration-500`} />
+                        <Logo size="lg" />
+                    </motion.div>
+
+                    <div className="space-y-4">
+                        <motion.h1 
+                            initial={{ opacity: 0, x: -20 }}
+                            animate={{ opacity: 1, x: 0 }}
+                            transition={{ delay: 0.2, duration: 0.6 }}
+                            className="text-3xl xl:text-4xl font-bold text-slate-800 leading-tight tracking-tight"
+                        >
+                            Grow Smarter. <br />
+                            <span className={colors.text}>Connected.</span>
+                        </motion.h1>
+                        <motion.p 
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: 1 }}
+                            transition={{ delay: 0.4, duration: 0.8 }}
+                            className="text-slate-500 text-sm max-w-xs leading-relaxed font-medium"
+                        >
+                            Secure access to your agricultural ecosystem. Manage trades, tracking, and growth in one unified place.
+                        </motion.p>
+                    </div>
+
+                    <motion.div 
+                        initial={{ opacity: 0, scale: 0.95 }}
+                        animate={{ opacity: 1, scale: 1 }}
+                        transition={{ delay: 0.6, duration: 0.8 }}
+                        className="pt-8 flex items-center gap-4 border-t border-slate-200/60"
+                    >
+                        <div className="flex -space-x-2">
+                            {[1, 2, 3].map(i => (
+                                <div key={i} className="w-8 h-8 rounded-full border-2 border-white bg-slate-200" />
+                            ))}
                         </div>
+                        <span className="text-[10px] text-slate-400 font-bold uppercase tracking-widest italic">Trusted by 2.4M+ Partners</span>
+                    </motion.div>
+                </div>
+            </div>
 
-                        <div className="px-6 py-8 sm:px-8 sm:py-10 text-left">
-                            <AnimatePresence mode="wait">
-                                {forgotMode ? (
-                                    <motion.div key="forgot-view" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
-                                        <div className="mb-6 flex items-start justify-between">
-                                            <div>
-                                                <h2 className="text-2xl font-bold text-slate-900 tracking-tight">Recovery.</h2>
-                                                <p className="text-slate-500 text-xs mt-1">
-                                                    {forgotStep === 1 ? "Enter your ID to receive an OTP." : "Verify OTP and set new password."}
-                                                </p>
-                                            </div>
-                                            <button 
-                                                onClick={() => { setForgotMode(false); setForgotStep(1); setError(''); }}
-                                                className="w-8 h-8 flex items-center justify-center rounded-full bg-slate-100 text-slate-500 hover:text-slate-800 hover:bg-slate-200 transition-colors"
-                                            >
-                                                <span className="material-symbols-outlined text-sm font-bold">close</span>
-                                            </button>
-                                        </div>
+            {/* Right Panel - Simple Form */}
+            <div className="flex-1 flex flex-col bg-white overflow-y-auto">
+                <nav className="w-full py-4 px-10 flex justify-between items-center z-50">
+                    <div className="flex lg:hidden">
+                        <Logo size="md" />
+                    </div>
+                    <div className="hidden lg:block">
+                        <Badge variant="slate" size="xs">System v2.4</Badge>
+                    </div>
+                    
+                    <div className="flex items-center gap-4">
+                        <span className="hidden sm:block text-[10px] font-bold text-slate-400 uppercase tracking-widest">Awaiting access?</span>
+                        <Link to="/farmer-registration" className="px-5 py-2 rounded-full text-[11px] font-black transition-all bg-slate-50 text-slate-600 hover:bg-slate-100 hover:text-slate-900 border border-slate-200/60 transition-all active:scale-95 uppercase tracking-tightest">
+                            Join Now
+                        </Link>
+                    </div>
+                </nav>
 
-                                        <div className="space-y-4">
-                                            <Input 
-                                                label="Registered ID"
-                                                name="identifier"
-                                                autoComplete="username"
-                                                type={isEmail ? 'email' : 'tel'}
-                                                value={identifier}
-                                                onChange={(e) => { setIdentifier(e.target.value); setError(''); }}
-                                                placeholder="Mobile number or Email"
-                                                icon={isEmail ? "mail" : identifier.length > 0 ? "phone_iphone" : "account_circle"}
-                                                success={isValidIdentifier}
-                                                colors={colors}
-                                                disabled={forgotStep === 2}
-                                            />
+                <main className="flex-1 flex flex-col items-center justify-center px-6 lg:px-20 py-4 relative">
+                    <AnimatePresence mode="wait">
+                        <Card 
+                            key={forgotMode ? 'forgot' : 'login'}
+                            initial={{ opacity: 0, scale: 0.98 }}
+                            animate={{ opacity: 1, scale: 1 }}
+                            exit={{ opacity: 0, scale: 0.98 }}
+                            transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
+                            className="w-full transition-all duration-500 !rounded-[20px] border border-slate-100 shadow-xl shadow-slate-200/40 max-w-[420px] overflow-hidden bg-white z-10" 
+                            padding="p-0" 
+                        >
+                            <div className="flex w-full bg-slate-100 h-1.5 overflow-hidden">
+                                <motion.div 
+                                    className={`h-full ${colors.bg} transition-colors duration-500`} 
+                                    initial={{ width: '0%' }}
+                                    animate={{ width: isValidIdentifier ? '100%' : '20%' }}
+                                />
+                            </div>
 
-                                            {forgotStep === 2 && (
-                                                <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: 'auto' }} className="space-y-4">
-                                                    <Input 
-                                                        label="6-Digit OTP"
-                                                        name="otp"
-                                                        autoComplete="one-time-code"
-                                                        value={otp}
-                                                        onChange={(e) => { setOtp(e.target.value); setError(''); }}
-                                                        placeholder="••••••"
-                                                        icon="pin"
-                                                        maxLength={6}
-                                                        inputMode="numeric"
-                                                        success={otp.length === 6}
-                                                        colors={colors}
-                                                    />
-                                                    <Input 
-                                                        label="New Password"
-                                                        name="newPassword"
-                                                        autoComplete="new-password"
-                                                        type="password"
-                                                        value={newPassword}
-                                                        onChange={(e) => { setNewPassword(e.target.value); setError(''); }}
-                                                        placeholder="Min 8 chars"
-                                                        icon="enhanced_encryption"
-                                                        success={isNewPasswordValid}
-                                                        colors={colors}
-                                                    />
-                                                </motion.div>
-                                            )}
-
-                                            {error && (
-                                                <div className="text-red-500 text-[10px] font-black text-center py-2 bg-red-50/50 rounded-xl border border-red-100/50 uppercase tracking-widest">
-                                                    {error}
+                            <div className="px-8 py-6 sm:px-12 sm:py-8 text-left">
+                                <AnimatePresence mode="wait">
+                                    {forgotMode ? (
+                                        <motion.div key="forgot-view" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
+                                            <div className="mb-8 flex items-start justify-between">
+                                                <div>
+                                                    <h2 className="text-2xl font-bold text-slate-800 tracking-tight">Forgot Password</h2>
+                                                    <p className="text-slate-500 text-[13px] mt-1 font-medium">Enter your ID to reset access.</p>
                                                 </div>
-                                            )}
-
-                                            <div className="pt-3">
-                                                {forgotStep === 1 ? (
-                                                    <Button 
-                                                        onClick={handleSendForgotOtp}
-                                                        disabled={loading || !isValidIdentifier}
-                                                        fullWidth
-                                                        variant={isValidIdentifier ? activeVariant : 'dark'}
-                                                        icon={loading ? "autorenew" : "send"}
-                                                    >
-                                                        {loading ? "SENDING..." : "SEND OTP"}
-                                                    </Button>
-                                                ) : (
-                                                    <Button 
-                                                        onClick={handleResetPasswordSubmit}
-                                                        disabled={loading || otp.length !== 6 || !isNewPasswordValid}
-                                                        fullWidth
-                                                        variant={(otp.length === 6 && isNewPasswordValid) ? activeVariant : 'dark'}
-                                                        icon={loading ? "autorenew" : "check_circle"}
-                                                    >
-                                                        {loading ? "VERIFYING..." : "RESET PASSWORD"}
-                                                    </Button>
-                                                )}
+                                                <button 
+                                                    onClick={() => { setForgotMode(false); setForgotStep(1); setError(''); }}
+                                                    className="w-8 h-8 flex items-center justify-center rounded-full bg-slate-50 text-slate-400 hover:text-rose-500 hover:bg-rose-50 transition-all active:scale-90"
+                                                >
+                                                    <span className="material-symbols-outlined text-sm font-black">close</span>
+                                                </button>
                                             </div>
-                                        </div>
-                                    </motion.div>
-                                ) : (
-                                    <motion.form key="login-view" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="space-y-4" onSubmit={handleLoginSubmit}>
-                                        <div className="mb-6 flex flex-col items-center justify-center text-center space-y-3">
-                                            <div>
-                                                <h2 className="text-2xl font-bold text-slate-900 tracking-tight">Welcome Back.</h2>
-                                                <p className="text-slate-500 text-xs mt-1">Access your AgriConnect dashboard.</p>
-                                            </div>
-                                            
-                                            <button 
-                                                type="button" 
-                                                onClick={() => { setLoginMethod(prev => prev === 'password' ? 'otp' : 'password'); setOtpSent(false); setError(''); }}
-                                                className={`px-4 py-1.5 ${colors.lightBg} ${colors.text} rounded-full text-[10px] font-black uppercase tracking-[0.1em] hover:bg-slate-100 hover:shadow-sm transition-all border ${themeRole ? `border-${colors.text.split('-')[1]}-200` : 'border-primary-100'}`}
-                                            >
-                                                {loginMethod === 'password' ? "LOGIN VIA OTP" : "USE PASSWORD"}
-                                            </button>
-                                        </div>
-                                        
-                                        <div>
-                                            <Input 
-                                                label="Mobile or Email"
-                                                name="identifier"
-                                                autoComplete="username"
-                                                type={isEmail ? 'email' : 'tel'}
-                                                value={identifier}
-                                                onChange={(e) => {
-                                                    setIdentifier(e.target.value);
-                                                    setError('');
-                                                }}
-                                                placeholder="Enter mobile or email"
-                                                icon={isEmail ? "mail" : identifier.length > 0 ? "phone_iphone" : "account_circle"}
-                                                success={isValidIdentifier}
-                                                colors={colors}
-                                                disabled={otpSent}
-                                            />
-                                            {loginMethod === 'password' && (
-                                                <p className={`mt-1 text-[9px] font-black uppercase tracking-widest text-right ${identifier.length === 0 ? 'text-slate-300' : 'text-primary-500'}`}>
-                                                    {identifier.length === 0 ? "Awaiting format" : isEmail ? "Email Verified" : "Mobile Verified"}
-                                                </p>
-                                            )}
-                                        </div>
 
-                                        <AnimatePresence mode="popLayout">
-                                            {loginMethod === 'password' ? (
-                                                <motion.div key="pass-box" initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: 'auto' }} exit={{ opacity: 0, height: 0 }}>
-                                                    <Input 
-                                                        label="Password"
-                                                        name="password"
-                                                        autoComplete="current-password"
-                                                        type="password"
-                                                        value={password}
-                                                        onChange={(e) => { setPassword(e.target.value); setError(''); }}
-                                                        placeholder="••••••••"
-                                                        icon="lock"
-                                                        success={isPasswordValid}
-                                                        colors={colors}
-                                                    />
-                                                </motion.div>
-                                            ) : (
-                                                otpSent && (
-                                                    <motion.div key="otp-box" initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: 'auto' }} exit={{ opacity: 0, height: 0 }}>
+                                            <div className="space-y-6">
+                                                <Input 
+                                                    label="Mobile or Email"
+                                                    name="identifier"
+                                                    autoComplete="username"
+                                                    type={isEmail ? 'email' : 'tel'}
+                                                    value={identifier}
+                                                    onChange={(e) => { setIdentifier(e.target.value); setError(''); }}
+                                                    placeholder="Phone or Email"
+                                                    icon={isEmail ? "mail" : identifier.length > 0 ? "phone_iphone" : "account_circle"}
+                                                    success={isValidIdentifier}
+                                                    colors={colors}
+                                                    disabled={forgotStep === 2}
+                                                />
+
+                                                {forgotStep === 2 && (
+                                                    <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="space-y-6">
                                                         <Input 
-                                                            label="6-Digit OTP"
-                                                            name="loginOtp"
+                                                            label="Verification Pin"
+                                                            name="otp"
                                                             autoComplete="one-time-code"
-                                                            value={loginOtp}
-                                                            onChange={(e) => { setLoginOtp(e.target.value); setError(''); }}
-                                                            placeholder="••••••"
+                                                            value={otp}
+                                                            onChange={(e) => { setOtp(e.target.value); setError(''); }}
+                                                            placeholder="6-Digits"
                                                             icon="pin"
                                                             maxLength={6}
                                                             inputMode="numeric"
-                                                            success={loginOtp.length === 6}
+                                                            success={otp.length === 6}
+                                                            colors={colors}
+                                                        />
+                                                        <Input 
+                                                            label="New Credentials"
+                                                            name="newPassword"
+                                                            autoComplete="new-password"
+                                                            type="password"
+                                                            value={newPassword}
+                                                            onChange={(e) => { setNewPassword(e.target.value); setError(''); }}
+                                                            placeholder="Set new secret"
+                                                            icon="verified_user"
+                                                            success={isNewPasswordValid}
                                                             colors={colors}
                                                         />
                                                     </motion.div>
-                                                )
-                                            )}
-                                        </AnimatePresence>
+                                                )}
 
-                                        <AnimatePresence>
-                                            {error && (
-                                                <motion.div 
-                                                    initial={{ opacity: 0, height: 0 }}
-                                                    animate={{ opacity: 1, height: 'auto' }}
-                                                    exit={{ opacity: 0, height: 0 }}
-                                                    className="text-red-500 text-[10px] font-black text-center py-2 bg-red-50/50 rounded-xl border border-red-100/50 uppercase tracking-widest"
-                                                >
-                                                    {error}
-                                                </motion.div>
-                                            )}
-                                        </AnimatePresence>
+                                                {error && (
+                                                    <div className="text-rose-600 text-[11px] font-black text-center py-3 bg-rose-50 rounded-xl border border-rose-100 uppercase tracking-widest leading-none">
+                                                        {error}
+                                                    </div>
+                                                )}
 
-                                        {loginMethod === 'password' && (
-                                            <div className="flex items-center justify-between pt-1">
-                                                <div className="flex items-center">
-                                                    <input
-                                                        id="remember-me"
-                                                        type="checkbox"
-                                                        checked={rememberMe}
-                                                        onChange={(e) => setRememberMe(e.target.checked)}
-                                                        className="h-3.5 w-3.5 rounded border-slate-300 text-primary-600 focus:ring-primary-600 cursor-pointer"
-                                                    />
-                                                    <label htmlFor="remember-me" className="ml-2 block text-[11px] font-bold text-slate-500 cursor-pointer select-none">
-                                                        Remember me
-                                                    </label>
+                                                <div className="pt-4">
+                                                    {forgotStep === 1 ? (
+                                                                                        <Button 
+                                                            onClick={handleSendForgotOtp}
+                                                            disabled={loading || !isValidIdentifier}
+                                                            fullWidth
+                                                            variant={isValidIdentifier ? activeVariant : 'dark'}
+                                                            icon={loading ? "sync" : "arrow_forward"}
+                                                            className="!py-3.5 !text-[12px]"
+                                                        >
+                                                            {loading ? "PROCESSING..." : "GET OTP"}
+                                                        </Button>
+                                                    ) : (
+                                                                                        <Button 
+                                                            onClick={handleResetPasswordSubmit}
+                                                            disabled={loading || otp.length !== 6 || !isNewPasswordValid}
+                                                            fullWidth
+                                                            variant={(otp.length === 6 && isNewPasswordValid) ? activeVariant : 'dark'}
+                                                            icon={loading ? "sync" : "task_alt"}
+                                                            className="!py-3.5 !text-[12px]"
+                                                        >
+                                                            {loading ? "UPDATING..." : "RESET PASSWORD"}
+                                                        </Button>
+                                                    )}
                                                 </div>
+                                            </div>
+                                        </motion.div>
+                                    ) : (
+                                        <motion.form key="login-view" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="space-y-4" onSubmit={handleLoginSubmit}>
+                                            <div className="mb-4 flex flex-col items-start space-y-3">
+                                                <div>
+                                                    <h2 className="text-2xl font-bold text-slate-800 tracking-tight">Login</h2>
+                                                    <p className="text-slate-500 text-[13px] font-medium leading-relaxed">Enter your details to manage your profile.</p>
+                                                </div>
+                                                
                                                 <button 
                                                     type="button" 
-                                                    onClick={() => { setForgotMode(true); setError(''); }}
-                                                    className="font-black text-primary-600 hover:text-primary-500 text-[11px] transition-colors uppercase tracking-tight"
+                                                    onClick={() => { setLoginMethod(prev => prev === 'password' ? 'otp' : 'password'); setOtpSent(false); setError(''); }}
+                                                    className={`px-4 py-1.5 ${colors.lightBg} ${colors.text} rounded-full text-[10px] font-black uppercase tracking-[0.05em] hover:shadow-sm transition-all border ${themeRole ? `border-${colors.text.split('-')[1]}-200` : 'border-slate-100'} active:scale-95`}
                                                 >
-                                                    Forgot Password?
+                                                    {loginMethod === 'password' ? "LOGIN VIA OTP" : "USE PASSWORD"}
                                                 </button>
                                             </div>
-                                        )}
-
-                                        <div className="pt-3">
-                                            <Button 
-                                                type="submit"
-                                                disabled={loading || !isValidIdentifier || (loginMethod === 'password' && !isPasswordValid) || (loginMethod === 'otp' && otpSent && loginOtp.length !== 6)}
-                                                fullWidth
-                                                variant={(isValidIdentifier && (isPasswordValid || loginMethod === 'otp')) ? activeVariant : 'dark'}
-                                                icon={loading ? "autorenew" : (
-                                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="5" strokeLinecap="round" strokeLinejoin="round" className="w-3.5 h-3.5">
-                                                        <polyline points="20 6 9 17 4 12" />
-                                                    </svg>
+                                            
+                                            <div className="space-y-0.5">
+                                                <Input 
+                                                    label="Mobile or Email"
+                                                    name="identifier"
+                                                    autoComplete="username"
+                                                    type={isEmail ? 'email' : 'tel'}
+                                                    value={identifier}
+                                                    onChange={(e) => {
+                                                        setIdentifier(e.target.value);
+                                                        setError('');
+                                                    }}
+                                                    placeholder="Phone or Email"
+                                                    icon={isEmail ? "mail" : identifier.length > 0 ? "phone_iphone" : "account_circle"}
+                                                    success={isValidIdentifier}
+                                                    colors={colors}
+                                                    disabled={otpSent}
+                                                />
+                                                 {loginMethod === 'password' && (
+                                                    <p className={`text-[9px] font-bold uppercase tracking-widest text-right px-1 pt-1 ${identifier.length === 0 ? 'text-slate-300' : 'text-primary-500'}`}>
+                                                        {identifier.length === 0 ? "CHECKING..." : "VERIFIED"}
+                                                    </p>
                                                 )}
-                                                className={`${loading ? 'opacity-80' : ''} !py-3.5 !text-[12px] font-black tracking-widest`}
-                                            >
-                                                {loading ? "AUTHENTICATING..." : loginMethod === 'password' ? "SECURE LOGIN" : (!otpSent ? "SEND LOGIN OTP" : "VERIFY & LOGIN")}
-                                            </Button>
-                                        </div>
-                                    </motion.form>
-                                )}
-                            </AnimatePresence>
-                        </div>
-                    </Card>
-                </AnimatePresence>
+                                            </div>
 
-                <div className="mt-8 text-center space-y-1.5 shrink-0 z-10">
-                    <p className="text-[10px] font-black text-slate-300 uppercase tracking-[0.2em]">
-                        Need an account?
-                    </p>
-                    <div className="flex items-center justify-center gap-3">
-                        {['Farmer', 'Vendor', 'Customer'].map((item, idx) => (
-                            <React.Fragment key={item}>
-                                <Link to={`/${item.toLowerCase()}-registration`} className={`text-[12px] font-black transition-colors ${idx === 0 ? 'text-primary-600' : idx === 1 ? 'text-accent-600' : 'text-info-600'}`}>
-                                    {item}
-                                </Link>
-                                {idx < 2 && <span className="w-1 h-1 rounded-full bg-slate-200" />}
-                            </React.Fragment>
-                        ))}
-                    </div>
+                                            <AnimatePresence mode="popLayout">
+                                                {loginMethod === 'password' ? (
+                                                    <motion.div key="pass-box" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }}>
+                                                        <Input 
+                                                            label="PASSWORD"
+                                                            name="password"
+                                                            autoComplete="current-password"
+                                                            type="password"
+                                                            value={password}
+                                                            onChange={(e) => { setPassword(e.target.value); setError(''); }}
+                                                            placeholder="••••••••"
+                                                            icon="key"
+                                                            success={isPasswordValid}
+                                                            colors={colors}
+                                                        />
+                                                    </motion.div>
+                                                ) : (
+                                                    otpSent && (
+                                                        <motion.div key="otp-box" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }}>
+                                                            <Input 
+                                                                label="Authentication Pin"
+                                                                name="loginOtp"
+                                                                autoComplete="one-time-code"
+                                                                value={loginOtp}
+                                                                onChange={(e) => { setLoginOtp(e.target.value); setError(''); }}
+                                                                placeholder="6-Digits"
+                                                                icon="pin"
+                                                                maxLength={6}
+                                                                inputMode="numeric"
+                                                                success={loginOtp.length === 6}
+                                                                colors={colors}
+                                                            />
+                                                        </motion.div>
+                                                    )
+                                                )}
+                                            </AnimatePresence>
+
+                                            <AnimatePresence>
+                                                {error && (
+                                                    <motion.div 
+                                                        initial={{ opacity: 0, scale: 0.98 }}
+                                                        animate={{ opacity: 1, scale: 1 }}
+                                                        className="text-rose-600 text-[10px] font-black text-center py-3 bg-rose-50 rounded-xl border border-rose-100 uppercase tracking-widest shadow-sm"
+                                                    >
+                                                        {error}
+                                                    </motion.div>
+                                                )}
+                                            </AnimatePresence>
+
+                                            {loginMethod === 'password' && (
+                                                <div className="flex items-center justify-between pt-1">
+                                                    <div className="flex items-center">
+                                                        <input
+                                                            id="remember-me"
+                                                            type="checkbox"
+                                                            checked={rememberMe}
+                                                            onChange={(e) => setRememberMe(e.target.checked)}
+                                                            className="h-4 w-4 rounded-md border-slate-300 text-primary-600 focus:ring-primary-100 cursor-pointer"
+                                                        />
+                                                        <label htmlFor="remember-me" className="ml-2 block text-[13px] font-semibold text-slate-500 cursor-pointer select-none">
+                                                            Trust device
+                                                        </label>
+                                                    </div>
+                                                    <button 
+                                                        type="button" 
+                                                        onClick={() => { setForgotMode(true); setError(''); }}
+                                                        className="font-bold text-primary-600 hover:text-primary-500 text-[11px] transition-colors uppercase tracking-tight"
+                                                    >
+                                                        Lost Access?
+                                                    </button>
+                                                </div>
+                                            )}
+
+                                            <div className="pt-4">
+                                                <Button 
+                                                    type="submit"
+                                                    disabled={loading || !isValidIdentifier || (loginMethod === 'password' && !isPasswordValid) || (loginMethod === 'otp' && otpSent && loginOtp.length !== 6)}
+                                                    fullWidth
+                                                    variant={(isValidIdentifier && (isPasswordValid || loginMethod === 'otp')) ? activeVariant : 'dark'}
+                                                    icon={loading ? "sync" : (
+                                                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="4" strokeLinecap="round" strokeLinejoin="round" className="w-4 h-4">
+                                                            <polyline points="20 6 9 17 4 12" />
+                                                        </svg>
+                                                    )}
+                                                    className={`${loading ? 'opacity-80' : ''} !py-4 !text-[12px] font-black tracking-widest shadow-lg active:scale-[0.98] transition-all`}
+                                                >
+                                                    {loading ? "LOADING..." : loginMethod === 'password' ? "LOGIN" : (!otpSent ? "SEND ACCESS OTP" : "VERIFY & LOGIN")}
+                                                </Button>
+                                            </div>
+                                        </motion.form>
+                                    )}
+                                </AnimatePresence>
+                            </div>
+                        </Card>
+                    </AnimatePresence>
+
+                    <footer className="mt-6 text-center space-y-3 z-10 lg:hidden">
+                        <p className="text-[10px] font-bold text-slate-300 uppercase tracking-[0.2em]">
+                             &copy; 2026 AgriConnect Unified
+                        </p>
+                    </footer>
+                </main>
+                
+                {/* Desktop Footer built-in to main */}
+                <div className="hidden lg:flex w-full p-4 justify-center items-center gap-12 border-t border-slate-50 bg-white mt-auto">
+                    {['Farmer', 'Vendor', 'Customer'].map((item, idx) => (
+                        <Link key={item} to={`/${item.toLowerCase()}-registration`} className="group flex items-center gap-2">
+                            <span className={`w-1 h-1 rounded-full ${idx === 0 ? 'bg-primary-500' : idx === 1 ? 'bg-accent-500' : 'bg-info-500'}`} />
+                            <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest group-hover:text-slate-800 transition-colors">{item} Entry</span>
+                        </Link>
+                    ))}
                 </div>
-            </main>
+            </div>
         </div>
     );
 };

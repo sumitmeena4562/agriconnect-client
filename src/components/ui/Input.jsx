@@ -53,7 +53,7 @@ const Input = forwardRef(({
             <div className={`space-y-1.5 ${widthStyle} ${className}`}>
                 <div className="flex items-center justify-between px-1">
                     {label && (
-                        <label htmlFor={inputId} className="text-[11px] font-black text-slate-600 uppercase tracking-widest">
+                        <label htmlFor={inputId} className="text-[10px] font-bold text-slate-500 uppercase tracking-[0.2em]">
                             {label}
                         </label>
                     )}
@@ -71,10 +71,10 @@ const Input = forwardRef(({
                 </div>
                 
                 <div className={`
-                    group flex items-center bg-white border rounded-xl px-4 py-1.5 
-                    transition-all duration-300 min-h-[50px] outline-none
-                    ${error ? 'border-red-200 focus-within:border-red-400 focus-within:shadow-[0_0_15px_-3px_rgba(239,68,68,0.15)]' : 
-                      `border-slate-200 focus-within:${getFocusStyles().split(' ')[0]} focus-within:${getFocusStyles().split(' ')[1]}`}
+                    group flex items-center bg-white border-[1px] border-slate-100 rounded-[14px] px-4 py-1.5 
+                    transition-all duration-300 min-h-[52px] outline-none shadow-sm shadow-slate-100/50
+                    ${error ? 'border-red-200 focus-within:border-red-400 focus-within:shadow-[0_0_15px_-3px_rgba(239,68,68,0.1)]' : 
+                      `focus-within:border-slate-300 focus-within:shadow-[0_0_20px_-5px_rgba(0,0,0,0.05)]`}
                 `}>
                     {icon && (
                         <span 
@@ -106,7 +106,7 @@ const Input = forwardRef(({
                         placeholder={placeholder}
                         autoFocus={autoFocus}
                         autoComplete="on"
-                        className="w-full bg-transparent border-none outline-none font-bold text-slate-800 text-[14px] placeholder:text-slate-400 tracking-tight"
+                        className="w-full bg-transparent border-none outline-none font-medium text-slate-700 text-[14px] placeholder:text-slate-300 tracking-tight"
                         {...props}
                     />
 
