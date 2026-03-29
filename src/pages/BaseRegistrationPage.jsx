@@ -40,7 +40,8 @@ const BaseRegistrationPage = ({ role, config }) => {
         gender: '',
         dob: '',
         profilePic: '',
-        location: null
+        location: null,
+        acceptTerms: false
     });
 
     const [success, setSuccess] = useState(false);

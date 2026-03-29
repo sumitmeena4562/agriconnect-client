@@ -184,6 +184,7 @@ export const useRegistrationForm = (initialData) => {
         if (formData.password !== formData.confirmPassword) errors.confirmPassword = "Passwords do not match";
         if (!formData.state) errors.state = "State is required";
         if (!formData.district) errors.district = "District is required";
+        if (!formData.acceptTerms) errors.acceptTerms = "Terms must be accepted";
 
         if (Object.keys(errors).length > 0) {
             setFieldErrors(errors);
@@ -208,7 +209,8 @@ export const useRegistrationForm = (initialData) => {
                 dob: formData.dob,
                 profilePic: formData.profilePic,
                 location: formData.location,
-                verificationToken: verificationToken
+                verificationToken: verificationToken,
+                acceptTerms: formData.acceptTerms
             };
 
             const response = await apiRegisterUser(userData);

@@ -32,7 +32,7 @@ const Step3ProfileDetails = ({ formData, onChange, onSubmit, loading, error, fie
     
     const passwordStrength = calculatePasswordStrength(formData.password);
 
-    const allValid = isNameValid && isEmailValid && isPasswordValid && isConfirmValid && isPincodeValid && isLocationValid && isDOBValid && isGenderValid;
+    const allValid = isNameValid && isEmailValid && isPasswordValid && isConfirmValid && isPincodeValid && isLocationValid && isDOBValid && isGenderValid && formData.acceptTerms;
 
     const checkEmailAvailability = async () => {
         if (!formData.email || validateEmail(formData.email)) return;
@@ -199,6 +199,23 @@ const Step3ProfileDetails = ({ formData, onChange, onSubmit, loading, error, fie
                         />
                     </div>
                 </div>
+            </div>
+
+            {/* Terms & Conditions */}
+            <div className="flex items-start gap-3 px-1 pt-2">
+                <div className="pt-0.5">
+                    <input
+                        id="acceptTerms"
+                        name="acceptTerms"
+                        type="checkbox"
+                        checked={formData.acceptTerms}
+                        onChange={(e) => onChange({ target: { name: 'acceptTerms', value: e.target.checked } })}
+                        className={`w-4 h-4 rounded border-slate-300 ${colors.text} focus:ring-${colors.text.split('-')[1]}-100 cursor-pointer`}
+                    />
+                </div>
+                <label htmlFor="acceptTerms" className="text-[12px] font-medium text-slate-500 leading-tight cursor-pointer select-none">
+                    I agree to the <span className={`${colors.text} font-bold cursor-pointer hover:underline`}>Terms of Service</span> and <span className={`${colors.text} font-bold cursor-pointer hover:underline`}>Privacy Policy</span> of AgriConnect Unified.
+                </label>
             </div>
 
             <AnimatePresence>
