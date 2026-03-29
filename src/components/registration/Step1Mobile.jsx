@@ -82,6 +82,14 @@ const Step1Mobile = ({ mobile, email, onChange, onContinue, loading, error, fiel
     }, [email]);
 
     const canContinue = isMobileFormatValid && isEmailValid && mobileAvailable && emailAvailable;
+
+    const domains = ['@gmail.com', '@outlook.com', '@hotmail.com', '.com'];
+    const showChips = email.length > 2 && !email.includes('@');
+
+    const handleDomainClick = (domain) => {
+        onChange({ target: { name: 'email', value: email + domain } });
+    };
+
     return (
         <motion.div 
             key="step1" 
@@ -127,6 +135,28 @@ const Step1Mobile = ({ mobile, email, onChange, onContinue, loading, error, fiel
                     loading={emailLoading}
                     colors={colors}
                 />
+
+                <AnimatePresence>
+                    {showChips && (
+                        <motion.div 
+                            initial={{ opacity: 0, height: 0 }}
+                            animate={{ opacity: 1, height: 'auto' }}
+                            exit={{ opacity: 0, height: 0 }}
+                            className="flex flex-wrap gap-2 px-1"
+                        >
+                            {domains.map(domain => (
+                                <button
+                                    key={domain}
+                                    type="button"
+                                    onClick={() => handleDomainClick(domain)}
+                                    className={`px-3 py-1.5 rounded-full bg-slate-50 border border-slate-100 text-[10px] font-black text-slate-500 hover:border-${colors.text.split('-')[1]}-200 hover:${colors.text} transition-all active:scale-95 uppercase tracking-tight`}
+                                >
+                                    {domain}
+                                </button>
+                            ))}
+                        </motion.div>
+                    )}
+                </AnimatePresence>
 
                 <Button 
                     onClick={onContinue}

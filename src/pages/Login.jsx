@@ -187,6 +187,13 @@ const Login = () => {
         }
     };
 
+    const domains = ['@gmail.com', '@outlook.com', '@hotmail.com', '.com'];
+    const showChips = identifier.length > 2 && !identifier.includes('@') && !/^\d+$/.test(identifier);
+
+    const handleDomainClick = (domain) => {
+        setIdentifier(identifier + domain);
+    };
+
     return (
         <div className="min-h-screen bg-white flex font-sans antialiased overflow-hidden">
             {/* Left Panel - Minimal Branding (Desktop Only) */}
@@ -402,6 +409,29 @@ const Login = () => {
                                                     colors={colors}
                                                     disabled={otpSent}
                                                 />
+
+                                                <AnimatePresence>
+                                                    {showChips && (
+                                                        <motion.div 
+                                                            initial={{ opacity: 0, height: 0 }}
+                                                            animate={{ opacity: 1, height: 'auto' }}
+                                                            exit={{ opacity: 0, height: 0 }}
+                                                            className="flex flex-wrap gap-2 px-1 pt-2"
+                                                        >
+                                                            {domains.map(domain => (
+                                                                <button
+                                                                    key={domain}
+                                                                    type="button"
+                                                                    onClick={() => handleDomainClick(domain)}
+                                                                    className={`px-3 py-1.5 rounded-full bg-slate-50 border border-slate-100 text-[10px] font-black text-slate-500 hover:border-${colors.text.split('-')[1]}-200 hover:${colors.text} transition-all active:scale-95 uppercase tracking-tight`}
+                                                                >
+                                                                    {domain}
+                                                                </button>
+                                                            ))}
+                                                        </motion.div>
+                                                    )}
+                                                </AnimatePresence>
+
                                                  {loginMethod === 'password' && (
                                                     <p className={`text-[9px] font-bold uppercase tracking-widest text-right px-1 pt-1 ${identifier.length === 0 ? 'text-slate-300' : 'text-primary-500'}`}>
                                                         {identifier.length === 0 ? "CHECKING..." : "VERIFIED"}

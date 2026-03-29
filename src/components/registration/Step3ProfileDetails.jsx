@@ -61,6 +61,40 @@ const Step3ProfileDetails = ({ formData, onChange, onSubmit, loading, error, fie
         }, 800);
         return () => clearTimeout(timer);
     }, [formData.email]);
+
+    // Z+ Intelligence: Smart Pincode Mapping
+    useEffect(() => {
+        if (formData.pincode?.length === 6 && !validatePincode(formData.pincode)) {
+            const prefix = formData.pincode.substring(0, 2);
+            const mapping = {
+                "40": { state: "Maharashtra", district: "Mumbai" },
+                "41": { state: "Maharashtra", district: "Pune" },
+                "42": { state: "Maharashtra", district: "Nashik" },
+                "45": { state: "Madhya Pradesh", district: "Indore" },
+                "46": { state: "Madhya Pradesh", district: "Bhopal" },
+                "14": { state: "Punjab", district: "Amritsar" },
+                "15": { state: "Punjab", district: "Ludhiana" },
+                "38": { state: "Gujarat", district: "Ahmedabad" },
+                "39": { state: "Gujarat", district: "Surat" },
+                "22": { state: "Uttar Pradesh", district: "Lucknow" },
+                "20": { state: "Uttar Pradesh", district: "Kanpur" }
+            };
+
+            const prediction = mapping[prefix];
+            if (prediction) {
+                // Only auto-fill if the user hasn't manually selected yet
+                if (!formData.state) onChange({ target: { name: 'state', value: prediction.state } });
+                if (!formData.district) onChange({ target: { name: 'district', value: prediction.district } });
+            }
+        }
+    }, [formData.pincode]);
+
+    // Z+ Intelligence: Auto Title Case for Name
+    const handleNameChange = (e) => {
+        const val = e.target.value;
+        const formatted = val.split(' ').map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase()).join(' ');
+        onChange({ target: { name: 'fullName', value: formatted } });
+    };
     return (
         <motion.div key="step3" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="space-y-6">
             <div className="space-y-1 text-left">
@@ -81,7 +115,7 @@ const Step3ProfileDetails = ({ formData, onChange, onSubmit, loading, error, fie
                         label="Full Name"
                         name="fullName"
                         value={formData.fullName}
-                        onChange={onChange}
+                        onChange={handleNameChange}
                         placeholder="Enter full name"
                         icon="person"
                         error={fieldErrors.fullName}

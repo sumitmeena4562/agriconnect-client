@@ -49,11 +49,12 @@ const BaseRegistrationPage = ({ role, config }) => {
     useEffect(() => {
         if (success) {
             const redirectTimer = setTimeout(() => {
-                navigate('/dashboard');
+                const dashUrl = role === 'admin' ? '/admin/dashboard' : `/${role}/dashboard`;
+                navigate(dashUrl);
             }, 5000);
             return () => clearTimeout(redirectTimer);
         }
-    }, [success, navigate]);
+    }, [success, role, navigate]);
 
     const handleSubmit = () => {
         hookSubmit(role, () => setSuccess(true));
@@ -127,7 +128,10 @@ const BaseRegistrationPage = ({ role, config }) => {
                             {success ? (
                                 <SuccessScreen 
                                     fullName={formData.fullName} 
-                                    onDashboardClick={() => navigate('/dashboard')} 
+                                    onDashboardClick={() => {
+                                        const dashUrl = role === 'admin' ? '/admin/dashboard' : `/${role}/dashboard`;
+                                        navigate(dashUrl);
+                                    }} 
                                     config={config?.success}
                                     colors={colors}
                                     themeColor={themeColor}

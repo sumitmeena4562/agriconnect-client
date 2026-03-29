@@ -8,6 +8,13 @@ const getStrengthColor = (strength) => {
     return 'bg-green-500';
 };
 
+const getStrengthText = (strength) => {
+    if (strength <= 25) return 'Weak';
+    if (strength <= 50) return 'Fair';
+    if (strength <= 75) return 'Good';
+    return 'Strong';
+};
+
 const Input = forwardRef(({ 
     label, 
     value, 
@@ -138,12 +145,17 @@ const Input = forwardRef(({
             {/* Password Strength Meter */}
             {isPassword && value && strength !== null && (
                 <div className="px-1 space-y-1">
-                    <div className="h-1 w-full bg-slate-100 rounded-full overflow-hidden">
-                        <motion.div 
-                            initial={{ width: 0 }}
-                            animate={{ width: `${strength}%` }}
-                            className={`h-full transition-colors duration-500 ${getStrengthColor(strength)}`}
-                        />
+                    <div className="flex items-center justify-between gap-2">
+                        <div className="h-1.5 flex-1 bg-slate-100 rounded-full overflow-hidden">
+                            <motion.div 
+                                initial={{ width: 0 }}
+                                animate={{ width: `${strength}%` }}
+                                className={`h-full transition-colors duration-500 ${getStrengthColor(strength)}`}
+                            />
+                        </div>
+                        <span className={`text-[9px] font-black uppercase tracking-widest ${getStrengthColor(strength).replace('bg-', 'text-')}`}>
+                            {getStrengthText(strength)}
+                        </span>
                     </div>
                 </div>
             )}
