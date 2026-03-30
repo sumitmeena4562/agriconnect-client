@@ -10,6 +10,7 @@ const CustomerRegistration = React.lazy(() => import('./pages/CustomerRegistrati
 const VendorRegistration = React.lazy(() => import('./pages/VendorRegistration'));
 const ThemePreview = React.lazy(() => import('./pages/ThemePreview'));
 const Login = React.lazy(() => import('./pages/Login'));
+const FarmerDashboard = React.lazy(() => import('./pages/farmer/FarmerDashboard'));
 
 const App = () => {
   return (
@@ -19,6 +20,7 @@ const App = () => {
         <Routes>
           <Route path="/" element={<LandingPage />} />
           <Route path="/login" element={<Login />} />
+          <Route path="/farmer/dashboard" element={<FarmerDashboard />} />
           <Route path="/farmer-registration" element={<FarmerRegistration />} />
           <Route path="/customer-registration" element={<CustomerRegistration />} />
           <Route path="/vendor-registration" element={<VendorRegistration />} />
