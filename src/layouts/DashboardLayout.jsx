@@ -32,13 +32,13 @@ const DashboardLayout = ({ children, role = 'farmer' }) => {
       <NavLink
         to={item.path}
         className={({ isActive }) => `
-          flex items-center gap-3 px-4 py-3.5 rounded-2xl transition-all group relative
+          flex items-center gap-3 px-4 py-3 rounded-2xl transition-all group relative
           ${isActive 
             ? 'bg-primary-500 text-white shadow-lg shadow-primary-500/30' 
             : 'text-slate-500 hover:bg-slate-50 hover:text-slate-900'}
         `}
       >
-        <span className={`material-symbols-outlined text-[22px] ${isActive ? 'text-white' : 'text-slate-400 group-hover:text-primary-500'}`}>
+        <span className={`material-symbols-outlined text-[24px] ${isActive ? 'text-white' : 'text-slate-400 group-hover:text-primary-500'}`}>
           {item.icon}
         </span>
         {!isCollapsed && (
@@ -56,13 +56,15 @@ const DashboardLayout = ({ children, role = 'farmer' }) => {
     );
   };
 
+  const mobileNavItems = farmerNavItems.slice(0, 4); // Top 4 for bottom bar
+
   return (
-    <div className="min-h-screen bg-[#F8FAFC] flex font-sans antialiased overflow-hidden">
-      {/* Desktop Sidebar */}
+    <div className="min-h-screen bg-[#F8FAFC] flex flex-col lg:flex-row font-sans antialiased overflow-hidden">
+      {/* Desktop Sidebar (Left) */}
       <motion.aside
         initial={false}
         animate={{ width: isSidebarOpen ? 280 : 88 }}
-        className="hidden lg:flex flex-col bg-white border-r border-slate-100 shadow-sm z-50 transition-all duration-300 relative"
+        className="hidden lg:flex flex-col bg-white border-r border-slate-100 shadow-sm z-50 transition-all duration-300 relative h-screen"
       >
         <div className="p-6 flex items-center justify-between">
           <AnimatePresence mode="wait">
@@ -112,17 +114,20 @@ const DashboardLayout = ({ children, role = 'farmer' }) => {
       </motion.aside>
 
       {/* Main Content Area */}
-      <div className="flex-1 flex flex-col min-w-0 h-screen overflow-hidden">
-        {/* Top Header */}
-        <header className="h-20 bg-white/80 backdrop-blur-md border-b border-slate-100 flex items-center justify-between px-6 lg:px-10 shrink-0 z-40">
-           <div className="flex items-center gap-4">
+      <div className="flex-1 flex flex-col min-w-0 h-screen overflow-hidden relative">
+        {/* Top Header - Mobile Compact */}
+        <header className="h-16 lg:h-20 bg-white/80 backdrop-blur-xl border-b border-slate-100 flex items-center justify-between px-4 lg:px-10 shrink-0 z-40">
+           <div className="flex items-center gap-3">
               <button 
                 onClick={() => setIsMobileMenuOpen(true)}
-                className="lg:hidden w-10 h-10 flex items-center justify-center rounded-xl bg-slate-50 text-slate-600"
+                className="w-10 h-10 flex items-center justify-center rounded-xl bg-slate-50 text-slate-600 lg:hidden active:scale-95 transition-all"
               >
-                <span className="material-symbols-outlined">menu</span>
+                <span className="material-symbols-outlined text-[22px]">menu</span>
               </button>
-              <div className="hidden sm:block">
+              <div className="lg:hidden">
+                 <Logo size="sm" />
+              </div>
+              <div className="hidden lg:block">
                  <h2 className="text-lg font-black text-slate-800 tracking-tight flex items-center gap-2 uppercase">
                     {farmerNavItems.find(i => i.path === location.pathname)?.label || 'Overview'}
                     <span className="w-1.5 h-1.5 rounded-full bg-primary-500 animate-pulse"></span>
@@ -130,47 +135,66 @@ const DashboardLayout = ({ children, role = 'farmer' }) => {
               </div>
            </div>
 
-           <div className="flex items-center gap-3 lg:gap-6">
-              <div className="hidden md:flex items-center bg-slate-50 border border-slate-100 rounded-2xl px-4 py-2 focus-within:bg-white focus-within:ring-2 focus-within:ring-primary-500/10 transition-all group">
+           <div className="flex items-center gap-2 lg:gap-6">
+              <div className="hidden sm:flex items-center bg-slate-50 border border-slate-100 rounded-2xl px-4 py-2 focus-within:bg-white focus-within:ring-2 focus-within:ring-primary-500/10 transition-all group">
                  <span className="material-symbols-outlined text-slate-400 text-[20px] mr-2">search</span>
                  <input type="text" placeholder="Search Mandis, Crops..." className="bg-transparent border-none focus:outline-none text-sm font-bold text-slate-700 w-48 lg:w-64 placeholder:text-slate-300" />
               </div>
 
-              <div className="flex items-center gap-2">
-                 <button className="w-10 h-10 rounded-xl bg-slate-50 text-slate-400 hover:text-primary-500 hover:bg-primary-50 transition-all relative">
-                    <span className="material-symbols-outlined">notifications</span>
-                    <span className="absolute top-2.5 right-2.5 w-2 h-2 bg-rose-500 border-2 border-white rounded-full"></span>
+              <div className="flex items-center gap-1.5 lg:gap-2">
+                 <button className="w-9 h-9 lg:w-10 lg:h-10 rounded-xl bg-slate-50 text-slate-400 hover:text-primary-500 hover:bg-primary-50 transition-all relative">
+                    <span className="material-symbols-outlined text-[20px] lg:text-[24px]">notifications</span>
+                    <span className="absolute top-2.5 right-2.5 w-1.5 h-1.5 lg:w-2 lg:h-2 bg-rose-500 border-2 border-white rounded-full"></span>
                  </button>
                  
-                 <div className="h-10 w-[1px] bg-slate-100 hidden sm:block mx-2"></div>
+                 <div className="h-8 lg:h-10 w-[1px] bg-slate-100 hidden sm:block mx-2"></div>
 
-                 <div className="flex items-center gap-3 pl-2">
+                 <div className="flex items-center gap-2 lg:gap-3 pl-1 lg:pl-2 relative group cursor-pointer">
                     <div className="hidden sm:flex flex-col items-end">
                        <span className="text-[13px] font-black text-slate-900 uppercase leading-none">{user?.name}</span>
-                       <Badge variant="primary" size="xs" className="mt-1">Verified {role}</Badge>
+                       <Badge variant="primary" size="xs" className="mt-1">Verified</Badge>
                     </div>
-                    <div className="w-10 h-10 rounded-xl bg-slate-100 flex items-center justify-center border border-slate-200 overflow-hidden cursor-pointer hover:ring-2 hover:ring-primary-500/20 transition-all">
+                    <div className="w-9 h-9 lg:w-10 lg:h-10 rounded-xl bg-white border border-slate-200 overflow-hidden shadow-sm">
                        {user?.avatar ? (
                          <img src={user.avatar} alt="Profile" className="w-full h-full object-cover" />
                        ) : (
-                         <span className="material-symbols-outlined text-slate-400">account_circle</span>
+                         <div className="w-full h-full flex items-center justify-center bg-primary-500 text-white font-black text-xs uppercase">{user?.name?.slice(0,1)}</div>
                        )}
                     </div>
-                    <button 
-                      onClick={handleLogout}
-                      className="w-10 h-10 rounded-xl bg-slate-50 text-slate-400 hover:text-rose-500 hover:bg-rose-50 transition-all"
-                    >
-                       <span className="material-symbols-outlined">logout</span>
-                    </button>
                  </div>
+                 <button 
+                   onClick={handleLogout}
+                   className="hidden lg:flex w-10 h-10 rounded-xl bg-slate-50 text-slate-400 hover:text-rose-500 hover:bg-rose-50 transition-all items-center justify-center"
+                 >
+                    <span className="material-symbols-outlined">logout</span>
+                 </button>
               </div>
            </div>
         </header>
 
         {/* Dynamic Page Content */}
-        <main className="flex-1 overflow-y-auto px-6 lg:px-10 py-8 custom-scrollbar">
+        <main className="flex-1 overflow-y-auto px-4 lg:px-10 py-6 lg:py-8 custom-scrollbar pb-24 lg:pb-8">
           {children}
         </main>
+
+        {/* Mobile Bottom Navigation Bar (App-style) */}
+        <div className="lg:hidden fixed bottom-0 left-0 right-0 h-20 bg-white/90 backdrop-blur-xl border-t border-slate-100 flex items-center justify-around px-4 z-[90] pb-2">
+           {mobileNavItems.map((item) => {
+              const isActive = location.pathname === item.path;
+              return (
+                <NavLink 
+                  key={item.path} 
+                  to={item.path} 
+                  className={`flex flex-col items-center gap-1 min-w-[60px] py-1 transition-all ${isActive ? 'text-primary-600 scale-110' : 'text-slate-400'}`}
+                >
+                   <div className={`w-10 h-10 rounded-2xl flex items-center justify-center transition-all ${isActive ? 'bg-primary-500 text-white shadow-lg shadow-primary-500/30' : 'bg-transparent'}`}>
+                      <span className="material-symbols-outlined text-[24px]">{item.icon}</span>
+                   </div>
+                   <span className="text-[9px] font-black uppercase tracking-widest">{item.label.split(' ')[0]}</span>
+                </NavLink>
+              )
+           })}
+        </div>
       </div>
 
       {/* Mobile Drawer Overlay */}
