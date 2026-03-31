@@ -71,7 +71,7 @@ const DashboardLayout = ({ children, role = 'farmer' }) => {
   const mobileNavItems = farmerNavItems.slice(0, 4);
 
   return (
-    <div className="min-h-screen bg-[#FBFDFF] flex flex-col lg:flex-row font-sans antialiased overflow-hidden">
+    <div className="min-h-screen bg-[#F4F7FE] flex flex-col lg:flex-row font-sans antialiased overflow-hidden">
       {/* Desktop Sidebar (Left) - Balanced & Clean */}
       <motion.aside
         initial={false}
@@ -114,122 +114,135 @@ const DashboardLayout = ({ children, role = 'farmer' }) => {
       {/* Main Content Area */}
       <div className="flex-1 flex flex-col min-w-0 h-screen overflow-hidden relative">
         {/* Pro Navbar Header */}
-        <header className="h-14 lg:h-16 bg-white/70 backdrop-blur-md border-b border-slate-50/80 flex items-center justify-between px-4 lg:px-8 shrink-0 z-50">
-           <div className="flex items-center gap-3">
-              <button 
-                onClick={() => setIsMobileMenuOpen(true)}
-                className="w-9 h-9 flex items-center justify-center rounded-lg bg-slate-50 text-slate-400 lg:hidden active:scale-95 transition-all"
-              >
-                <span className="material-symbols-outlined text-[20px]">sort</span>
-              </button>
-              <div className="flex items-center gap-2 pr-4 lg:border-r lg:border-slate-100/50">
-                 <h2 className="text-[12px] font-black text-slate-800 uppercase tracking-[0.1em] whitespace-nowrap">
-                   {farmerNavItems.find(i => i.path === location.pathname)?.label || 'Overview'}
-                 </h2>
-                 <div className="flex items-center gap-1 ml-2 bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-100/50">
-                    <div className="w-1 h-1 rounded-full bg-emerald-500 animate-pulse"></div>
-                    <span className="text-[8px] font-black text-emerald-600 uppercase tracking-tighter">Live</span>
-                 </div>
-              </div>
+        <header className="h-14 lg:h-16 bg-white border-b border-slate-200/60 shadow-[0_1px_2px_rgba(0,0,0,0.03)] flex items-center justify-between px-4 lg:px-8 shrink-0 z-50">
+            <div className="flex items-center gap-4 lg:gap-6">
+               <button 
+                 onClick={() => setIsMobileMenuOpen(true)}
+                 className="w-10 h-10 flex items-center justify-center rounded-xl bg-slate-50 text-slate-400 lg:hidden border border-slate-200/50 active:scale-95 transition-all"
+               >
+                 <span className="material-symbols-outlined text-[20px]">sort</span>
+               </button>
+               
+               <div className="flex flex-col items-start pr-4 lg:border-r lg:border-slate-200/60">
+                  <div className="flex items-center gap-2">
+                     <h2 className="text-[13px] font-black text-slate-900 uppercase tracking-[0.08em] whitespace-nowrap">
+                       {farmerNavItems.find(i => i.path === location.pathname)?.label || 'Overview'}
+                     </h2>
+                     <div className="flex items-center gap-1.5 bg-emerald-50 px-2.5 py-0.5 rounded-full border border-emerald-100">
+                        <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></div>
+                        <span className="text-[9px] font-black text-emerald-700 uppercase tracking-tighter">Live</span>
+                     </div>
+                  </div>
+                  <span className="text-[9px] font-bold text-slate-400 uppercase tracking-[0.05em] mt-0.5 hidden sm:block">Real-time Agriculture Monitor</span>
+               </div>
 
-              {/* Quick Weather Widget */}
-              <div className="hidden xl:flex items-center gap-3 pl-4">
-                 <div className="flex flex-col items-start">
-                    <span className="text-[9px] font-bold text-slate-400 uppercase tracking-widest leading-none">Jaipur, Rajasthan</span>
-                    <span className="text-[11px] font-black text-slate-700 mt-0.5">32°C / Sunny</span>
-                 </div>
-                 <span className="material-symbols-outlined text-amber-500 text-[20px]">light_mode</span>
-              </div>
-           </div>
+               {/* Quick Weather Widget */}
+               <div className="hidden xl:flex items-center gap-3 pl-2">
+                  <div className="w-9 h-9 rounded-xl bg-amber-50 flex items-center justify-center text-amber-500 border border-amber-100">
+                     <span className="material-symbols-outlined text-[20px]">light_mode</span>
+                  </div>
+                  <div className="flex flex-col items-start">
+                     <span className="text-[11px] font-black text-slate-700 leading-none">32°C / Sunny</span>
+                     <span className="text-[9px] font-bold text-slate-400 uppercase tracking-widest mt-1">Jaipur</span>
+                  </div>
+               </div>
+            </div>
 
-           <div className="flex-1 max-w-xs hidden md:block px-6">
-              <div className="relative group">
-                 <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-slate-300 text-[16px] group-focus-within:text-primary-500 transition-colors">search</span>
-                 <input 
-                   type="text" 
-                   placeholder="Search mandi, crops..." 
-                   className="w-full bg-slate-50/50 border border-slate-100/50 rounded-xl py-1.5 pl-9 pr-4 text-[11px] font-bold text-slate-600 placeholder:text-slate-300 focus:outline-none focus:bg-white focus:ring-4 focus:ring-primary-500/5 transition-all" 
-                 />
-              </div>
-           </div>
+            <div className="flex-1 max-w-sm hidden md:block px-6">
+               <div className="relative group">
+                  <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-slate-300 text-[18px] group-focus-within:text-primary-500 transition-colors">search</span>
+                  <input 
+                    type="text" 
+                    placeholder="Search Mandi, Crops, or Experts..." 
+                    className="w-full bg-slate-50 border border-slate-200/60 rounded-xl py-2 pl-10 pr-4 text-[12px] font-medium text-slate-700 placeholder:text-slate-400 focus:outline-none focus:bg-white focus:ring-4 focus:ring-primary-500/10 focus:border-primary-500/30 transition-all shadow-inner-sm" 
+                  />
+               </div>
+            </div>
 
-           <div className="flex items-center gap-2 lg:gap-4">
-              {/* Language Switcher */}
-              <div className="hidden sm:flex items-center bg-slate-50 border border-slate-100/50 rounded-lg p-1 mr-2">
-                 <button className="px-2 py-1 text-[9px] font-black text-slate-400 hover:text-slate-600">EN</button>
-                 <button className="px-2 py-1 text-[9px] font-black bg-white shadow-sm border border-slate-100 rounded-md text-primary-600">हि</button>
-              </div>
+            <div className="flex items-center gap-2 lg:gap-4">
+               {/* Language Switcher */}
+               <div className="hidden sm:flex items-center bg-slate-50 border border-slate-200/60 rounded-xl p-1 mr-2 shadow-sm">
+                  <button className="px-3 py-1 text-[10px] font-black text-slate-400 hover:text-slate-600 transition-colors">EN</button>
+                  <button className="px-3 py-1 text-[10px] font-black bg-white shadow-sm border border-slate-200/60 rounded-lg text-primary-600">हि</button>
+               </div>
 
-              <button className="w-9 h-9 rounded-xl text-slate-300 hover:text-primary-500 hover:bg-primary-50 transition-all flex items-center justify-center relative">
-                 <span className="material-symbols-outlined text-[20px]">notifications</span>
-                 <span className="absolute top-2.5 right-2.5 w-1.5 h-1.5 bg-rose-500 rounded-full border-2 border-white"></span>
-              </button>
+               <button className="w-10 h-10 rounded-xl text-slate-400 hover:text-primary-500 hover:bg-primary-50 transition-all flex items-center justify-center relative border border-transparent hover:border-primary-100 shadow-sm">
+                  <span className="material-symbols-outlined text-[22px]">notifications</span>
+                  <span className="absolute top-2.5 right-2.5 w-2 h-2 bg-rose-500 rounded-full border-2 border-white shadow-sm"></span>
+               </button>
 
-              <div className="h-6 w-[1px] bg-slate-100 hidden sm:block mx-1"></div>
+               <div className="h-8 w-[1px] bg-slate-200 hidden sm:block mx-1"></div>
 
-              <div className="relative profile-section">
-                 <div 
-                   onClick={() => setIsProfileOpen(!isProfileOpen)}
-                   className="flex items-center gap-3 cursor-pointer group hover:bg-slate-50 p-1.5 rounded-xl transition-all"
-                 >
-                    <div className="hidden lg:flex flex-col items-end">
-                       <span className="text-[11px] font-black text-slate-800 uppercase tracking-tight leading-none mb-0.5">{user?.name}</span>
-                       <span className="text-[9px] font-bold text-slate-300 uppercase tracking-widest leading-none">Verified Pro</span>
-                    </div>
-                    
-                    <div className="w-8 h-8 rounded-lg bg-primary-500 shadow-md shadow-primary-500/10 flex items-center justify-center text-white font-black text-xs transition-transform group-hover:scale-105">
-                       {user?.name?.slice(0,1)}
-                    </div>
-                    <span className={`material-symbols-outlined text-[18px] text-slate-300 transition-transform duration-300 ${isProfileOpen ? 'rotate-180' : ''}`}>expand_more</span>
-                 </div>
+               <div className="relative profile-section">
+                  <div 
+                    onClick={() => setIsProfileOpen(!isProfileOpen)}
+                    className="flex items-center gap-3 cursor-pointer group hover:bg-slate-50 p-1.5 rounded-xl transition-all border border-transparent hover:border-slate-200"
+                  >
+                     <div className="hidden lg:flex flex-col items-end">
+                        <span className="text-[12px] font-black text-slate-900 uppercase tracking-tight leading-none mb-1">{user?.name}</span>
+                        <div className="flex items-center gap-1">
+                           <span className="w-1 h-1 rounded-full bg-primary-500"></span>
+                           <span className="text-[9px] font-bold text-slate-400 uppercase tracking-widest leading-none">Verified Pro</span>
+                        </div>
+                     </div>
+                     
+                     <div className="w-9 h-9 rounded-xl bg-primary-500 shadow-lg shadow-primary-500/20 flex items-center justify-center text-white font-black text-[14px] transition-transform group-hover:scale-105 border-2 border-white">
+                        {user?.name?.slice(0,1)}
+                     </div>
+                     <span className={`material-symbols-outlined text-[20px] text-slate-400 transition-transform duration-300 ${isProfileOpen ? 'rotate-180' : ''}`}>expand_more</span>
+                  </div>
 
-                 {/* Premium Profile Dropdown */}
-                 <AnimatePresence>
-                    {isProfileOpen && (
-                      <motion.div
-                        initial={{ opacity: 0, y: 8, scale: 0.95 }}
-                        animate={{ opacity: 1, y: 0, scale: 1 }}
-                        exit={{ opacity: 0, y: 8, scale: 0.95 }}
-                        transition={{ duration: 0.15, ease: 'easeOut' }}
-                        className="absolute right-0 mt-3 w-60 bg-white border border-slate-100 shadow-[0_25px_60px_rgba(0,0,0,0.12)] rounded-3xl p-2 z-[999]"
-                      >
-                         <div className="px-4 py-4 border-b border-slate-50/50 mb-1">
-                            <p className="text-[10px] font-black text-slate-400 uppercase tracking-[0.15em]">Signed in as</p>
-                            <p className="text-[14px] font-black text-slate-800 truncate mt-1.5">{user?.name}</p>
-                         </div>
+                  {/* Premium Profile Dropdown */}
+                  <AnimatePresence>
+                     {isProfileOpen && (
+                       <motion.div
+                         initial={{ opacity: 0, y: 12, scale: 0.95 }}
+                         animate={{ opacity: 1, y: 0, scale: 1 }}
+                         exit={{ opacity: 0, y: 12, scale: 0.95 }}
+                         transition={{ duration: 0.2, ease: [0.23, 1, 0.32, 1] }}
+                         className="absolute right-0 mt-3 w-64 bg-white border border-slate-200/60 shadow-[0_30px_70px_rgba(0,0,0,0.15)] rounded-3xl p-2.5 z-[999]"
+                       >
+                          <div className="px-4 py-4 border-b border-slate-100/50 mb-1.5">
+                             <p className="text-[10px] font-black text-slate-400 uppercase tracking-[0.15em]">Signed in as</p>
+                             <p className="text-[15px] font-black text-slate-900 truncate mt-1.5 font-heading tracking-tight">{user?.name}</p>
+                          </div>
 
-                         <div className="space-y-0.5">
-                            {profileMenuItems.map((item) => (
-                              <NavLink
-                                key={item.path}
-                                to={item.path}
-                                onClick={() => setIsProfileOpen(false)}
-                                className="flex items-center gap-3.5 px-4 py-3 rounded-2xl text-slate-600 hover:bg-primary-50 hover:text-primary-600 transition-all group"
-                              >
-                                 <span className="material-symbols-outlined text-[18px] text-slate-400 group-hover:text-primary-500 transition-colors">{item.icon}</span>
-                                 <span className="text-[12px] font-bold">{item.label}</span>
-                              </NavLink>
-                            ))}
-                         </div>
+                          <div className="space-y-1">
+                             {profileMenuItems.map((item) => (
+                               <NavLink
+                                 key={item.path}
+                                 to={item.path}
+                                 onClick={() => setIsProfileOpen(false)}
+                                 className="flex items-center gap-3.5 px-4 py-3 rounded-2xl text-slate-600 hover:bg-primary-50 hover:text-primary-600 transition-all group"
+                               >
+                                  <div className="w-8 h-8 rounded-lg bg-slate-50 flex items-center justify-center group-hover:bg-primary-100/50 transition-colors">
+                                     <span className="material-symbols-outlined text-[18px] text-slate-400 group-hover:text-primary-600 transition-colors">{item.icon}</span>
+                                  </div>
+                                  <span className="text-[13px] font-bold">{item.label}</span>
+                               </NavLink>
+                             ))}
+                          </div>
 
-                         <div className="mt-1.5 pt-1.5 border-t border-slate-50">
-                            <button 
-                              onClick={handleLogout}
-                              className="w-full flex items-center gap-3.5 px-4 py-3 rounded-2xl text-rose-500 hover:bg-rose-50 transition-all group"
-                            >
-                               <span className="material-symbols-outlined text-[18px] group-hover:rotate-12 transition-transform">logout</span>
-                               <span className="text-[11px] font-black uppercase tracking-wider">Sign Out</span>
-                            </button>
-                         </div>
-                      </motion.div>
-                    )}
-                 </AnimatePresence>
-              </div>
-           </div>
+                          <div className="mt-2 pt-2 border-t border-slate-100">
+                             <button 
+                               onClick={handleLogout}
+                               className="w-full flex items-center gap-3.5 px-4 py-3 rounded-2xl text-rose-500 hover:bg-rose-50 transition-all group"
+                             >
+                                <div className="w-8 h-8 rounded-lg bg-rose-50 flex items-center justify-center group-hover:bg-rose-100 transition-colors">
+                                   <span className="material-symbols-outlined text-[18px] group-hover:rotate-12 transition-transform">logout</span>
+                                </div>
+                                <span className="text-[12px] font-black uppercase tracking-wider">Sign Out</span>
+                             </button>
+                          </div>
+                       </motion.div>
+                     )}
+                  </AnimatePresence>
+               </div>
+            </div>
         </header>
 
         {/* Dynamic Page Content */}
-        <main className="flex-1 overflow-y-auto px-4 lg:px-8 py-4 lg:py-6 no-scrollbar pb-24 lg:pb-8 bg-slate-50/30">
+        <main className="flex-1 overflow-y-auto px-4 lg:px-8 py-4 lg:py-6 no-scrollbar pb-24 lg:pb-8">
           <AnimatePresence mode="wait">
              <motion.div
                key={location.pathname}

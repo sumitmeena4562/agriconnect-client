@@ -48,8 +48,8 @@ const FarmerDashboard = () => {
                         {stats.map((stat, idx) => (
                             <Card 
                                 key={idx}
-                                className="!rounded-[24px] border border-slate-100/80 shadow-sm hover:shadow-md transition-all duration-300 overflow-hidden group cursor-pointer bg-white"
-                                padding="p-4 lg:p-5"
+                                className="!rounded-[28px] border border-slate-200/50 shadow-sm hover:shadow-md transition-all duration-300 overflow-hidden group cursor-pointer bg-white"
+                                padding="p-5 lg:p-6"
                             >
                                 <div className="flex items-center gap-3 mb-3">
                                     <div className={`w-8 h-8 rounded-xl ${stat.color} text-white flex items-center justify-center shadow-lg shadow-inherit/10`}>
@@ -80,7 +80,7 @@ const FarmerDashboard = () => {
                         
                         <div className="space-y-3">
                             {mandiPrices.map((item, i) => (
-                                <div key={i} className="bg-white p-3 lg:p-4 rounded-[20px] border border-slate-50 shadow-sm hover:shadow-md transition-all cursor-pointer flex items-center justify-between group">
+                                <div key={i} className="bg-white p-4 lg:p-5 rounded-[24px] border border-slate-200/50 shadow-sm hover:shadow-md transition-all cursor-pointer flex items-center justify-between group">
                                     <div className="flex items-center gap-3">
                                         <div className="w-8 h-8 rounded-lg bg-slate-50 flex items-center justify-center text-emerald-600 group-hover:bg-emerald-50 transition-colors">
                                             <span className="material-symbols-outlined text-[18px]">agriculture</span>
@@ -113,7 +113,7 @@ const FarmerDashboard = () => {
                             {myCrops.map((crop) => (
                                 <Card 
                                     key={crop.id}
-                                    className="!rounded-[24px] border border-slate-100 p-4 lg:p-5 shadow-sm hover:shadow-lg transition-all duration-300 bg-white relative overflow-hidden"
+                                    className="!rounded-[28px] border border-slate-200/50 p-5 lg:p-6 shadow-sm hover:shadow-lg transition-all duration-300 bg-white relative overflow-hidden"
                                 >
                                     <div className="flex items-center justify-between mb-4">
                                         <Badge variant={crop.status === 'Growing' ? 'primary' : 'success'} size="xs" className="!px-3 !py-1">
@@ -145,7 +145,7 @@ const FarmerDashboard = () => {
                             ))}
 
                             {/* Simple Add Crop Placeholder */}
-                            <button className="h-full min-h-[140px] rounded-[24px] border-2 border-dashed border-slate-100 hover:border-primary-200 hover:bg-primary-50/20 transition-all flex flex-col items-center justify-center gap-2 group">
+                            <button className="h-full min-h-[160px] rounded-[28px] border-2 border-dashed border-slate-200 hover:border-primary-300 hover:bg-white transition-all flex flex-col items-center justify-center gap-3 group shadow-sm hover:shadow-md">
                                 <span className="material-symbols-outlined text-slate-300 text-[24px] group-hover:text-primary-400 transition-colors">add_circle</span>
                                 <p className="text-[10px] font-bold text-slate-400 uppercase tracking-tight">Expand Portfolio</p>
                             </button>
