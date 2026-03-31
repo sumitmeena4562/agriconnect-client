@@ -43,27 +43,66 @@ const DashboardLayout = ({ children, role = 'farmer' }) => {
     navigate('/login');
   };
 
-  const SidebarItem = ({ item, isCollapsed }) => {
+  const NavItem = ({ item, isCollapsed = false, variant = 'sidebar' }) => {
     const isActive = location.pathname === item.path;
+    
+    // Sidebar Style (Desktop)
+    if (variant === 'sidebar') {
+      return (
+        <NavLink
+          to={item.path}
+          aria-label={item.label}
+          className={({ isActive }) => `
+            flex items-center transition-all duration-300 group relative
+            ${isCollapsed ? 'justify-center w-11 h-11 mx-auto rounded-xl mb-3' : 'gap-3.5 px-4 py-3 rounded-2xl mb-1.5'}
+            ${isActive 
+              ? 'bg-primary-500 text-white shadow-lg shadow-primary-500/20' 
+              : 'text-slate-400 hover:bg-slate-50 hover:text-slate-900'}
+          `}
+        >
+          <span className={`material-symbols-outlined ${isCollapsed ? 'text-[22px]' : 'text-[24px]'} ${isActive ? 'text-white' : 'group-hover:text-primary-500'}`}>
+            {item.icon}
+          </span>
+          {!isCollapsed && (
+            <span className={`text-[13px] font-black uppercase tracking-tight whitespace-nowrap ${isActive ? 'text-white' : 'text-slate-600'}`}>
+              {item.label}
+            </span>
+          )}
+        </NavLink>
+      );
+    }
+
+    // Bottom Nav Style (Mobile Only)
+    if (variant === 'bottom') {
+      return (
+        <NavLink 
+          to={item.path} 
+          aria-label={item.label}
+          className={`flex flex-col items-center gap-1 transition-all duration-300 relative ${isActive ? 'text-primary-600 scale-110' : 'text-slate-400 hover:text-slate-600 transition-colors'}`}
+        >
+           <div className={`w-10 h-10 rounded-[14px] flex items-center justify-center transition-all ${isActive ? 'bg-primary-50 shadow-sm shadow-primary-200/50' : 'bg-transparent'}`}>
+              <span className="material-symbols-outlined text-[22px]">{item.icon}</span>
+           </div>
+           {isActive && (
+             <motion.div layoutId="nav-dot" className="absolute -bottom-1 w-1 h-1 rounded-full bg-primary-600 shadow-[0_0_8px_rgba(0,210,120,0.5)]" />
+           )}
+        </NavLink>
+      );
+    }
+
+    // Drawer Style (Mobile Side Menu)
     return (
       <NavLink
         to={item.path}
+        onClick={() => setIsMobileMenuOpen(false)}
+        aria-label={item.label}
         className={({ isActive }) => `
-          flex items-center transition-all duration-200 group relative
-          ${isCollapsed ? 'justify-center w-11 h-11 mx-auto rounded-xl mb-3' : 'gap-3.5 px-4 py-3 rounded-2xl mb-1.5'}
-          ${isActive 
-            ? 'bg-primary-500 text-white shadow-lg shadow-primary-500/15' 
-            : 'text-slate-400 hover:bg-slate-50 hover:text-slate-900'}
+          flex items-center gap-3.5 px-5 py-3.5 rounded-2xl text-[13px] font-black uppercase tracking-wider transition-all
+          ${isActive ? 'bg-primary-500 text-white shadow-lg shadow-primary-500/20' : 'text-slate-500 hover:bg-slate-50 hover:text-slate-800'}
         `}
       >
-        <span className={`material-symbols-outlined ${isCollapsed ? 'text-[22px]' : 'text-[24px]'} ${isActive ? 'text-white' : 'group-hover:text-primary-500'}`}>
-          {item.icon}
-        </span>
-        {!isCollapsed && (
-          <span className={`text-[13px] font-bold uppercase tracking-tight whitespace-nowrap ${isActive ? 'text-white' : 'text-slate-600'}`}>
-            {item.label}
-          </span>
-        )}
+        <span className="material-symbols-outlined text-[20px]">{item.icon}</span>
+        {item.label}
       </NavLink>
     );
   };
@@ -93,9 +132,9 @@ const DashboardLayout = ({ children, role = 'farmer' }) => {
           </AnimatePresence>
         </div>
 
-        <nav className="flex-1 px-4 mt-6 overflow-y-auto no-scrollbar">
+        <nav className="flex-1 px-4 mt-6 overflow-y-auto no-scrollbar space-y-1">
           {farmerNavItems.map((item) => (
-            <SidebarItem key={item.path} item={item} isCollapsed={!isSidebarOpen} />
+            <NavItem key={item.path} item={item} isCollapsed={!isSidebarOpen} variant="sidebar" />
           ))}
         </nav>
 
@@ -118,10 +157,16 @@ const DashboardLayout = ({ children, role = 'farmer' }) => {
             <div className="flex items-center gap-4 lg:gap-6">
                <button 
                  onClick={() => setIsMobileMenuOpen(true)}
-                 className="w-10 h-10 flex items-center justify-center rounded-xl bg-slate-50 text-slate-400 lg:hidden border border-slate-200/50 active:scale-95 transition-all"
+                 aria-label="Open Side Menu"
+                 className="w-10 h-10 flex items-center justify-center rounded-xl bg-slate-50 text-slate-500 lg:hidden border border-slate-200/60 active:scale-95 transition-all hover:bg-slate-100"
                >
                  <span className="material-symbols-outlined text-[20px]">sort</span>
                </button>
+
+               {/* Mobile/Tablet Header Logo */}
+               <div className="lg:hidden mr-2">
+                 <Logo size="sm" />
+               </div>
                
                <div className="flex-col items-start pr-4 lg:border-r lg:border-slate-200/60 hidden sm:flex">
                   <div className="flex items-center gap-2">
@@ -166,7 +211,7 @@ const DashboardLayout = ({ children, role = 'farmer' }) => {
                   <button className="px-3 py-1 text-[10px] font-black bg-white shadow-sm border border-slate-200/60 rounded-lg text-primary-600">हि</button>
                </div>
 
-               <button className="w-10 h-10 rounded-xl text-slate-400 hover:text-primary-500 hover:bg-primary-50 transition-all flex items-center justify-center relative border border-transparent hover:border-primary-100 shadow-sm">
+               <button aria-label="View Notifications" className="w-10 h-10 rounded-xl text-slate-400 hover:text-primary-500 hover:bg-primary-50 transition-all flex items-center justify-center relative border border-transparent hover:border-primary-100 shadow-sm">
                   <span className="material-symbols-outlined text-[22px]">notifications</span>
                   <span className="absolute top-2.5 right-2.5 w-2 h-2 bg-rose-500 rounded-full border-2 border-white shadow-sm"></span>
                </button>
@@ -259,22 +304,17 @@ const DashboardLayout = ({ children, role = 'farmer' }) => {
         {/* Mobile Bottom Navigation Bar (Floating & Premium) */}
         <nav className="lg:hidden fixed bottom-5 left-4 right-4 h-16 bg-white/80 backdrop-blur-xl border border-white/20 shadow-[0_20px_50px_rgba(0,0,0,0.1)] rounded-[24px] flex items-center justify-around px-4 z-[90] pointer-events-auto">
            {mobileNavItems.map((item, index) => {
-              const isActive = location.pathname === item.path;
-              // Add a central button space after the second item
+              // Reusing NavItem component with variant="bottom"
               return (
                 <React.Fragment key={item.path}>
-                  <NavLink to={item.path} className={`flex flex-col items-center gap-1 transition-all duration-300 relative ${isActive ? 'text-primary-600 scale-110' : 'text-slate-400'}`}>
-                     <div className={`w-10 h-10 rounded-[14px] flex items-center justify-center transition-all ${isActive ? 'bg-primary-50 shadow-sm shadow-primary-200/50' : 'bg-transparent'}`}>
-                        <span className="material-symbols-outlined text-[22px]">{item.icon}</span>
-                     </div>
-                     {isActive && (
-                       <motion.div layoutId="nav-dot" className="absolute -bottom-1 w-1 h-1 rounded-full bg-primary-600" />
-                     )}
-                  </NavLink>
+                  <NavItem item={item} variant="bottom" />
                   
                   {index === 1 && (
                     <div className="flex items-center justify-center -mt-8">
-                       <button className="w-12 h-12 rounded-[18px] bg-primary-500 shadow-lg shadow-primary-500/30 flex items-center justify-center text-white active:scale-90 transition-all border-4 border-[#F4F7FE]">
+                       <button 
+                         aria-label="Add New Activity"
+                         className="w-12 h-12 rounded-[18px] bg-primary-500 shadow-lg shadow-primary-500/30 flex items-center justify-center text-white active:scale-90 transition-all border-4 border-[#F4F7FE] hover:bg-primary-600"
+                        >
                           <span className="material-symbols-outlined text-[24px]">add</span>
                        </button>
                     </div>
@@ -297,20 +337,9 @@ const DashboardLayout = ({ children, role = 'farmer' }) => {
                     <span className="material-symbols-outlined">close</span>
                   </button>
                </div>
-               <nav className="flex-1 px-3 pt-6 space-y-1">
+               <nav className="flex-1 px-4 pt-6 space-y-1.5 overflow-y-auto no-scrollbar">
                   {farmerNavItems.map((item) => (
-                    <NavLink
-                      key={item.path}
-                      to={item.path}
-                      onClick={() => setIsMobileMenuOpen(false)}
-                      className={({ isActive }) => `
-                        flex items-center gap-3 px-4 py-3 rounded-lg text-[13px] font-bold uppercase
-                        ${isActive ? 'bg-primary-500 text-white' : 'text-slate-500 hover:bg-slate-50'}
-                      `}
-                    >
-                      <span className="material-symbols-outlined text-[20px]">{item.icon}</span>
-                      {item.label}
-                    </NavLink>
+                    <NavItem key={item.path} item={item} variant="drawer" />
                   ))}
                </nav>
             </motion.div>
