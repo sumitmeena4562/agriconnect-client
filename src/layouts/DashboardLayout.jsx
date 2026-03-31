@@ -99,14 +99,12 @@ const DashboardLayout = ({ children, role = 'farmer' }) => {
         {/* Simplified Header */}
         <header className="h-16 lg:h-20 bg-white/90 backdrop-blur-md border-b border-slate-50 flex items-center justify-between px-4 lg:px-10 shrink-0 z-40">
            <div className="flex items-center gap-3">
-              {!isSidebarOpen && (
-                <button 
-                  onClick={() => setIsMobileMenuOpen(true)}
-                  className="w-10 h-10 flex items-center justify-center rounded-xl bg-slate-50 text-slate-400 lg:hidden active:scale-95 transition-all"
-                >
-                  <span className="material-symbols-outlined text-[20px]">sort</span>
-                </button>
-              )}
+              <button 
+                onClick={() => setIsMobileMenuOpen(true)}
+                className="w-10 h-10 flex items-center justify-center rounded-xl bg-slate-100 text-slate-500 lg:hidden active:scale-90 transition-all shadow-sm"
+              >
+                <span className="material-symbols-outlined text-[22px]">sort</span>
+              </button>
               <h2 className="text-[14px] font-bold text-slate-700 uppercase tracking-tight flex items-center gap-2">
                 {farmerNavItems.find(i => i.path === location.pathname)?.label || 'Overview'}
                 <span className="w-1.5 h-1.5 rounded-full bg-primary-500"></span>
