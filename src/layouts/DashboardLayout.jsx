@@ -33,17 +33,17 @@ const DashboardLayout = ({ children, role = 'farmer' }) => {
         to={item.path}
         className={({ isActive }) => `
           flex items-center transition-all duration-200 group relative
-          ${isCollapsed ? 'justify-center w-10 h-10 mx-auto rounded-lg mb-3' : 'gap-3 px-3 py-2.5 rounded-xl mb-1'}
+          ${isCollapsed ? 'justify-center w-11 h-11 mx-auto rounded-xl mb-3' : 'gap-3.5 px-4 py-3 rounded-2xl mb-1.5'}
           ${isActive 
-            ? 'bg-primary-500 text-white shadow-md shadow-primary-500/10' 
+            ? 'bg-primary-500 text-white shadow-lg shadow-primary-500/15' 
             : 'text-slate-400 hover:bg-slate-50 hover:text-slate-900'}
         `}
       >
-        <span className={`material-symbols-outlined ${isCollapsed ? 'text-[20px]' : 'text-[22px]'} ${isActive ? 'text-white' : 'group-hover:text-primary-500'}`}>
+        <span className={`material-symbols-outlined ${isCollapsed ? 'text-[22px]' : 'text-[24px]'} ${isActive ? 'text-white' : 'group-hover:text-primary-500'}`}>
           {item.icon}
         </span>
         {!isCollapsed && (
-          <span className={`text-[12px] font-bold uppercase tracking-tight whitespace-nowrap ${isActive ? 'text-white' : 'text-slate-600'}`}>
+          <span className={`text-[13px] font-bold uppercase tracking-tight whitespace-nowrap ${isActive ? 'text-white' : 'text-slate-600'}`}>
             {item.label}
           </span>
         )}
@@ -55,40 +55,40 @@ const DashboardLayout = ({ children, role = 'farmer' }) => {
 
   return (
     <div className="min-h-screen bg-[#FBFDFF] flex flex-col lg:flex-row font-sans antialiased overflow-hidden">
-      {/* Desktop Sidebar (Left) - Slimmer & Smoother */}
+      {/* Desktop Sidebar (Left) - Balanced & Clean */}
       <motion.aside
         initial={false}
-        animate={{ width: isSidebarOpen ? 220 : 72 }}
+        animate={{ width: isSidebarOpen ? 250 : 80 }}
         transition={{ type: 'tween', ease: 'easeOut', duration: 0.2 }}
         className="hidden lg:flex flex-col bg-white border-r border-slate-100 z-50 relative h-screen"
       >
-        <div className="p-5 flex items-center justify-center h-16">
+        <div className="p-5 flex items-center justify-between h-20">
           <AnimatePresence mode="wait">
             {isSidebarOpen ? (
-              <motion.div key="full" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
-                <Logo size="sm" />
+              <motion.div key="full" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="pl-2">
+                <Logo size="md" />
               </motion.div>
             ) : (
-              <motion.div key="mini" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
-                <div className="w-8 h-8 bg-primary-500 rounded-lg flex items-center justify-center text-white font-black text-sm">A</div>
+              <motion.div key="mini" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="mx-auto">
+                <div className="w-10 h-10 bg-primary-500 rounded-xl flex items-center justify-center text-white font-black text-lg">A</div>
               </motion.div>
             )}
           </AnimatePresence>
         </div>
 
-        <nav className="flex-1 px-3 mt-4 overflow-y-auto no-scrollbar">
+        <nav className="flex-1 px-4 mt-6 overflow-y-auto no-scrollbar">
           {farmerNavItems.map((item) => (
             <SidebarItem key={item.path} item={item} isCollapsed={!isSidebarOpen} />
           ))}
         </nav>
 
-        <div className="p-3 mt-auto">
+        <div className="p-4 mt-auto">
           <button 
             onClick={() => setIsSidebarOpen(!isSidebarOpen)}
-            className={`flex items-center gap-3 rounded-xl text-slate-300 hover:text-slate-600 transition-all group ${isSidebarOpen ? 'w-full px-5 py-3' : 'w-10 h-10 mx-auto justify-center'}`}
+            className={`flex items-center gap-3 rounded-2xl text-slate-300 hover:text-slate-600 transition-all group ${isSidebarOpen ? 'w-full px-5 py-3 ml-1' : 'w-11 h-11 mx-auto justify-center'}`}
           >
-            <span className="material-symbols-outlined text-[20px]" style={{ transform: isSidebarOpen ? 'rotate(180deg)' : 'rotate(0)' }}>
-              chevron_right
+            <span className="material-symbols-outlined transition-transform duration-300" style={{ transform: isSidebarOpen ? 'rotate(180deg)' : 'rotate(0)' }}>
+              keyboard_double_arrow_right
             </span>
           </button>
         </div>
@@ -97,19 +97,19 @@ const DashboardLayout = ({ children, role = 'farmer' }) => {
       {/* Main Content Area */}
       <div className="flex-1 flex flex-col min-w-0 h-screen overflow-hidden relative">
         {/* Simplified Header */}
-        <header className="h-14 lg:h-16 bg-white/90 backdrop-blur-md border-b border-slate-50 flex items-center justify-between px-4 lg:px-8 shrink-0 z-40">
+        <header className="h-16 lg:h-20 bg-white/90 backdrop-blur-md border-b border-slate-50 flex items-center justify-between px-4 lg:px-10 shrink-0 z-40">
            <div className="flex items-center gap-3">
               {!isSidebarOpen && (
                 <button 
                   onClick={() => setIsMobileMenuOpen(true)}
-                  className="w-8 h-8 flex items-center justify-center rounded-lg bg-slate-50 text-slate-400 lg:hidden active:scale-95 transition-all"
+                  className="w-10 h-10 flex items-center justify-center rounded-xl bg-slate-50 text-slate-400 lg:hidden active:scale-95 transition-all"
                 >
-                  <span className="material-symbols-outlined text-[18px]">menu</span>
+                  <span className="material-symbols-outlined text-[20px]">sort</span>
                 </button>
               )}
-              <h2 className="text-[13px] font-bold text-slate-700 uppercase tracking-tight flex items-center gap-2">
+              <h2 className="text-[14px] font-bold text-slate-700 uppercase tracking-tight flex items-center gap-2">
                 {farmerNavItems.find(i => i.path === location.pathname)?.label || 'Overview'}
-                <span className="w-1 h-1 rounded-full bg-primary-500"></span>
+                <span className="w-1.5 h-1.5 rounded-full bg-primary-500"></span>
               </h2>
            </div>
 
