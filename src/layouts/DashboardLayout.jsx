@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { NavLink, useNavigate, useLocation } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useAuth } from '../context/AuthContext';
@@ -9,8 +9,20 @@ const DashboardLayout = ({ children, role = 'farmer' }) => {
   const { user, logout } = useAuth();
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [isProfileOpen, setIsProfileOpen] = useState(false);
   const navigate = useNavigate();
   const location = useLocation();
+
+  // Close dropdown on click outside
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (isProfileOpen && !event.target.closest('.profile-section')) {
+        setIsProfileOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, [isProfileOpen]);
 
   const farmerNavItems = [
     { label: 'Dashboard', icon: 'grid_view', path: '/farmer/dashboard' },
@@ -19,6 +31,12 @@ const DashboardLayout = ({ children, role = 'farmer' }) => {
     { label: 'Weather', icon: 'cloud', path: '/farmer/weather' },
     { label: 'Community', icon: 'groups', path: '/farmer/community' },
     { label: 'Payments', icon: 'account_balance_wallet', path: '/farmer/payments' },
+  ];
+
+  const profileMenuItems = [
+    { label: 'My Profile', icon: 'person', path: '/farmer/profile' },
+    { label: 'Account Settings', icon: 'settings', path: '/farmer/settings' },
+    { label: 'Privacy & Security', icon: 'shield', path: '/farmer/security' },
   ];
 
   const handleLogout = () => {
@@ -150,23 +168,59 @@ const DashboardLayout = ({ children, role = 'farmer' }) => {
 
               <div className="h-6 w-[1px] bg-slate-100 hidden sm:block mx-1"></div>
 
-              <div className="flex items-center gap-3 cursor-pointer group">
-                 <div className="hidden lg:flex flex-col items-end">
-                    <span className="text-[11px] font-black text-slate-800 uppercase tracking-tight leading-none mb-0.5">{user?.name}</span>
-                    <span className="text-[9px] font-bold text-slate-300 uppercase tracking-widest leading-none">Verified Pro</span>
-                 </div>
-                 
-                 <div className="w-8 h-8 rounded-lg bg-primary-500 shadow-md shadow-primary-500/10 flex items-center justify-center text-white font-black text-xs transition-transform group-hover:scale-105">
-                    {user?.name?.slice(0,1)}
+              <div className="relative profile-section">
+                 <div 
+                   onClick={() => setIsProfileOpen(!isProfileOpen)}
+                   className="flex items-center gap-3 cursor-pointer group hover:bg-slate-50 p-1.5 rounded-xl transition-all"
+                 >
+                    <div className="hidden lg:flex flex-col items-end">
+                       <span className="text-[11px] font-black text-slate-800 uppercase tracking-tight leading-none mb-0.5">{user?.name}</span>
+                       <span className="text-[9px] font-bold text-slate-300 uppercase tracking-widest leading-none">Verified Pro</span>
+                    </div>
+                    
+                    <div className="w-8 h-8 rounded-lg bg-primary-500 shadow-md shadow-primary-500/10 flex items-center justify-center text-white font-black text-xs transition-transform group-hover:scale-105">
+                       {user?.name?.slice(0,1)}
+                    </div>
+                    <span className={`material-symbols-outlined text-[18px] text-slate-300 transition-transform duration-300 ${isProfileOpen ? 'rotate-180' : ''}`}>expand_more</span>
                  </div>
 
-                 <button 
-                   onClick={handleLogout} 
-                   className="w-8 h-8 rounded-lg text-slate-300 hover:text-rose-500 hover:bg-rose-50 transition-all flex items-center justify-center"
-                   title="Logout"
-                 >
-                    <span className="material-symbols-outlined text-[18px]">logout</span>
-                 </button>
+                 {/* Premium Profile Dropdown */}
+                 <AnimatePresence>
+                    {isProfileOpen && (
+                      <motion.div
+                        initial={{ opacity: 0, y: 10, scale: 0.95 }}
+                        animate={{ opacity: 1, y: 0, scale: 1 }}
+                        exit={{ opacity: 0, y: 10, scale: 0.95 }}
+                        transition={{ duration: 0.15, ease: 'easeOut' }}
+                        className="absolute right-0 mt-2 w-52 bg-white/80 backdrop-blur-xl border border-slate-100 shadow-2xl shadow-slate-200/50 rounded-2xl p-2 z-[110]"
+                      >
+                         <div className="px-3 py-3 border-b border-slate-50 mb-1">
+                            <p className="text-[10px] font-black text-slate-400 uppercase tracking-[0.1em]">Signed in as</p>
+                            <p className="text-[12px] font-bold text-slate-800 truncate">{user?.name}</p>
+                         </div>
+
+                         {profileMenuItems.map((item) => (
+                           <NavLink
+                             key={item.path}
+                             to={item.path}
+                             onClick={() => setIsProfileOpen(false)}
+                             className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-slate-600 hover:bg-primary-50 hover:text-primary-600 transition-all group"
+                           >
+                              <span className="material-symbols-outlined text-[18px] text-slate-400 group-hover:text-primary-500">{item.icon}</span>
+                              <span className="text-[12px] font-bold">{item.label}</span>
+                           </NavLink>
+                         ))}
+
+                         <button 
+                           onClick={handleLogout}
+                           className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-rose-500 hover:bg-rose-50 transition-all mt-1 border-t border-slate-50 pt-3"
+                         >
+                            <span className="material-symbols-outlined text-[18px]">logout</span>
+                            <span className="text-[12px] font-black uppercase">Sign Out</span>
+                         </button>
+                      </motion.div>
+                    )}
+                 </AnimatePresence>
               </div>
            </div>
         </header>
