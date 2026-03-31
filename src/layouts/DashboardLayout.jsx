@@ -97,34 +97,56 @@ const DashboardLayout = ({ children, role = 'farmer' }) => {
       {/* Main Content Area */}
       <div className="flex-1 flex flex-col min-w-0 h-screen overflow-hidden relative">
         {/* Simplified Header */}
-        <header className="h-16 lg:h-20 bg-white/90 backdrop-blur-md border-b border-slate-50 flex items-center justify-between px-4 lg:px-10 shrink-0 z-40">
+        <header className="h-14 lg:h-16 bg-white/70 backdrop-blur-md border-b border-slate-50/80 flex items-center justify-between px-4 lg:px-8 shrink-0 z-40 px-6">
            <div className="flex items-center gap-3">
               <button 
                 onClick={() => setIsMobileMenuOpen(true)}
-                className="w-10 h-10 flex items-center justify-center rounded-xl bg-slate-100 text-slate-500 lg:hidden active:scale-90 transition-all shadow-sm"
+                className="w-9 h-9 flex items-center justify-center rounded-lg bg-slate-50 text-slate-400 lg:hidden active:scale-95 transition-all"
               >
-                <span className="material-symbols-outlined text-[22px]">sort</span>
+                <span className="material-symbols-outlined text-[20px]">sort</span>
               </button>
-              <h2 className="text-[14px] font-bold text-slate-700 uppercase tracking-tight flex items-center gap-2">
-                {farmerNavItems.find(i => i.path === location.pathname)?.label || 'Overview'}
-                <span className="w-1.5 h-1.5 rounded-full bg-primary-500"></span>
-              </h2>
+              <div className="flex items-center gap-2 pr-4 lg:border-r lg:border-slate-100/50">
+                 <h2 className="text-[12px] font-black text-slate-800 uppercase tracking-[0.1em] whitespace-nowrap">
+                   {farmerNavItems.find(i => i.path === location.pathname)?.label || 'Overview'}
+                 </h2>
+                 <div className="w-1.5 h-1.5 rounded-full bg-primary-400 opacity-60 ml-1"></div>
+              </div>
            </div>
 
-           <div className="flex items-center gap-2">
-              <div className="hidden sm:flex items-center bg-slate-50 border border-slate-100 rounded-lg px-3 py-1.5 focus-within:bg-white transition-all">
-                 <span className="material-symbols-outlined text-slate-300 text-[16px] mr-2">search</span>
-                 <input type="text" placeholder="Search..." className="bg-transparent border-none focus:outline-none text-[12px] font-medium text-slate-600 w-32 lg:w-40" />
+           <div className="flex-1 max-w-xs hidden sm:block px-6">
+              <div className="relative group">
+                 <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-slate-300 text-[16px] group-focus-within:text-primary-500 transition-colors">search</span>
+                 <input 
+                   type="text" 
+                   placeholder="Search..." 
+                   className="w-full bg-slate-50/50 border border-slate-100/50 rounded-xl py-1.5 pl-9 pr-4 text-[11px] font-bold text-slate-600 placeholder:text-slate-300 focus:outline-none focus:bg-white focus:ring-4 focus:ring-primary-500/5 transition-all" 
+                 />
               </div>
+           </div>
 
-              <div className="flex items-center gap-2 relative cursor-pointer pl-2 border-l border-slate-50 ml-2">
+           <div className="flex items-center gap-3">
+              <button className="w-9 h-9 rounded-xl text-slate-300 hover:text-primary-500 hover:bg-primary-50 transition-all flex items-center justify-center relative">
+                 <span className="material-symbols-outlined text-[20px]">notifications</span>
+                 <span className="absolute top-2.5 right-2.5 w-1.5 h-1.5 bg-rose-500 rounded-full border-2 border-white"></span>
+              </button>
+
+              <div className="h-6 w-[1px] bg-slate-100 mx-1"></div>
+
+              <div className="flex items-center gap-3 cursor-pointer group">
                  <div className="hidden md:flex flex-col items-end">
-                    <span className="text-[11px] font-bold text-slate-900 leading-none">{user?.name}</span>
+                    <span className="text-[11px] font-black text-slate-800 uppercase tracking-tight leading-none mb-0.5">{user?.name}</span>
+                    <span className="text-[9px] font-bold text-slate-300 uppercase tracking-widest leading-none">Pro Farmer</span>
                  </div>
-                 <div className="w-8 h-8 rounded-lg bg-primary-500 flex items-center justify-center text-white font-bold text-xs shadow-sm shadow-primary-500/20">
+                 
+                 <div className="w-8 h-8 rounded-lg bg-primary-500 shadow-md shadow-primary-500/10 flex items-center justify-center text-white font-black text-xs transition-transform group-hover:scale-105">
                     {user?.name?.slice(0,1)}
                  </div>
-                 <button onClick={handleLogout} className="w-8 h-8 rounded-lg text-slate-300 hover:text-rose-500 transition-colors flex items-center justify-center">
+
+                 <button 
+                   onClick={handleLogout} 
+                   className="w-8 h-8 rounded-lg text-slate-300 hover:text-rose-500 hover:bg-rose-50 transition-all flex items-center justify-center"
+                   title="Logout"
+                 >
                     <span className="material-symbols-outlined text-[18px]">logout</span>
                  </button>
               </div>
