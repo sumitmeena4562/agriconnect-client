@@ -32,13 +32,14 @@ const DashboardLayout = ({ children, role = 'farmer' }) => {
       <NavLink
         to={item.path}
         className={({ isActive }) => `
-          flex items-center gap-3 px-4 py-3 rounded-2xl transition-all group relative
+          flex items-center transition-all group relative
+          ${isCollapsed ? 'justify-center w-12 h-12 mx-auto rounded-xl mb-2' : 'gap-3 px-4 py-3 rounded-2xl mb-1.5'}
           ${isActive 
-            ? 'bg-primary-500 text-white shadow-lg shadow-primary-500/30' 
-            : 'text-slate-500 hover:bg-slate-50 hover:text-slate-900'}
+            ? 'bg-primary-500 text-white shadow-lg shadow-primary-500/25' 
+            : 'text-slate-400 hover:bg-slate-50 hover:text-slate-900'}
         `}
       >
-        <span className={`material-symbols-outlined text-[24px] ${isActive ? 'text-white' : 'text-slate-400 group-hover:text-primary-500'}`}>
+        <span className={`material-symbols-outlined ${isCollapsed ? 'text-[22px]' : 'text-[24px]'} ${isActive ? 'text-white' : 'group-hover:text-primary-500'}`}>
           {item.icon}
         </span>
         {!isCollapsed && (
@@ -80,7 +81,7 @@ const DashboardLayout = ({ children, role = 'farmer' }) => {
           </AnimatePresence>
         </div>
 
-        <nav className="flex-1 px-4 space-y-1.5 mt-4 overflow-y-auto custom-scrollbar">
+        <nav className="flex-1 px-4 mt-4 overflow-y-auto no-scrollbar">
           {farmerNavItems.map((item) => (
             <SidebarItem key={item.path} item={item} isCollapsed={!isSidebarOpen} />
           ))}
@@ -103,12 +104,12 @@ const DashboardLayout = ({ children, role = 'farmer' }) => {
 
           <button 
             onClick={() => setIsSidebarOpen(!isSidebarOpen)}
-            className="w-full mt-4 flex items-center gap-3 px-4 py-3 rounded-2xl text-slate-400 hover:text-slate-900 transition-all group"
+            className={`flex items-center gap-3 rounded-2xl text-slate-400 hover:text-slate-900 transition-all group ${isSidebarOpen ? 'w-full px-4 py-3 mt-4' : 'w-12 h-12 mx-auto justify-center'}`}
           >
             <span className="material-symbols-outlined transition-transform duration-300" style={{ transform: isSidebarOpen ? 'rotate(180deg)' : 'rotate(0)' }}>
               last_page
             </span>
-            {isSidebarOpen && <span className="text-xs font-bold uppercase tracking-widest">Collapse Menu</span>}
+            {isSidebarOpen && <span className="text-xs font-bold uppercase tracking-widest">Collapse</span>}
           </button>
         </div>
       </motion.aside>
