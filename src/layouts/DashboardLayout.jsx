@@ -123,7 +123,7 @@ const DashboardLayout = ({ children, role = 'farmer' }) => {
                  <span className="material-symbols-outlined text-[20px]">sort</span>
                </button>
                
-               <div className="flex flex-col items-start pr-4 lg:border-r lg:border-slate-200/60">
+               <div className="flex-col items-start pr-4 lg:border-r lg:border-slate-200/60 hidden sm:flex">
                   <div className="flex items-center gap-2">
                      <h2 className="text-[13px] font-black text-slate-900 uppercase tracking-[0.08em] whitespace-nowrap">
                        {farmerNavItems.find(i => i.path === location.pathname)?.label || 'Overview'}
@@ -133,7 +133,7 @@ const DashboardLayout = ({ children, role = 'farmer' }) => {
                         <span className="text-[9px] font-black text-emerald-700 uppercase tracking-tighter">Live</span>
                      </div>
                   </div>
-                  <span className="text-[9px] font-bold text-slate-400 uppercase tracking-[0.05em] mt-0.5 hidden sm:block">Real-time Agriculture Monitor</span>
+                  <span className="text-[9px] font-bold text-slate-400 uppercase tracking-[0.05em] mt-0.5 hidden md:block">Real-time Agriculture Monitor</span>
                </div>
 
                {/* Quick Weather Widget */}
@@ -256,16 +256,30 @@ const DashboardLayout = ({ children, role = 'farmer' }) => {
           </AnimatePresence>
         </main>
 
-        {/* Mobile Bottom Navigation Bar */}
-        <nav className="lg:hidden fixed bottom-0 left-0 right-0 h-16 bg-white/95 backdrop-blur-xl border-t border-slate-50 flex items-center justify-around px-6 z-[90] pb-2">
-           {mobileNavItems.map((item) => {
+        {/* Mobile Bottom Navigation Bar (Floating & Premium) */}
+        <nav className="lg:hidden fixed bottom-5 left-4 right-4 h-16 bg-white/80 backdrop-blur-xl border border-white/20 shadow-[0_20px_50px_rgba(0,0,0,0.1)] rounded-[24px] flex items-center justify-around px-4 z-[90] pointer-events-auto">
+           {mobileNavItems.map((item, index) => {
               const isActive = location.pathname === item.path;
+              // Add a central button space after the second item
               return (
-                <NavLink key={item.path} to={item.path} className={`flex flex-col items-center gap-1 transition-all ${isActive ? 'text-primary-500' : 'text-slate-300'}`}>
-                   <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${isActive ? 'bg-primary-50' : 'bg-transparent'}`}>
-                      <span className="material-symbols-outlined text-[20px]">{item.icon}</span>
-                   </div>
-                </NavLink>
+                <React.Fragment key={item.path}>
+                  <NavLink to={item.path} className={`flex flex-col items-center gap-1 transition-all duration-300 relative ${isActive ? 'text-primary-600 scale-110' : 'text-slate-400'}`}>
+                     <div className={`w-10 h-10 rounded-[14px] flex items-center justify-center transition-all ${isActive ? 'bg-primary-50 shadow-sm shadow-primary-200/50' : 'bg-transparent'}`}>
+                        <span className="material-symbols-outlined text-[22px]">{item.icon}</span>
+                     </div>
+                     {isActive && (
+                       <motion.div layoutId="nav-dot" className="absolute -bottom-1 w-1 h-1 rounded-full bg-primary-600" />
+                     )}
+                  </NavLink>
+                  
+                  {index === 1 && (
+                    <div className="flex items-center justify-center -mt-8">
+                       <button className="w-12 h-12 rounded-[18px] bg-primary-500 shadow-lg shadow-primary-500/30 flex items-center justify-center text-white active:scale-90 transition-all border-4 border-[#F4F7FE]">
+                          <span className="material-symbols-outlined text-[24px]">add</span>
+                       </button>
+                    </div>
+                  )}
+                </React.Fragment>
               )
            })}
         </nav>
