@@ -222,36 +222,36 @@ const DashboardLayout = ({ children, role = 'farmer' }) => {
             />
             <motion.div 
               initial={{ x: '-100%' }} animate={{ x: 0 }} exit={{ x: '-100%' }}
-              transition={{ type: 'spring', damping: 25, stiffness: 200 }}
-              className="absolute top-0 left-0 h-full w-[85%] max-w-sm bg-white/95 backdrop-blur-xl shadow-2xl overflow-hidden flex flex-col rounded-r-[32px]"
+              transition={{ type: 'spring', damping: 28, stiffness: 220 }}
+              className="absolute top-0 left-0 h-full w-[75%] max-w-[280px] bg-white shadow-2xl overflow-hidden flex flex-col rounded-r-[24px] z-50 border-r border-slate-100"
             >
-               <div className="p-8 flex items-center justify-between border-b border-slate-50">
-                  <Logo size="md" />
-                  <button onClick={() => setIsMobileMenuOpen(false)} className="w-10 h-10 rounded-xl bg-slate-50 flex items-center justify-center text-slate-400">
-                    <span className="material-symbols-outlined">close</span>
+               <div className="p-6 flex items-center justify-between border-b border-slate-50 shrink-0">
+                  <Logo size="sm" />
+                  <button onClick={() => setIsMobileMenuOpen(false)} className="w-8 h-8 rounded-lg bg-slate-50 flex items-center justify-center text-slate-400 active:scale-95 transition-all">
+                    <span className="material-symbols-outlined text-[20px]">close</span>
                   </button>
                </div>
 
-               <nav className="flex-1 px-6 pt-8 space-y-2 overflow-y-auto no-scrollbar">
+               <nav className="flex-1 px-4 pt-6 space-y-1 overflow-y-auto no-scrollbar">
                   {farmerNavItems.map((item) => (
                     <NavLink
                       key={item.path}
                       to={item.path}
                       onClick={() => setIsMobileMenuOpen(false)}
                       className={({ isActive }) => `
-                        flex items-center gap-4 px-6 py-4 rounded-[20px] text-[15px] font-bold uppercase transition-all
-                        ${isActive ? 'bg-primary-500 text-white shadow-xl shadow-primary-500/30' : 'text-slate-500 hover:bg-slate-50'}
+                        flex items-center gap-3.5 px-5 py-3.5 rounded-xl text-[13px] font-bold uppercase transition-all
+                        ${isActive ? 'bg-primary-500 text-white shadow-lg shadow-primary-500/20' : 'text-slate-500 hover:bg-slate-50/80 active:bg-slate-100'}
                       `}
                     >
-                      <span className="material-symbols-outlined">{item.icon}</span>
+                      <span className="material-symbols-outlined text-[22px]">{item.icon}</span>
                       {item.label}
                     </NavLink>
                   ))}
                </nav>
 
-               <div className="p-8 border-t border-slate-50 mt-auto">
-                  <button onClick={handleLogout} className="flex items-center gap-4 px-6 py-4 w-full text-rose-500 font-bold uppercase hover:bg-rose-50 rounded-2xl transition-all">
-                    <span className="material-symbols-outlined">power_settings_new</span>
+               <div className="p-6 border-t border-slate-50 mt-auto shrink-0 bg-white">
+                  <button onClick={handleLogout} className="flex items-center gap-3.5 px-5 py-3.5 w-full text-rose-500 font-bold text-[13px] uppercase hover:bg-rose-50/50 rounded-xl transition-all active:scale-95">
+                    <span className="material-symbols-outlined text-[22px]">power_settings_new</span>
                     Sign Out
                   </button>
                </div>
