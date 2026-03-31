@@ -3,7 +3,6 @@ import { NavLink, useNavigate, useLocation } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useAuth } from '../context/AuthContext';
 import Logo from '../components/common/Logo';
-import Badge from '../components/ui/Badge';
 
 const DashboardLayout = ({ children, role = 'farmer' }) => {
   const { user, logout } = useAuth();
@@ -114,8 +113,8 @@ const DashboardLayout = ({ children, role = 'farmer' }) => {
 
       {/* Main Content Area */}
       <div className="flex-1 flex flex-col min-w-0 h-screen overflow-hidden relative">
-        {/* Simplified Header */}
-        <header className="h-14 lg:h-16 bg-white/70 backdrop-blur-md border-b border-slate-50/80 flex items-center justify-between px-4 lg:px-8 shrink-0 z-40">
+        {/* Pro Navbar Header */}
+        <header className="h-14 lg:h-16 bg-white/70 backdrop-blur-md border-b border-slate-50/80 flex items-center justify-between px-4 lg:px-8 shrink-0 z-50">
            <div className="flex items-center gap-3">
               <button 
                 onClick={() => setIsMobileMenuOpen(true)}
@@ -128,12 +127,12 @@ const DashboardLayout = ({ children, role = 'farmer' }) => {
                    {farmerNavItems.find(i => i.path === location.pathname)?.label || 'Overview'}
                  </h2>
                  <div className="flex items-center gap-1 ml-2 bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-100/50">
-                    <div className="w-1 h-1 rounded-full bg-emerald-500"></div>
+                    <div className="w-1 h-1 rounded-full bg-emerald-500 animate-pulse"></div>
                     <span className="text-[8px] font-black text-emerald-600 uppercase tracking-tighter">Live</span>
                  </div>
               </div>
 
-              {/* Quick Weather Widget - Pro Navbar */}
+              {/* Quick Weather Widget */}
               <div className="hidden xl:flex items-center gap-3 pl-4">
                  <div className="flex flex-col items-start">
                     <span className="text-[9px] font-bold text-slate-400 uppercase tracking-widest leading-none">Jaipur, Rajasthan</span>
@@ -155,7 +154,7 @@ const DashboardLayout = ({ children, role = 'farmer' }) => {
            </div>
 
            <div className="flex items-center gap-2 lg:gap-4">
-              {/* Language Switcher - New Pro Feature */}
+              {/* Language Switcher */}
               <div className="hidden sm:flex items-center bg-slate-50 border border-slate-100/50 rounded-lg p-1 mr-2">
                  <button className="px-2 py-1 text-[9px] font-black text-slate-400 hover:text-slate-600">EN</button>
                  <button className="px-2 py-1 text-[9px] font-black bg-white shadow-sm border border-slate-100 rounded-md text-primary-600">हि</button>
@@ -188,36 +187,40 @@ const DashboardLayout = ({ children, role = 'farmer' }) => {
                  <AnimatePresence>
                     {isProfileOpen && (
                       <motion.div
-                        initial={{ opacity: 0, y: 10, scale: 0.95 }}
+                        initial={{ opacity: 0, y: 8, scale: 0.95 }}
                         animate={{ opacity: 1, y: 0, scale: 1 }}
-                        exit={{ opacity: 0, y: 10, scale: 0.95 }}
+                        exit={{ opacity: 0, y: 8, scale: 0.95 }}
                         transition={{ duration: 0.15, ease: 'easeOut' }}
-                        className="absolute right-0 mt-2 w-52 bg-white/80 backdrop-blur-xl border border-slate-100 shadow-2xl shadow-slate-200/50 rounded-2xl p-2 z-[110]"
+                        className="absolute right-0 mt-3 w-60 bg-white border border-slate-100 shadow-[0_25px_60px_rgba(0,0,0,0.12)] rounded-3xl p-2 z-[999]"
                       >
-                         <div className="px-3 py-3 border-b border-slate-50 mb-1">
-                            <p className="text-[10px] font-black text-slate-400 uppercase tracking-[0.1em]">Signed in as</p>
-                            <p className="text-[12px] font-bold text-slate-800 truncate">{user?.name}</p>
+                         <div className="px-4 py-4 border-b border-slate-50/50 mb-1">
+                            <p className="text-[10px] font-black text-slate-400 uppercase tracking-[0.15em]">Signed in as</p>
+                            <p className="text-[14px] font-black text-slate-800 truncate mt-1.5">{user?.name}</p>
                          </div>
 
-                         {profileMenuItems.map((item) => (
-                           <NavLink
-                             key={item.path}
-                             to={item.path}
-                             onClick={() => setIsProfileOpen(false)}
-                             className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-slate-600 hover:bg-primary-50 hover:text-primary-600 transition-all group"
-                           >
-                              <span className="material-symbols-outlined text-[18px] text-slate-400 group-hover:text-primary-500">{item.icon}</span>
-                              <span className="text-[12px] font-bold">{item.label}</span>
-                           </NavLink>
-                         ))}
+                         <div className="space-y-0.5">
+                            {profileMenuItems.map((item) => (
+                              <NavLink
+                                key={item.path}
+                                to={item.path}
+                                onClick={() => setIsProfileOpen(false)}
+                                className="flex items-center gap-3.5 px-4 py-3 rounded-2xl text-slate-600 hover:bg-primary-50 hover:text-primary-600 transition-all group"
+                              >
+                                 <span className="material-symbols-outlined text-[18px] text-slate-400 group-hover:text-primary-500 transition-colors">{item.icon}</span>
+                                 <span className="text-[12px] font-bold">{item.label}</span>
+                              </NavLink>
+                            ))}
+                         </div>
 
-                         <button 
-                           onClick={handleLogout}
-                           className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-rose-500 hover:bg-rose-50 transition-all mt-1 border-t border-slate-50 pt-3"
-                         >
-                            <span className="material-symbols-outlined text-[18px]">logout</span>
-                            <span className="text-[12px] font-black uppercase">Sign Out</span>
-                         </button>
+                         <div className="mt-1.5 pt-1.5 border-t border-slate-50">
+                            <button 
+                              onClick={handleLogout}
+                              className="w-full flex items-center gap-3.5 px-4 py-3 rounded-2xl text-rose-500 hover:bg-rose-50 transition-all group"
+                            >
+                               <span className="material-symbols-outlined text-[18px] group-hover:rotate-12 transition-transform">logout</span>
+                               <span className="text-[11px] font-black uppercase tracking-wider">Sign Out</span>
+                            </button>
+                         </div>
                       </motion.div>
                     )}
                  </AnimatePresence>
@@ -240,7 +243,7 @@ const DashboardLayout = ({ children, role = 'farmer' }) => {
           </AnimatePresence>
         </main>
 
-        {/* Mobile Bottom Navigation Bar (Super Clean) */}
+        {/* Mobile Bottom Navigation Bar */}
         <nav className="lg:hidden fixed bottom-0 left-0 right-0 h-16 bg-white/95 backdrop-blur-xl border-t border-slate-50 flex items-center justify-around px-6 z-[90] pb-2">
            {mobileNavItems.map((item) => {
               const isActive = location.pathname === item.path;
@@ -255,7 +258,7 @@ const DashboardLayout = ({ children, role = 'farmer' }) => {
         </nav>
       </div>
 
-      {/* Super Simple Mobile Drawer Overlay */}
+      {/* Mobile Drawer Overlay */}
       <AnimatePresence>
         {isMobileMenuOpen && (
           <div className="fixed inset-0 z-[100] lg:hidden">
