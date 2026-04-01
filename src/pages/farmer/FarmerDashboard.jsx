@@ -73,27 +73,27 @@ const FarmerDashboard = () => {
                                 >
                                     <Card 
                                         className={`glass-card glass-shine group cursor-pointer transition-all duration-500 shadow-sm hover:shadow-xl hover:-translate-y-1 !rounded-[32px]`}
-                                        padding="p-6 lg:p-7"
+                                        padding="p-4 sm:p-6 lg:p-7"
                                     >
-                                        <div className="flex items-start justify-between mb-6">
-                                            <div className={`w-12 h-12 rounded-2xl ${stat.color} text-white flex items-center justify-center shadow-lg ${stat.glow} icon-pop`}>
-                                                <span className="material-symbols-outlined text-[20px] lg:text-[24px]">{stat.icon}</span>
+                                        <div className="flex items-start justify-between mb-4 sm:mb-6">
+                                            <div className={`w-10 h-10 sm:w-12 sm:h-12 flex-shrink-0 rounded-2xl ${stat.color} text-white flex items-center justify-center shadow-lg ${stat.glow} icon-pop`}>
+                                                <span className="material-symbols-outlined text-[18px] sm:text-[20px] lg:text-[24px] leading-none mb-0">{stat.icon}</span>
                                             </div>
-                                            <div className="flex flex-col items-end">
-                                                <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">{stat.label}</span>
+                                            <div className="flex flex-col items-end text-right">
+                                                <span className="text-[8px] sm:text-[10px] font-black text-slate-400 uppercase tracking-widest truncate max-w-[60px] sm:max-w-none">{stat.label}</span>
                                                 <div className="flex items-center gap-1 mt-1">
-                                                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
-                                                    <span className="text-[9px] font-black text-emerald-600 uppercase tracking-tighter">Live</span>
+                                                    <span className="w-1 h-1 sm:w-1.5 sm:h-1.5 rounded-full bg-emerald-500"></span>
+                                                    <span className="text-[7px] sm:text-[9px] font-black text-emerald-600 uppercase tracking-tighter">Live</span>
                                                 </div>
                                             </div>
                                         </div>
-                                        <div className="flex items-baseline gap-2">
-                                            <h3 className="text-2xl lg:text-3xl font-black text-slate-900 leading-none tracking-tight">{stat.value}</h3>
-                                            <span className="text-[11px] font-black text-slate-400 uppercase tracking-widest">{stat.unit}</span>
+                                        <div className="flex items-baseline gap-1 sm:gap-2">
+                                            <h3 className="text-xl sm:text-2xl lg:text-3xl font-black text-slate-900 leading-none tracking-tight">{stat.value}</h3>
+                                            <span className="text-[9px] sm:text-[11px] font-black text-slate-400 uppercase tracking-widest">{stat.unit}</span>
                                         </div>
-                                        <div className="mt-4 pt-4 border-t border-slate-100 flex items-center justify-between">
-                                            <p className="text-[9px] font-black text-slate-500 uppercase tracking-tight">{stat.trend}</p>
-                                            <span className="material-symbols-outlined text-slate-300 text-[16px] group-hover:text-primary-500 transition-colors">arrow_forward</span>
+                                        <div className="mt-3 sm:mt-4 pt-3 sm:pt-4 border-t border-slate-100 flex items-center justify-between">
+                                            <p className="text-[7px] sm:text-[9px] font-black text-slate-500 uppercase tracking-tight truncate max-w-[80%]">{stat.trend}</p>
+                                            <span className="material-symbols-outlined text-slate-300 text-[14px] sm:text-[16px] group-hover:text-primary-500 transition-colors">arrow_forward</span>
                                         </div>
                                     </Card>
                                 </motion.div>
