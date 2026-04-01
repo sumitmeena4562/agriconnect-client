@@ -30,9 +30,9 @@ const FarmerDashboard = () => {
         <DashboardLayout role="farmer">
             {/* Z+ Layered Background Architecture */}
             <div className="relative">
-                {/* Visual Tier 1: Abstract Glows */}
-                <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-primary-500/5 rounded-full blur-[120px] -z-10 animate-pulse" />
-                <div className="absolute bottom-0 left-0 w-[300px] h-[300px] bg-amber-500/5 rounded-full blur-[100px] -z-10" />
+                {/* Visual Tier 1: Abstract Glows - Optimized for Performance */}
+                <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-primary-500/5 rounded-full blur-[64px] -z-10" />
+                <div className="absolute bottom-0 left-0 w-[300px] h-[300px] bg-amber-500/5 rounded-full blur-[64px] -z-10" />
 
                 <div className="space-y-8 lg:space-y-12 pb-20 max-w-7xl mx-auto pt-2">
                     {/* 1. Elite Header & Welcome */}
@@ -74,7 +74,7 @@ const FarmerDashboard = () => {
                                     transition={{ delay: idx * 0.1, duration: 0.5 }}
                                 >
                                     <Card 
-                                        className={`glass-card glass-shine group cursor-pointer transition-all duration-500 shadow-sm hover:shadow-xl hover:-translate-y-1 !rounded-[32px]`}
+                                        className={`glass-card backdrop-blur-[6px] group cursor-pointer transition-all duration-300 shadow-sm hover:shadow-xl hover:-translate-y-1 !rounded-[32px] will-change-transform`}
                                         padding="p-4 sm:p-6 lg:p-7"
                                     >
                                         <div className="flex items-start justify-between mb-4 sm:mb-6">
@@ -122,7 +122,7 @@ const FarmerDashboard = () => {
                                         initial={{ opacity: 0, x: -10 }}
                                         animate={{ opacity: 1, x: 0 }}
                                         transition={{ delay: 0.4 + (i * 0.1) }}
-                                        className="bg-white/70 backdrop-blur-md p-5 rounded-[28px] border border-slate-100 shadow-sm hover:shadow-md hover:border-primary-100/50 transition-all cursor-pointer flex items-center justify-between group relative overflow-hidden"
+                                        className="bg-white/80 backdrop-blur-[6px] p-5 rounded-[28px] border border-slate-100 shadow-sm hover:shadow-md hover:border-primary-100/50 transition-all duration-300 cursor-pointer flex items-center justify-between group relative overflow-hidden will-change-transform"
                                     >
                                         <div className="absolute top-0 left-0 w-1 h-full bg-primary-500 opacity-0 group-hover:opacity-100 transition-opacity" />
                                         <div className="flex items-center gap-4">
@@ -146,9 +146,9 @@ const FarmerDashboard = () => {
                                 ))}
                             </div>
 
-                            {/* Insight Card */}
-                            <div className="p-6 rounded-[32px] bg-gradient-to-br from-slate-800 to-slate-900 text-white shadow-xl relative overflow-hidden group">
-                                <div className="absolute -right-4 -top-4 w-24 h-24 bg-primary-500/10 rounded-full blur-2xl group-hover:bg-primary-500/20 transition-all" />
+                            {/* Insight Card - Optimized */}
+                            <div className="p-6 rounded-[32px] bg-gradient-to-br from-slate-800 to-slate-900 text-white shadow-lg relative overflow-hidden group">
+                                <div className="absolute -right-4 -top-4 w-24 h-24 bg-primary-500/5 rounded-full blur-xl group-hover:bg-primary-500/10 transition-all duration-300" />
                                 <span className="material-symbols-outlined text-primary-400 mb-3 block">lightbulb</span>
                                 <h4 className="text-sm font-black uppercase tracking-widest mb-2">Market Insight</h4>
                                 <p className="text-[11px] text-slate-400 leading-relaxed">Wheat prices in Nashik are expected to rise by 4% next week due to supply constraints. <span className="text-primary-400 font-bold">Consider holding stock.</span></p>
@@ -178,7 +178,7 @@ const FarmerDashboard = () => {
                                         transition={{ delay: 0.5 + (idx * 0.1) }}
                                     >
                                         <Card 
-                                            className="!rounded-[36px] border border-slate-100 p-6 lg:p-8 shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-500 bg-white relative overflow-hidden group"
+                                            className="!rounded-[36px] border border-slate-100 p-6 lg:p-8 shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300 bg-white relative overflow-hidden group will-change-transform"
                                         >
                                             {/* Decorative Corner */}
                                             <div className="absolute top-0 right-0 w-24 h-24 bg-slate-50 rounded-bl-[80px] -z-0 transition-all group-hover:bg-primary-50" />
