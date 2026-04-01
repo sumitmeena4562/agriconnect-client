@@ -4,6 +4,7 @@ import DashboardLayout from '../../layouts/DashboardLayout';
 import Card from '../../components/ui/Card';
 import Badge from '../../components/ui/Badge';
 import Button from '../../components/ui/Button';
+import WeatherAlert from '../../components/dashboard/WeatherAlert';
 
 const FarmerDashboard = () => {
     // Mock Data for UI
@@ -28,7 +29,7 @@ const FarmerDashboard = () => {
     return (
         <DashboardLayout role="farmer">
             {/* Z+ Layered Background Architecture */}
-            <div className="relative min-h-screen">
+            <div className="relative">
                 {/* Visual Tier 1: Abstract Glows */}
                 <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-primary-500/5 rounded-full blur-[120px] -z-10 animate-pulse" />
                 <div className="absolute bottom-0 left-0 w-[300px] h-[300px] bg-amber-500/5 rounded-full blur-[100px] -z-10" />
@@ -61,6 +62,7 @@ const FarmerDashboard = () => {
                                 <Button variant="primary" size="sm" icon="auto_awesome" className="!rounded-2xl !py-3 !px-6 !text-[11px] font-black tracking-widest shadow-lg shadow-primary-500/20 active:scale-95 transition-all">AI ADVICE</Button>
                             </motion.div>
                         </div>
+
 
                         {/* Premium Stats Grid */}
                         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 lg:gap-6">
@@ -102,9 +104,9 @@ const FarmerDashboard = () => {
                     </section>
 
                     {/* 2. Content Matrix */}
-                    <div className="grid grid-cols-1 xl:grid-cols-12 gap-6 lg:gap-8 px-2">
+                    <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-8 px-2">
                         {/* Market Ticker Widget */}
-                        <div className="xl:col-span-4 space-y-5">
+                        <div className="lg:col-span-4 space-y-5">
                             <div className="flex items-center justify-between px-2">
                                 <div className="flex items-center gap-2">
                                     <div className="w-2 h-2 rounded-full bg-primary-500 animate-pulse" />
@@ -154,7 +156,7 @@ const FarmerDashboard = () => {
                         </div>
 
                         {/* Inventory/Crops Portfolio */}
-                        <div className="xl:col-span-8 space-y-5">
+                        <div className="lg:col-span-8 space-y-5">
                             <div className="flex items-center justify-between px-2">
                                 <div className="flex items-center gap-2">
                                     <div className="w-2 h-2 rounded-full bg-primary-500" />
@@ -249,58 +251,16 @@ const FarmerDashboard = () => {
                         </div>
                     </div>
 
-                    {/* 3. Redesigned Premium Weather Alert */}
-                    <section className="px-2">
-                        <motion.div 
-                            initial={{ opacity: 0, y: 30 }}
-                            animate={{ opacity: 1, y: 0 }}
-                            transition={{ delay: 0.8 }}
-                            className="bg-slate-900 rounded-[40px] p-6 lg:p-10 relative overflow-hidden group shadow-2xl shadow-slate-900/20"
-                        >
-                            {/* Animated Background Elements */}
-                            <div className="absolute top-0 right-0 w-[400px] h-[400px] bg-primary-500/10 rounded-full blur-[100px] pointer-events-none group-hover:bg-primary-500/15 transition-all duration-700" />
-                            <div className="absolute -bottom-20 -left-20 w-64 h-64 border-[1px] border-white/5 rounded-full pointer-events-none" />
-                            
-                            <div className="relative z-10 flex flex-col xl:flex-row items-center gap-8 lg:gap-12">
-                                <div className="flex-1 flex flex-col lg:flex-row items-center gap-6 lg:gap-10">
-                                    {/* Weather Icon Master */}
-                                    <div className="relative shrink-0">
-                                        <div className="w-20 h-20 lg:w-24 lg:h-24 rounded-[32px] bg-white/5 border border-white/10 flex items-center justify-center text-primary-400 shadow-inner group-hover:scale-105 transition-transform duration-500">
-                                            <span className="material-symbols-outlined text-[40px] lg:text-[48px] animate-bounce-slow">rainy</span>
-                                        </div>
-                                        <div className="absolute -top-2 -right-2 w-8 h-8 rounded-full bg-rose-500 border-4 border-slate-900 flex items-center justify-center">
-                                            <span className="material-symbols-outlined text-white text-[14px] font-black">priority_high</span>
-                                        </div>
-                                    </div>
+                    {/* 3. Bottom Weather Alert - Full Width & Clean */}
+                    <WeatherAlert 
+                        type="rain"
+                        title="Weather Advisory"
+                        location="Nashik (Sector 4)"
+                        intensity="High Precipitation"
+                        message="Heavy rainfall likely at 10:30 PM. Please ensure your harvest is secure."
+                        className="mt-4"
+                    />
 
-                                    <div className="text-center lg:text-left space-y-3">
-                                        <div className="flex items-center justify-center lg:justify-start gap-3">
-                                            <div className="flex items-center gap-1.5 bg-primary-500/20 px-3 py-1 rounded-full border border-primary-500/30">
-                                                <span className="w-1.5 h-1.5 rounded-full bg-primary-400" />
-                                                <span className="text-[10px] font-black text-primary-400 uppercase tracking-widest">Priority Alert</span>
-                                            </div>
-                                            <span className="text-[10px] font-black text-slate-500 uppercase tracking-[0.2em]">Verified: NASA Power</span>
-                                        </div>
-                                        <h2 className="text-2xl lg:text-4xl font-black text-white tracking-tight leading-none uppercase italic">
-                                            High Precipitation <span className="text-primary-400 normal-case italic">Expected Tonight</span>
-                                        </h2>
-                                        <p className="text-[13px] lg:text-sm font-medium text-slate-400 max-w-xl leading-relaxed">
-                                            Our sensors detect an 85% probability of heavy rainfall in <span className="text-white font-bold">Nashik (Sector 4)</span> starting at 10:30 PM. We strongly recommend completing all harvesting operations and moving stock to covered depots immediately.
-                                        </p>
-                                    </div>
-                                </div>
-
-                                <div className="flex flex-col sm:flex-row items-center gap-4 w-full xl:w-auto shrink-0 border-t xl:border-t-0 xl:border-l border-white/5 pt-8 xl:pt-0 xl:pl-12">
-                                    <div className="flex flex-col items-center xl:items-start gap-1 mr-4 hidden sm:flex">
-                                        <span className="text-[9px] font-black text-slate-500 uppercase tracking-widest">Expected Intensity</span>
-                                        <span className="text-xl font-black text-white">42mm / hr</span>
-                                    </div>
-                                    <Button variant="primary" size="lg" className="w-full sm:w-auto !rounded-2xl !bg-white !text-slate-900 hover:!bg-slate-50 !py-4 !px-8 !text-[12px] font-black tracking-widest shadow-xl active:scale-95 transition-all">TAKE ACTION</Button>
-                                    <Button variant="glass" size="lg" className="w-full sm:w-auto !rounded-2xl border-white/10 !bg-white/5 !text-white !py-4 !px-8 !text-[12px] font-black tracking-widest hover:!bg-white/10 transition-all">VIEW DOPPLER</Button>
-                                </div>
-                            </div>
-                        </motion.div>
-                    </section>
                 </div>
             </div>
         </DashboardLayout>
