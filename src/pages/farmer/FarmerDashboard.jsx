@@ -5,6 +5,11 @@ import Card from '../../components/ui/Card';
 import Badge from '../../components/ui/Badge';
 import Button from '../../components/ui/Button';
 import WeatherAlert from '../../components/dashboard/WeatherAlert';
+import SoilHealthCard from '../../components/dashboard/SoilHealthCard';
+import TaskManager from '../../components/dashboard/TaskManager';
+import FinancialSnapshot from '../../components/dashboard/FinancialSnapshot';
+import AgriNewsTicker from '../../components/dashboard/AgriNewsTicker';
+import ExpertToggle from '../../components/dashboard/ExpertToggle';
 
 const FarmerDashboard = () => {
     // Mock Data for UI
@@ -153,6 +158,9 @@ const FarmerDashboard = () => {
                                 <h4 className="text-sm font-black uppercase tracking-widest mb-2">Market Insight</h4>
                                 <p className="text-[11px] text-slate-400 leading-relaxed">Wheat prices in Nashik are expected to rise by 4% next week due to supply constraints. <span className="text-primary-400 font-bold">Consider holding stock.</span></p>
                             </div>
+
+                            {/* New Financial Snapshot */}
+                            <FinancialSnapshot />
                         </div>
 
                         {/* Inventory/Crops Portfolio */}
@@ -248,7 +256,18 @@ const FarmerDashboard = () => {
                                     </div>
                                 </motion.button>
                             </div>
+
+                            {/* New Intelligence Tier: Soil & Tasks */}
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pt-2">
+                                <SoilHealthCard />
+                                <TaskManager />
+                            </div>
                         </div>
+                    </div>
+
+                    {/* Live News Ticker Integration */}
+                    <div className="mt-8 -mx-2">
+                        <AgriNewsTicker />
                     </div>
 
                     {/* 3. Bottom Weather Alert - Full Width & Clean */}
@@ -263,6 +282,9 @@ const FarmerDashboard = () => {
 
                 </div>
             </div>
+
+            {/* Floating Expert Communication */}
+            <ExpertToggle />
         </DashboardLayout>
     );
 };
