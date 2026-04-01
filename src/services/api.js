@@ -12,6 +12,11 @@ API.interceptors.request.use((config) => {
   if (token) {
     config.headers.Authorization = `Bearer ${token}`;
   }
+  
+  // Tunnel bypass for mobile testing (ngrok & localtunnel)
+  config.headers['ngrok-skip-browser-warning'] = 'true';
+  config.headers['bypass-tunnel-reminder'] = 'true';
+  
   return config;
 });
 
