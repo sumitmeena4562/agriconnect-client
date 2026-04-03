@@ -49,9 +49,10 @@ const BaseRegistrationPage = ({ role, config }) => {
     useEffect(() => {
         if (success) {
             const redirectTimer = setTimeout(() => {
-                const dashUrl = role === 'admin' ? '/admin/dashboard' : `/${role}/dashboard`;
+                let dashUrl = role === 'admin' ? '/admin/dashboard' : `/${role}/dashboard`;
+
                 navigate(dashUrl);
-            }, 5000);
+            }, 6000); // 6s to allow success animation to breathe
             return () => clearTimeout(redirectTimer);
         }
     }, [success, role, navigate]);
@@ -129,7 +130,7 @@ const BaseRegistrationPage = ({ role, config }) => {
                                 <SuccessScreen 
                                     fullName={formData.fullName} 
                                     onDashboardClick={() => {
-                                        const dashUrl = role === 'admin' ? '/admin/dashboard' : `/${role}/dashboard`;
+                                        let dashUrl = role === 'admin' ? '/admin/dashboard' : `/${role}/dashboard`;
                                         navigate(dashUrl);
                                     }} 
                                     config={config?.success}

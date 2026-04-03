@@ -24,6 +24,12 @@ API.interceptors.request.use((config) => {
 API.interceptors.response.use(
   (response) => response,
   (error) => {
+    // Tunnel Detection Logic
+    if (error.message === "Network Error" && !error.response) {
+      console.error("🕵️‍♂️ [TUNNEL DETECTED] Possible Bridge Failure. Please confirm your Ngrok/Localtunnel is active.");
+      toast.error("Bridge Error: Please verify your tunnel connectivity.");
+    }
+
     // Extract human-readable error message
     const message = error.response?.data?.message || 
                    (error.message === "Network Error" ? "Connection lost. Please check your internet and try again." : error.message) || 
