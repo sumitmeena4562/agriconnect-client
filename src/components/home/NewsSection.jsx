@@ -72,7 +72,7 @@ const NewsSection = () => {
                             whileInView={{ opacity: 1, y: 0 }}
                             viewport={{ once: true }}
                             transition={{ duration: 0.5, delay: index * 0.1 }}
-                            className="flex flex-col group cursor-pointer glass-shine p-4 rounded-3xl bg-white border border-gray-50 shadow-sm hover:shadow-xl hover:shadow-green-50/50 transition-all duration-500"
+                            className="global-card flex flex-col group cursor-pointer glass-shine"
                         >
                             <div className="relative aspect-[16/10] rounded-2xl overflow-hidden mb-4">
                                 <img 

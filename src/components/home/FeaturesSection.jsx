@@ -90,7 +90,7 @@ const FeaturesSection = () => {
                             whileInView={{ opacity: 1, y: 0 }}
                             viewport={{ once: true }}
                             transition={{ duration: 0.5, delay: index * 0.1 }}
-                            className="bg-white rounded-2xl p-5 sm:p-6 shadow-[0_8px_30px_rgb(0,0,0,0.04)] hover:shadow-[0_20px_40px_rgba(0,180,100,0.08)] transition-all duration-300 border border-gray-100 group cursor-default hover:-translate-y-1.5 glass-shine"
+                            className="global-card group cursor-default glass-shine"
                         >
                             {/* Icon Container - Higher Contrast */}
                             <div className={`w-12 h-12 sm:w-14 sm:h-14 rounded-xl ${feature.colorClass.split(' ')[0]} flex items-center justify-center mb-5 transition-transform duration-500 group-hover:scale-110 group-hover:rotate-3`}>

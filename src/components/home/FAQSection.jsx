@@ -78,7 +78,7 @@ const FAQSection = () => {
                                 whileInView={{ opacity: 1, y: 0 }}
                                 viewport={{ once: true }}
                                 transition={{ duration: 0.4, delay: index * 0.08 }}
-                                className={`bg-white rounded-xl border transition-all duration-300 relative overflow-hidden ${isOpen ? 'border-[#00B464]/30 shadow-md shadow-[#00B464]/5' : 'border-gray-100/60 shadow-sm'}`}
+                                className={`bg-white rounded-xl border transition-all duration-300 relative overflow-hidden ${isOpen ? 'border-[#00B464]/30 shadow-[var(--shadow-card-hover)]' : 'border-gray-100/60 shadow-[var(--shadow-card)]'}`}
                             >
                                 {/* Active Accent Bar */}
                                 <div className={`absolute left-0 top-0 bottom-0 w-1 bg-[#00B464] transition-transform duration-300 ${isOpen ? 'scale-y-100' : 'scale-y-0'}`} />

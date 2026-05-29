@@ -83,28 +83,40 @@ const Testimonials = () => {
                     initial={{ opacity: 0, scale: 0.95 }}
                     whileInView={{ opacity: 1, scale: 1 }}
                     viewport={{ once: true }}
-                    className="max-w-4xl mx-auto mb-16 lg:mb-20 relative group"
+                    className="max-w-4xl mx-auto mb-16 lg:mb-20 relative group px-2 sm:px-0"
                 >
-                    <div className="aspect-video rounded-[32px] overflow-hidden bg-slate-900 shadow-2xl relative border-8 border-white">
+                    <div className="aspect-[4/3] sm:aspect-video rounded-[24px] sm:rounded-[32px] overflow-hidden bg-slate-900 shadow-2xl relative border-[4px] sm:border-8 border-white">
                         <img 
                             src="https://images.unsplash.com/photo-1523348837708-15d4a09cfac2?ixlib=rb-4.0.3&auto=format&fit=crop&w=1200&q=80" 
                             alt="Farmer Success Story" 
-                            className="w-full h-full object-cover opacity-60 group-hover:scale-105 transition-transform duration-1000"
+                            className="absolute inset-0 w-full h-full object-cover opacity-50 group-hover:scale-105 group-hover:opacity-60 transition-all duration-1000"
                         />
-                        <div className="absolute inset-0 flex flex-col items-center justify-center p-6 text-center">
+                        {/* Gradient overlay for perfect text contrast */}
+                        <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-black/10" />
+                        
+                        <div className="absolute inset-0 flex flex-col items-center justify-center p-4 sm:p-8 text-center z-10">
                             <motion.button 
                                 whileHover={{ scale: 1.1 }}
                                 whileTap={{ scale: 0.9 }}
-                                className="w-20 h-20 sm:w-24 sm:h-24 bg-[#00B464] text-white rounded-full flex items-center justify-center shadow-[0_0_30px_rgba(0,180,100,0.5)] mb-6 glass-shine"
+                                className="w-16 h-16 sm:w-20 sm:h-20 lg:w-24 lg:h-24 bg-[#00B464] text-white rounded-full flex items-center justify-center shadow-[0_0_30px_rgba(0,180,100,0.5)] mb-4 sm:mb-6 glass-shine transition-colors hover:bg-green-500"
                             >
-                                <span className="material-symbols-outlined text-[40px] sm:text-[48px] fill-1">play_arrow</span>
+                                <svg className="w-8 h-8 sm:w-10 sm:h-10 lg:w-12 lg:h-12 ml-1 sm:ml-2" fill="currentColor" viewBox="0 0 24 24">
+                                    <path d="M8 5v14l11-7z" />
+                                </svg>
                             </motion.button>
-                            <h3 className="text-white text-xl sm:text-2xl lg:text-3xl font-black mb-2 drop-shadow-lg">Watch: How Ram became a Digital Farmer</h3>
-                            <p className="text-white/80 text-[13px] sm:text-[14px] font-bold uppercase tracking-widest drop-shadow-md">Verified Success Story • Nashik, Maharashtra</p>
+                            
+                            <h3 className="text-white text-[18px] sm:text-2xl lg:text-3xl font-black mb-2 drop-shadow-lg leading-tight px-4">
+                                Watch: How Ram became a Digital Farmer
+                            </h3>
+                            
+                            <div className="inline-flex items-center gap-1.5 px-3 py-1 bg-black/30 backdrop-blur-md rounded-full mt-1">
+                                <span className="w-1.5 h-1.5 bg-[#00B464] rounded-full animate-pulse" />
+                                <p className="text-white text-[9px] sm:text-[11px] font-bold uppercase tracking-[0.1em] drop-shadow-md">Verified Success Story • Nashik</p>
+                            </div>
                         </div>
                     </div>
                     {/* Decorative element */}
-                    <div className="absolute -z-10 -bottom-6 -right-6 w-32 h-32 bg-[#2F80ED]/10 rounded-full blur-2xl" />
+                    <div className="absolute -z-10 -bottom-4 sm:-bottom-6 -right-2 sm:-right-6 w-24 sm:w-32 h-24 sm:h-32 bg-[#2F80ED]/10 rounded-full blur-2xl" />
                 </motion.div>
 
                 {/* Grid */}
@@ -116,29 +128,28 @@ const Testimonials = () => {
                             whileInView={{ opacity: 1, y: 0 }}
                             viewport={{ once: true }}
                             transition={{ duration: 0.5, delay: index * 0.1 }}
-                            className="bg-white rounded-2xl p-5 sm:p-6 shadow-[var(--shadow-card)] hover:shadow-[var(--shadow-card-hover)] transition-all duration-500 border border-gray-100/50 group flex flex-col items-start glass-shine"
+                            className="global-card group flex flex-col items-start glass-shine"
                         >
                             {/* Quote Icon & Role */}
-                            <div className="w-full flex items-center justify-between mb-5">
-                                <span className="material-symbols-outlined text-[32px] text-gray-100 group-hover:text-green-50 transition-colors">format_quote</span>
-                                <div className={`flex items-center gap-1 px-2 py-0.5 rounded-lg ${review.roleColor} text-[8px] font-black tracking-wider uppercase`}>
-                                    <span className="material-symbols-outlined text-[12px]">{review.roleIcon}</span>
+                            <div className="w-full flex items-center justify-between mb-4">
+                                <span className="material-symbols-outlined text-[40px] text-slate-200 group-hover:text-[#00B464]/20 transition-colors -ml-2 -mt-2">format_quote</span>
+                                <div className={`flex items-center gap-1 px-2.5 py-1 rounded-lg ${review.roleColor} text-[9px] font-black tracking-widest uppercase`}>
+                                    <span className="material-symbols-outlined text-[14px]">{review.roleIcon}</span>
                                     {review.role}
                                 </div>
                             </div>
 
-                            <p className="text-[#0A2616] font-medium text-[13px] sm:text-[14px] leading-[1.6] mb-6 italic">
+                            <p className="text-slate-700 font-medium text-[14px] leading-relaxed mb-6 italic">
                                 "{review.quote}"
                             </p>
 
                             <div className="mt-auto w-full">
-                                {/* Stars */}
-                                <div className="flex gap-0.5 mb-4">
+                                {/* Solid SVG Stars */}
+                                <div className="flex gap-1 mb-4">
                                     {[...Array(5)].map((_, i) => (
-                                        <span key={i} className="material-symbols-outlined text-[14px]" 
-                                              style={{ color: i < review.stars ? '#F59E0B' : '#E2E8F0' }}>
-                                            star
-                                        </span>
+                                        <svg key={i} className={`w-4 h-4 ${i < review.stars ? 'text-[#F59E0B]' : 'text-slate-200'}`} fill="currentColor" viewBox="0 0 20 20">
+                                            <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                                        </svg>
                                     ))}
                                 </div>
 

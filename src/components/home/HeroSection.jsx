@@ -62,7 +62,7 @@ const HeroSection = () => {
                                 { to: '/customer-registration', icon: 'shopping_basket', label: 'Customer', desc: 'Zero Fees', color: 'text-[#F59E0B]', bg: 'bg-[#FFFBEB]' },
                             ].map(cta => (
                                 <Link key={cta.label} to={cta.to}
-                                    className="group relative p-3 sm:p-4 rounded-2xl bg-white border border-slate-200 shadow-sm shadow-slate-200/50 hover:border-[#00B464]/40 hover:shadow-xl hover:shadow-[#00B464]/10 transition-all duration-300 text-center active:scale-[0.98] glass-shine">
+                                    className="group relative p-3 sm:p-4 rounded-[var(--card-border-radius)] bg-[var(--color-surface)] border border-[var(--color-border)] shadow-[var(--shadow-card)] hover:shadow-[var(--shadow-card-hover)] transition-all duration-300 text-center active:scale-[0.98] glass-shine">
                                     <div className={`w-10 h-10 sm:w-12 sm:h-12 mx-auto ${cta.bg} ${cta.color} rounded-xl flex items-center justify-center mb-2.5 transition-transform duration-300 group-hover:scale-110 group-hover:rotate-3 border border-white/50 shadow-inner`}>
                                         <span className="material-symbols-outlined text-xl sm:text-[24px] drop-shadow-sm icon-pop">{cta.icon}</span>
                                     </div>

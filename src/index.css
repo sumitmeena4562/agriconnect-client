@@ -37,10 +37,14 @@
   --form-border-radius: 0.5rem; /* 8px rounded corners */
   --form-text-size: 0.875rem;  /* 14px text - Compact */
 
-  /* 6. SHADOWS */
-  --shadow-card: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -2px rgba(0, 0, 0, 0.05);
-  --shadow-card-hover: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -4px rgba(0, 0, 0, 0.1);
+  /* 6. SHADOWS & CARDS */
+  --shadow-card: 0 4px 12px -2px rgba(0, 0, 0, 0.05), 0 2px 4px -2px rgba(0, 0, 0, 0.03);
+  --shadow-card-hover: 0 12px 24px -4px rgba(0, 0, 0, 0.08), 0 8px 12px -6px rgba(0, 0, 0, 0.04);
   --shadow-premium: 0 10px 40px -10px rgba(22, 163, 74, 0.15);
+  
+  --card-border-radius: 1rem; /* 16px (rounded-2xl) */
+  --card-padding-mobile: 1.25rem; /* 20px (p-5) */
+  --card-padding-desktop: 1.5rem; /* 24px (p-6) */
 }
 
 @layer base {
@@ -67,17 +71,16 @@
   /* Layout Container */
   .app-container {
     @apply max-w-md mx-auto min-h-screen px-4 py-6;
-    /* max-w-md makes it compact & perfect for mobile screens */
   }
 
-  /* Form Input / Select */
+  /* Form Controls */
   .form-input {
     @apply w-full border bg-white text-slate-900 transition-all outline-none shadow-sm;
     height: var(--form-input-height);
     padding-left: var(--form-input-px);
     padding-right: var(--form-input-px);
     border-radius: var(--form-border-radius);
-    border-color: #cbd5e1; /* Darker border for better visibility */
+    border-color: #cbd5e1;
     font-size: var(--form-text-size);
   }
   .form-input:focus {
@@ -87,12 +90,11 @@
     @apply text-slate-400 font-medium;
   }
 
-  /* Form Label */
   .form-label {
     @apply block text-[13px] font-bold text-slate-800 mb-1.5;
   }
 
-  /* Primary Button */
+  /* Buttons */
   .btn-primary {
     @apply w-full bg-primary-600 hover:bg-primary-700 text-white font-medium transition-all flex justify-center items-center gap-2 cursor-pointer;
     height: var(--form-input-height);
@@ -105,7 +107,6 @@
     @apply opacity-50 cursor-not-allowed hover:bg-primary-600;
   }
 
-  /* Secondary Button (Outline) */
   .btn-secondary {
     @apply w-full border border-gray-300 bg-white hover:bg-gray-50 text-gray-700 font-medium transition-all flex justify-center items-center gap-2 cursor-pointer;
     height: var(--form-input-height);
@@ -115,26 +116,55 @@
     font-size: var(--form-text-size);
   }
 
-  /* Card / Form Container */
-  .ui-card {
+  /* =========================================
+     GLOBAL CARD STYLES
+  ========================================== */
+  .global-card {
     background-color: var(--color-surface);
-    border-radius: 0.75rem;
+    border-radius: var(--card-border-radius);
+    padding: var(--card-padding-mobile);
     box-shadow: var(--shadow-card);
-    padding: var(--space-lg);
+    border: 1px solid var(--color-border);
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+  
+  @media (min-width: 640px) {
+    .global-card {
+      padding: var(--card-padding-desktop);
+    }
   }
 
-  /* Premium Glass Effect (Optional) */
+  .global-card:hover {
+    box-shadow: var(--shadow-card-hover);
+    transform: translateY(-2px);
+  }
+
+  /* Card without internal padding (for cards with cover images) */
+  .global-card-flush {
+    background-color: var(--color-surface);
+    border-radius: var(--card-border-radius);
+    box-shadow: var(--shadow-card);
+    border: 1px solid var(--color-border);
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    overflow: hidden;
+  }
+  .global-card-flush:hover {
+    box-shadow: var(--shadow-card-hover);
+    transform: translateY(-2px);
+  }
+
   .glass-card {
     background-color: rgba(255, 255, 255, 0.7);
     backdrop-filter: blur(12px);
     border: 1px solid rgba(255, 255, 255, 0.5);
     box-shadow: var(--shadow-premium);
-    border-radius: 0.75rem;
+    border-radius: var(--card-border-radius);
   }
 
   /* Hover Animations */
   .glass-shine {
     overflow: hidden;
+    position: relative;
   }
   .glass-shine::before {
     content: "";

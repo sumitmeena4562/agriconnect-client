@@ -163,7 +163,7 @@ const TrendingCategories = () => {
                             whileInView={{ opacity: 1, y: 0 }}
                             viewport={{ once: true }}
                             transition={{ duration: 0.5, delay: index * 0.1 }}
-                            className="bg-white rounded-2xl overflow-hidden shadow-[var(--shadow-card)] hover:shadow-[var(--shadow-card-hover)] transition-all duration-300 hover:-translate-y-1.5 group cursor-pointer border border-gray-100/50 flex flex-col h-full glass-shine"
+                            className="global-card-flush group cursor-pointer flex flex-col h-full glass-shine"
                         >
                             {/* Image Container */}
                             <div className="w-full h-[140px] sm:h-[150px] bg-gray-50 overflow-hidden relative">

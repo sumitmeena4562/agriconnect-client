@@ -102,7 +102,7 @@ const HowItWorks = () => {
                                 <div className="hidden lg:block absolute top-[44px] left-full w-full h-[2px] border-t-2 border-dashed border-gray-200 z-0 transform -translate-x-4" />
                             )}
 
-                            <div className="relative z-10 bg-white p-5 sm:p-6 rounded-2xl shadow-[var(--shadow-card)] group-hover:shadow-[var(--shadow-card-hover)] transition-all duration-300 border border-gray-100/50 group-hover:-translate-y-1.5 h-full flex flex-col glass-shine">
+                            <div className="relative z-10 global-card group-hover:-translate-y-1.5 h-full flex flex-col glass-shine">
                                 <div className={`w-12 h-12 sm:w-14 sm:h-14 rounded-xl ${step.color} flex items-center justify-center mb-5 relative overflow-hidden transition-transform duration-500 group-hover:scale-110 group-hover:rotate-3`}>
                                     <span className="material-symbols-outlined text-[24px] sm:text-[28px] z-10 icon-pop">{step.icon}</span>
                                 </div>
