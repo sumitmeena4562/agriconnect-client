@@ -49,7 +49,7 @@ const HeroSection = () => {
                             India's leading marketplace for farmers, bulk vendors, and health-conscious customers. Eliminating middlemen for a fairer, fresher future.
                         </motion.p>
 
-                        {/* CTA Cards - Reverted to Small & Equal */}
+                        {/* CTA Cards - Reverted to Small & Equal with better contrast */}
                         <motion.div 
                             initial={{ opacity: 0, y: 20 }}
                             whileInView={{ opacity: 1, y: 0 }}
@@ -62,12 +62,12 @@ const HeroSection = () => {
                                 { to: '/customer-registration', icon: 'shopping_basket', label: 'Customer', desc: 'Zero Fees', color: 'text-[#F59E0B]', bg: 'bg-[#FFFBEB]' },
                             ].map(cta => (
                                 <Link key={cta.label} to={cta.to}
-                                    className="group relative p-3 sm:p-4 rounded-2xl bg-white border border-gray-100 hover:border-[#00B464]/30 hover:shadow-xl hover:shadow-green-50 transition-all duration-300 text-center active:scale-[0.98] glass-shine">
-                                    <div className={`w-10 h-10 sm:w-12 sm:h-12 mx-auto ${cta.bg} ${cta.color} rounded-xl flex items-center justify-center mb-2.5 transition-transform group-hover:scale-110 group-hover:rotate-3`}>
-                                        <span className="material-symbols-outlined text-xl sm:text-[24px] icon-pop">{cta.icon}</span>
+                                    className="group relative p-3 sm:p-4 rounded-2xl bg-white border border-slate-200 shadow-sm shadow-slate-200/50 hover:border-[#00B464]/40 hover:shadow-xl hover:shadow-[#00B464]/10 transition-all duration-300 text-center active:scale-[0.98] glass-shine">
+                                    <div className={`w-10 h-10 sm:w-12 sm:h-12 mx-auto ${cta.bg} ${cta.color} rounded-xl flex items-center justify-center mb-2.5 transition-transform duration-300 group-hover:scale-110 group-hover:rotate-3 border border-white/50 shadow-inner`}>
+                                        <span className="material-symbols-outlined text-xl sm:text-[24px] drop-shadow-sm icon-pop">{cta.icon}</span>
                                     </div>
-                                    <h3 className="font-black text-[12px] sm:text-[13px] text-gray-900">{cta.label}</h3>
-                                    <p className="text-[9px] sm:text-[10px] text-gray-500 mt-0.5 font-bold uppercase tracking-tighter">{cta.desc}</p>
+                                    <h3 className="font-black text-[13px] sm:text-[14px] text-slate-800">{cta.label}</h3>
+                                    <p className="text-[10px] sm:text-[11px] text-slate-500 mt-0.5 font-bold uppercase tracking-tighter">{cta.desc}</p>
                                 </Link>
                             ))}
                         </motion.div>
