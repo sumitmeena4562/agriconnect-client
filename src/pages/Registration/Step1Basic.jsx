@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import Input from '../../components/ui/Input';
+import PhoneInput from '../../components/ui/PhoneInput';
 import Button from '../../components/ui/Button';
 import OtpInput from '../../components/ui/OtpInput';
 
@@ -7,7 +8,7 @@ const Step1Basic = ({ data, updateData, nextStep }) => {
   const [step, setStep] = useState(0); // 0: Phone, 1: OTP, 2: Name
   const [otp, setOtp] = useState('');
   const [timer, setTimer] = useState(30);
-  const [error, setError] = useState('');
+  const [errors, setErrors] = useState({});
 
   // Handle countdown timer
   useEffect(() => {
@@ -20,41 +21,60 @@ const Step1Basic = ({ data, updateData, nextStep }) => {
     return () => clearInterval(interval);
   }, [step, timer]);
 
+  const validateField = (name, value) => {
+    let errMsg = '';
+    if (name === 'phone') {
+      if (!value) errMsg = 'Mobile number is required';
+      else if (!/^[0-9]{7,15}$/.test(value)) errMsg = 'Enter a valid mobile number';
+    }
+    if (name === 'name') {
+      if (!value.trim()) errMsg = 'Full name is required';
+      else if (value.trim().length < 3) errMsg = 'Name must be at least 3 characters';
+      else if (!/^[a-zA-Z\s]+$/.test(value)) errMsg = 'Name can only contain alphabets';
+    }
+    setErrors((prev) => ({ ...prev, [name]: errMsg }));
+    return errMsg === '';
+  };
+
   const handleChange = (e) => {
-    updateData({ [e.target.name]: e.target.value });
-    if (error) setError('');
+    const { name, value } = e.target;
+    // Prevent typing non-numbers in phone field
+    if (name === 'phone' && value && !/^[0-9]*$/.test(value)) return;
+    
+    updateData({ [name]: value });
+    validateField(name, value);
+  };
+
+  const handleCountryChange = (e) => {
+    updateData({ countryCode: e.target.value });
   };
 
   const handleGetOTP = (e) => {
     e.preventDefault();
-    if (!data.phone || data.phone.length < 10) {
-      setError('Please enter a valid 10-digit mobile number');
-      return;
+    if (validateField('phone', data.phone)) {
+      setStep(1);
+      setTimer(30);
     }
-    // Simulate API call
-    setError('');
-    setStep(1);
-    setTimer(30);
   };
 
   const handleVerifyOTP = (e) => {
     e.preventDefault();
-    if (otp === '1234') { // Mock verification
-      setError('');
-      setStep(2); // Move to Name input
+    if (otp === '1234') { 
+      setErrors((prev) => ({ ...prev, otp: '' }));
+      setStep(2); 
     } else {
-      setError('Invalid OTP. Please try 1234');
+      setErrors((prev) => ({ ...prev, otp: 'Invalid OTP. Please try 1234' }));
     }
   };
 
   const handleNext = (e) => {
     e.preventDefault();
-    if (data.name) {
+    if (validateField('name', data.name)) {
       nextStep();
-    } else {
-      setError('Please enter your full name');
     }
   };
+
+  const currentCountryCode = data.countryCode || '+91';
 
   return (
     <div>
@@ -83,16 +103,18 @@ const Step1Basic = ({ data, updateData, nextStep }) => {
       {/* State 0: Enter Mobile */}
       {step === 0 && (
         <form onSubmit={handleGetOTP}>
-          <Input 
+          <PhoneInput 
             label="Mobile Number" 
             id="phone" 
             name="phone"
             type="tel"
-            placeholder="10-digit mobile number" 
+            placeholder="Mobile number" 
             value={data.phone || ''}
             onChange={handleChange}
-            error={error}
-            maxLength={10}
+            countryCode={currentCountryCode}
+            onCountryChange={handleCountryChange}
+            error={errors.phone}
+            maxLength={15}
             required
           />
           <div className="mt-8">
@@ -107,7 +129,7 @@ const Step1Basic = ({ data, updateData, nextStep }) => {
           <div className="mb-8 p-3 px-4 rounded-xl bg-green-50 border border-green-100 flex items-center justify-between">
             <div className="flex flex-col">
               <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-0.5">Sending OTP to</p>
-              <p className="text-[15px] font-black text-slate-800 leading-none">+91 {data.phone}</p>
+              <p className="text-[15px] font-black text-slate-800 leading-none">{currentCountryCode} {data.phone}</p>
             </div>
             <button 
               type="button" 
@@ -122,7 +144,7 @@ const Step1Basic = ({ data, updateData, nextStep }) => {
             <label className="block text-[14px] font-bold text-slate-800 mb-3 text-center">
               Enter 4-digit OTP
             </label>
-            <OtpInput length={4} value={otp} onChange={setOtp} error={error} />
+            <OtpInput length={4} value={otp} onChange={setOtp} error={errors.otp} />
           </div>
 
           <div className="text-center mb-6">
@@ -152,7 +174,7 @@ const Step1Basic = ({ data, updateData, nextStep }) => {
             </div>
             <div>
               <p className="text-[11px] font-bold text-slate-500 uppercase">Verified Number</p>
-              <p className="text-sm font-black text-slate-800">+91 {data.phone}</p>
+              <p className="text-sm font-black text-slate-800">{currentCountryCode} {data.phone}</p>
             </div>
           </div>
 
@@ -164,7 +186,7 @@ const Step1Basic = ({ data, updateData, nextStep }) => {
             placeholder="e.g. Ramesh Kumar" 
             value={data.name || ''}
             onChange={handleChange}
-            error={error}
+            error={errors.name}
             required
           />
 

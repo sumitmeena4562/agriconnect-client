@@ -1,16 +1,40 @@
-import React from 'react';
+import React, { useState } from 'react';
 import Input from '../../components/ui/Input';
 import Select from '../../components/ui/Select';
 import Button from '../../components/ui/Button';
 
 const Step2Location = ({ data, updateData, nextStep, prevStep }) => {
+  const [errors, setErrors] = useState({});
+
+  const validateField = (name, value) => {
+    let errMsg = '';
+    if (!value || !value.trim()) {
+      errMsg = 'This field is required';
+    } else if ((name === 'district' || name === 'village') && value.trim().length < 3) {
+      errMsg = 'Must be at least 3 characters';
+    } else if ((name === 'district' || name === 'village') && !/^[a-zA-Z\s]+$/.test(value)) {
+      errMsg = 'Only alphabets allowed';
+    }
+    
+    setErrors((prev) => ({ ...prev, [name]: errMsg }));
+    return errMsg === '';
+  };
+
   const handleChange = (e) => {
-    updateData({ [e.target.name]: e.target.value });
+    const { name, value } = e.target;
+    updateData({ [name]: value });
+    validateField(name, value);
   };
 
   const handleNext = (e) => {
     e.preventDefault();
-    nextStep();
+    const isStateValid = validateField('state', data.state || '');
+    const isDistrictValid = validateField('district', data.district || '');
+    const isVillageValid = validateField('village', data.village || '');
+
+    if (isStateValid && isDistrictValid && isVillageValid) {
+      nextStep();
+    }
   };
 
   // Mock data for states (would come from API normally)
@@ -33,6 +57,7 @@ const Step2Location = ({ data, updateData, nextStep, prevStep }) => {
         options={stateOptions}
         value={data.state || ''}
         onChange={handleChange}
+        error={errors.state}
         required
       />
 
@@ -44,6 +69,7 @@ const Step2Location = ({ data, updateData, nextStep, prevStep }) => {
         placeholder="Enter your district" 
         value={data.district || ''}
         onChange={handleChange}
+        error={errors.district}
         required
       />
 
@@ -55,6 +81,7 @@ const Step2Location = ({ data, updateData, nextStep, prevStep }) => {
         placeholder="Enter your village name" 
         value={data.village || ''}
         onChange={handleChange}
+        error={errors.village}
         required
       />
 
