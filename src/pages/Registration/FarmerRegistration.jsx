@@ -39,14 +39,14 @@ const FarmerRegistration = () => {
   };
 
   return (
-    <div className="min-h-screen flex flex-col items-center justify-start pt-12 sm:justify-center sm:pt-4 p-4 bg-gray-50/30">
+    <div className="min-h-screen flex flex-col items-center justify-start pt-12 sm:justify-center sm:pt-4 p-4 bg-[var(--color-bg-body)]">
       <div className="w-full max-w-[400px] mt-4 sm:mt-0">
         <div className="mb-6 text-center">
           <h1 className="text-2xl font-black text-primary-800">AgriConnect</h1>
           <p className="text-sm font-medium text-slate-500 mt-1">Join the farmer network</p>
         </div>
 
-        <div className="ui-card shadow-[0_10px_40px_-10px_rgba(0,0,0,0.1)] border border-slate-100">
+        <div className="global-card">
           <ProgressBar currentStep={step} totalSteps={totalSteps} />
 
           <div className="mt-5">

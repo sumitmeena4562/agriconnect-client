@@ -1,13 +1,13 @@
 import React from 'react';
 
 const ProgressBar = ({ currentStep, totalSteps }) => {
-  const percentage = Math.round(((currentStep - 1) / (totalSteps - 1)) * 100);
+  const percentage = Math.round((currentStep / totalSteps) * 100);
 
   return (
     <div className="mb-6">
-      <div className="flex justify-between text-xs text-gray-500 mb-2">
-        <span>Step {currentStep} of {totalSteps}</span>
-        <span>{percentage}%</span>
+      <div className="flex justify-between items-center text-[12px] font-bold text-slate-400 mb-2.5">
+        <span className="uppercase tracking-wider">Step {currentStep} of {totalSteps}</span>
+        <span className="text-[#00B464]">{percentage}%</span>
       </div>
       <div className="w-full bg-gray-200 rounded-full h-2">
         <div 

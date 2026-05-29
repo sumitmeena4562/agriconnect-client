@@ -126,7 +126,7 @@ const Step1Basic = ({ data, updateData, nextStep }) => {
       {/* State 1: Verify OTP */}
       {step === 1 && (
         <form onSubmit={handleVerifyOTP} className="animate-in fade-in slide-in-from-bottom-2 duration-300">
-          <div className="mb-8 p-3 px-4 rounded-xl bg-green-50 border border-green-100 flex items-center justify-between">
+          <div className="mb-8 p-3 px-4 rounded-[var(--form-border-radius)] bg-green-50 border border-green-100 flex items-center justify-between">
             <div className="flex flex-col">
               <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-0.5">Sending OTP to</p>
               <p className="text-[15px] font-black text-slate-800 leading-none">{currentCountryCode} {data.phone}</p>
@@ -168,7 +168,7 @@ const Step1Basic = ({ data, updateData, nextStep }) => {
       {/* State 2: Enter Name */}
       {step === 2 && (
         <form onSubmit={handleNext} className="animate-in fade-in slide-in-from-bottom-2 duration-300">
-          <div className="mb-6 p-4 rounded-xl bg-green-50 border border-green-100 flex items-center gap-3">
+          <div className="mb-6 p-4 rounded-[var(--form-border-radius)] bg-green-50 border border-green-100 flex items-center gap-3">
             <div className="w-8 h-8 rounded-full bg-[#00B464] flex items-center justify-center text-white shrink-0">
               <span className="material-symbols-outlined text-[18px]">verified</span>
             </div>

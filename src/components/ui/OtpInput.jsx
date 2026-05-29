@@ -73,7 +73,7 @@ const OtpInput = ({ length = 4, value, onChange, error }) => {
             onChange={(e) => handleChange(e.target, index)}
             onKeyDown={(e) => handleKeyDown(e, index)}
             onPaste={handlePaste}
-            className={`w-[52px] h-[52px] text-center text-2xl font-black rounded-xl border ${error ? 'border-red-500 ring-1 ring-red-500' : 'border-slate-300 focus:border-[#00B464] focus:ring-2 focus:ring-[#00B464]'} outline-none shadow-sm transition-all bg-white text-slate-800`}
+            className={`w-12 h-12 sm:w-14 sm:h-14 text-center text-xl sm:text-2xl font-black rounded-[var(--form-border-radius)] border ${error ? 'border-red-500 ring-1 ring-red-500 bg-red-50' : 'border-[#cbd5e1] focus:border-primary-500 focus:ring-2 focus:ring-primary-500 bg-white'} outline-none shadow-sm transition-all text-slate-800`}
           />
         ))}
       </div>
