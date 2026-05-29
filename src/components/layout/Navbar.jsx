@@ -2,10 +2,12 @@ import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import Logo from '../common/Logo';
+import RoleSelectionModal from './RoleSelectionModal';
 
 const Header = () => {
   // --- States ---
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [isJoinModalOpen, setIsJoinModalOpen] = useState(false);
   const [isCatOpen, setIsCatOpen] = useState(false);
   const [isLocationOpen, setIsLocationOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
@@ -208,7 +210,7 @@ const Header = () => {
 
               <div className="hidden sm:flex items-center gap-1.5 lg:gap-2">
                 <Link to="/login" className="px-3 lg:px-4 py-2.5 text-[13px] font-bold text-slate-700 hover:bg-white rounded-xl transition-all">Log in</Link>
-                <Link to="/farmer-registration" className="px-5 py-2.5 text-[14px] font-black text-white bg-[#00B464] rounded-xl shadow-lg shadow-green-200/40 hover:scale-[1.02] active:scale-[0.98] transition-all whitespace-nowrap">Join Free</Link>
+                <button onClick={() => setIsJoinModalOpen(true)} className="px-5 py-2.5 text-[14px] font-black text-white bg-[#00B464] rounded-xl shadow-lg shadow-green-200/40 hover:scale-[1.02] active:scale-[0.98] transition-all whitespace-nowrap">Join Free</button>
               </div>
 
               <button onClick={() => setIsMenuOpen(true)} className="md:hidden w-10 h-10 flex items-center justify-center rounded-xl bg-slate-900 text-white shadow-xl">
@@ -273,7 +275,7 @@ const Header = () => {
               </nav>
 
               <div className="space-y-4 pt-6 border-t border-gray-50">
-                  <Link to="/farmer-registration" onClick={() => setIsMenuOpen(false)} className="block w-full text-center py-5 bg-[#00B464] text-white font-black rounded-2xl shadow-xl shadow-green-100 text-[16px]">FARMER REGISTRATION</Link>
+                  <button onClick={() => { setIsJoinModalOpen(true); setIsMenuOpen(false); }} className="block w-full text-center py-5 bg-[#00B464] text-white font-black rounded-2xl shadow-xl shadow-green-100 text-[16px]">JOIN FREE</button>
                   <div className="grid grid-cols-2 gap-4">
                       <Link to="/login" className="flex items-center justify-center py-4 bg-slate-900 text-white font-black rounded-xl text-[14px]">LOGIN</Link>
                       <a href="https://wa.me/91000000000" className="flex items-center justify-center py-4 bg-[#25D366] text-white font-black rounded-xl text-[14px]">WHATSAPP</a>
@@ -283,6 +285,8 @@ const Header = () => {
           </div>
         )}
       </AnimatePresence>
+
+      <RoleSelectionModal isOpen={isJoinModalOpen} onClose={() => setIsJoinModalOpen(false)} />
     </>
   );
 };
