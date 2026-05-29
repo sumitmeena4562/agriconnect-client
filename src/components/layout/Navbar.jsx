@@ -243,42 +243,106 @@ const Header = () => {
         </div>
       </header>
 
-      {/* Mobile Menu */}
+      {/* Mobile Menu (Premium Full-Screen but Compact) */}
       <AnimatePresence>
         {isMenuOpen && (
-          <div className="fixed inset-0 z-[150] md:hidden">
-            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="absolute inset-0 bg-[#0A2616]/60 backdrop-blur-md" onClick={() => setIsMenuOpen(false)} />
-            <motion.div initial={{ x: '100%' }} animate={{ x: 0 }} exit={{ x: '100%' }} transition={{ type: 'spring', damping: 25 }} className="absolute top-0 right-0 w-[85%] h-full bg-white shadow-2xl p-6 flex flex-col pt-12 overflow-y-auto">
-              <div className="flex items-center justify-between mb-8 pb-6 border-b border-gray-100">
-                  <Logo size="md" />
-                  <button onClick={() => setIsMenuOpen(false)} className="w-10 h-10 rounded-xl bg-gray-100 flex items-center justify-center"><span className="material-symbols-outlined text-[24px]">close</span></button>
-              </div>
-
-              <div className="mb-8 space-y-4">
-                  <div className="p-1.5 bg-gray-50 rounded-2xl flex items-center px-4 h-14 border border-gray-200 shadow-sm">
-                      <span className="material-symbols-outlined text-[#00B464] text-[22px]">search</span>
-                      <input type="text" placeholder="Search Mandi Rates..." className="bg-transparent border-none focus:outline-none text-[15px] font-black ml-3 w-full" />
+          <div className="fixed inset-0 z-[200] md:hidden">
+            <motion.div 
+              initial={{ opacity: 0 }} 
+              animate={{ opacity: 1 }} 
+              exit={{ opacity: 0 }} 
+              className="absolute inset-0 bg-slate-900/40 backdrop-blur-sm" 
+            />
+            
+            <motion.div 
+              initial={{ opacity: 0, scale: 0.98 }} 
+              animate={{ opacity: 1, scale: 1 }} 
+              exit={{ opacity: 0, scale: 0.98 }} 
+              transition={{ type: 'tween', duration: 0.2 }} 
+              className="absolute inset-0 bg-[#0A2616] flex flex-col overflow-y-auto"
+            >
+              {/* Compact Header */}
+              <div className="flex items-center justify-between p-4 border-b border-white/10 shrink-0">
+                  <div className="scale-90 origin-left">
+                    <Logo size="md" variant="dark" />
                   </div>
-                  <div className="grid grid-cols-2 gap-3">
-                      {mandis.slice(0, 4).map(m => (
-                          <button key={m} onClick={() => handleLocationSelect(m)} className={`p-4 rounded-xl border text-[12px] font-black transition-all ${location === m ? 'bg-[#00B464] text-white border-transparent' : 'bg-gray-50 w-full'}`}>{m.split(' ')[0]}</button>
+                  
+                  <div className="flex items-center gap-2">
+                    <div className="flex items-center bg-white/10 p-0.5 rounded-lg">
+                      {['EN', 'हिं'].map((l) => (
+                          <button key={l} onClick={() => setLang(l)} className={`px-2 py-1 rounded-md text-[10px] font-black transition-all ${lang === l ? 'bg-[#00B464] text-white shadow-sm' : 'text-white/50 hover:text-white/80'}`}>
+                              {l === 'हिं' ? 'HI' : 'EN'}
+                          </button>
                       ))}
+                    </div>
+                    <button onClick={() => setIsMenuOpen(false)} className="w-8 h-8 rounded-lg bg-white/10 flex items-center justify-center text-white/80 hover:bg-white/20 transition-colors">
+                      <span className="material-symbols-outlined text-[18px]">close</span>
+                    </button>
                   </div>
               </div>
+              
+              <div className="flex-1 p-5 flex flex-col gap-6">
+                
+                {/* Search */}
+                <div>
+                  <div className="relative">
+                    <span className="absolute left-3 top-1/2 -translate-y-1/2 material-symbols-outlined text-white/40 text-[18px]">search</span>
+                    <input 
+                      type="text" 
+                      placeholder="Search crops, rates..." 
+                      value={searchQuery}
+                      onChange={handleSearch}
+                      className="w-full bg-white/5 border border-white/10 rounded-[var(--form-border-radius)] text-white text-[13px] font-bold py-2.5 pl-9 pr-3 focus:outline-none focus:border-[#00B464] placeholder:text-white/30 transition-colors"
+                    />
+                  </div>
+                </div>
 
-              <nav className="flex-1 space-y-1 mb-8">
-                  {navLinks.map(link => (
-                      <button key={link.id} onClick={() => scrollToSection(link.id)} className="w-full text-left py-4 text-[18px] font-black border-b border-gray-50 flex items-center justify-between">
-                          {link.label} <span className="material-symbols-outlined text-gray-300 text-[20px]">chevron_right</span>
+                {/* Mandis */}
+                <div>
+                  <p className="text-[10px] font-bold text-white/40 uppercase tracking-widest mb-2.5">Top Mandis</p>
+                  <div className="flex flex-wrap gap-2">
+                    {mandis.slice(0, 4).map(m => (
+                      <button 
+                        key={m} 
+                        onClick={() => handleLocationSelect(m)} 
+                        className={`px-3 py-1.5 rounded-[8px] text-[12px] font-bold transition-all border ${location === m ? 'bg-[#00B464] border-[#00B464] text-white shadow-sm' : 'bg-white/5 border-white/10 text-white/70 hover:bg-white/10'}`}
+                      >
+                        {m.split(' ')[0]}
                       </button>
-                  ))}
-              </nav>
+                    ))}
+                  </div>
+                </div>
 
-              <div className="space-y-4 pt-6 border-t border-gray-50">
-                  <button onClick={() => { setIsJoinModalOpen(true); setIsMenuOpen(false); }} className="block w-full text-center py-5 bg-[#00B464] text-white font-black rounded-2xl shadow-xl shadow-green-100 text-[16px]">JOIN FREE</button>
-                  <div className="grid grid-cols-2 gap-4">
-                      <Link to="/login" className="flex items-center justify-center py-4 bg-slate-900 text-white font-black rounded-xl text-[14px]">LOGIN</Link>
-                      <a href="https://wa.me/91000000000" className="flex items-center justify-center py-4 bg-[#25D366] text-white font-black rounded-xl text-[14px]">WHATSAPP</a>
+                <div className="h-[1px] bg-white/10 w-full" />
+
+                {/* Nav Links (Compact) */}
+                <nav className="flex flex-col space-y-1">
+                    {navLinks.map((link, i) => (
+                        <motion.button 
+                          key={link.id} 
+                          initial={{ opacity: 0, x: -10 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: i * 0.05 + 0.1 }}
+                          onClick={() => scrollToSection(link.id)} 
+                          className="text-left px-3 py-3 text-[16px] font-black text-white/90 hover:bg-white/5 hover:text-[#00B464] rounded-lg transition-colors flex items-center justify-between group"
+                        >
+                            {link.label}
+                            <span className="material-symbols-outlined text-[18px] text-white/20 group-hover:text-[#00B464]">chevron_right</span>
+                        </motion.button>
+                    ))}
+                </nav>
+              </div>
+
+              {/* Bottom Actions (Compact) */}
+              <div className="p-5 border-t border-white/10 bg-white/5 space-y-3 shrink-0">
+                  <button onClick={() => { setIsJoinModalOpen(true); setIsMenuOpen(false); }} className="w-full bg-[#00B464] text-white py-3 text-[14px] font-black rounded-[var(--form-border-radius)] shadow-[0_4px_14px_rgba(0,180,100,0.3)] hover:scale-[1.02] transition-transform">
+                    JOIN FREE
+                  </button>
+                  <div className="flex gap-3">
+                      <Link to="/login" className="flex-1 py-3 bg-white text-[#0A2616] text-center font-black rounded-[var(--form-border-radius)] text-[13px] hover:bg-gray-100 transition-colors">
+                        LOGIN
+                      </Link>
+                      <a href="https://wa.me/91000000000" className="w-[46px] flex items-center justify-center bg-[#25D366] text-white rounded-[var(--form-border-radius)] shadow-sm hover:opacity-90 transition-opacity">
+                        <span className="material-symbols-outlined text-[20px]">chat</span>
+                      </a>
                   </div>
               </div>
             </motion.div>
