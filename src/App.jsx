@@ -1,4 +1,5 @@
 import { Routes, Route } from 'react-router-dom';
+import { Toaster } from 'react-hot-toast';
 import ScrollToTop from './components/common/ScrollToTop';
 import ThemePreview from './pages/ThemePreview';
 import LandingPage from './pages/LandingPage';
@@ -9,6 +10,17 @@ function App() {
   return (
     <>
       <ScrollToTop />
+      <Toaster 
+        position="top-center"
+        toastOptions={{
+          style: {
+            fontFamily: 'inherit',
+            fontWeight: '600',
+            fontSize: '14px',
+            borderRadius: 'var(--form-border-radius)',
+          },
+        }}
+      />
       <Routes>
         <Route path="/" element={<LandingPage />} />
         <Route path="/theme" element={<ThemePreview />} />
