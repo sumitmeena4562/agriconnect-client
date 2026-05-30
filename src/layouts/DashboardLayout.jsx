@@ -10,6 +10,7 @@ const DashboardLayout = () => {
   const [isProfileOpen, setIsProfileOpen] = useState(false);
   const [isLogoutModalOpen, setIsLogoutModalOpen] = useState(false);
   const [isLoggingOut, setIsLoggingOut] = useState(false);
+  const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
   const [userInitials, setUserInitials] = useState('FA');
   const [userName, setUserName] = useState('');
 
@@ -55,20 +56,25 @@ const DashboardLayout = () => {
     <>
       <div className="min-h-screen bg-[var(--color-bg-body)] flex">
         {/* 1. Desktop Sidebar (Hidden on mobile) */}
-        <aside className="hidden md:flex flex-col w-[220px] bg-white border-r border-slate-200 fixed h-full z-20 shadow-sm">
-          <div className="h-14 px-4 border-b border-slate-200 flex items-center">
-            <Logo size="sm" />
+        <aside className={`hidden md:flex flex-col bg-white border-r border-slate-200 fixed h-full z-20 shadow-sm transition-all duration-300 ease-in-out ${isSidebarCollapsed ? 'w-[80px]' : 'w-[220px]'}`}>
+          <div className="h-14 px-4 border-b border-slate-200 flex items-center overflow-hidden">
+            <div className={`transition-all duration-300 overflow-hidden whitespace-nowrap ${isSidebarCollapsed ? 'w-7' : 'w-[200px]'}`}>
+              <Logo size="sm" />
+            </div>
           </div>
           
-          <nav className="flex-1 px-3 py-4 space-y-1.5 overflow-y-auto">
-            <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest mb-2 px-2">Menu</p>
+          <nav className="flex-1 px-3 py-4 space-y-1.5 overflow-y-auto overflow-x-hidden">
+            <p className={`text-[9px] font-bold text-slate-400 uppercase tracking-widest px-2 transition-all duration-300 overflow-hidden whitespace-nowrap ${isSidebarCollapsed ? 'max-h-0 opacity-0 mb-0' : 'max-h-10 opacity-100 mb-2'}`}>
+              Menu
+            </p>
             {navItems.map((item) => (
               <NavLink
                 key={item.name}
                 to={item.path}
                 end={item.path === '/farmer-dashboard'}
+                title={isSidebarCollapsed ? item.name : ""}
                 className={({ isActive }) =>
-                  `flex items-center gap-2.5 px-3 py-2.5 rounded-lg transition-all duration-200 font-bold text-[12px] ${
+                  `flex items-center ${isSidebarCollapsed ? 'justify-center px-0' : 'gap-2.5 px-3'} py-2.5 rounded-lg transition-all duration-200 font-bold text-[12px] ${
                     isActive
                       ? 'bg-primary-50 text-primary-600 shadow-sm'
                       : 'text-slate-500 hover:bg-slate-50 hover:text-slate-800'
@@ -77,29 +83,43 @@ const DashboardLayout = () => {
               >
                 {({ isActive }) => (
                   <>
-                    <span className={`material-symbols-outlined text-[18px] ${isActive ? 'icon-pop' : ''}`}>
+                    <span className={`material-symbols-outlined text-[20px] transition-transform ${isActive ? 'icon-pop' : ''}`}>
                       {item.icon}
                     </span>
-                    {item.name}
+                    <span className={`whitespace-nowrap overflow-hidden transition-all duration-300 ${isSidebarCollapsed ? 'max-w-0 opacity-0' : 'max-w-[150px] opacity-100'}`}>
+                      {item.name}
+                    </span>
                   </>
                 )}
               </NavLink>
             ))}
           </nav>
 
-          <div className="p-3 border-t border-slate-200">
+          <div className="p-3 border-t border-slate-200 flex flex-col gap-2 overflow-hidden">
+            <button 
+              onClick={() => setIsSidebarCollapsed(!isSidebarCollapsed)}
+              className="flex items-center justify-center w-full py-2 rounded-lg text-slate-400 hover:text-slate-600 hover:bg-slate-50 transition-colors"
+              title="Toggle Sidebar"
+            >
+              <span className={`material-symbols-outlined text-[18px] transition-transform duration-300 ${isSidebarCollapsed ? 'rotate-180' : ''}`}>
+                keyboard_double_arrow_left
+              </span>
+            </button>
             <button 
               onClick={() => setIsLogoutModalOpen(true)}
-              className="flex items-center justify-center gap-2 w-full py-2.5 rounded-lg text-[12px] font-bold text-red-500 bg-red-50 hover:bg-red-100 transition-colors"
+              title={isSidebarCollapsed ? "Logout" : ""}
+              className={`flex items-center ${isSidebarCollapsed ? 'justify-center px-0' : 'justify-center gap-2'} w-full py-2.5 rounded-lg text-[12px] font-bold text-red-500 bg-red-50 hover:bg-red-100 transition-colors`}
             >
-            <span className="material-symbols-outlined text-[16px]">logout</span>
-            Logout
-          </button>
-        </div>
-      </aside>
+              <span className="material-symbols-outlined text-[16px]">logout</span>
+              <span className={`whitespace-nowrap overflow-hidden transition-all duration-300 ${isSidebarCollapsed ? 'max-w-0 opacity-0' : 'max-w-[150px] opacity-100'}`}>
+                Logout
+              </span>
+            </button>
+          </div>
+        </aside>
 
-      {/* 2. Main Content Area */}
-      <main className="flex-1 md:ml-[220px] pb-[70px] md:pb-0 min-h-screen relative flex flex-col">
+        {/* 2. Main Content Area */}
+        <main className={`flex-1 transition-all duration-300 ease-in-out ${isSidebarCollapsed ? 'md:ml-[80px]' : 'md:ml-[220px]'} pb-[70px] md:pb-0 min-h-screen relative flex flex-col`}>
         {/* Top Header (Mobile & Desktop) */}
         <header className="h-14 sticky top-0 z-10 bg-white/90 backdrop-blur-md border-b border-slate-200 px-4 sm:px-6 flex items-center justify-between">
           <div className="md:hidden">
