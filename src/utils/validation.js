@@ -8,7 +8,7 @@ import { z } from 'zod';
 const getError = (schema, value) => {
   const result = schema.safeParse(value);
   if (!result.success) {
-    return result.error.errors[0].message;
+    return result.error?.issues?.[0]?.message || result.error?.errors?.[0]?.message || 'Invalid input';
   }
   return '';
 };
