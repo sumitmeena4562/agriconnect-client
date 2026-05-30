@@ -1,5 +1,4 @@
 import React from 'react';
-import { motion } from 'framer-motion';
 
 const TrendingCategories = () => {
     // 1. Ticker Data

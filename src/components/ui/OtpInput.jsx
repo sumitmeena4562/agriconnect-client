@@ -7,6 +7,7 @@ const OtpInput = ({ length = 4, value, onChange, error }) => {
   useEffect(() => {
     // If value prop changes externally (e.g., reset)
     if (value === "") {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setOtp(new Array(length).fill(""));
     }
   }, [value, length]);
