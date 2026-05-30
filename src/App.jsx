@@ -5,6 +5,7 @@ import ThemePreview from './pages/ThemePreview';
 import LandingPage from './pages/LandingPage';
 import FarmerRegistration from './pages/Registration/FarmerRegistration';
 import Login from './pages/Auth/Login';
+import ForgotPassword from './pages/Auth/ForgotPassword';
 import './App.css';
 
 function App() {
@@ -26,6 +27,7 @@ function App() {
         <Route path="/" element={<LandingPage />} />
         <Route path="/theme" element={<ThemePreview />} />
         <Route path="/login" element={<Login />} />
+        <Route path="/forgot-password" element={<ForgotPassword />} />
         <Route path="/farmer-registration" element={<FarmerRegistration />} />
         <Route path="/farmer-dashboard" element={<div className="p-8"><h1>Farmer Dashboard Coming Soon...</h1></div>} />
       </Routes>
