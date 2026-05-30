@@ -6,6 +6,7 @@ import OtpInput from '../../components/ui/OtpInput';
 import axios from 'axios';
 import { auth } from '../../config/firebase';
 import { GoogleAuthProvider, signInWithPopup } from 'firebase/auth';
+import { validateEmail, validatePhone, validateName, validatePassword, validateOtp } from '../../utils/validation';
 
 const Step1Basic = ({ data, updateData, currentStep, nextStep, prevStep, setStep }) => {
   const [otp, setOtp] = useState('');
@@ -26,23 +27,11 @@ const Step1Basic = ({ data, updateData, currentStep, nextStep, prevStep, setStep
 
   const validateField = (name, value) => {
     let errMsg = '';
-    if (name === 'email') {
-      if (!value) errMsg = 'Email address is required';
-      else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value)) errMsg = 'Enter a valid email address';
-    }
-    if (name === 'phone') {
-      if (!value) errMsg = 'Mobile number is required';
-      else if (!/^[0-9]{7,15}$/.test(value)) errMsg = 'Enter a valid mobile number';
-    }
-    if (name === 'name') {
-      if (!value.trim()) errMsg = 'Full name is required';
-      else if (value.trim().length < 3) errMsg = 'Name must be at least 3 characters';
-      else if (!/^[a-zA-Z\s]+$/.test(value)) errMsg = 'Name can only contain alphabets';
-    }
-    if (name === 'password') {
-      if (!value) errMsg = 'Password is required';
-      else if (value.length < 6) errMsg = 'Password must be at least 6 characters long';
-    }
+    if (name === 'email') errMsg = validateEmail(value);
+    if (name === 'phone') errMsg = validatePhone(value);
+    if (name === 'name') errMsg = validateName(value);
+    if (name === 'password') errMsg = validatePassword(value);
+    
     setErrors((prev) => ({ ...prev, [name]: errMsg }));
     return errMsg === '';
   };
@@ -99,18 +88,21 @@ const Step1Basic = ({ data, updateData, currentStep, nextStep, prevStep, setStep
 
   const handleVerifyOTP = async (e) => {
     e.preventDefault();
-    if (otp.length === 6) { 
-      try {
-        await axios.post('/api/auth/verify-otp', { email: data.email, otp });
-        setErrors((prev) => ({ ...prev, otp: '' }));
-        
-        // OTP verified successfully, proceed to collect Name and Phone
-        setStep(3);
-      } catch (error) {
-        setErrors((prev) => ({ ...prev, otp: error.response?.data?.error || 'Invalid OTP. Please try again.' }));
-      }
-    } else {
-      setErrors((prev) => ({ ...prev, otp: 'Enter a valid 6-digit OTP' }));
+    
+    const otpError = validateOtp(otp);
+    if (otpError) {
+      setErrors((prev) => ({ ...prev, otp: otpError }));
+      return;
+    }
+
+    try {
+      await axios.post('/api/auth/verify-otp', { email: data.email, otp });
+      setErrors((prev) => ({ ...prev, otp: '' }));
+      
+      // OTP verified successfully, proceed to collect Name and Phone
+      setStep(3);
+    } catch (error) {
+      setErrors((prev) => ({ ...prev, otp: error.response?.data?.error || 'Invalid OTP. Please try again.' }));
     }
   };
 

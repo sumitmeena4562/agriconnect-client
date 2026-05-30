@@ -2,19 +2,16 @@ import React, { useState } from 'react';
 import Input from '../../components/ui/Input';
 import Select from '../../components/ui/Select';
 import Button from '../../components/ui/Button';
+import { validateLocationString, validateRequired } from '../../utils/validation';
 
 const Step2Location = ({ data, updateData, nextStep, prevStep }) => {
   const [errors, setErrors] = useState({});
 
   const validateField = (name, value) => {
     let errMsg = '';
-    if (!value || !value.trim()) {
-      errMsg = 'This field is required';
-    } else if ((name === 'district' || name === 'village') && value.trim().length < 3) {
-      errMsg = 'Must be at least 3 characters';
-    } else if ((name === 'district' || name === 'village') && !/^[a-zA-Z\s]+$/.test(value)) {
-      errMsg = 'Only alphabets allowed';
-    }
+    if (name === 'state') errMsg = validateRequired(value);
+    if (name === 'district') errMsg = validateLocationString(value, 'District');
+    if (name === 'village') errMsg = validateLocationString(value, 'Village');
     
     setErrors((prev) => ({ ...prev, [name]: errMsg }));
     return errMsg === '';

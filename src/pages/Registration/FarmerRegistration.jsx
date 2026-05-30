@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import toast from 'react-hot-toast';
 import ProgressBar from '../../components/ui/ProgressBar';
 import Step1Basic from './Step1Basic';
@@ -9,6 +10,7 @@ import axios from 'axios';
 const FarmerRegistration = () => {
   const [step, setStep] = useState(1);
   const totalSteps = 5;
+  const navigate = useNavigate();
 
   const [formData, setFormData] = useState({
     phone: '',
@@ -42,9 +44,16 @@ const FarmerRegistration = () => {
     const toastId = toast.loading('Registering account...');
     try {
       const response = await axios.post('/api/farmers/register', formData);
-      toast.success("Welcome " + response.data.data.user.name + "!", { id: toastId });
-      // Optionally reset form or redirect here
-      setStep(1);
+      const { token, user } = response.data.data;
+      
+      // Save auth data to localStorage
+      localStorage.setItem('agriconnect_token', token);
+      localStorage.setItem('agriconnect_user', JSON.stringify(user));
+
+      toast.success("Welcome " + user.name + "!", { id: toastId });
+      
+      // Redirect to Dashboard
+      navigate('/dashboard');
     } catch (error) {
       console.error("Registration Error:", error);
       toast.error(error.response?.data?.error || "Server error during registration", { id: toastId });

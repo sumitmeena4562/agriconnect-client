@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import Input from '../../components/ui/Input';
 import Select from '../../components/ui/Select';
 import Button from '../../components/ui/Button';
+import { validateRequired, validateLandSize, validateCrops } from '../../utils/validation';
 
 const Step3Farm = ({ data, updateData, submitForm, prevStep }) => {
   const [errors, setErrors] = useState({});
@@ -9,15 +10,9 @@ const Step3Farm = ({ data, updateData, submitForm, prevStep }) => {
   const validateField = (name, value) => {
     let errMsg = '';
     
-    if (!value || (typeof value === 'string' && !value.trim())) {
-      errMsg = 'This field is required';
-    } else if (name === 'landSize') {
-      if (isNaN(value)) errMsg = 'Must be a valid number';
-      else if (parseFloat(value) <= 0) errMsg = 'Must be greater than 0';
-      else if (parseFloat(value) > 1000) errMsg = 'Value seems suspiciously high';
-    } else if (name === 'crops' && value.trim().length < 3) {
-      errMsg = 'Please list at least one valid crop';
-    }
+    if (name === 'landSize') errMsg = validateLandSize(value);
+    else if (name === 'crops') errMsg = validateCrops(value);
+    else errMsg = validateRequired(value);
 
     setErrors((prev) => ({ ...prev, [name]: errMsg }));
     return errMsg === '';
