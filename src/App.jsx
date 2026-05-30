@@ -4,6 +4,7 @@ import ScrollToTop from './components/common/ScrollToTop';
 import ThemePreview from './pages/ThemePreview';
 import LandingPage from './pages/LandingPage';
 import FarmerRegistration from './pages/Registration/FarmerRegistration';
+import Login from './pages/Auth/Login';
 import './App.css';
 
 function App() {
@@ -24,8 +25,9 @@ function App() {
       <Routes>
         <Route path="/" element={<LandingPage />} />
         <Route path="/theme" element={<ThemePreview />} />
+        <Route path="/login" element={<Login />} />
         <Route path="/farmer-registration" element={<FarmerRegistration />} />
-        <Route path="/dashboard" element={<div className="p-8"><h1>Dashboard Coming Soon...</h1></div>} />
+        <Route path="/farmer-dashboard" element={<div className="p-8"><h1>Farmer Dashboard Coming Soon...</h1></div>} />
       </Routes>
     </>
   );
