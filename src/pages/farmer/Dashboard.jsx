@@ -25,20 +25,20 @@ const FarmerDashboard = () => {
         <motion.div 
           initial={{ opacity: 0, y: -10 }}
           animate={{ opacity: 1, y: 0 }}
-          className="bg-orange-50 border border-orange-200 rounded-xl p-3 sm:p-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 shadow-sm"
+          className="bg-warning-50 border border-warning-200 rounded-xl p-3 sm:p-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 shadow-sm"
         >
           <div className="flex items-start gap-2.5">
-            <div className="w-8 h-8 rounded-full bg-orange-100 flex items-center justify-center shrink-0">
-              <span className="material-symbols-outlined text-[18px] text-orange-500">account_balance</span>
+            <div className="w-8 h-8 rounded-full bg-warning-100 flex items-center justify-center shrink-0">
+              <span className="material-symbols-outlined text-[18px] text-warning-500">account_balance</span>
             </div>
             <div className="mt-0.5">
-              <h3 className="text-[12px] font-bold text-orange-800 leading-none mb-1">Complete Your Setup</h3>
-              <p className="text-[10px] text-orange-700 font-medium leading-relaxed">
+              <h3 className="text-[12px] font-bold text-warning-800 leading-none mb-1">Complete Your Setup</h3>
+              <p className="text-[10px] text-warning-700 font-medium leading-relaxed">
                 Add your bank account details to start receiving payments for your crops directly.
               </p>
             </div>
           </div>
-          <Link to="/farmer-dashboard/profile" className="shrink-0 w-full sm:w-auto bg-orange-500 hover:bg-orange-600 text-white text-[11px] font-bold py-2 px-4 rounded-lg transition-colors text-center shadow-sm">
+          <Link to="/farmer-dashboard/profile" className="shrink-0 w-full sm:w-auto bg-warning-500 hover:bg-warning-600 text-white text-[11px] font-bold py-2 px-4 rounded-lg transition-colors text-center shadow-sm">
             Add Details
           </Link>
         </motion.div>
@@ -48,7 +48,7 @@ const FarmerDashboard = () => {
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
         <StatCard title="Total Earnings" value="₹0.00" icon="account_balance_wallet" color="primary" trend={0} trendLabel="vs last month" />
         <StatCard title="Active Crops" value="0" icon="grass" color="info" />
-        <StatCard title="Pending Orders" value="0" icon="shopping_basket" color="accent" />
+        <StatCard title="Pending Orders" value="0" icon="shopping_basket" color="warning" />
         <StatCard title="Profile Views" value="0" icon="visibility" color="primary" />
       </div>
 
@@ -56,13 +56,13 @@ const FarmerDashboard = () => {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-5">
         
         {/* Weather Widget */}
-        <div className="lg:col-span-1 global-card-flush flex flex-col h-full bg-gradient-to-br from-blue-500 to-indigo-600 relative overflow-hidden group">
+        <div className="lg:col-span-1 global-card-flush flex flex-col h-full bg-gradient-to-br from-info-500 to-info-600 relative overflow-hidden group">
           <div className="absolute -top-24 -right-24 w-48 h-48 bg-white/10 rounded-full blur-2xl group-hover:scale-150 transition-transform duration-700"></div>
           
           <div className="p-4 flex-1 flex flex-col justify-between relative z-10">
             <div className="flex justify-between items-start text-white">
               <div>
-                <p className="text-[10px] font-bold text-blue-100 uppercase tracking-wider mb-0.5">Weather Forecast</p>
+                <p className="text-[10px] font-bold text-info-100 uppercase tracking-wider mb-0.5">Weather Forecast</p>
                 <h3 className="text-[16px] font-black leading-none">Your Farm</h3>
               </div>
               <span className="material-symbols-outlined text-[28px] text-yellow-300 icon-pop">partly_cloudy_day</span>
@@ -70,22 +70,22 @@ const FarmerDashboard = () => {
             
             <div className="mt-5 mb-3">
               <h2 className="text-[36px] font-black text-white tracking-tighter leading-none">
-                32°<span className="text-[18px] text-blue-200">C</span>
+                32°<span className="text-[18px] text-info-200">C</span>
               </h2>
-              <p className="text-[10px] font-medium text-blue-100 mt-1.5">Partly Cloudy • Humidity 45%</p>
+              <p className="text-[10px] font-medium text-info-100 mt-1.5">Partly Cloudy • Humidity 45%</p>
             </div>
             
             <div className="flex justify-between items-center pt-3 border-t border-white/20 text-white mt-auto">
               <div className="text-center">
-                <p className="text-[9px] text-blue-200 font-bold uppercase mb-0.5">Tomorrow</p>
+                <p className="text-[9px] text-info-200 font-bold uppercase mb-0.5">Tomorrow</p>
                 <div className="flex items-center gap-0.5 text-[11px]"><span className="material-symbols-outlined text-[12px]">sunny</span> 34°</div>
               </div>
               <div className="text-center">
-                <p className="text-[9px] text-blue-200 font-bold uppercase mb-0.5">Friday</p>
+                <p className="text-[9px] text-info-200 font-bold uppercase mb-0.5">Friday</p>
                 <div className="flex items-center gap-0.5 text-[11px]"><span className="material-symbols-outlined text-[12px]">rainy</span> 28°</div>
               </div>
               <div className="text-center">
-                <p className="text-[9px] text-blue-200 font-bold uppercase mb-0.5">Saturday</p>
+                <p className="text-[9px] text-info-200 font-bold uppercase mb-0.5">Saturday</p>
                 <div className="flex items-center gap-0.5 text-[11px]"><span className="material-symbols-outlined text-[12px]">cloud</span> 30°</div>
               </div>
             </div>
@@ -105,9 +105,9 @@ const FarmerDashboard = () => {
           </div>
           
           <div className="flex-1 overflow-x-auto pb-1">
-            <div className="min-w-[360px]">
-              <div className="grid grid-cols-4 gap-3 px-3 py-2 bg-slate-50 rounded-lg mb-2 text-[9px] font-bold text-slate-500 uppercase tracking-wider">
-                <div className="col-span-1">Crop</div>
+            <div className="min-w-[400px]">
+              <div className="grid grid-cols-5 gap-3 px-3 py-2 bg-slate-50 rounded-lg mb-2 text-[9px] font-bold text-slate-500 uppercase tracking-wider">
+                <div className="col-span-2">Crop</div>
                 <div className="col-span-1 text-right">Min Price</div>
                 <div className="col-span-1 text-right">Max Price</div>
                 <div className="col-span-1 text-right">Trend</div>
@@ -119,17 +119,17 @@ const FarmerDashboard = () => {
                 { name: 'Rice (Basmati)', min: '₹3,200', max: '₹3,800', trend: 1.2, icon: 'eco' },
                 { name: 'Tomato', min: '₹1,500', max: '₹2,100', trend: -5.4, icon: 'nutrition' },
               ].map((crop, idx) => (
-                <div key={idx} className="grid grid-cols-4 gap-3 px-3 py-2 items-center border-b border-slate-100 last:border-0 hover:bg-slate-50 transition-colors rounded-lg">
-                  <div className="col-span-1 flex items-center gap-2.5">
-                    <div className="w-6 h-6 rounded-md bg-green-50 flex items-center justify-center text-green-600 shrink-0">
-                      <span className="material-symbols-outlined text-[14px]">{crop.icon}</span>
+                <div key={idx} className="grid grid-cols-5 gap-3 px-3 py-2.5 items-center border-b border-slate-100 last:border-0 hover:bg-slate-50 transition-colors rounded-lg">
+                  <div className="col-span-2 flex items-center gap-2.5">
+                    <div className="w-7 h-7 rounded-md bg-success-50 flex items-center justify-center text-success-600 shrink-0">
+                      <span className="material-symbols-outlined text-[16px]">{crop.icon}</span>
                     </div>
-                    <span className="text-[11px] font-bold text-slate-800 whitespace-nowrap">{crop.name}</span>
+                    <span className="text-[12px] font-bold text-slate-800 truncate">{crop.name}</span>
                   </div>
-                  <div className="col-span-1 text-right text-[11px] font-bold text-slate-600">{crop.min}<span className="text-[9px] text-slate-400 font-medium">/q</span></div>
-                  <div className="col-span-1 text-right text-[11px] font-bold text-slate-800">{crop.max}<span className="text-[9px] text-slate-400 font-medium">/q</span></div>
+                  <div className="col-span-1 text-right text-[11.5px] font-bold text-slate-600">{crop.min}<span className="text-[9px] text-slate-400 font-medium">/q</span></div>
+                  <div className="col-span-1 text-right text-[11.5px] font-bold text-slate-800">{crop.max}<span className="text-[9px] text-slate-400 font-medium">/q</span></div>
                   <div className="col-span-1 flex justify-end">
-                    <span className={`flex items-center gap-0.5 text-[9px] font-bold px-1.5 py-0.5 rounded ${crop.trend > 0 ? 'text-green-600 bg-green-100' : 'text-red-600 bg-red-100'}`}>
+                    <span className={`flex items-center gap-0.5 text-[9.5px] font-bold px-1.5 py-0.5 rounded ${crop.trend > 0 ? 'text-success-600 bg-success-100' : 'text-danger-600 bg-danger-100'}`}>
                       <span className="material-symbols-outlined text-[10px]">{crop.trend > 0 ? 'trending_up' : 'trending_down'}</span>
                       {Math.abs(crop.trend)}%
                     </span>

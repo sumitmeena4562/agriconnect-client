@@ -4,9 +4,11 @@ const StatCard = ({ title, value, icon, trend, trendLabel, color = 'primary' }) 
   // Define color variations based on the global theme
   const colorStyles = {
     primary: 'bg-primary-50 text-primary-600',
-    accent: 'bg-orange-50 text-orange-500',
-    info: 'bg-blue-50 text-blue-500',
-    danger: 'bg-red-50 text-red-500',
+    accent: 'bg-warning-50 text-warning-500',
+    warning: 'bg-warning-50 text-warning-500',
+    info: 'bg-info-50 text-info-500',
+    danger: 'bg-danger-50 text-danger-500',
+    success: 'bg-success-50 text-success-600',
   };
 
   const currentStyle = colorStyles[color] || colorStyles.primary;
@@ -25,7 +27,7 @@ const StatCard = ({ title, value, icon, trend, trendLabel, color = 'primary' }) 
       
       {trend && (
         <div className="flex items-center gap-1.5 mt-1">
-          <span className={`flex items-center text-[10px] font-bold ${trend > 0 ? 'text-green-600 bg-green-100' : 'text-red-600 bg-red-100'} px-1.5 py-0.5 rounded-sm`}>
+          <span className={`flex items-center text-[10px] font-bold ${trend > 0 ? 'text-success-600 bg-success-50' : 'text-danger-600 bg-danger-50'} px-1.5 py-0.5 rounded-sm`}>
             <span className="material-symbols-outlined text-[12px]">{trend > 0 ? 'trending_up' : 'trending_down'}</span>
             {Math.abs(trend)}%
           </span>

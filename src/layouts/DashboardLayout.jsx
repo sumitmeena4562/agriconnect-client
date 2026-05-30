@@ -1,9 +1,31 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { NavLink, Outlet, useNavigate } from 'react-router-dom';
+import { motion, AnimatePresence } from 'framer-motion';
+import { toast } from 'react-hot-toast';
 import Logo from '../components/common/Logo';
+import ConfirmModal from '../components/common/ConfirmModal';
 
 const DashboardLayout = () => {
   const navigate = useNavigate();
+  const [isProfileOpen, setIsProfileOpen] = useState(false);
+  const [isLogoutModalOpen, setIsLogoutModalOpen] = useState(false);
+  const [isLoggingOut, setIsLoggingOut] = useState(false);
+  const [userInitials, setUserInitials] = useState('FA');
+  const [userName, setUserName] = useState('');
+
+  useEffect(() => {
+    // Get user from storage and set initials
+    const user = JSON.parse(localStorage.getItem('user') || sessionStorage.getItem('user') || '{}');
+    if (user.name) {
+      setUserName(user.name);
+      const parts = user.name.split(' ');
+      if (parts.length > 1) {
+        setUserInitials(`${parts[0][0]}${parts[1][0]}`.toUpperCase());
+      } else {
+        setUserInitials(user.name.substring(0, 2).toUpperCase());
+      }
+    }
+  }, []);
 
   const navItems = [
     { name: 'Home', path: '/farmer-dashboard', icon: 'home' },
@@ -13,53 +35,63 @@ const DashboardLayout = () => {
   ];
 
   const handleLogout = () => {
-    localStorage.removeItem('token');
-    localStorage.removeItem('user');
-    sessionStorage.removeItem('token');
-    sessionStorage.removeItem('user');
-    navigate('/login');
+    setIsLoggingOut(true);
+    
+    // Simulate API delay for a "real" deep logout feel
+    setTimeout(() => {
+      localStorage.removeItem('token');
+      localStorage.removeItem('user');
+      sessionStorage.removeItem('token');
+      sessionStorage.removeItem('user');
+      
+      setIsLoggingOut(false);
+      setIsLogoutModalOpen(false);
+      toast.success('Logged out successfully');
+      navigate('/login', { replace: true });
+    }, 800); // 800ms delay
   };
 
   return (
-    <div className="min-h-screen bg-[var(--color-bg-body)] flex">
-      {/* 1. Desktop Sidebar (Hidden on mobile) */}
-      <aside className="hidden md:flex flex-col w-[220px] bg-white border-r border-slate-200 fixed h-full z-20 shadow-sm">
-        <div className="p-4 border-b border-slate-100">
-          <Logo size="sm" />
-        </div>
-        
-        <nav className="flex-1 px-3 py-4 space-y-1.5 overflow-y-auto">
-          <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest mb-2 px-2">Menu</p>
-          {navItems.map((item) => (
-            <NavLink
-              key={item.name}
-              to={item.path}
-              end={item.path === '/farmer-dashboard'}
-              className={({ isActive }) =>
-                `flex items-center gap-2.5 px-3 py-2.5 rounded-lg transition-all duration-200 font-bold text-[12px] ${
-                  isActive
-                    ? 'bg-primary-50 text-primary-600 shadow-sm'
-                    : 'text-slate-500 hover:bg-slate-50 hover:text-slate-800'
-                }`
-              }
-            >
-              {({ isActive }) => (
-                <>
-                  <span className={`material-symbols-outlined text-[18px] ${isActive ? 'icon-pop' : ''}`}>
-                    {item.icon}
-                  </span>
-                  {item.name}
-                </>
-              )}
-            </NavLink>
-          ))}
-        </nav>
+    <>
+      <div className="min-h-screen bg-[var(--color-bg-body)] flex">
+        {/* 1. Desktop Sidebar (Hidden on mobile) */}
+        <aside className="hidden md:flex flex-col w-[220px] bg-white border-r border-slate-200 fixed h-full z-20 shadow-sm">
+          <div className="h-14 px-4 border-b border-slate-200 flex items-center">
+            <Logo size="sm" />
+          </div>
+          
+          <nav className="flex-1 px-3 py-4 space-y-1.5 overflow-y-auto">
+            <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest mb-2 px-2">Menu</p>
+            {navItems.map((item) => (
+              <NavLink
+                key={item.name}
+                to={item.path}
+                end={item.path === '/farmer-dashboard'}
+                className={({ isActive }) =>
+                  `flex items-center gap-2.5 px-3 py-2.5 rounded-lg transition-all duration-200 font-bold text-[12px] ${
+                    isActive
+                      ? 'bg-primary-50 text-primary-600 shadow-sm'
+                      : 'text-slate-500 hover:bg-slate-50 hover:text-slate-800'
+                  }`
+                }
+              >
+                {({ isActive }) => (
+                  <>
+                    <span className={`material-symbols-outlined text-[18px] ${isActive ? 'icon-pop' : ''}`}>
+                      {item.icon}
+                    </span>
+                    {item.name}
+                  </>
+                )}
+              </NavLink>
+            ))}
+          </nav>
 
-        <div className="p-3 border-t border-slate-100">
-          <button 
-            onClick={handleLogout}
-            className="flex items-center justify-center gap-2 w-full py-2.5 rounded-lg text-[12px] font-bold text-red-500 bg-red-50 hover:bg-red-100 transition-colors"
-          >
+          <div className="p-3 border-t border-slate-200">
+            <button 
+              onClick={() => setIsLogoutModalOpen(true)}
+              className="flex items-center justify-center gap-2 w-full py-2.5 rounded-lg text-[12px] font-bold text-red-500 bg-red-50 hover:bg-red-100 transition-colors"
+            >
             <span className="material-symbols-outlined text-[16px]">logout</span>
             Logout
           </button>
@@ -69,7 +101,7 @@ const DashboardLayout = () => {
       {/* 2. Main Content Area */}
       <main className="flex-1 md:ml-[220px] pb-[70px] md:pb-0 min-h-screen relative flex flex-col">
         {/* Top Header (Mobile & Desktop) */}
-        <header className="sticky top-0 z-10 bg-white/90 backdrop-blur-md border-b border-slate-200 px-4 sm:px-6 py-2.5 flex items-center justify-between">
+        <header className="h-14 sticky top-0 z-10 bg-white/90 backdrop-blur-md border-b border-slate-200 px-4 sm:px-6 flex items-center justify-between">
           <div className="md:hidden">
             <Logo size="sm" />
           </div>
@@ -77,13 +109,72 @@ const DashboardLayout = () => {
             <h2 className="text-[16px] font-black text-slate-800 leading-none pt-1">Dashboard</h2>
           </div>
           
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-3 relative">
             <button className="relative w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center text-slate-500 hover:text-primary-600 hover:bg-primary-50 transition-colors">
               <span className="material-symbols-outlined text-[18px]">notifications</span>
               <span className="absolute top-1.5 right-1.5 w-1.5 h-1.5 bg-red-500 rounded-full border-2 border-white"></span>
             </button>
-            <div className="w-8 h-8 rounded-full bg-gradient-to-tr from-primary-500 to-green-300 border border-white shadow-sm flex items-center justify-center cursor-pointer">
-              <span className="text-white font-bold text-[11px]">FA</span>
+
+            {/* Profile Dropdown Container */}
+            <div className="relative">
+              <div 
+                onClick={() => setIsProfileOpen(!isProfileOpen)}
+                className="w-8 h-8 rounded-full bg-gradient-to-tr from-primary-500 to-green-300 border border-white shadow-sm flex items-center justify-center cursor-pointer hover:shadow-md transition-shadow"
+              >
+                <span className="text-white font-bold text-[11px] leading-none relative top-[1px]">{userInitials}</span>
+              </div>
+
+              {/* Invisible Overlay to close dropdown when clicking outside */}
+              {isProfileOpen && (
+                <div className="fixed inset-0 z-40" onClick={() => setIsProfileOpen(false)}></div>
+              )}
+
+              {/* Dropdown Menu */}
+              <AnimatePresence>
+                {isProfileOpen && (
+                  <motion.div
+                    initial={{ opacity: 0, y: 10, scale: 0.95 }}
+                    animate={{ opacity: 1, y: 0, scale: 1 }}
+                    exit={{ opacity: 0, y: 10, scale: 0.95 }}
+                    transition={{ duration: 0.15 }}
+                    className="absolute right-0 top-12 w-48 bg-white rounded-xl shadow-lg border border-slate-200 py-2 z-50 overflow-hidden"
+                  >
+                    <div className="px-4 py-2 border-b border-slate-100 mb-1">
+                      <p className="text-[10px] text-slate-400 font-bold uppercase tracking-wider">Signed in as</p>
+                      <p className="text-[13px] font-bold text-slate-800 truncate">{userName || 'Farmer User'}</p>
+                    </div>
+                    
+                    <button 
+                      onClick={() => { setIsProfileOpen(false); navigate('/farmer-dashboard/profile'); }}
+                      className="w-full text-left px-4 py-2 text-[13px] font-bold text-slate-600 hover:bg-slate-50 hover:text-primary-600 flex items-center gap-2 transition-colors"
+                    >
+                      <span className="material-symbols-outlined text-[18px]">person</span>
+                      My Profile
+                    </button>
+                    
+                    <button 
+                      onClick={() => { setIsProfileOpen(false); /* Add Settings Route later */ }}
+                      className="w-full text-left px-4 py-2 text-[13px] font-bold text-slate-600 hover:bg-slate-50 hover:text-primary-600 flex items-center gap-2 transition-colors"
+                    >
+                      <span className="material-symbols-outlined text-[18px]">settings</span>
+                      Settings
+                    </button>
+                    
+                    <div className="h-[1px] bg-slate-100 my-1"></div>
+                    
+                    <button 
+                      onClick={() => {
+                        setIsProfileOpen(false);
+                        setIsLogoutModalOpen(true);
+                      }}
+                      className="w-full text-left px-4 py-2 text-[13px] font-bold text-red-500 hover:bg-red-50 flex items-center gap-2 transition-colors"
+                    >
+                      <span className="material-symbols-outlined text-[18px]">logout</span>
+                      Logout
+                    </button>
+                  </motion.div>
+                )}
+              </AnimatePresence>
             </div>
           </div>
         </header>
@@ -94,35 +185,50 @@ const DashboardLayout = () => {
         </div>
       </main>
 
-      {/* 3. Mobile Bottom Navigation (Hidden on Desktop) */}
-      <nav className="md:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-slate-200 px-4 py-1.5 pb-safe z-20 flex justify-between items-center shadow-[0_-4px_20px_rgba(0,0,0,0.05)]">
-        {navItems.map((item) => (
-          <NavLink
-            key={item.name}
-            to={item.path}
-            end={item.path === '/farmer-dashboard'}
-            className={({ isActive }) =>
-              `flex flex-col items-center justify-center w-12 h-12 rounded-xl transition-all duration-300 ${
-                isActive ? 'text-primary-600 transform -translate-y-0.5' : 'text-slate-400 hover:text-slate-600'
-              }`
-            }
-          >
-            {({ isActive }) => (
-              <>
-                <div className={`relative flex items-center justify-center w-8 h-8 rounded-lg transition-colors ${isActive ? 'bg-primary-50' : 'bg-transparent'}`}>
-                  <span className={`material-symbols-outlined text-[20px] transition-transform ${isActive ? 'icon-pop' : ''}`}>
-                    {item.icon}
+        {/* Mobile Bottom Navigation (Hidden on Desktop) */}
+        <nav className="md:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-slate-200 px-4 py-1.5 pb-safe z-20 flex justify-between items-center shadow-[0_-4px_20px_rgba(0,0,0,0.05)]">
+          {navItems.map((item) => (
+            <NavLink
+              key={item.name}
+              to={item.path}
+              end={item.path === '/farmer-dashboard'}
+              className={({ isActive }) =>
+                `flex flex-col items-center justify-center w-12 h-12 rounded-xl transition-all duration-300 ${
+                  isActive ? 'text-primary-600 transform -translate-y-0.5' : 'text-slate-400 hover:text-slate-600'
+                }`
+              }
+            >
+              {({ isActive }) => (
+                <>
+                  <div className={`relative flex items-center justify-center w-8 h-8 rounded-lg transition-colors ${isActive ? 'bg-primary-50' : 'bg-transparent'}`}>
+                    <span className={`material-symbols-outlined text-[20px] transition-transform ${isActive ? 'icon-pop' : ''}`}>
+                      {item.icon}
+                    </span>
+                  </div>
+                  <span className={`text-[8px] font-bold mt-0.5 leading-none ${isActive ? 'opacity-100' : 'opacity-0'} transition-opacity`}>
+                    {item.name}
                   </span>
-                </div>
-                <span className={`text-[8px] font-bold mt-0.5 leading-none ${isActive ? 'opacity-100' : 'opacity-0'} transition-opacity`}>
-                  {item.name}
-                </span>
-              </>
-            )}
-          </NavLink>
-        ))}
-      </nav>
-    </div>
+                </>
+              )}
+            </NavLink>
+          ))}
+        </nav>
+      </div>
+
+      {/* Logout Confirmation Modal */}
+      <ConfirmModal
+        isOpen={isLogoutModalOpen}
+        onClose={() => setIsLogoutModalOpen(false)}
+        onConfirm={handleLogout}
+        title="Log out of AgriConnect?"
+        description="You will need to login again to access your dashboard, crops, and earnings."
+        confirmText="Yes, Log Out"
+        cancelText="Cancel"
+        icon="logout"
+        isDanger={true}
+        isLoading={isLoggingOut}
+      />
+    </>
   );
 };
 
