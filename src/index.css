@@ -110,23 +110,28 @@
 
   /* Form Controls */
   .form-input {
-    @apply w-full border bg-white text-slate-900 transition-all outline-none shadow-sm;
+    @apply w-full border transition-all outline-none shadow-sm;
+    background-color: var(--color-surface);
+    color: var(--color-text-primary);
     height: var(--form-input-height);
     padding-left: var(--form-input-px);
     padding-right: var(--form-input-px);
     border-radius: var(--form-border-radius);
-    border-color: #cbd5e1;
+    border-color: var(--color-border);
     font-size: var(--form-text-size);
   }
   .form-input:focus {
-    @apply ring-2 ring-primary-500 border-primary-500 bg-white;
+    @apply ring-2 ring-primary-500 border-primary-500;
+    background-color: var(--color-surface);
   }
   .form-input::placeholder {
-    @apply text-slate-400 font-medium;
+    color: var(--color-text-secondary);
+    font-weight: 500;
   }
 
   .form-label {
-    @apply block text-[13px] font-bold text-slate-800 mb-1.5;
+    @apply block text-[13px] font-bold mb-1.5;
+    color: var(--color-text-primary);
   }
 
   /* Buttons */
@@ -143,12 +148,18 @@
   }
 
   .btn-secondary {
-    @apply w-full border border-gray-300 bg-white hover:bg-gray-50 text-gray-700 font-medium transition-all flex justify-center items-center gap-2 cursor-pointer;
+    @apply w-full border font-medium transition-all flex justify-center items-center gap-2 cursor-pointer;
+    background-color: var(--color-surface);
+    border-color: var(--color-border);
+    color: var(--color-text-primary);
     height: var(--form-input-height);
     padding-left: var(--form-input-px);
     padding-right: var(--form-input-px);
     border-radius: var(--form-border-radius);
     font-size: var(--form-text-size);
+  }
+  .btn-secondary:hover {
+    background-color: var(--color-bg-subtle);
   }
 
   /* =========================================

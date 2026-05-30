@@ -7,6 +7,7 @@ const Input = ({
   error, 
   className = '', 
   wrapperClassName = '',
+  labelClassName = '',
   type = 'text',
   ...props 
 }) => {
@@ -20,7 +21,7 @@ const Input = ({
   return (
     <div className={`mb-4 relative ${wrapperClassName}`}>
       {label && (
-        <label htmlFor={id} className="form-label">
+        <label htmlFor={id} className={`form-label ${labelClassName}`}>
           {label}
         </label>
       )}

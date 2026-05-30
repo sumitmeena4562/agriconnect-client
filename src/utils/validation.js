@@ -88,3 +88,33 @@ export const validateCrops = (crops) => {
     .min(3, 'Please list at least one valid crop');
   return getError(schema, crops);
 };
+
+export const validateCropName = (name) => {
+  const schema = z.string()
+    .min(1, 'Crop name is required')
+    .min(2, 'Crop name is too short')
+    .max(100, 'Crop name is too long');
+  return getError(schema, name);
+};
+
+export const validateQuantity = (quantity) => {
+  const num = parseFloat(quantity);
+  const schema = z.number({ required_error: 'Quantity is required', invalid_type_error: 'Must be a valid number' })
+    .positive('Quantity must be greater than 0');
+  return getError(schema, isNaN(num) ? undefined : num);
+};
+
+export const validatePrice = (price) => {
+  const num = parseFloat(price);
+  const schema = z.number({ required_error: 'Price is required', invalid_type_error: 'Must be a valid number' })
+    .nonnegative('Price cannot be negative');
+  return getError(schema, isNaN(num) ? undefined : num);
+};
+
+export const validateHarvestDate = (date) => {
+  if (!date) return 'Harvest date is required';
+  const schema = z.string().refine((val) => !isNaN(Date.parse(val)), {
+    message: 'Invalid harvest date format'
+  });
+  return getError(schema, date);
+};

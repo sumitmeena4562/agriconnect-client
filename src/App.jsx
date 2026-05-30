@@ -8,6 +8,8 @@ import Login from './pages/Auth/Login';
 import ForgotPassword from './pages/Auth/ForgotPassword';
 import DashboardLayout from './layouts/DashboardLayout';
 import FarmerDashboard from './pages/Farmer/Dashboard';
+import MyCrops from './pages/Farmer/MyCrops';
+import AddCrop from './pages/Farmer/AddCrop';
 import './App.css';
 
 function App() {
@@ -35,7 +37,8 @@ function App() {
         {/* Protected Dashboard Routes */}
         <Route path="/farmer-dashboard" element={<DashboardLayout />}>
           <Route index element={<FarmerDashboard />} />
-          <Route path="crops" element={<div className="p-4"><h1 className="text-xl font-bold">My Crops (Coming Soon)</h1></div>} />
+          <Route path="crops" element={<MyCrops />} />
+          <Route path="crops/new" element={<AddCrop />} />
           <Route path="orders" element={<div className="p-4"><h1 className="text-xl font-bold">Orders (Coming Soon)</h1></div>} />
           <Route path="profile" element={<div className="p-4"><h1 className="text-xl font-bold">Profile (Coming Soon)</h1></div>} />
         </Route>
