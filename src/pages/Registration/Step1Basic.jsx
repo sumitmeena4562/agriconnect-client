@@ -6,7 +6,7 @@ import OtpInput from '../../components/ui/OtpInput';
 import axios from 'axios';
 import { auth } from '../../config/firebase';
 import { GoogleAuthProvider, signInWithPopup } from 'firebase/auth';
-import { validateEmail, validatePhone, validateName, validatePassword, validateOtp } from '../../utils/validation';
+import { validateEmail, validatePhone, validateName, validatePassword, validateOtp, validateConfirmPassword } from '../../utils/validation';
 
 const Step1Basic = ({ data, updateData, currentStep, nextStep, prevStep, setStep }) => {
   const [otp, setOtp] = useState('');
@@ -31,6 +31,7 @@ const Step1Basic = ({ data, updateData, currentStep, nextStep, prevStep, setStep
     if (name === 'phone') errMsg = validatePhone(value);
     if (name === 'name') errMsg = validateName(value);
     if (name === 'password') errMsg = validatePassword(value);
+    if (name === 'confirmPassword') errMsg = validateConfirmPassword(data.password, value);
     
     setErrors((prev) => ({ ...prev, [name]: errMsg }));
     return errMsg === '';
@@ -51,6 +52,14 @@ const Step1Basic = ({ data, updateData, currentStep, nextStep, prevStep, setStep
       const result = await signInWithPopup(auth, provider);
       const user = result.user;
       
+      // Early Duplicate Check: Ensure email doesn't already exist
+      try {
+        await axios.post('/api/auth/check-user', { email: user.email });
+      } catch (checkError) {
+        toast.error(checkError.response?.data?.error || "This email is already registered.");
+        return; // Stop execution
+      }
+      
       updateData({
         name: user.displayName || '',
         email: user.email || '',
@@ -62,7 +71,10 @@ const Step1Basic = ({ data, updateData, currentStep, nextStep, prevStep, setStep
       setStep(3); // Go directly to Step 3 to collect Phone Number
     } catch (error) {
       console.error("Google Sign-In Error:", error);
-      toast.error("Google Sign-In failed. Please try again.");
+      // Only show error if it's not a user-cancelled popup
+      if (error.code !== 'auth/popup-closed-by-user') {
+        toast.error("Google Sign-In failed. Please try again.");
+      }
     }
   };
 
@@ -109,10 +121,17 @@ const Step1Basic = ({ data, updateData, currentStep, nextStep, prevStep, setStep
   const handleNext = (e) => {
     e.preventDefault();
     const isNameValid = validateField('name', data.name);
-    const isPasswordValid = data.authProvider === 'GOOGLE' ? true : validateField('password', data.password);
     const isPhoneValid = validateField('phone', data.phone || '');
     
-    if (isNameValid && isPasswordValid && isPhoneValid) {
+    let isPasswordValid = true;
+    let isConfirmPasswordValid = true;
+    
+    if (data.authProvider !== 'GOOGLE') {
+      isPasswordValid = validateField('password', data.password);
+      isConfirmPasswordValid = validateField('confirmPassword', data.confirmPassword);
+    }
+    
+    if (isNameValid && isPasswordValid && isConfirmPasswordValid && isPhoneValid) {
       nextStep();
     }
   };
@@ -288,17 +307,30 @@ const Step1Basic = ({ data, updateData, currentStep, nextStep, prevStep, setStep
           />
 
           {data.authProvider !== 'GOOGLE' && (
-            <Input 
-              label="Create Password" 
-              id="password" 
-              name="password"
-              type="password"
-              placeholder="Secure password (min 6 chars)" 
-              value={data.password || ''}
-              onChange={handleChange}
-              error={errors.password}
-              required
-            />
+            <>
+              <Input 
+                label="Create Password" 
+                id="password" 
+                name="password"
+                type="password"
+                placeholder="Secure password (min 6 chars)" 
+                value={data.password || ''}
+                onChange={handleChange}
+                error={errors.password}
+                required
+              />
+              <Input 
+                label="Confirm Password" 
+                id="confirmPassword" 
+                name="confirmPassword"
+                type="password"
+                placeholder="Re-enter your password" 
+                value={data.confirmPassword || ''}
+                onChange={handleChange}
+                error={errors.confirmPassword}
+                required
+              />
+            </>
           )}
 
           <div className="mt-8 flex gap-3">

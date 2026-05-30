@@ -47,6 +47,12 @@ export const validatePassword = (password) => {
   return getError(schema, password);
 };
 
+export const validateConfirmPassword = (password, confirmPassword) => {
+  if (!confirmPassword) return 'Please confirm your password';
+  if (password !== confirmPassword) return 'Passwords do not match';
+  return '';
+};
+
 export const validateOtp = (otp) => {
   const schema = z.string()
     .min(1, 'OTP is required')

@@ -16,6 +16,7 @@ const FarmerRegistration = () => {
     phone: '',
     email: '',
     password: '',
+    confirmPassword: '',
     name: '',
     authProvider: 'LOCAL',
     googleId: '',
