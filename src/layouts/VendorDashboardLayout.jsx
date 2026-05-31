@@ -78,7 +78,7 @@ const VendorDashboardLayout = () => {
         <aside className={`hidden md:flex flex-col bg-white border-r border-slate-200 fixed h-full z-20 shadow-sm transition-all duration-300 ease-in-out ${isSidebarCollapsed ? 'w-[80px]' : 'w-[220px]'}`}>
           <div className="h-14 px-4 border-b border-slate-200 flex items-center overflow-hidden">
             <div className={`transition-all duration-300 overflow-hidden whitespace-nowrap ${isSidebarCollapsed ? 'w-7' : 'w-[200px]'}`}>
-              <Logo size="sm" />
+              <Logo size="sm" color="#3B82F6" />
             </div>
           </div>
           
@@ -142,7 +142,7 @@ const VendorDashboardLayout = () => {
         {/* Top Header */}
         <header className="h-14 sticky top-0 z-10 bg-white/90 backdrop-blur-md border-b border-slate-200 px-4 sm:px-6 flex items-center justify-between">
           <div className="md:hidden">
-            <Logo size="sm" />
+            <Logo size="sm" color="#3B82F6" />
           </div>
           <div className="hidden md:block">
             <h2 className="text-[16px] font-black text-slate-800 leading-none pt-1">Procurement Portal</h2>

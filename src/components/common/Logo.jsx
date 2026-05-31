@@ -8,12 +8,14 @@ import { Link } from 'react-router-dom';
  * @param {'sm'|'md'|'lg'} props.size - Size variant
  * @param {string} props.className - Additional classes for the container
  * @param {function} props.onClick - Optional click handler (renders as button instead of Link)
+ * @param {string} props.color - Brand color override (default: '#00B464' green)
  */
 const Logo = ({
   variant = 'light',
   size = 'md',
   className = '',
-  onClick
+  onClick,
+  color = '#00B464'
 }) => {
   const isDark = variant === 'dark';
 
@@ -34,11 +36,11 @@ const Logo = ({
 
   const content = (
     <div className={`flex items-center gap-2 group ${className}`}>
-      <div className={`${currentIcon.box} bg-[#00B464] ${currentIcon.border} flex items-center justify-center shadow-sm transition-transform duration-300 group-hover:scale-105 shrink-0`}>
+      <div className={`${currentIcon.box} ${currentIcon.border} flex items-center justify-center shadow-sm transition-transform duration-300 group-hover:scale-105 shrink-0`} style={{ backgroundColor: color }}>
         <span className={`material-symbols-outlined text-white leading-none ${currentIcon.icon}`}>eco</span>
       </div>
       <span className={`${currentText} tracking-tight font-heading leading-none relative top-[1px] ${isDark ? 'text-white' : 'text-slate-800'}`}>
-        Agri<span className="text-[#00B464]">Connect</span>
+        Agri<span style={{ color: color }}>Connect</span>
       </span>
     </div>
   );

@@ -27,8 +27,8 @@ const CropCard = ({
           </div>
         )}
         
-        {/* Status Toggle on Top Left of Image */}
-        {actionType === 'farmer' && (
+        {/* Status Badge on Top Left of Image */}
+        {actionType === 'farmer' ? (
           <button
              onClick={(e) => { 
                e.preventDefault(); 
@@ -45,6 +45,17 @@ const CropCard = ({
              <div className={`w-2 h-2 rounded-full shadow-sm ${crop.status === 'Available' ? 'bg-green-500' : 'bg-red-500'}`}></div>
              {crop.status === 'Available' ? 'Available' : 'Sold Out'}
           </button>
+        ) : (
+          <span
+             className={`absolute top-2 left-2 z-10 px-2.5 py-1 rounded-full text-[10px] font-bold shadow-md backdrop-blur-md border flex items-center gap-1.5 ${
+               crop.status === 'Available' 
+                ? 'bg-white/95 text-green-700 border-green-200' 
+                : 'bg-white/95 text-red-700 border-red-200'
+             }`}
+          >
+             <div className={`w-2 h-2 rounded-full shadow-sm ${crop.status === 'Available' ? 'bg-green-500' : 'bg-red-500'}`}></div>
+             {crop.status === 'Available' ? 'Available' : 'Sold Out'}
+          </span>
         )}
 
         {/* Top Right Action (Delete) */}
@@ -173,12 +184,12 @@ const CropCard = ({
                 onClick={(e) => {
                   e.preventDefault();
                   e.stopPropagation();
-                  // Add to cart logic
+                  // No specific logic here yet, it will just let the Link handle the click if we want, or we can use it later.
                 }}
-                title="Add to Cart"
-                className="btn-icon w-7 h-7 sm:w-8 sm:h-8 bg-primary-600 text-white hover:bg-primary-700 shrink-0 flex items-center justify-center"
+                title="View & Request"
+                className="btn-icon w-7 h-7 sm:w-8 sm:h-8 bg-primary-600 text-white hover:bg-primary-700 shrink-0 flex items-center justify-center pointer-events-none"
               >
-                <span className="material-symbols-outlined text-[16px] sm:text-[18px]">add_shopping_cart</span>
+                <span className="material-symbols-outlined text-[16px] sm:text-[18px]">arrow_forward</span>
               </button>
             )}
           </div>
