@@ -6,11 +6,14 @@ const CropCard = ({
   onEdit, 
   onDelete, 
   onToggleStatus,
-  actionType = 'farmer' // 'farmer' (shows edit/delete) or 'buyer' (shows add to cart)
+  actionType = 'farmer', // 'farmer' (shows edit/delete) or 'buyer' (shows add to cart)
+  linkTo
 }) => {
+  const destinationUrl = linkTo || `/farmer-dashboard/crops/${crop._id}`;
+
   return (
     <Link 
-      to={`/farmer-dashboard/crops/${crop._id}`}
+      to={destinationUrl}
       className="bg-white rounded-[16px] overflow-hidden flex flex-col shadow-sm border border-[var(--color-border)] relative group transition-transform duration-300 hover:-translate-y-1 hover:shadow-md cursor-pointer h-full"
     >
       
