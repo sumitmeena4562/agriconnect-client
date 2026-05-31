@@ -60,6 +60,23 @@ const MyCrops = () => {
     navigate(`/farmer-dashboard/crops/edit/${cropId}`);
   };
 
+  const handleToggleStatus = async (cropId) => {
+    try {
+      const token = localStorage.getItem('token') || sessionStorage.getItem('token');
+      const res = await axios.patch(`/api/crops/${cropId}/status`, {}, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      toast.success(res.data.message);
+      
+      // Update UI optimistically
+      setCrops(prev => prev.map(crop => 
+        crop._id === cropId ? { ...crop, status: res.data.data.status } : crop
+      ));
+    } catch (error) {
+      toast.error(error.response?.data?.error || 'Failed to update status');
+    }
+  };
+
   const handleDelete = (cropId) => {
     setDeleteModal({ isOpen: true, cropId, isLoading: false });
   };
@@ -208,6 +225,7 @@ const MyCrops = () => {
                 crop={crop} 
                 onEdit={handleEdit}
                 onDelete={handleDelete}
+                onToggleStatus={handleToggleStatus}
                 actionType="farmer"
               />
             ))}
