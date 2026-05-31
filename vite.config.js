@@ -9,8 +9,16 @@ export default defineConfig({
   ],
   server: {
     allowedHosts: true,
+    hmr: {
+      clientPort: 443,
+    },
     proxy: {
       '/api': {
+        target: 'http://127.0.0.1:5000',
+        changeOrigin: true,
+        secure: false,
+      },
+      '/uploads': {
         target: 'http://127.0.0.1:5000',
         changeOrigin: true,
         secure: false,
@@ -19,4 +27,4 @@ export default defineConfig({
   },
 })
 
-// Force Vite restart
+// Force Vite restart - trigger HMR cache clear

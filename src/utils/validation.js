@@ -118,3 +118,17 @@ export const validateHarvestDate = (date) => {
   });
   return getError(schema, date);
 };
+
+export const validateCropLocation = (value, fieldName) => {
+  const schema = z.string()
+    .min(1, `${fieldName} is required`)
+    .min(3, 'Must be at least 3 characters');
+  return getError(schema, value);
+};
+
+export const validateMinOrderQuantity = (quantity) => {
+  const num = parseFloat(quantity);
+  const schema = z.number({ required_error: 'MOQ is required', invalid_type_error: 'Must be a valid number' })
+    .positive('MOQ must be greater than 0');
+  return getError(schema, isNaN(num) ? undefined : num);
+};
