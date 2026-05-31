@@ -50,6 +50,8 @@ const FarmerRegistration = () => {
       // Save auth data to localStorage
       localStorage.setItem('agriconnect_token', token);
       localStorage.setItem('agriconnect_user', JSON.stringify(user));
+      localStorage.setItem('token', token);
+      localStorage.setItem('user', JSON.stringify(user));
 
       toast.success("Welcome " + user.name + "!", { id: toastId });
       

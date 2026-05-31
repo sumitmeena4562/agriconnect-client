@@ -115,9 +115,13 @@ const Login = () => {
     if (rememberMe) {
         localStorage.setItem('token', token);
         localStorage.setItem('user', JSON.stringify(user));
+        localStorage.setItem('agriconnect_token', token);
+        localStorage.setItem('agriconnect_user', JSON.stringify(user));
     } else {
         sessionStorage.setItem('token', token);
         sessionStorage.setItem('user', JSON.stringify(user));
+        sessionStorage.setItem('agriconnect_token', token);
+        sessionStorage.setItem('agriconnect_user', JSON.stringify(user));
     }
     toast.success(`${t.welcome}, ${user.name}! 🌾`);
     if (user.role === 'FARMER') navigate('/farmer-dashboard');
