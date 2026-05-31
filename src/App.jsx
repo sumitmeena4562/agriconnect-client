@@ -4,6 +4,7 @@ import ScrollToTop from './components/common/ScrollToTop';
 import ThemePreview from './pages/ThemePreview';
 import LandingPage from './pages/LandingPage';
 import FarmerRegistration from './pages/Registration/FarmerRegistration';
+import VendorRegistration from './pages/Registration/VendorRegistration';
 import Login from './pages/Auth/Login';
 import ForgotPassword from './pages/Auth/ForgotPassword';
 import DashboardLayout from './layouts/DashboardLayout';
@@ -35,6 +36,7 @@ function App() {
         <Route path="/login" element={<Login />} />
         <Route path="/forgot-password" element={<ForgotPassword />} />
         <Route path="/farmer-registration" element={<FarmerRegistration />} />
+        <Route path="/vendor-registration" element={<VendorRegistration />} />
         
         {/* Protected Dashboard Routes */}
         <Route path="/farmer-dashboard" element={<DashboardLayout />}>

@@ -165,7 +165,7 @@ const Step1Basic = ({ data, updateData, currentStep, nextStep, prevStep, setStep
         <form onSubmit={handleGetOTP} className="animate-in fade-in slide-in-from-bottom-2 duration-300">
           
           {data.authProvider === 'GOOGLE' && (
-            <div className="mb-6 p-3 rounded-lg bg-green-50 border border-green-200 flex items-center gap-3">
+            <div className="mb-6 p-3 rounded-lg bg-primary-50 border border-primary-200 flex items-center gap-3">
               <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" alt="Google" className="w-6 h-6" />
               <div className="flex-1">
                 <p className="text-[12px] font-bold text-slate-800">Linked: {data.email}</p>
@@ -216,7 +216,7 @@ const Step1Basic = ({ data, updateData, currentStep, nextStep, prevStep, setStep
       {/* State 2: Verify OTP */}
       {currentStep === 2 && (
         <form onSubmit={handleVerifyOTP} className="animate-in fade-in slide-in-from-bottom-2 duration-300">
-          <div className="mb-8 p-3 px-4 rounded-[var(--form-border-radius)] bg-green-50 border border-green-100 flex items-center justify-between">
+          <div className="mb-8 p-3 px-4 rounded-[var(--form-border-radius)] bg-primary-50 border border-primary-100 flex items-center justify-between">
             <div className="flex flex-col">
               <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-0.5">Sending OTP to</p>
               <p className="text-[15px] font-black text-slate-800 leading-none truncate max-w-[200px]">{data.email}</p>
@@ -272,8 +272,8 @@ const Step1Basic = ({ data, updateData, currentStep, nextStep, prevStep, setStep
       {/* State 3: Enter Name and Phone */}
       {currentStep === 3 && (
         <form onSubmit={handleNext} className="animate-in fade-in slide-in-from-bottom-2 duration-300">
-          <div className="mb-6 p-4 rounded-[var(--form-border-radius)] bg-green-50 border border-green-100 flex items-center gap-3">
-            <div className="w-8 h-8 rounded-full bg-[#00B464] flex items-center justify-center text-white shrink-0">
+          <div className="mb-6 p-4 rounded-[var(--form-border-radius)] bg-primary-50 border border-primary-100 flex items-center gap-3">
+            <div className="w-8 h-8 rounded-full bg-primary-500 flex items-center justify-center text-white shrink-0">
               <span className="material-symbols-outlined text-[18px]">verified</span>
             </div>
             <div className="overflow-hidden">

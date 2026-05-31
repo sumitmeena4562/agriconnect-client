@@ -37,7 +37,7 @@ const Input = ({
             type="button"
             onClick={togglePassword}
             onMouseDown={(e) => e.preventDefault()} // Prevents the input from losing focus when clicking the eye
-            className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-[#00B464] focus:outline-none transition-colors duration-200 flex items-center justify-center p-1.5 rounded-lg hover:bg-green-50"
+            className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-primary-600 focus:outline-none transition-colors duration-200 flex items-center justify-center p-1.5 rounded-lg hover:bg-primary-50"
           >
             {showPassword ? (
               <EyeOff size={18} strokeWidth={2.5} />

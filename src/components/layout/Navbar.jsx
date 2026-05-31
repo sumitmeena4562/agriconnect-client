@@ -87,7 +87,7 @@ const Header = () => {
     <>
       <header className={`sticky top-0 left-0 right-0 z-[100] transition-all duration-300 ${scrolled
         ? 'py-2 bg-white/80 backdrop-blur-xl border-b border-gray-100 shadow-sm'
-        : 'py-3 bg-white border-b-2 border-green-50'
+        : 'py-3 bg-white border-b-2 border-primary-50'
         }`}>
         <div className="max-w-8xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col gap-2.5">
           
@@ -117,7 +117,7 @@ const Header = () => {
                       {categories.map((cat, i) => (
                         <button key={i} className="w-full text-left px-5 py-2.5 hover:bg-slate-50 transition-all group border-l-4 border-transparent hover:border-[#00B464]">
                           <div className="flex items-center gap-4">
-                            <div className="w-10 h-10 rounded-xl bg-slate-50 flex items-center justify-center group-hover:bg-[#00B464] transition-all">
+                            <div className="w-10 h-10 rounded-xl bg-slate-50 flex items-center justify-center group-hover:bg-primary-600 transition-all">
                               <span className="material-symbols-outlined text-[#00B464] text-[20px] group-hover:text-white">{cat.icon}</span>
                             </div>
                             <div>
@@ -153,7 +153,7 @@ const Header = () => {
                       >
                         {mandis.map((m) => (
                           <button key={m} onClick={() => handleLocationSelect(m)}
-                            className="w-full text-left px-4 py-2.5 hover:bg-green-50 text-[12px] font-bold flex items-center justify-between group/item"
+                            className="w-full text-left px-4 py-2.5 hover:bg-primary-50 text-[12px] font-bold flex items-center justify-between group/item"
                           >
                             <span className={location === m ? 'text-[#00B464]' : 'text-slate-600'}>{m}</span>
                             {location === m && <span className="material-symbols-outlined text-[#00B464] text-[15px]">check_circle</span>}
@@ -188,7 +188,7 @@ const Header = () => {
                   >
                     <span>{link.label}</span>
                     {activeSection === link.id && (
-                      <motion.span layoutId="activeNav" className="absolute bottom-0 left-0 right-0 h-[3px] bg-[#00B464] rounded-full" />
+                      <motion.span layoutId="activeNav" className="absolute bottom-0 left-0 right-0 h-[3px] bg-primary-600 rounded-full" />
                     )}
                   </button>
                 ))}
@@ -197,7 +197,7 @@ const Header = () => {
               <div className="flex items-center gap-1.5 lg:gap-2">
                 <div className="flex items-center bg-gray-100 border border-gray-200 rounded-[12px] p-0.5">
                     {['EN', 'हिं'].map((l) => (
-                        <button key={l} onClick={() => setLang(l)} className={`px-2.5 lg:px-3 py-1.5 rounded-[10px] text-[11px] font-black transition-all ${lang === l ? 'bg-[#00B464] text-white' : 'text-slate-400 hover:text-slate-800'}`}>
+                        <button key={l} onClick={() => setLang(l)} className={`px-2.5 lg:px-3 py-1.5 rounded-[10px] text-[11px] font-black transition-all ${lang === l ? 'bg-primary-600 text-white' : 'text-slate-400 hover:text-slate-800'}`}>
                             {l === 'हिं' ? 'हिन्दी' : 'EN'}
                         </button>
                     ))}
@@ -210,7 +210,7 @@ const Header = () => {
 
               <div className="hidden sm:flex items-center gap-1.5 lg:gap-2">
                 <Link to="/login" className="px-3 lg:px-4 py-2.5 text-[13px] font-bold text-slate-700 hover:bg-white rounded-xl transition-all">Log in</Link>
-                <button onClick={() => setIsJoinModalOpen(true)} className="px-5 py-2.5 text-[14px] font-black text-white bg-[#00B464] rounded-xl shadow-lg shadow-green-200/40 hover:scale-[1.02] active:scale-[0.98] transition-all whitespace-nowrap">Join Free</button>
+                <button onClick={() => setIsJoinModalOpen(true)} className="px-5 py-2.5 text-[14px] font-black text-white bg-primary-600 rounded-xl shadow-lg shadow-primary-200/40 hover:scale-[1.02] active:scale-[0.98] transition-all whitespace-nowrap">Join Free</button>
               </div>
 
               <button onClick={() => setIsMenuOpen(true)} className="md:hidden w-10 h-10 flex items-center justify-center rounded-xl bg-slate-900 text-white shadow-xl">
@@ -270,7 +270,7 @@ const Header = () => {
                   <div className="flex items-center gap-2">
                     <div className="flex items-center bg-white/10 p-0.5 rounded-lg">
                       {['EN', 'हिं'].map((l) => (
-                          <button key={l} onClick={() => setLang(l)} className={`px-2 py-1 rounded-md text-[10px] font-black transition-all ${lang === l ? 'bg-[#00B464] text-white shadow-sm' : 'text-white/50 hover:text-white/80'}`}>
+                          <button key={l} onClick={() => setLang(l)} className={`px-2 py-1 rounded-md text-[10px] font-black transition-all ${lang === l ? 'bg-primary-600 text-white shadow-sm' : 'text-white/50 hover:text-white/80'}`}>
                               {l === 'हिं' ? 'HI' : 'EN'}
                           </button>
                       ))}

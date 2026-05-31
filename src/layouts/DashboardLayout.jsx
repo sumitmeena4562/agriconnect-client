@@ -15,8 +15,16 @@ const DashboardLayout = () => {
   const [userName, setUserName] = useState('');
 
   useEffect(() => {
+    const token = localStorage.getItem('agriconnect_token') || sessionStorage.getItem('agriconnect_token') || localStorage.getItem('token');
+    
+    // If no token exists, redirect to landing page and replace history
+    if (!token) {
+      navigate('/', { replace: true });
+      return;
+    }
+
     // Get user from storage and set initials
-    const user = JSON.parse(localStorage.getItem('user') || sessionStorage.getItem('user') || '{}');
+    const user = JSON.parse(localStorage.getItem('user') || sessionStorage.getItem('user') || localStorage.getItem('agriconnect_user') || '{}');
     if (user.name) {
       setUserName(user.name);
       const parts = user.name.split(' ');
@@ -26,7 +34,7 @@ const DashboardLayout = () => {
         setUserInitials(user.name.substring(0, 2).toUpperCase());
       }
     }
-  }, []);
+  }, [navigate]);
 
   const navItems = [
     { name: 'Home', path: '/farmer-dashboard', icon: 'home' },
@@ -42,13 +50,17 @@ const DashboardLayout = () => {
     setTimeout(() => {
       localStorage.removeItem('token');
       localStorage.removeItem('user');
+      localStorage.removeItem('agriconnect_token');
+      localStorage.removeItem('agriconnect_user');
       sessionStorage.removeItem('token');
       sessionStorage.removeItem('user');
       
       setIsLoggingOut(false);
       setIsLogoutModalOpen(false);
       toast.success('Logged out successfully');
-      navigate('/login', { replace: true });
+      
+      // Navigate to Landing Page and replace history
+      navigate('/', { replace: true });
     }, 800); // 800ms delay
   };
 
