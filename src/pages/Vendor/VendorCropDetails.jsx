@@ -15,6 +15,8 @@ const VendorCropDetails = () => {
   const [isOrderModalOpen, setIsOrderModalOpen] = useState(false);
   const [orderQuantity, setOrderQuantity] = useState('');
   const [orderMessage, setOrderMessage] = useState('');
+  const [pickupDate, setPickupDate] = useState('');
+  const [vehicleNumber, setVehicleNumber] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   useEffect(() => {
@@ -58,7 +60,9 @@ const VendorCropDetails = () => {
             cropId: crop._id,
             requestedQuantity: Number(orderQuantity),
             offeredPrice: crop.price, // We can add negotiation later
-            message: orderMessage
+            message: orderMessage,
+            pickupDate: pickupDate || undefined,
+            vehicleNumber: vehicleNumber || undefined
         }, {
             headers: { Authorization: `Bearer ${getToken()}` }
         });
@@ -67,6 +71,8 @@ const VendorCropDetails = () => {
         setIsOrderModalOpen(false);
         setOrderQuantity('');
         setOrderMessage('');
+        setPickupDate('');
+        setVehicleNumber('');
     } catch (error) {
         toast.error(error.response?.data?.error || 'Failed to send request', { id: toastId });
     } finally {
@@ -83,6 +89,24 @@ const VendorCropDetails = () => {
   }
 
   if (!crop) return null;
+
+  const getQuantityError = () => {
+    if (!orderQuantity) return '';
+    const qty = Number(orderQuantity);
+    const minQty = crop.minOrderQuantity || 1;
+    const maxQty = crop.quantity;
+    
+    if (isNaN(qty)) return 'Please enter a valid number';
+    if (qty < minQty) {
+      return `Minimum order is ${minQty} ${crop.unit}`;
+    }
+    if (qty > maxQty) {
+      return `Only ${maxQty} ${crop.unit} available`;
+    }
+    return '';
+  };
+  
+  const quantityError = getQuantityError();
 
   return (
     <div className="space-y-3">
@@ -294,12 +318,45 @@ const VendorCropDetails = () => {
                     onChange={(e) => setOrderQuantity(e.target.value)}
                     placeholder={`e.g. ${crop.minOrderQuantity || 1}`}
                     required
-                    min={crop.minOrderQuantity || 1}
-                    max={crop.quantity}
+                    className={`form-input w-full !h-[36px] !text-[12px] ${quantityError ? 'border-red-500! focus:border-red-500! focus:ring-red-500!' : ''}`}
+                  />
+                  {quantityError && (
+                    <p className="text-red-500 text-[10px] font-bold mt-1 ml-0.5 flex items-center gap-1 select-none">
+                      <span className="material-symbols-outlined text-[13px] font-bold">error</span>
+                      <span>{quantityError}</span>
+                    </p>
+                  )}
+                </div>
+                
+                <div>
+                  <label className="block text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1 ml-0.5">
+                    Pickup Date (Optional)
+                  </label>
+                  <input 
+                    type="date"
+                    value={pickupDate}
+                    onChange={(e) => setPickupDate(e.target.value)}
+                    min={(() => {
+                      const d = new Date();
+                      return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+                    })()}
                     className="form-input w-full !h-[36px] !text-[12px]"
                   />
                 </div>
                 
+                <div>
+                  <label className="block text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1 ml-0.5">
+                    Vehicle Number (Optional)
+                  </label>
+                  <input 
+                    type="text"
+                    value={vehicleNumber}
+                    onChange={(e) => setVehicleNumber(e.target.value)}
+                    placeholder="e.g. MH-12-AB-3456"
+                    className="form-input w-full !h-[36px] !text-[12px]"
+                  />
+                </div>
+
                 <div>
                   <label className="block text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1 ml-0.5">
                     Message to Farmer (Optional)
@@ -321,10 +378,10 @@ const VendorCropDetails = () => {
                 >
                   Cancel
                 </button>
-                <button 
+                 <button 
                   type="submit"
-                  disabled={isSubmitting}
-                  className="flex-1 py-2.5 rounded-lg text-[13px] font-bold text-white bg-primary-600 hover:bg-primary-700 shadow-sm shadow-primary-500/20 transition-all disabled:opacity-70 disabled:cursor-wait flex items-center justify-center gap-1.5"
+                  disabled={isSubmitting || !!quantityError || !orderQuantity}
+                  className="flex-1 py-2.5 rounded-lg text-[13px] font-bold text-white bg-primary-600 hover:bg-primary-700 shadow-sm shadow-primary-500/20 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-1.5"
                 >
                   {isSubmitting ? (
                     <>
