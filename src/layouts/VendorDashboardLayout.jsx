@@ -150,7 +150,7 @@ const VendorDashboardLayout = () => {
         </aside>
 
         {/* 2. Main Content Area */}
-        <main className={`flex-1 transition-all duration-300 ease-in-out ${isSidebarCollapsed ? 'md:ml-[80px]' : 'md:ml-[220px]'} pb-[70px] md:pb-0 min-h-screen relative flex flex-col`}>
+        <main className={`flex-1 min-w-0 transition-all duration-300 ease-in-out ${isSidebarCollapsed ? 'md:ml-[80px]' : 'md:ml-[220px]'} pb-[70px] md:pb-0 min-h-screen relative flex flex-col`}>
         {/* Top Header */}
         <header className="h-14 sticky top-0 z-10 bg-white/90 backdrop-blur-md border-b border-slate-200 px-4 sm:px-6 flex items-center justify-between">
           <div className="md:hidden">
