@@ -2,8 +2,6 @@ import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import toast from 'react-hot-toast';
-import Button from '../../components/ui/Button';
-import Input from '../../components/ui/Input';
 
 const VendorCropDetails = () => {
   const { id } = useParams();
@@ -233,15 +231,14 @@ const VendorCropDetails = () => {
                     </div>
                  </div>
 
-                 <Button 
-                   variant="primary" 
-                   className="w-full sm:w-auto shadow-lg shadow-primary-500/30 whitespace-nowrap"
+                 <button 
+                   className="w-full sm:w-auto px-5 py-2.5 rounded-lg text-[13px] font-bold text-white bg-primary-600 hover:bg-primary-700 shadow-lg shadow-primary-500/30 transition-all whitespace-nowrap disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-1.5"
                    onClick={() => setIsOrderModalOpen(true)}
                    disabled={crop.status !== 'Available'}
                  >
                    <span className="material-symbols-outlined text-[16px]">send</span>
                    Send Order
-                 </Button>
+                 </button>
                </div>
             </div>
 
@@ -251,39 +248,40 @@ const VendorCropDetails = () => {
 
       {/* Order Request Modal */}
       {isOrderModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center px-4 bg-slate-900/40 backdrop-blur-sm">
-          <div className="bg-white rounded-2xl shadow-xl w-full max-w-md overflow-hidden animate-fade-in-up">
-            <div className="p-4 border-b border-slate-100 flex justify-between items-center bg-slate-50">
-              <h3 className="font-black text-slate-800 flex items-center gap-2">
-                <span className="material-symbols-outlined text-primary-600">shopping_cart</span>
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4" onClick={() => setIsOrderModalOpen(false)}>
+          <div className="absolute inset-0 bg-slate-900/40 backdrop-blur-sm"></div>
+          <div className="relative w-full max-w-sm bg-white rounded-2xl shadow-xl overflow-hidden" onClick={(e) => e.stopPropagation()}>
+            <div className="p-3 border-b border-[var(--color-border)] flex justify-between items-center">
+              <h3 className="text-[14px] font-black text-[var(--color-text-primary)] flex items-center gap-1.5">
+                <span className="material-symbols-outlined text-[18px] text-primary-600">shopping_cart</span>
                 Request Order
               </h3>
               <button 
                 onClick={() => setIsOrderModalOpen(false)}
-                className="text-slate-400 hover:text-slate-600 transition-colors"
+                className="w-7 h-7 flex items-center justify-center rounded-full hover:bg-slate-100 text-slate-400 hover:text-slate-600 transition-colors"
               >
-                <span className="material-symbols-outlined">close</span>
+                <span className="material-symbols-outlined text-[18px]">close</span>
               </button>
             </div>
             
-            <form onSubmit={handleOrderRequest} className="p-5">
-              <div className="mb-4 p-3 bg-primary-50 rounded-xl border border-primary-100 flex justify-between items-center">
+            <form onSubmit={handleOrderRequest} className="p-4">
+              <div className="mb-3 p-2.5 bg-primary-50 rounded-lg border border-primary-100 flex justify-between items-center">
                  <div>
-                    <p className="text-[11px] font-bold text-primary-600 uppercase">Total Available</p>
-                    <p className="text-lg font-black text-primary-800">{crop.quantity} {crop.unit}</p>
+                    <p className="text-[9px] font-bold text-primary-600 uppercase">Available</p>
+                    <p className="text-[14px] font-black text-primary-800">{crop.quantity} {crop.unit}</p>
                  </div>
                  <div className="text-right">
-                    <p className="text-[11px] font-bold text-primary-600 uppercase">Min Order</p>
-                    <p className="text-lg font-black text-primary-800">{crop.minOrderQuantity || 1} {crop.unit}</p>
+                    <p className="text-[9px] font-bold text-primary-600 uppercase">Min Order</p>
+                    <p className="text-[14px] font-black text-primary-800">{crop.minOrderQuantity || 1} {crop.unit}</p>
                  </div>
               </div>
 
-              <div className="space-y-4">
+              <div className="space-y-3">
                 <div>
-                  <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1.5 ml-1">
+                  <label className="block text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1 ml-0.5">
                     I want to buy (in {crop.unit})
                   </label>
-                  <Input 
+                  <input 
                     type="number"
                     value={orderQuantity}
                     onChange={(e) => setOrderQuantity(e.target.value)}
@@ -291,37 +289,46 @@ const VendorCropDetails = () => {
                     required
                     min={crop.minOrderQuantity || 1}
                     max={crop.quantity}
+                    className="form-input w-full !h-[36px] !text-[12px]"
                   />
                 </div>
                 
                 <div>
-                  <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1.5 ml-1">
+                  <label className="block text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1 ml-0.5">
                     Message to Farmer (Optional)
                   </label>
                   <textarea
                     value={orderMessage}
                     onChange={(e) => setOrderMessage(e.target.value)}
-                    placeholder="E.g., I can pick this up tomorrow if the quality is good."
-                    className="w-full bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[var(--form-border-radius)] p-3 text-[var(--form-text-size)] focus:outline-none focus:border-primary-500 focus:ring-1 focus:ring-primary-500 transition-all resize-none h-24"
+                    placeholder="E.g., I can pick this up tomorrow."
+                    className="form-input w-full !text-[12px] resize-none h-16"
                   ></textarea>
                 </div>
               </div>
 
-              <div className="mt-6 flex gap-3">
-                <Button 
+              <div className="mt-4 flex gap-3">
+                <button 
                   type="button" 
-                  variant="secondary" 
                   onClick={() => setIsOrderModalOpen(false)}
+                  className="flex-1 py-2.5 rounded-lg text-[13px] font-bold text-slate-600 bg-slate-100 hover:bg-slate-200 transition-colors"
                 >
                   Cancel
-                </Button>
-                <Button 
-                  type="submit" 
-                  variant="primary"
+                </button>
+                <button 
+                  type="submit"
                   disabled={isSubmitting}
+                  className="flex-1 py-2.5 rounded-lg text-[13px] font-bold text-white bg-primary-600 hover:bg-primary-700 shadow-sm shadow-primary-500/20 transition-all disabled:opacity-70 disabled:cursor-wait flex items-center justify-center gap-1.5"
                 >
-                  {isSubmitting ? 'Sending...' : 'Confirm Request'}
-                </Button>
+                  {isSubmitting ? (
+                    <>
+                      <svg className="animate-spin h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                      </svg>
+                      Sending...
+                    </>
+                  ) : 'Confirm Request'}
+                </button>
               </div>
             </form>
           </div>

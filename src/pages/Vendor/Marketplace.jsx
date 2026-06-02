@@ -16,14 +16,18 @@ const Marketplace = () => {
   // Filters
   const [keyword, setKeyword] = useState('');
   const [category, setCategory] = useState('All');
+  const [sort, setSort] = useState('newest');
   const [useMyLocation, setUseMyLocation] = useState(false); // Default OFF
+  const [page, setPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+  const [totalCrops, setTotalCrops] = useState(0);
 
   const categories = ['All', 'Vegetables', 'Fruits', 'Grains', 'Pulses', 'Spices', 'Others'];
 
   const fetchMarketplaceCrops = useCallback(async () => {
     setIsLoading(true);
     try {
-      let url = `/api/crops/marketplace?category=${category}&keyword=${keyword}`;
+      let url = `/api/crops/marketplace?category=${category}&keyword=${keyword}&sort=${sort}&page=${page}&limit=10`;
       
       // Apply location filter if toggle is on and vendor has a state
       if (useMyLocation && vendorProfile?.state) {
@@ -36,13 +40,15 @@ const Marketplace = () => {
         }
       });
       setCrops(res.data.data);
+      setTotalPages(res.data.totalPages);
+      setTotalCrops(res.data.total);
     } catch (error) {
       console.error("Error fetching marketplace:", error);
       toast.error('Failed to load marketplace crops');
     } finally {
       setIsLoading(false);
     }
-  }, [category, keyword, useMyLocation, vendorProfile]);
+  }, [category, keyword, sort, page, useMyLocation, vendorProfile]);
 
   useEffect(() => {
     // Only fetch if vendorProfile is loaded (or we know it doesn't exist)
@@ -51,7 +57,7 @@ const Marketplace = () => {
       // Debounce the fetch slightly if keyword changes
       const timeoutId = setTimeout(() => {
         fetchMarketplaceCrops();
-      }, 500);
+      }, 300);
       return () => clearTimeout(timeoutId);
     }
   }, [fetchMarketplaceCrops, vendorProfile]);
@@ -62,13 +68,13 @@ const Marketplace = () => {
       <div className="flex justify-between items-end">
         <div>
           <h1 className="text-[18px] sm:text-[20px] font-black text-[var(--color-text-primary)] tracking-tight leading-none mb-0.5">Marketplace</h1>
-          <p className="text-[10px] sm:text-[11px] text-[var(--color-text-secondary)] font-medium">Discover and procure fresh produce directly from farmers.</p>
+          <p className="text-[10px] sm:text-[11px] text-[var(--color-text-secondary)] font-medium">Discover and procure fresh produce directly from farmers. ({totalCrops} available)</p>
         </div>
       </div>
 
       {/* Advanced Filters Section */}
       <div className="global-card !p-3">
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
           {/* Search */}
           <div className="relative">
             <span className="material-symbols-outlined absolute left-2.5 top-1/2 -translate-y-1/2 text-[18px] text-gray-400">search</span>
@@ -114,6 +120,21 @@ const Marketplace = () => {
               <div className="w-7 h-3.5 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-2.5 after:w-2.5 after:transition-all peer-checked:bg-primary-500"></div>
             </label>
           </div>
+
+          {/* Sort */}
+          <div className="relative">
+            <span className="material-symbols-outlined absolute left-2.5 top-1/2 -translate-y-1/2 text-[18px] text-gray-400">sort</span>
+            <select 
+              value={sort}
+              onChange={(e) => { setSort(e.target.value); setPage(1); }}
+              className="form-input w-full pl-9 !h-[36px] !text-[12px] bg-[var(--color-bg-body)] appearance-none"
+            >
+              <option value="newest">Newest First</option>
+              <option value="oldest">Oldest First</option>
+              <option value="price_asc">Price: Low to High</option>
+              <option value="price_desc">Price: High to Low</option>
+            </select>
+          </div>
         </div>
       </div>
 
@@ -144,16 +165,43 @@ const Marketplace = () => {
           )}
         </div>
       ) : (
-        <div className="grid grid-cols-1 min-[380px]:grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3 sm:gap-4">
-          {crops.map((crop) => (
-            <CropCard 
-              key={crop._id} 
-              crop={crop} 
-              actionType="buyer" 
-              linkTo={`/vendor-dashboard/crops/${crop._id}`}
-            />
-          ))}
-        </div>
+        <>
+          <div className="grid grid-cols-1 min-[380px]:grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3 sm:gap-4">
+            {crops.map((crop) => (
+              <CropCard 
+                key={crop._id} 
+                crop={crop} 
+                actionType="buyer" 
+                linkTo={`/vendor-dashboard/crops/${crop._id}`}
+              />
+            ))}
+          </div>
+
+          {/* Pagination */}
+          {totalPages > 1 && (
+            <div className="flex justify-center items-center gap-2 mt-6 pb-4">
+              <button 
+                onClick={() => setPage(p => Math.max(1, p - 1))}
+                disabled={page === 1}
+                className={`w-8 h-8 flex items-center justify-center rounded-lg border ${page === 1 ? 'border-gray-200 text-gray-300' : 'border-primary-200 text-primary-600 hover:bg-primary-50'} transition-colors`}
+              >
+                <span className="material-symbols-outlined text-[16px]">chevron_left</span>
+              </button>
+              
+              <span className="text-[11px] font-bold text-gray-500 px-2">
+                Page {page} of {totalPages}
+              </span>
+
+              <button 
+                onClick={() => setPage(p => Math.min(totalPages, p + 1))}
+                disabled={page === totalPages}
+                className={`w-8 h-8 flex items-center justify-center rounded-lg border ${page === totalPages ? 'border-gray-200 text-gray-300' : 'border-primary-200 text-primary-600 hover:bg-primary-50'} transition-colors`}
+              >
+                <span className="material-symbols-outlined text-[16px]">chevron_right</span>
+              </button>
+            </div>
+          )}
+        </>
       )}
     </div>
   );
