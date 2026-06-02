@@ -16,6 +16,11 @@ import MyCrops from './pages/Farmer/MyCrops';
 import AddCrop from './pages/Farmer/AddCrop';
 import CropDetails from './pages/Farmer/CropDetails';
 import Profile from './pages/Farmer/Profile';
+import FarmerOrders from './pages/farmer/FarmerOrders';
+import VendorOrders from './pages/Vendor/VendorOrders';
+import SharedCropLinkHandler from './pages/SharedCropLinkHandler';
+import NotFound from './pages/NotFound';
+import ProtectedRoute from './components/common/ProtectedRoute';
 import './App.css';
 
 function App() {
@@ -41,24 +46,34 @@ function App() {
         <Route path="/farmer-registration" element={<FarmerRegistration />} />
         <Route path="/vendor-registration" element={<VendorRegistration />} />
         
+        {/* WhatsApp Shared Link Handler */}
+        <Route path="/crops/:id" element={<SharedCropLinkHandler />} />
+        
         {/* Protected Dashboard Routes (Farmer) */}
-        <Route path="/farmer-dashboard" element={<DashboardLayout />}>
-          <Route index element={<FarmerDashboard />} />
-          <Route path="crops" element={<MyCrops />} />
-          <Route path="crops/new" element={<AddCrop />} />
-          <Route path="crops/edit/:id" element={<AddCrop isEditMode={true} />} />
-          <Route path="crops/:id" element={<CropDetails />} />
-          <Route path="orders" element={<div className="p-4"><h1 className="text-xl font-bold">Orders (Coming Soon)</h1></div>} />
-          <Route path="profile" element={<Profile />} />
+        <Route element={<ProtectedRoute allowedRoles={['FARMER']} />}>
+          <Route path="/farmer-dashboard" element={<DashboardLayout />}>
+            <Route index element={<FarmerDashboard />} />
+            <Route path="crops" element={<MyCrops />} />
+            <Route path="crops/new" element={<AddCrop />} />
+            <Route path="crops/edit/:id" element={<AddCrop isEditMode={true} />} />
+            <Route path="crops/:id" element={<CropDetails />} />
+            <Route path="orders" element={<FarmerOrders />} />
+            <Route path="profile" element={<Profile />} />
+          </Route>
         </Route>
 
         {/* Protected Dashboard Routes (Vendor) */}
-        <Route path="/vendor-dashboard" element={<VendorDashboardLayout />}>
-          <Route index element={<Marketplace />} />
-          <Route path="crops/:id" element={<VendorCropDetails />} />
-          <Route path="orders" element={<div className="p-4"><h1 className="text-xl font-bold">My Orders (Coming Soon)</h1></div>} />
-          <Route path="profile" element={<div className="p-4"><h1 className="text-xl font-bold">Vendor Profile (Coming Soon)</h1></div>} />
+        <Route element={<ProtectedRoute allowedRoles={['VENDOR', 'CUSTOMER', 'ADMIN']} />}>
+          <Route path="/vendor-dashboard" element={<VendorDashboardLayout />}>
+            <Route index element={<Marketplace />} />
+            <Route path="crops/:id" element={<VendorCropDetails />} />
+            <Route path="orders" element={<VendorOrders />} />
+            <Route path="profile" element={<div className="p-4"><h1 className="text-xl font-bold">Vendor Profile (Coming Soon)</h1></div>} />
+          </Route>
         </Route>
+
+        {/* 404 Route */}
+        <Route path="*" element={<NotFound />} />
       </Routes>
     </>
   );

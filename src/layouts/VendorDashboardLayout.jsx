@@ -5,6 +5,8 @@ import { toast } from 'react-hot-toast';
 import Logo from '../components/common/Logo';
 import ConfirmModal from '../components/common/ConfirmModal';
 
+import { getToken, getUser } from '../utils/auth';
+
 const VendorDashboardLayout = () => {
   const navigate = useNavigate();
   const [isProfileOpen, setIsProfileOpen] = useState(false);
@@ -13,6 +15,16 @@ const VendorDashboardLayout = () => {
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
   const [userInitials, setUserInitials] = useState('VA');
   const [userName, setUserName] = useState('');
+
+  const [isNotificationsOpen, setIsNotificationsOpen] = useState(false);
+  const [notifications, setNotifications] = useState([
+    { id: 1, text: '📦 Your order has been accepted by the farmer!', time: 'Just now', read: false },
+    { id: 2, text: 'Mandi rates have been updated. Check the latest rates.', time: '2 hr ago', read: false }
+  ]);
+
+  const handleMarkAllRead = () => {
+    setNotifications(prev => prev.map(n => ({ ...n, read: true })));
+  };
 
   // Activate Vendor Theme globally for the entire dashboard
   useEffect(() => {
@@ -23,14 +35,14 @@ const VendorDashboardLayout = () => {
   }, []);
 
   useEffect(() => {
-    const token = localStorage.getItem('agriconnect_token') || sessionStorage.getItem('agriconnect_token') || localStorage.getItem('token');
+    const token = getToken();
     
     if (!token) {
       navigate('/', { replace: true });
       return;
     }
 
-    const user = JSON.parse(localStorage.getItem('user') || sessionStorage.getItem('user') || localStorage.getItem('agriconnect_user') || '{}');
+    const user = getUser() || {};
     if (user.name) {
       setUserName(user.name);
       const parts = user.name.split(' ');
@@ -149,10 +161,61 @@ const VendorDashboardLayout = () => {
           </div>
           
           <div className="flex items-center gap-3 relative">
-            <button className="relative w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center text-slate-500 hover:text-primary-600 hover:bg-primary-50 transition-colors">
-              <span className="material-symbols-outlined text-[18px]">notifications</span>
-              <span className="absolute top-1.5 right-1.5 w-1.5 h-1.5 bg-red-500 rounded-full border-2 border-white"></span>
-            </button>
+            <div className="relative">
+              <button 
+                onClick={() => setIsNotificationsOpen(!isNotificationsOpen)}
+                className="relative w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center text-slate-500 hover:text-primary-600 hover:bg-primary-50 transition-colors cursor-pointer"
+              >
+                <span className="material-symbols-outlined text-[18px]">notifications</span>
+                {notifications.some(n => !n.read) && (
+                  <span className="absolute top-1.5 right-1.5 w-1.5 h-1.5 bg-red-500 rounded-full border-2 border-white"></span>
+                )}
+              </button>
+
+              {isNotificationsOpen && (
+                <div className="fixed inset-0 z-40" onClick={() => setIsNotificationsOpen(false)}></div>
+              )}
+
+              <AnimatePresence>
+                {isNotificationsOpen && (
+                  <motion.div
+                    initial={{ opacity: 0, y: 10, scale: 0.95 }}
+                    animate={{ opacity: 1, y: 0, scale: 1 }}
+                    exit={{ opacity: 0, y: 10, scale: 0.95 }}
+                    transition={{ duration: 0.15 }}
+                    className="absolute right-0 top-11 w-64 bg-white rounded-xl shadow-lg border border-slate-200 py-2.5 z-50 overflow-hidden"
+                  >
+                    <div className="px-3.5 pb-2 border-b border-slate-100 flex justify-between items-center mb-1">
+                      <span className="text-[11px] font-black text-slate-800 uppercase tracking-wider">Notifications</span>
+                      <button 
+                        onClick={handleMarkAllRead} 
+                        className="text-[9.5px] font-bold text-primary-600 hover:underline cursor-pointer"
+                      >
+                        Mark all read
+                      </button>
+                    </div>
+                    
+                    <div className="max-h-48 overflow-y-auto divide-y divide-slate-100">
+                      {notifications.map(n => (
+                        <div 
+                          key={n.id} 
+                          onClick={() => {
+                            setNotifications(prev => prev.map(item => item.id === n.id ? { ...item, read: true } : item));
+                          }}
+                          className={`px-3.5 py-2 text-[10.5px] leading-snug cursor-pointer transition-colors hover:bg-slate-50 flex items-start gap-2 ${!n.read ? 'bg-primary-50/40 font-bold' : ''}`}
+                        >
+                          <div className={`w-1.5 h-1.5 rounded-full mt-1.5 shrink-0 ${!n.read ? 'bg-primary-500' : 'bg-transparent'}`} />
+                          <div>
+                            <p className="text-slate-700">{n.text}</p>
+                            <span className="text-[8.5px] text-slate-400 font-medium block mt-0.5">{n.time}</span>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </div>
 
             {/* Profile Dropdown */}
             <div className="relative">

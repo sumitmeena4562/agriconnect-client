@@ -13,6 +13,7 @@ import {
   validateCropName, validateQuantity, validatePrice, validateHarvestDate,
   validateCropLocation, validateMinOrderQuantity
 } from '../../utils/validation';
+import { getToken } from '../../utils/auth';
 
 const AddCrop = ({ isEditMode = false }) => {
   const navigate = useNavigate();
@@ -43,7 +44,7 @@ const AddCrop = ({ isEditMode = false }) => {
     if (isEditMode && id) {
       const fetchCrop = async () => {
         try {
-          const token = localStorage.getItem('token') || sessionStorage.getItem('token');
+          const token = getToken();
           const res = await axios.get(`/api/crops/${id}`, {
             headers: { 
               Authorization: `Bearer ${token}`,
@@ -87,7 +88,7 @@ const AddCrop = ({ isEditMode = false }) => {
       // Fetch default location for new crop
       const fetchDefaultLocation = async () => {
         try {
-          const token = localStorage.getItem('token') || sessionStorage.getItem('token');
+          const token = getToken();
           const res = await axios.get('/api/farmers/profile', {
             headers: { Authorization: `Bearer ${token}` }
           });
@@ -179,7 +180,7 @@ const AddCrop = ({ isEditMode = false }) => {
 
     setIsSubmitting(true);
     try {
-      const token = localStorage.getItem('token') || sessionStorage.getItem('token');
+      const token = getToken();
       
       // Upload new files first
       let finalImageUrls = [];
@@ -478,7 +479,7 @@ const AddCrop = ({ isEditMode = false }) => {
             <div className="flex flex-wrap gap-2.5">
               {images.map((img, idx) => (
                 <div key={idx} className="relative w-16 h-16 rounded-lg overflow-hidden border border-[var(--color-border)] group shadow-sm">
-                  <img src={img.url.startsWith('http') || img.url.startsWith('data:') ? img.url : `http://localhost:5000${img.url}`} alt={`crop-${idx}`} className="w-full h-full object-cover" />
+                  <img src={img.url.startsWith('http') || img.url.startsWith('data:') ? img.url : `${import.meta.env.VITE_API_URL || ''}${img.url}`} alt={`crop-${idx}`} className="w-full h-full object-cover" />
                   <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
                     <button 
                       type="button" 

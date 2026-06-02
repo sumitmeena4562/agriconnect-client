@@ -5,6 +5,8 @@ import { motion } from 'framer-motion';
 import Input from '../../components/ui/Input';
 import Button from '../../components/ui/Button';
 
+import { getToken } from '../../utils/auth';
+
 const Profile = () => {
   const [formData, setFormData] = useState({
     name: '',
@@ -25,7 +27,7 @@ const Profile = () => {
   useEffect(() => {
     const fetchProfile = async () => {
       try {
-        const token = localStorage.getItem('token') || sessionStorage.getItem('token');
+        const token = getToken();
         const res = await axios.get('/api/farmers/profile', {
           headers: { Authorization: `Bearer ${token}` }
         });
@@ -71,7 +73,7 @@ const Profile = () => {
     setIsSubmitting(true);
     
     try {
-      const token = localStorage.getItem('token') || sessionStorage.getItem('token');
+      const token = getToken();
       
       const payload = {
         name: formData.name,

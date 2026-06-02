@@ -3,6 +3,8 @@ import { useParams, Link, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { toast } from 'react-hot-toast';
 
+import { getToken } from '../../utils/auth';
+
 const CropDetails = () => {
   const { id } = useParams();
   const navigate = useNavigate();
@@ -13,7 +15,7 @@ const CropDetails = () => {
   useEffect(() => {
     const fetchCropDetails = async () => {
       try {
-        const token = localStorage.getItem('token') || sessionStorage.getItem('token');
+        const token = getToken();
         const res = await axios.get(`/api/crops/${id}`, {
           headers: { Authorization: `Bearer ${token}` }
         });
@@ -27,6 +29,20 @@ const CropDetails = () => {
     };
     fetchCropDetails();
   }, [id, navigate]);
+
+  const handleDelete = async () => {
+    if (!window.confirm('Are you sure you want to delete this crop?')) return;
+    try {
+      const token = getToken();
+      await axios.delete(`/api/crops/${id}`, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      toast.success('Crop deleted successfully');
+      navigate('/farmer-dashboard/crops');
+    } catch (error) {
+      toast.error(error.response?.data?.error || 'Failed to delete crop');
+    }
+  };
 
   if (isLoading) {
     return (
@@ -96,13 +112,13 @@ const CropDetails = () => {
             
             {/* Tags */}
             <div className="flex flex-wrap gap-1.5">
-              {crop.availabilityStatus === 'Available' ? (
+              {crop.availabilityStatus === 'Ready to Dispatch' ? (
                 <span className="badge badge-success">
                   <span className="material-symbols-outlined icon-sm">check_circle</span> In Stock
                 </span>
               ) : (
                 <span className="badge badge-warning">
-                  <span className="material-symbols-outlined icon-sm">schedule</span> Coming Soon
+                  <span className="material-symbols-outlined icon-sm">schedule</span> Pre-Booking
                 </span>
               )}
               {crop.farmingMethod === 'Organic' && (
@@ -181,6 +197,24 @@ const CropDetails = () => {
                   <p className="text-subtitle text-[11px]"><span className="text-[var(--color-text-secondary)] mr-1">Harvested:</span>{new Date(crop.harvestDate).toLocaleDateString()}</p>
                 </div>
               )}
+            </div>
+
+            {/* Action Buttons */}
+            <div className="pt-5 border-t border-[var(--color-border)] flex gap-3">
+              <button
+                onClick={() => navigate(`/farmer-dashboard/crops/edit/${id}`)}
+                className="flex-1 btn-secondary text-primary-600 border-primary-200 hover:bg-primary-50 !h-[36px] !text-[12px] font-bold"
+              >
+                <span className="material-symbols-outlined icon-md">edit</span>
+                Edit Crop
+              </button>
+              <button
+                onClick={handleDelete}
+                className="flex-1 py-1.5 rounded-lg border border-danger-200 text-danger-600 bg-white hover:bg-danger-50 flex items-center justify-center gap-1.5 !h-[36px] !text-[12px] font-bold active:scale-[0.98] transition-all cursor-pointer"
+              >
+                <span className="material-symbols-outlined icon-md">delete</span>
+                Delete Crop
+              </button>
             </div>
 
           </div>

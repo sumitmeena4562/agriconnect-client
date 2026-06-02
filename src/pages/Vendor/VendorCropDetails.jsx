@@ -2,12 +2,14 @@ import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import toast from 'react-hot-toast';
+import { getToken } from '../../utils/auth';
 
 const VendorCropDetails = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const [crop, setCrop] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [mainImage, setMainImage] = useState(0);
   
   // Order Modal State
   const [isOrderModalOpen, setIsOrderModalOpen] = useState(false);
@@ -19,7 +21,7 @@ const VendorCropDetails = () => {
     const fetchCropDetails = async () => {
       try {
         const res = await axios.get(`/api/crops/${id}`, {
-          headers: { Authorization: `Bearer ${localStorage.getItem('agriconnect_token')}` }
+          headers: { Authorization: `Bearer ${getToken()}` }
         });
         // We need the crop to be populated with farmer details. Wait, GET /api/crops/:id doesn't populate farmer details currently!
         // For now, let's fetch it from marketplace endpoint trick, or we update backend.
@@ -58,7 +60,7 @@ const VendorCropDetails = () => {
             offeredPrice: crop.price, // We can add negotiation later
             message: orderMessage
         }, {
-            headers: { Authorization: `Bearer ${localStorage.getItem('agriconnect_token')}` }
+            headers: { Authorization: `Bearer ${getToken()}` }
         });
 
         toast.success('Order request sent successfully! The farmer will be notified.', { id: toastId });
@@ -103,7 +105,7 @@ const VendorCropDetails = () => {
           <div className="global-card-flush aspect-[4/3] bg-[var(--color-bg-body)]">
             {crop.images && crop.images.length > 0 ? (
               <img 
-                src={crop.images[0]} 
+                src={crop.images[mainImage] || crop.images[0]} 
                 alt={crop.name} 
                 className="w-full h-full object-cover transition-opacity duration-300" 
               />
@@ -121,7 +123,12 @@ const VendorCropDetails = () => {
               {crop.images.map((img, idx) => (
                 <div
                   key={idx}
-                  className={`w-14 h-14 rounded-lg overflow-hidden shrink-0 border-2 border-transparent opacity-70 hover:opacity-100`}
+                  onClick={() => setMainImage(idx)}
+                  className={`w-14 h-14 rounded-lg overflow-hidden shrink-0 border-2 cursor-pointer transition-all ${
+                    mainImage === idx 
+                      ? 'border-primary-600 opacity-100 scale-95 shadow-sm' 
+                      : 'border-transparent opacity-60 hover:opacity-100'
+                  }`}
                 >
                   <img src={img} alt={`Thumbnail ${idx+1}`} className="w-full h-full object-cover" />
                 </div>

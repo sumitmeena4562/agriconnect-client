@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import axios from 'axios';
 import { auth } from '../../config/firebase';
 import { GoogleAuthProvider, signInWithPopup } from 'firebase/auth';
@@ -66,6 +66,8 @@ const dict = {
 
 const Login = () => {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const redirectUrl = searchParams.get('redirect');
   const [lang, setLang] = useState('en');
   const t = dict[lang];
 
@@ -124,10 +126,17 @@ const Login = () => {
         sessionStorage.setItem('agriconnect_user', JSON.stringify(user));
     }
     toast.success(`${t.welcome}, ${user.name}! 🌾`);
-    if (user.role === 'FARMER') navigate('/farmer-dashboard');
-    else if (user.role === 'VENDOR') navigate('/vendor-dashboard');
-    else if (user.role === 'CUSTOMER') navigate('/customer-dashboard');
-    else navigate('/');
+    if (redirectUrl) {
+        navigate(redirectUrl, { replace: true });
+    } else if (user.role === 'FARMER') {
+        navigate('/farmer-dashboard');
+    } else if (user.role === 'VENDOR') {
+        navigate('/vendor-dashboard');
+    } else if (user.role === 'CUSTOMER') {
+        navigate('/customer-dashboard');
+    } else {
+        navigate('/');
+    }
   };
 
   const handlePasswordLogin = async () => {

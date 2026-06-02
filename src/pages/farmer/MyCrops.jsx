@@ -5,6 +5,7 @@ import { toast } from 'react-hot-toast';
 import CropCard from '../../components/shared/CropCard';
 import ConfirmModal from '../../components/common/ConfirmModal';
 import { CROP_CATEGORIES } from '../../constants/cropConstants';
+import { getToken } from '../../utils/auth';
 
 const MyCrops = () => {
   const [crops, setCrops] = useState([]);
@@ -22,7 +23,7 @@ const MyCrops = () => {
   const fetchCrops = useCallback(async () => {
     setIsLoading(true);
     try {
-      const token = localStorage.getItem('token') || sessionStorage.getItem('token');
+      const token = getToken();
       const res = await axios.get(`/api/crops?keyword=${keyword}&category=${category}&sort=${sort}&page=${page}&limit=10`, {
         headers: { 
           Authorization: `Bearer ${token}`,
@@ -62,7 +63,7 @@ const MyCrops = () => {
 
   const handleToggleStatus = async (cropId) => {
     try {
-      const token = localStorage.getItem('token') || sessionStorage.getItem('token');
+      const token = getToken();
       const res = await axios.patch(`/api/crops/${cropId}/status`, {}, {
         headers: { Authorization: `Bearer ${token}` }
       });
@@ -87,7 +88,7 @@ const MyCrops = () => {
 
     setDeleteModal(prev => ({ ...prev, isLoading: true }));
     try {
-      const token = localStorage.getItem('token') || sessionStorage.getItem('token');
+      const token = getToken();
       await axios.delete(`/api/crops/${cropId}`, {
         headers: { Authorization: `Bearer ${token}` }
       });

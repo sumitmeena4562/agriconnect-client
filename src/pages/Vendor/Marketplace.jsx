@@ -2,14 +2,13 @@ import React, { useState, useEffect, useCallback } from 'react';
 import axios from 'axios';
 import toast from 'react-hot-toast';
 import CropCard from '../../components/shared/CropCard';
-import Input from '../../components/ui/Input';
-import Button from '../../components/ui/Button';
+import { getToken, getUser } from '../../utils/auth';
 
 const Marketplace = () => {
   const [crops, setCrops] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [vendorProfile, setVendorProfile] = useState(() => {
-    const user = JSON.parse(localStorage.getItem('agriconnect_user') || '{}');
+    const user = getUser() || {};
     return user.vendorProfile || null;
   });
   
@@ -36,7 +35,7 @@ const Marketplace = () => {
 
       const res = await axios.get(url, {
         headers: {
-          Authorization: `Bearer ${localStorage.getItem('agriconnect_token')}`
+          Authorization: `Bearer ${getToken()}`
         }
       });
       setCrops(res.data.data);
@@ -50,9 +49,13 @@ const Marketplace = () => {
     }
   }, [category, keyword, sort, page, useMyLocation, vendorProfile]);
 
+  // Reset to page 1 when filter parameters change
+  useEffect(() => {
+    setPage(1);
+  }, [keyword, category, useMyLocation]);
+
   useEffect(() => {
     // Only fetch if vendorProfile is loaded (or we know it doesn't exist)
-    // To prevent a double fetch, we can just run it when vendorProfile is resolved
     if (vendorProfile !== undefined) {
       // Debounce the fetch slightly if keyword changes
       const timeoutId = setTimeout(() => {

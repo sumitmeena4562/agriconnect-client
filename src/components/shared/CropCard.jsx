@@ -115,11 +115,11 @@ const CropCard = ({
             <span>Min: {crop.minOrderQuantity || 1} {crop.unit}</span>
           </p>
           
-          <p className={`text-subtitle text-[10.5px] font-bold ${crop.availabilityStatus === 'Available' ? 'text-green-600' : 'text-orange-500'}`}>
-            <span className={`material-symbols-outlined icon-md ${crop.availabilityStatus === 'Available' ? 'text-green-500' : 'text-orange-500'}`}>
-              {crop.availabilityStatus === 'Available' ? 'check_circle' : 'schedule'}
+          <p className={`text-subtitle text-[10.5px] font-bold ${crop.availabilityStatus === 'Ready to Dispatch' ? 'text-green-600' : 'text-orange-500'}`}>
+            <span className={`material-symbols-outlined icon-md ${crop.availabilityStatus === 'Ready to Dispatch' ? 'text-green-500' : 'text-orange-500'}`}>
+              {crop.availabilityStatus === 'Ready to Dispatch' ? 'check_circle' : 'schedule'}
             </span>
-            <span>{crop.availabilityStatus === 'Available' ? 'In Stock' : 'Coming Soon'}</span>
+            <span>{crop.availabilityStatus === 'Ready to Dispatch' ? 'In Stock' : 'Pre-Booking'}</span>
           </p>
         </div>
         
@@ -127,11 +127,8 @@ const CropCard = ({
         <div className="mt-auto flex justify-between items-end gap-1 border-t border-[var(--color-border)] pt-2.5">
           {/* Price Block Stacked */}
           <div className="flex flex-col justify-end shrink-0">
-            <p className="text-price text-[16px] sm:text-[18px] leading-none mb-0.5">
+            <p className="text-price text-[16px] sm:text-[18px] leading-none">
               ₹{crop.price}
-            </p>
-            <p className="text-[9px] sm:text-[10px] text-[var(--color-text-secondary)] font-bold line-through decoration-gray-400 leading-none">
-              MRP ₹{Math.round(crop.price * 1.2)}
             </p>
           </div>
 
@@ -181,13 +178,8 @@ const CropCard = ({
             
             {actionType === 'buyer' && (
               <button 
-                onClick={(e) => {
-                  e.preventDefault();
-                  e.stopPropagation();
-                  // No specific logic here yet, it will just let the Link handle the click if we want, or we can use it later.
-                }}
                 title="View & Request"
-                className="btn-icon w-7 h-7 sm:w-8 sm:h-8 bg-primary-600 text-white hover:bg-primary-700 shrink-0 flex items-center justify-center pointer-events-none"
+                className="btn-icon w-7 h-7 sm:w-8 sm:h-8 bg-primary-600 text-white hover:bg-primary-700 shrink-0 flex items-center justify-center"
               >
                 <span className="material-symbols-outlined text-[16px] sm:text-[18px]">arrow_forward</span>
               </button>

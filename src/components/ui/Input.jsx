@@ -1,15 +1,15 @@
 import React, { useState } from 'react';
 import { Eye, EyeOff } from 'lucide-react';
 
-const Input = ({ 
-  label, 
-  id, 
-  error, 
-  className = '', 
+const Input = ({
+  label,
+  id,
+  error,
+  className = '',
   wrapperClassName = '',
   labelClassName = '',
   type = 'text',
-  ...props 
+  ...props
 }) => {
   const [showPassword, setShowPassword] = useState(false);
   const isPassword = type === 'password';
@@ -26,7 +26,7 @@ const Input = ({
         </label>
       )}
       <div className="relative">
-        <input 
+        <input
           id={id}
           type={isPassword ? (showPassword ? 'text' : 'password') : type}
           className={`form-input pr-10 ${error ? 'border-red-500 ring-1 ring-red-500' : ''} ${className}`}
@@ -47,7 +47,7 @@ const Input = ({
           </button>
         )}
       </div>
-      {error && <p className="text-red-500 text-xs mt-1">{error}</p>}
+      {error && <p className="text-red-500 text-xs mt-1"> {error}</p>}
     </div>
   );
 };
