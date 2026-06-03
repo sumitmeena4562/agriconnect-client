@@ -179,14 +179,14 @@ const CropDetails = () => {
             <div className="space-y-2 pt-3 border-t border-[var(--color-border)]">
               {crop.logisticsOption && (
                 <div className="flex items-center gap-2">
-                  <span className="material-symbols-outlined icon-lg text-blue-600 w-5 text-center">local_shipping</span>
+                  <span className="material-symbols-outlined icon-lg text-info-600 w-5 text-center">local_shipping</span>
                   <p className="text-subtitle text-[11px]"><span className="text-[var(--color-text-secondary)] mr-1">Logistics:</span>{crop.logisticsOption}</p>
                 </div>
               )}
               
               {crop.paymentTerms && (
                 <div className="flex items-center gap-2">
-                  <span className="material-symbols-outlined icon-lg text-green-600 w-5 text-center">payments</span>
+                  <span className="material-symbols-outlined icon-lg text-success-600 w-5 text-center">payments</span>
                   <p className="text-subtitle text-[11px]"><span className="text-[var(--color-text-secondary)] mr-1">Payment:</span>{crop.paymentTerms}</p>
                 </div>
               )}

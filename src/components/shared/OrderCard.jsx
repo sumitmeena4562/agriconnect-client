@@ -162,10 +162,10 @@ const OrderCard = ({ order, role = 'farmer', onUpdateStatus, onCancelOrder }) =>
                   <a 
                     href={`tel:${contactPerson.phone}`} 
                     onClick={(e) => e.stopPropagation()} 
-                    className="bg-green-50 hover:bg-green-100 border border-green-200 rounded-full w-6.5 h-6.5 text-green-700 flex items-center justify-center no-underline transition-all shrink-0 active:scale-90"
+                    className="bg-success-50 hover:bg-success-100 border border-success-100 rounded-full w-6.5 h-6.5 text-success-600 flex items-center justify-center no-underline transition-all shrink-0 active:scale-90"
                     title="Call contact"
                   >
-                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="w-[11.5px] h-[11.5px] text-green-700 select-none">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="w-[11.5px] h-[11.5px] text-success-600 select-none">
                       <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/>
                     </svg>
                   </a>
@@ -356,7 +356,7 @@ const OrderCard = ({ order, role = 'farmer', onUpdateStatus, onCancelOrder }) =>
                       <a 
                         href={`tel:${order.vendor.phone}`} 
                         onClick={(e) => e.stopPropagation()} 
-                        className="mt-2 w-full py-1.5 px-2 rounded-lg bg-green-500 hover:bg-green-600 active:scale-[0.97] transition-all text-white font-black text-[11px] flex items-center justify-center gap-1 no-underline shadow-sm shadow-green-200"
+                        className="mt-2 w-full py-1.5 px-2 rounded-lg bg-success-600 hover:bg-success-500 active:scale-[0.97] transition-all text-white font-black text-[11px] flex items-center justify-center gap-1 no-underline shadow-sm"
                       >
                         <span className="material-symbols-outlined text-[13px] font-bold">call</span>
                         <span>Call Buyer</span>
@@ -379,7 +379,7 @@ const OrderCard = ({ order, role = 'farmer', onUpdateStatus, onCancelOrder }) =>
                       <a 
                         href={`tel:${order.farmer.phone}`} 
                         onClick={(e) => e.stopPropagation()} 
-                        className="mt-2 w-full py-1.5 px-2 rounded-lg bg-green-500 hover:bg-green-600 active:scale-[0.97] transition-all text-white font-black text-[11px] flex items-center justify-center gap-1 no-underline shadow-sm shadow-green-200"
+                        className="mt-2 w-full py-1.5 px-2 rounded-lg bg-success-600 hover:bg-success-500 active:scale-[0.97] transition-all text-white font-black text-[11px] flex items-center justify-center gap-1 no-underline shadow-sm"
                       >
                         <span className="material-symbols-outlined text-[13px] font-bold">call</span>
                         <span>Call Seller</span>
@@ -444,7 +444,7 @@ const OrderCard = ({ order, role = 'farmer', onUpdateStatus, onCancelOrder }) =>
                         {order.vehicleNumber && (
                           <div className="flex justify-between items-center text-[11.5px] sm:text-[12px]">
                             <span className="text-slate-500 font-medium flex items-center gap-1 shrink-0">
-                              <span className="material-symbols-outlined text-[14px] text-blue-500">local_shipping</span>
+                              <span className="material-symbols-outlined text-[14px] text-info-600">local_shipping</span>
                               Vehicle Number:
                             </span>
                             <span className="font-bold text-slate-800 uppercase bg-slate-200/60 px-1.5 py-0.5 rounded text-[10.5px]">

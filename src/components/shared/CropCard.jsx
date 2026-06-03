@@ -37,23 +37,23 @@ const CropCard = ({
              }}
              className={`absolute top-2 left-2 z-10 px-2.5 py-1 rounded-full text-[10px] font-bold shadow-md backdrop-blur-md border flex items-center gap-1.5 transition-transform hover:scale-105 ${
                crop.status === 'Available' 
-                ? 'bg-white/95 text-green-700 border-green-200 hover:bg-green-50' 
+                ? 'bg-white/95 text-success-600 border-success-100 hover:bg-success-50' 
                 : 'bg-white/95 text-red-700 border-red-200 hover:bg-red-50'
              }`}
              title="Click to toggle status"
           >
-             <div className={`w-2 h-2 rounded-full shadow-sm ${crop.status === 'Available' ? 'bg-green-500' : 'bg-red-500'}`}></div>
+             <div className={`w-2 h-2 rounded-full shadow-sm ${crop.status === 'Available' ? 'bg-success-500' : 'bg-red-500'}`}></div>
              {crop.status === 'Available' ? 'Available' : 'Sold Out'}
           </button>
         ) : (
           <span
              className={`absolute top-2 left-2 z-10 px-2.5 py-1 rounded-full text-[10px] font-bold shadow-md backdrop-blur-md border flex items-center gap-1.5 ${
                crop.status === 'Available' 
-                ? 'bg-white/95 text-green-700 border-green-200' 
+                ? 'bg-white/95 text-success-600 border-success-100' 
                 : 'bg-white/95 text-red-700 border-red-200'
              }`}
           >
-             <div className={`w-2 h-2 rounded-full shadow-sm ${crop.status === 'Available' ? 'bg-green-500' : 'bg-red-500'}`}></div>
+             <div className={`w-2 h-2 rounded-full shadow-sm ${crop.status === 'Available' ? 'bg-success-500' : 'bg-red-500'}`}></div>
              {crop.status === 'Available' ? 'Available' : 'Sold Out'}
           </span>
         )}
@@ -115,8 +115,8 @@ const CropCard = ({
             <span>Min: {crop.minOrderQuantity || 1} {crop.unit}</span>
           </p>
           
-          <p className={`text-subtitle text-[10.5px] font-bold ${crop.availabilityStatus === 'Ready to Dispatch' ? 'text-green-600' : 'text-orange-500'}`}>
-            <span className={`material-symbols-outlined icon-md ${crop.availabilityStatus === 'Ready to Dispatch' ? 'text-green-500' : 'text-orange-500'}`}>
+          <p className={`text-subtitle text-[10.5px] font-bold ${crop.availabilityStatus === 'Ready to Dispatch' ? 'text-success-600' : 'text-orange-500'}`}>
+            <span className={`material-symbols-outlined icon-md ${crop.availabilityStatus === 'Ready to Dispatch' ? 'text-success-500' : 'text-orange-500'}`}>
               {crop.availabilityStatus === 'Ready to Dispatch' ? 'check_circle' : 'schedule'}
             </span>
             <span>{crop.availabilityStatus === 'Ready to Dispatch' ? 'In Stock' : 'Pre-Booking'}</span>

@@ -1,4 +1,5 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
+import axios from 'axios';
 import { NavLink, Outlet, useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { toast } from 'react-hot-toast';
@@ -6,6 +7,7 @@ import Logo from '../components/common/Logo';
 import ConfirmModal from '../components/common/ConfirmModal';
 
 import { getToken, getUser } from '../utils/auth';
+import { formatTimeAgo } from '../utils/time';
 
 const VendorDashboardLayout = () => {
   const navigate = useNavigate();
@@ -17,13 +19,174 @@ const VendorDashboardLayout = () => {
   const [userName, setUserName] = useState('');
 
   const [isNotificationsOpen, setIsNotificationsOpen] = useState(false);
-  const [notifications, setNotifications] = useState([
-    { id: 1, text: '📦 Your order has been accepted by the farmer!', time: 'Just now', read: false },
-    { id: 2, text: 'Mandi rates have been updated. Check the latest rates.', time: '2 hr ago', read: false }
-  ]);
+  const [notifications, setNotifications] = useState([]);
 
-  const handleMarkAllRead = () => {
-    setNotifications(prev => prev.map(n => ({ ...n, read: true })));
+  const isInitialLoad = useRef(true);
+  const notificationsRef = useRef([]);
+
+  const notificationsDropdownRef = useRef(null);
+  const profileDropdownRef = useRef(null);
+  const audioCtxRef = useRef(null);
+
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (notificationsDropdownRef.current && !notificationsDropdownRef.current.contains(event.target)) {
+        setIsNotificationsOpen(false);
+      }
+      if (profileDropdownRef.current && !profileDropdownRef.current.contains(event.target)) {
+        setIsProfileOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, []);
+
+  // Request browser notification permission on mount
+  useEffect(() => {
+    if ('Notification' in window && Notification.permission === 'default') {
+      Notification.requestPermission();
+    }
+  }, []);
+
+  // Premium two-tone chime using Web Audio API
+  const playNotificationChime = () => {
+    try {
+      if (!audioCtxRef.current || audioCtxRef.current.state === 'closed') {
+        audioCtxRef.current = new (window.AudioContext || window.webkitAudioContext)();
+      }
+      const ctx = audioCtxRef.current;
+      const now = ctx.currentTime;
+
+      const osc1 = ctx.createOscillator();
+      const gain1 = ctx.createGain();
+      osc1.type = 'sine';
+      osc1.frequency.setValueAtTime(659, now);
+      gain1.gain.setValueAtTime(0.15, now);
+      gain1.gain.exponentialRampToValueAtTime(0.001, now + 0.15);
+      osc1.connect(gain1);
+      gain1.connect(ctx.destination);
+      osc1.start(now);
+      osc1.stop(now + 0.15);
+
+      const osc2 = ctx.createOscillator();
+      const gain2 = ctx.createGain();
+      osc2.type = 'sine';
+      osc2.frequency.setValueAtTime(784, now + 0.12);
+      gain2.gain.setValueAtTime(0.12, now + 0.12);
+      gain2.gain.exponentialRampToValueAtTime(0.001, now + 0.3);
+      osc2.connect(gain2);
+      gain2.connect(ctx.destination);
+      osc2.start(now + 0.12);
+      osc2.stop(now + 0.3);
+    } catch (e) {
+      // Silently fail if Audio API not available
+    }
+  };
+
+  useEffect(() => {
+    notificationsRef.current = notifications;
+  }, [notifications]);
+
+  const fetchNotifications = async () => {
+    try {
+      const token = getToken();
+      if (!token) return;
+      const res = await axios.get('/api/notifications', {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      const newNotifications = res.data.data;
+
+      // Trigger active toast messages, chime sound, and push for new unread notifications
+      if (!isInitialLoad.current && newNotifications.length > 0) {
+        let hasNewUnread = false;
+        newNotifications.forEach(n => {
+          const exists = notificationsRef.current.some(prev => prev._id === n._id);
+          if (!exists && !n.read) {
+            hasNewUnread = true;
+            toast(n.text, {
+              icon: n.type === 'ORDER_RECEIVED' ? '🌾' :
+                    n.type === 'ORDER_ACCEPTED' ? '✅' :
+                    n.type === 'ORDER_REJECTED' ? '❌' :
+                    n.type === 'ORDER_COMPLETED' ? '🎉' :
+                    n.type === 'ORDER_CANCELLED' ? '⚠️' : '🔔',
+              duration: 5000,
+              style: {
+                borderRadius: '10px',
+                background: '#333',
+                color: '#fff',
+                fontSize: '12px',
+                fontWeight: 'bold'
+              }
+            });
+
+            // Browser push notification (shows when tab is not focused)
+            if ('Notification' in window && Notification.permission === 'granted' && document.hidden) {
+              try {
+                new Notification('AgriConnect 📦', {
+                  body: n.text,
+                  icon: '/favicon.svg',
+                  tag: n._id,
+                  silent: true
+                });
+              } catch (e) { /* ignore */ }
+            }
+          }
+        });
+
+        // Play chime once for batch of new notifications
+        if (hasNewUnread) {
+          playNotificationChime();
+        }
+      }
+
+      setNotifications(newNotifications);
+      isInitialLoad.current = false;
+    } catch (error) {
+      console.error('Error fetching notifications:', error);
+    }
+  };
+
+  useEffect(() => {
+    fetchNotifications();
+    const interval = setInterval(fetchNotifications, 20000);
+    return () => clearInterval(interval);
+  }, []);
+
+
+
+  const handleMarkAllRead = async () => {
+    try {
+      const token = getToken();
+      await axios.patch('/api/notifications/mark-read', {}, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      setNotifications(prev => prev.map(n => ({ ...n, read: true })));
+    } catch (error) {
+      console.error('Error marking all read:', error);
+    }
+  };
+
+  const handleMarkSingleRead = async (notificationId) => {
+    const found = notifications.find(n => n._id === notificationId);
+    if (found && found.read) return;
+
+    try {
+      const token = getToken();
+      await axios.patch(`/api/notifications/${notificationId}/read`, {}, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      setNotifications(prev => prev.map(n => n._id === notificationId ? { ...n, read: true } : n));
+    } catch (error) {
+      console.error('Error marking read:', error);
+    }
+  };
+
+  const handleNotificationNav = async (n) => {
+    await handleMarkSingleRead(n._id);
+    setIsNotificationsOpen(false);
+    navigate('/vendor-dashboard/orders');
   };
 
   // Activate Vendor Theme globally for the entire dashboard
@@ -161,7 +324,7 @@ const VendorDashboardLayout = () => {
           </div>
           
           <div className="flex items-center gap-3 relative">
-            <div className="relative">
+            <div className="relative" ref={notificationsDropdownRef}>
               <button 
                 onClick={() => setIsNotificationsOpen(!isNotificationsOpen)}
                 className="relative w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center text-slate-500 hover:text-primary-600 hover:bg-primary-50 transition-colors cursor-pointer"
@@ -171,10 +334,6 @@ const VendorDashboardLayout = () => {
                   <span className="absolute top-1.5 right-1.5 w-1.5 h-1.5 bg-red-500 rounded-full border-2 border-white"></span>
                 )}
               </button>
-
-              {isNotificationsOpen && (
-                <div className="fixed inset-0 z-40" onClick={() => setIsNotificationsOpen(false)}></div>
-              )}
 
               <AnimatePresence>
                 {isNotificationsOpen && (
@@ -196,21 +355,35 @@ const VendorDashboardLayout = () => {
                     </div>
                     
                     <div className="max-h-48 overflow-y-auto divide-y divide-slate-100">
-                      {notifications.map(n => (
-                        <div 
-                          key={n.id} 
-                          onClick={() => {
-                            setNotifications(prev => prev.map(item => item.id === n.id ? { ...item, read: true } : item));
-                          }}
-                          className={`px-3.5 py-2 text-[10.5px] leading-snug cursor-pointer transition-colors hover:bg-slate-50 flex items-start gap-2 ${!n.read ? 'bg-primary-50/40 font-bold' : ''}`}
-                        >
-                          <div className={`w-1.5 h-1.5 rounded-full mt-1.5 shrink-0 ${!n.read ? 'bg-primary-500' : 'bg-transparent'}`} />
-                          <div>
-                            <p className="text-slate-700">{n.text}</p>
-                            <span className="text-[8.5px] text-slate-400 font-medium block mt-0.5">{n.time}</span>
-                          </div>
+                      {notifications.length === 0 ? (
+                        <div className="px-4 py-6 text-center text-slate-400 text-[11px] font-medium select-none">
+                          No notifications yet.
                         </div>
-                      ))}
+                      ) : (
+                        notifications.map(n => (
+                          <div 
+                            key={n._id} 
+                            onClick={() => handleNotificationNav(n)}
+                            className={`px-3.5 py-2 text-[10.5px] leading-snug cursor-pointer transition-colors hover:bg-slate-50 flex items-start gap-2 ${!n.read ? 'bg-primary-50/40 font-bold' : ''}`}
+                          >
+                            <div className={`w-1.5 h-1.5 rounded-full mt-1.5 shrink-0 ${!n.read ? 'bg-primary-500' : 'bg-transparent'}`} />
+                            <div>
+                              <p className="text-slate-700">{n.text}</p>
+                              <span className="text-[8.5px] text-slate-400 font-medium block mt-0.5">{formatTimeAgo(n.createdAt)}</span>
+                            </div>
+                          </div>
+                        ))
+                      )}
+                    </div>
+                    
+                    <div className="border-t border-slate-100 p-2 text-center bg-slate-50/50">
+                      <button 
+                        onClick={() => { setIsNotificationsOpen(false); navigate('/vendor-dashboard/notifications'); }}
+                        className="text-[10px] font-bold text-[var(--color-primary-600)] hover:underline flex items-center justify-center gap-0.5 mx-auto cursor-pointer"
+                      >
+                        <span>View all notifications</span>
+                        <span className="material-symbols-outlined text-[12px]">arrow_right_alt</span>
+                      </button>
                     </div>
                   </motion.div>
                 )}
@@ -218,17 +391,13 @@ const VendorDashboardLayout = () => {
             </div>
 
             {/* Profile Dropdown */}
-            <div className="relative">
+            <div className="relative" ref={profileDropdownRef}>
               <div 
                 onClick={() => setIsProfileOpen(!isProfileOpen)}
-                className="w-8 h-8 rounded-full bg-gradient-to-tr from-primary-500 to-blue-300 border border-white shadow-sm flex items-center justify-center cursor-pointer hover:shadow-md transition-shadow"
+                className="w-8 h-8 rounded-full bg-gradient-to-tr from-primary-500 to-primary-300 border border-white shadow-sm flex items-center justify-center cursor-pointer hover:shadow-md transition-shadow"
               >
                 <span className="text-white font-bold text-[11px] leading-none relative top-[1px]">{userInitials}</span>
               </div>
-
-              {isProfileOpen && (
-                <div className="fixed inset-0 z-40" onClick={() => setIsProfileOpen(false)}></div>
-              )}
 
               <AnimatePresence>
                 {isProfileOpen && (
