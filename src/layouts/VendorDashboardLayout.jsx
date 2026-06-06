@@ -8,6 +8,7 @@ import ConfirmModal from '../components/common/ConfirmModal';
 
 import { getToken, getUser } from '../utils/auth';
 import { formatTimeAgo } from '../utils/time';
+import useSSE from '../hooks/useSSE';
 
 const VendorDashboardLayout = () => {
   const navigate = useNavigate();
@@ -34,6 +35,9 @@ const VendorDashboardLayout = () => {
   const [isNotificationsOpen, setIsNotificationsOpen] = useState(false);
   const [notifications, setNotifications] = useState([]);
   const [bankAccount, setBankAccount] = useState(null);
+
+  // Establish real-time SSE stream connection
+  useSSE();
 
   const isInitialLoad = useRef(true);
   const notificationsRef = useRef([]);
@@ -183,44 +187,52 @@ const VendorDashboardLayout = () => {
   }, [fetchBankAccount]);
 
   useEffect(() => {
-    let active = true;
-    let intervalId = null;
-
-    const startPolling = async () => {
-      if (!active) return;
-      await fetchNotifications();
-      
-      if (intervalId) clearInterval(intervalId);
-      intervalId = setInterval(() => {
-        if (active && document.visibilityState === 'visible') {
-          fetchNotifications();
-        }
-      }, 20000);
-    };
-
-    const handleVisibilityChange = () => {
-      if (document.visibilityState === 'visible') {
-        startPolling();
-      } else {
-        if (intervalId) {
-          clearInterval(intervalId);
-          intervalId = null;
-        }
-      }
-    };
-
-    if (document.visibilityState === 'visible') {
-      startPolling();
-    }
-
-    document.addEventListener('visibilitychange', handleVisibilityChange);
-
-    return () => {
-      active = false;
-      if (intervalId) clearInterval(intervalId);
-      document.removeEventListener('visibilitychange', handleVisibilityChange);
-    };
+    fetchNotifications();
   }, [fetchNotifications]);
+
+  useEffect(() => {
+    const handleSseNotification = (event) => {
+      const newNotification = event.detail;
+      
+      playNotificationChime();
+      
+      toast(newNotification.text, {
+        icon: newNotification.type === 'ORDER_RECEIVED'     ? '📦' :
+              newNotification.type === 'ORDER_ACCEPTED'     ? '✅' :
+              newNotification.type === 'ORDER_REJECTED'     ? '❌' :
+              newNotification.type === 'ORDER_COMPLETED'    ? '🎉' :
+              newNotification.type === 'ORDER_CANCELLED'    ? '⚠️' :
+              newNotification.type === 'PAYMENT_SUBMITTED'  ? '💳' :
+              newNotification.type === 'PAYMENT_VERIFIED'   ? '✅' :
+              newNotification.type === 'PAYMENT_REJECTED'   ? '🔴' : '🔔',
+        duration: 5000,
+        style: {
+          borderRadius: '10px',
+          background: '#333',
+          color: '#fff',
+          fontSize: '12px',
+          fontWeight: 'bold'
+        }
+      });
+
+      if ('Notification' in window && Notification.permission === 'granted' && document.hidden) {
+        try {
+          new Notification('AgriConnect 📦', {
+            body: newNotification.text,
+            icon: '/favicon.svg',
+            tag: newNotification._id,
+            silent: true
+          });
+        } catch (e) { /* ignore */ }
+      }
+
+      setNotifications(prev => [newNotification, ...prev]);
+      fetchBankAccount();
+    };
+
+    window.addEventListener('agriconnect:notification', handleSseNotification);
+    return () => window.removeEventListener('agriconnect:notification', handleSseNotification);
+  }, [fetchBankAccount]);
 
 
 
