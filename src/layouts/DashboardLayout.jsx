@@ -170,6 +170,7 @@ const DashboardLayout = () => {
         // Play chime once for batch of new notifications
         if (hasNewUnread) {
           playNotificationChime();
+          window.dispatchEvent(new CustomEvent('agriconnect:refresh-data'));
         }
       }
 
@@ -182,22 +183,41 @@ const DashboardLayout = () => {
 
   useEffect(() => {
     let active = true;
-    const initialFetch = async () => {
-      if (active) {
-        await fetchNotifications();
+    let intervalId = null;
+
+    const startPolling = async () => {
+      if (!active) return;
+      await fetchNotifications();
+      
+      if (intervalId) clearInterval(intervalId);
+      intervalId = setInterval(() => {
+        if (active && document.visibilityState === 'visible') {
+          fetchNotifications();
+        }
+      }, 20000);
+    };
+
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === 'visible') {
+        startPolling();
+      } else {
+        if (intervalId) {
+          clearInterval(intervalId);
+          intervalId = null;
+        }
       }
     };
-    initialFetch();
-    
-    const interval = setInterval(() => {
-      if (active) {
-        fetchNotifications();
-      }
-    }, 20000);
-    
+
+    if (document.visibilityState === 'visible') {
+      startPolling();
+    }
+
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+
     return () => {
       active = false;
-      clearInterval(interval);
+      if (intervalId) clearInterval(intervalId);
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
     };
   }, [fetchNotifications]);
 

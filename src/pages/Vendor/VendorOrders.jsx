@@ -14,18 +14,18 @@ const VendorOrders = () => {
   const [paymentModal, setPaymentModal] = useState({ isOpen: false, order: null, method: 'UPI', upiRef: '', note: '', isLoading: false });
   const [bankAccount, setBankAccount] = useState(null);
 
-  const fetchBankAccount = async () => {
+  const fetchBankAccount = useCallback(async () => {
     try {
       const res = await api.get('/bank/account');
       setBankAccount(res.data.data);
     } catch (error) {
       console.error('Error fetching bank account:', error);
     }
-  };
+  }, []);
 
   useEffect(() => {
     fetchBankAccount();
-  }, []);
+  }, [fetchBankAccount]);
 
   const tabs = ['All', 'Pending', 'Accepted', 'Rejected', 'Completed', 'Cancelled'];
 
@@ -49,6 +49,15 @@ const VendorOrders = () => {
   useEffect(() => {
     fetchOrders();
   }, [fetchOrders]);
+
+  useEffect(() => {
+    const handleRefresh = () => {
+      fetchOrders();
+      fetchBankAccount();
+    };
+    window.addEventListener('agriconnect:refresh-data', handleRefresh);
+    return () => window.removeEventListener('agriconnect:refresh-data', handleRefresh);
+  }, [fetchOrders, fetchBankAccount]);
 
   useEffect(() => {
     setSearchQuery('');

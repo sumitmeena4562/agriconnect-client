@@ -48,6 +48,14 @@ const FarmerOrders = () => {
   }, [fetchOrders]);
 
   useEffect(() => {
+    const handleRefresh = () => {
+      fetchOrders();
+    };
+    window.addEventListener('agriconnect:refresh-data', handleRefresh);
+    return () => window.removeEventListener('agriconnect:refresh-data', handleRefresh);
+  }, [fetchOrders]);
+
+  useEffect(() => {
     setSearchQuery('');
   }, [activeTab]);
 
