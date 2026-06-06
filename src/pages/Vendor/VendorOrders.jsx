@@ -12,6 +12,20 @@ const VendorOrders = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [confirmModal, setConfirmModal] = useState({ isOpen: false, orderId: null, isLoading: false });
   const [paymentModal, setPaymentModal] = useState({ isOpen: false, order: null, method: 'UPI', upiRef: '', note: '', isLoading: false });
+  const [bankAccount, setBankAccount] = useState(null);
+
+  const fetchBankAccount = async () => {
+    try {
+      const res = await api.get('/bank/account');
+      setBankAccount(res.data.data);
+    } catch (error) {
+      console.error('Error fetching bank account:', error);
+    }
+  };
+
+  useEffect(() => {
+    fetchBankAccount();
+  }, []);
 
   const tabs = ['All', 'Pending', 'Accepted', 'Rejected', 'Completed', 'Cancelled'];
 
@@ -67,6 +81,7 @@ const VendorOrders = () => {
   };
 
   const handleSubmitPaymentClick = (order) => {
+    fetchBankAccount();
     setPaymentModal({ isOpen: true, order, method: 'UPI', upiRef: '', note: '', isLoading: false });
   };
 
@@ -219,17 +234,37 @@ const VendorOrders = () => {
 
             {/* Body */}
             <div className="p-5 space-y-4">
-              {/* Amount (readonly) */}
-              <div>
-                <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">Total Amount</p>
-                <div className="bg-amber-50 border border-amber-200 rounded-xl px-4 py-3 text-center">
-                  <span className="text-[22px] font-black text-amber-700">
-                    ₹{((paymentModal.order.requestedQuantity || 0) * (paymentModal.order.offeredPrice || 0)).toLocaleString('en-IN')}
-                  </span>
-                  <p className="text-[10px] text-amber-600 font-medium mt-0.5">
-                    {paymentModal.order.requestedQuantity} {paymentModal.order.crop?.unit} × ₹{paymentModal.order.offeredPrice}
-                  </p>
+              {/* Amount & Balance Details */}
+              <div className="space-y-2">
+                <div>
+                  <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">Total Amount</p>
+                  <div className="bg-amber-50 border border-amber-200 rounded-xl px-4 py-3 text-center">
+                    <span className="text-[22px] font-black text-amber-700">
+                      ₹{((paymentModal.order.requestedQuantity || 0) * (paymentModal.order.offeredPrice || 0)).toLocaleString('en-IN')}
+                    </span>
+                    <p className="text-[10px] text-amber-600 font-medium mt-0.5">
+                      {paymentModal.order.requestedQuantity} {paymentModal.order.crop?.unit} × ₹{paymentModal.order.offeredPrice}
+                    </p>
+                  </div>
                 </div>
+
+                {bankAccount && (() => {
+                  const orderAmt = (paymentModal.order.requestedQuantity || 0) * (paymentModal.order.offeredPrice || 0);
+                  const isInsufficient = bankAccount.balance < orderAmt;
+                  return (
+                    <div className={`px-3 py-2 rounded-xl border text-[10.5px] font-bold flex items-center justify-between ${
+                      isInsufficient 
+                        ? 'bg-rose-50 border-rose-200 text-rose-700' 
+                        : 'bg-emerald-50 border-emerald-200 text-emerald-700'
+                    }`}>
+                      <span className="flex items-center gap-1">
+                        <span className="material-symbols-outlined text-[14px]">account_balance</span>
+                        <span>Bank Balance:</span>
+                      </span>
+                      <span>₹{bankAccount.balance.toLocaleString('en-IN')}</span>
+                    </div>
+                  );
+                })()}
               </div>
 
               {/* Payment Method */}
@@ -287,13 +322,17 @@ const VendorOrders = () => {
               >Cancel</button>
               <button
                 onClick={handleConfirmPayment}
-                disabled={paymentModal.isLoading}
+                disabled={paymentModal.isLoading || (bankAccount && bankAccount.balance < ((paymentModal.order.requestedQuantity || 0) * (paymentModal.order.offeredPrice || 0)))}
                 className="flex-1 h-10 rounded-xl bg-amber-500 hover:bg-amber-600 text-white text-[12.5px] font-bold transition-colors disabled:opacity-60 flex items-center justify-center gap-2"
               >
                 {paymentModal.isLoading ? (
                   <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
                 ) : '💳'}
-                {paymentModal.isLoading ? 'Submitting...' : 'Submit Payment'}
+                {paymentModal.isLoading 
+                  ? 'Submitting...' 
+                  : (bankAccount && bankAccount.balance < ((paymentModal.order.requestedQuantity || 0) * (paymentModal.order.offeredPrice || 0)) 
+                      ? 'Insufficient Funds' 
+                      : 'Submit Payment')}
               </button>
             </div>
           </div>

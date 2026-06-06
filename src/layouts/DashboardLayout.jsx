@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import api from '../utils/api';
-import { NavLink, Outlet, useNavigate } from 'react-router-dom';
+import { NavLink, Link, Outlet, useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { toast } from 'react-hot-toast';
 import Logo from '../components/common/Logo';
@@ -20,6 +20,7 @@ const DashboardLayout = () => {
   
   const [isNotificationsOpen, setIsNotificationsOpen] = useState(false);
   const [notifications, setNotifications] = useState([]);
+  const [bankAccount, setBankAccount] = useState(null);
 
   const isInitialLoad = useRef(true);
   const notificationsRef = useRef([]);
@@ -88,10 +89,22 @@ const DashboardLayout = () => {
     notificationsRef.current = notifications;
   }, [notifications]);
 
+  const fetchBankAccount = async () => {
+    try {
+      const token = getToken();
+      if (!token) return;
+      const res = await api.get('/bank/account');
+      setBankAccount(res.data.data);
+    } catch (error) {
+      console.error('Error fetching bank account:', error);
+    }
+  };
+
   const fetchNotifications = async () => {
     try {
       const token = getToken();
       if (!token) return;
+      fetchBankAccount();
       const res = await api.get('/notifications');
       const newNotifications = res.data.data;
 
@@ -209,6 +222,7 @@ const DashboardLayout = () => {
     { name: 'Home', path: '/farmer-dashboard', icon: 'home' },
     { name: 'My Crops', path: '/farmer-dashboard/crops', icon: 'yard' },
     { name: 'Orders', path: '/farmer-dashboard/orders', icon: 'shopping_cart' },
+    { name: 'Bank Account', path: '/farmer-dashboard/bank', icon: 'account_balance' },
     { name: 'Profile', path: '/farmer-dashboard/profile', icon: 'person' },
   ];
 
@@ -311,6 +325,15 @@ const DashboardLayout = () => {
           </div>
           
           <div className="flex items-center gap-3 relative">
+            {bankAccount && (
+              <Link 
+                to="/farmer-dashboard/bank"
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-emerald-50 border border-emerald-100 hover:bg-emerald-100/70 transition-all text-emerald-800 text-[10.5px] font-black cursor-pointer shadow-sm active:scale-[0.98]"
+              >
+                <span className="material-symbols-outlined text-[14px]">account_balance</span>
+                <span>₹{bankAccount.balance.toLocaleString('en-IN')}</span>
+              </Link>
+            )}
             <div className="relative" ref={notificationsDropdownRef}>
               <button 
                 onClick={() => setIsNotificationsOpen(!isNotificationsOpen)}

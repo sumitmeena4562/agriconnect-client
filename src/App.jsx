@@ -22,6 +22,7 @@ import SharedCropLinkHandler from './pages/SharedCropLinkHandler';
 import NotFound from './pages/NotFound';
 import ProtectedRoute from './components/common/ProtectedRoute';
 import NotificationsPage from './pages/NotificationsPage';
+import BankPage from './pages/BankPage';
 import './App.css';
 
 function App() {
@@ -59,6 +60,7 @@ function App() {
             <Route path="crops/edit/:id" element={<AddCrop isEditMode={true} />} />
             <Route path="crops/:id" element={<CropDetails />} />
             <Route path="orders" element={<FarmerOrders />} />
+            <Route path="bank" element={<BankPage />} />
             <Route path="notifications" element={<NotificationsPage />} />
             <Route path="profile" element={<Profile />} />
           </Route>
@@ -70,6 +72,7 @@ function App() {
             <Route index element={<Marketplace />} />
             <Route path="crops/:id" element={<VendorCropDetails />} />
             <Route path="orders" element={<VendorOrders />} />
+            <Route path="bank" element={<BankPage />} />
             <Route path="notifications" element={<NotificationsPage />} />
             <Route path="profile" element={<div className="p-4"><h1 className="text-xl font-bold">Vendor Profile (Coming Soon)</h1></div>} />
           </Route>
