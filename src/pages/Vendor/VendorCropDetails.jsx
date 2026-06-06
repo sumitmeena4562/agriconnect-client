@@ -233,6 +233,13 @@ const VendorCropDetails = () => {
                   <p className="text-subtitle text-[11px]"><span className="text-[var(--color-text-secondary)] mr-1">Logistics:</span>{crop.logisticsOption}</p>
                 </div>
               )}
+
+              {crop.paymentTerms && (
+                <div className="flex items-center gap-2">
+                  <span className="material-symbols-outlined icon-lg text-success-600 w-5 text-center">payments</span>
+                  <p className="text-subtitle text-[11px]"><span className="text-[var(--color-text-secondary)] mr-1">Payment:</span>{crop.paymentTerms}</p>
+                </div>
+              )}
               
               {crop.harvestDate && (
                 <div className="flex items-center gap-2">

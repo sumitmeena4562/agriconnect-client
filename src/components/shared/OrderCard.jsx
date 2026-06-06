@@ -180,6 +180,15 @@ const OrderCard = ({ order, role = 'farmer', onUpdateStatus, onCancelOrder, onSu
               </span>
             </div>
 
+            {order.crop?.paymentTerms && (
+              <div className="flex justify-between items-center gap-2 min-w-0">
+                <span className="text-[var(--color-text-secondary)] font-medium shrink-0">Payment Terms:</span>
+                <span className="font-semibold text-slate-700 text-right truncate min-w-0 text-[10.5px] bg-slate-100 px-1.5 py-0.5 rounded border border-slate-200/50">
+                  {order.crop.paymentTerms}
+                </span>
+              </div>
+            )}
+
             <div className="flex justify-between items-center gap-2 pt-1.5 border-t border-[var(--color-border)] mt-1.5 min-w-0">
               <span className="text-[var(--color-text-secondary)] font-bold shrink-0">Total Amount:</span>
               <span className="font-bold text-[13.5px] text-[var(--color-text-primary)] text-right truncate min-w-0">
@@ -228,7 +237,7 @@ const OrderCard = ({ order, role = 'farmer', onUpdateStatus, onCancelOrder, onSu
               </div>
             )}
 
-            {order.status === 'Accepted' && onUpdateStatus && (
+            {order.status === 'Accepted' && order.payment?.status === 'Verified' && onUpdateStatus && (
               <div 
                 onClick={(e) => e.stopPropagation()} 
                 className="mt-2.5"
@@ -290,7 +299,12 @@ const OrderCard = ({ order, role = 'farmer', onUpdateStatus, onCancelOrder, onSu
                     onClick={() => onSubmitPayment(order)}
                     className="w-full h-8 rounded-lg bg-amber-500 hover:bg-amber-600 text-white text-[11.5px] font-bold transition-all active:scale-[0.98] cursor-pointer flex items-center justify-center gap-1.5"
                   >
-                    <span>💳</span><span>Submit Payment</span>
+                    <span>💳</span>
+                    <span>
+                      {order.crop?.paymentTerms === '50% Advance'
+                        ? `Submit 50% Advance (₹${(0.5 * order.requestedQuantity * order.offeredPrice).toLocaleString('en-IN')})`
+                        : `Submit 100% Advance (₹${(order.requestedQuantity * order.offeredPrice).toLocaleString('en-IN')})`}
+                    </span>
                   </button>
                 )}
               </div>
@@ -512,9 +526,15 @@ const OrderCard = ({ order, role = 'farmer', onUpdateStatus, onCancelOrder, onSu
                           <div className="pt-2 border-t border-slate-200 mt-2 flex flex-col items-center justify-center gap-1.5 text-center">
                             {isFarmer ? (
                               order.status === 'Accepted' ? (
-                                <div className="bg-primary-50 text-primary-700 px-3 py-2 rounded-lg border border-primary-200 text-[11px] font-bold w-full">
-                                  <span>Verify OTP from Buyer during pickup to mark completed.</span>
-                                </div>
+                                order.payment?.status === 'Verified' ? (
+                                  <div className="bg-primary-50 text-primary-700 px-3 py-2 rounded-lg border border-primary-200 text-[11px] font-bold w-full">
+                                    <span>Verify OTP from Buyer during pickup to mark completed.</span>
+                                  </div>
+                                ) : (
+                                  <div className="bg-orange-50 text-orange-700 px-3 py-2 rounded-lg border border-orange-200 text-[11px] font-bold w-full">
+                                    <span>Awaiting payment verification before order completion.</span>
+                                  </div>
+                                )
                               ) : (
                                 <div className="bg-slate-100 text-slate-500 px-3 py-1.5 rounded-lg text-[11px] font-medium w-full">
                                   <span>Delivery OTP verified successfully.</span>
@@ -522,18 +542,32 @@ const OrderCard = ({ order, role = 'farmer', onUpdateStatus, onCancelOrder, onSu
                               )
                             ) : (
                               order.status === 'Accepted' ? (
-                                <div className="bg-yellow-50 border border-yellow-200 text-yellow-800 p-2.5 rounded-xl flex flex-col items-center justify-center gap-1 w-full">
-                                  <span className="text-[10px] font-extrabold uppercase tracking-wide flex items-center gap-1 text-yellow-700">
-                                    <span className="material-symbols-outlined text-[13px]">key</span>
-                                    Delivery Verification OTP
-                                  </span>
-                                  <span className="text-[18px] font-black tracking-widest text-slate-800 bg-white px-4 py-1.5 rounded-lg border border-yellow-300 shadow-inner">
-                                    {order.deliveryOTP}
-                                  </span>
-                                  <span className="text-[9px] font-medium text-yellow-700 mt-0.5">
-                                    Share this with the seller to complete the order.
-                                  </span>
-                                </div>
+                                order.payment?.status === 'Verified' ? (
+                                  <div className="bg-yellow-50 border border-yellow-200 text-yellow-800 p-2.5 rounded-xl flex flex-col items-center justify-center gap-1 w-full">
+                                    <span className="text-[10px] font-extrabold uppercase tracking-wide flex items-center gap-1 text-yellow-700">
+                                      <span className="material-symbols-outlined text-[13px]">key</span>
+                                      Delivery Verification OTP
+                                    </span>
+                                    <span className="text-[18px] font-black tracking-widest text-slate-800 bg-white px-4 py-1.5 rounded-lg border border-yellow-300 shadow-inner">
+                                      {order.deliveryOTP}
+                                    </span>
+                                    <span className="text-[9px] font-medium text-yellow-700 mt-0.5">
+                                      Share this with the seller to complete the order.
+                                    </span>
+                                  </div>
+                                ) : (
+                                  <div className="bg-orange-50 border border-orange-200 text-orange-850 p-2.5 rounded-xl flex flex-col items-center justify-center gap-1 w-full">
+                                    <span className="text-[10px] font-extrabold uppercase tracking-wide flex items-center gap-1 text-orange-700">
+                                      <span className="material-symbols-outlined text-[13px]">lock</span>
+                                      OTP Locked
+                                    </span>
+                                    <span className="text-[10px] font-bold text-slate-650 mt-0.5">
+                                      {order.payment?.status === 'Submitted'
+                                        ? 'Awaiting farmer to confirm your submitted payment.'
+                                        : 'Please submit payment first to unlock the delivery OTP.'}
+                                    </span>
+                                  </div>
+                                )
                               ) : (
                                 <div className="bg-slate-100 text-slate-500 px-3 py-1.5 rounded-lg text-[11px] font-medium w-full">
                                   <span>Delivery OTP ({order.deliveryOTP}) verified successfully.</span>
@@ -581,7 +615,7 @@ const OrderCard = ({ order, role = 'farmer', onUpdateStatus, onCancelOrder, onSu
                       </div>
                     )}
 
-                    {order.status === 'Accepted' && onUpdateStatus && (
+                    {order.status === 'Accepted' && order.payment?.status === 'Verified' && onUpdateStatus && (
                       <div className="mt-0.5">
                         <button
                           onClick={(e) => {

@@ -278,7 +278,7 @@ const NotificationsPage = () => {
 
               // Determine if quick actions should show
               const showAcceptReject = isFarmer && n.type === 'ORDER_RECEIVED' && orderStatus === 'Pending';
-              const showViewOtp = !isFarmer && n.type === 'ORDER_ACCEPTED' && orderStatus === 'Accepted' && order?.deliveryOTP;
+              const showViewOtp = !isFarmer && n.type === 'ORDER_ACCEPTED' && orderStatus === 'Accepted' && order?.deliveryOTP && order?.payment?.status === 'Verified';
 
               // Readable title from type
               const getTitle = (type) => {

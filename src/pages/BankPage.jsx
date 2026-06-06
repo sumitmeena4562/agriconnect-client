@@ -59,6 +59,7 @@ const BankPage = () => {
   };
 
   const getTransactionDetails = (tx) => {
+    const isOffline = tx.description && tx.description.toLowerCase().includes('offline');
     const isCredit = 
       tx.type === 'DEPOSIT' || 
       (tx.type === 'PAYMENT' && tx.receiver?._id === account?.user) ||
@@ -66,12 +67,14 @@ const BankPage = () => {
       
     return {
       isCredit,
-      sign: isCredit ? '+' : '-',
-      colorClass: isCredit ? 'text-emerald-600 font-extrabold' : 'text-rose-600 font-extrabold',
-      icon: tx.type === 'DEPOSIT' ? 'arrow_downward' : tx.type === 'REFUND' ? 'replay' : 'arrow_upward',
-      badgeClass: tx.type === 'DEPOSIT' ? 'bg-emerald-50 text-emerald-700 border-emerald-100' :
+      isOffline,
+      sign: isOffline ? '' : (isCredit ? '+' : '-'),
+      colorClass: isOffline ? 'text-slate-550 font-bold' : (isCredit ? 'text-emerald-600 font-extrabold' : 'text-rose-600 font-extrabold'),
+      icon: isOffline ? 'handshake' : (tx.type === 'DEPOSIT' ? 'arrow_downward' : tx.type === 'REFUND' ? 'replay' : 'arrow_upward'),
+      badgeClass: isOffline ? 'bg-slate-100 text-slate-600 border-slate-200' :
+                  (tx.type === 'DEPOSIT' ? 'bg-emerald-50 text-emerald-700 border-emerald-100' :
                   tx.type === 'REFUND' ? 'bg-amber-50 text-amber-700 border-amber-100' :
-                  'bg-blue-50 text-blue-700 border-blue-100'
+                  'bg-blue-50 text-blue-700 border-blue-100')
     };
   };
 
@@ -196,8 +199,12 @@ const BankPage = () => {
                         <p className={`text-[13.5px] ${details.colorClass}`}>
                           {details.sign}₹{tx.amount.toLocaleString('en-IN')}
                         </p>
-                        <p className="text-[9px] font-bold text-emerald-600 bg-emerald-50 border border-emerald-100 px-1.5 py-0.5 rounded-full inline-block mt-0.5">
-                          {tx.status}
+                        <p className={`text-[9px] font-bold px-1.5 py-0.5 rounded-full inline-block mt-0.5 ${
+                          details.isOffline 
+                            ? 'bg-slate-100 text-slate-650 border border-slate-200/60' 
+                            : 'bg-emerald-50 text-emerald-600 border border-emerald-100'
+                        }`}>
+                          {details.isOffline ? 'Offline Paid' : tx.status}
                         </p>
                       </div>
                     </div>

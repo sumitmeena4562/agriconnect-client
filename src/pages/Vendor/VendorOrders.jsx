@@ -246,20 +246,31 @@ const VendorOrders = () => {
               {/* Amount & Balance Details */}
               <div className="space-y-2">
                 <div>
-                  <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">Total Amount</p>
+                  <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">
+                    {paymentModal.order.crop?.paymentTerms === '50% Advance' ? 'Advance Payment (50%)' : 'Total Amount'}
+                  </p>
                   <div className="bg-amber-50 border border-amber-200 rounded-xl px-4 py-3 text-center">
                     <span className="text-[22px] font-black text-amber-700">
-                      ₹{((paymentModal.order.requestedQuantity || 0) * (paymentModal.order.offeredPrice || 0)).toLocaleString('en-IN')}
+                      ₹{(() => {
+                        const total = (paymentModal.order.requestedQuantity || 0) * (paymentModal.order.offeredPrice || 0);
+                        const required = paymentModal.order.crop?.paymentTerms === '50% Advance' ? 0.5 * total : total;
+                        return required.toLocaleString('en-IN');
+                      })()}
                     </span>
                     <p className="text-[10px] text-amber-600 font-medium mt-0.5">
-                      {paymentModal.order.requestedQuantity} {paymentModal.order.crop?.unit} × ₹{paymentModal.order.offeredPrice}
+                      {paymentModal.order.crop?.paymentTerms === '50% Advance' ? (
+                        <>50% of Total ₹{((paymentModal.order.requestedQuantity || 0) * (paymentModal.order.offeredPrice || 0)).toLocaleString('en-IN')}</>
+                      ) : (
+                        <>{paymentModal.order.requestedQuantity} {paymentModal.order.crop?.unit || 'units'} × ₹{paymentModal.order.offeredPrice}</>
+                      )}
                     </p>
                   </div>
                 </div>
 
                 {bankAccount && (() => {
-                  const orderAmt = (paymentModal.order.requestedQuantity || 0) * (paymentModal.order.offeredPrice || 0);
-                  const isInsufficient = bankAccount.balance < orderAmt;
+                  const total = (paymentModal.order.requestedQuantity || 0) * (paymentModal.order.offeredPrice || 0);
+                  const required = paymentModal.order.crop?.paymentTerms === '50% Advance' ? 0.5 * total : total;
+                  const isInsufficient = bankAccount.balance < required;
                   return (
                     <div className={`px-3 py-2 rounded-xl border text-[10.5px] font-bold flex items-center justify-between ${
                       isInsufficient 
@@ -331,7 +342,10 @@ const VendorOrders = () => {
               >Cancel</button>
               <button
                 onClick={handleConfirmPayment}
-                disabled={paymentModal.isLoading || (bankAccount && bankAccount.balance < ((paymentModal.order.requestedQuantity || 0) * (paymentModal.order.offeredPrice || 0)))}
+                disabled={paymentModal.isLoading || (bankAccount && bankAccount.balance < (() => {
+                  const total = (paymentModal.order.requestedQuantity || 0) * (paymentModal.order.offeredPrice || 0);
+                  return paymentModal.order.crop?.paymentTerms === '50% Advance' ? 0.5 * total : total;
+                })())}
                 className="flex-1 h-10 rounded-xl bg-amber-500 hover:bg-amber-600 text-white text-[12.5px] font-bold transition-colors disabled:opacity-60 flex items-center justify-center gap-2"
               >
                 {paymentModal.isLoading ? (
@@ -339,7 +353,10 @@ const VendorOrders = () => {
                 ) : '💳'}
                 {paymentModal.isLoading 
                   ? 'Submitting...' 
-                  : (bankAccount && bankAccount.balance < ((paymentModal.order.requestedQuantity || 0) * (paymentModal.order.offeredPrice || 0)) 
+                  : (bankAccount && bankAccount.balance < (() => {
+                      const total = (paymentModal.order.requestedQuantity || 0) * (paymentModal.order.offeredPrice || 0);
+                      return paymentModal.order.crop?.paymentTerms === '50% Advance' ? 0.5 * total : total;
+                    })() 
                       ? 'Insufficient Funds' 
                       : 'Submit Payment')}
               </button>
