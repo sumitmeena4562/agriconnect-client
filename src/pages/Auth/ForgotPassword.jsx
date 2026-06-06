@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Link, useNavigate } from 'react-router-dom';
-import axios from 'axios';
+import api from '../../utils/api';
 import Input from '../../components/ui/Input';
 import Button from '../../components/ui/Button';
 import OtpInput from '../../components/ui/OtpInput';
@@ -42,7 +42,7 @@ const ForgotPassword = () => {
     setIsLoading(true);
     
     try {
-      const response = await axios.post('/api/auth/forgot-password', { identifier });
+      const response = await api.post('/auth/forgot-password', { identifier });
       if (response.data.success) {
         setEmail(response.data.email);
         setStep(2);
@@ -83,7 +83,7 @@ const ForgotPassword = () => {
     setIsLoading(true);
 
     try {
-      const response = await axios.post('/api/auth/reset-password', { 
+      const response = await api.post('/auth/reset-password', { 
         email, 
         otp, 
         newPassword 
@@ -105,7 +105,7 @@ const ForgotPassword = () => {
     setGlobalError('');
     setIsLoading(true);
     try {
-      await axios.post('/api/auth/forgot-password', { identifier });
+      await api.post('/auth/forgot-password', { identifier });
       setTimer(60);
       setSuccessMsg('OTP resent successfully!');
       setTimeout(() => setSuccessMsg(''), 3000);

@@ -45,9 +45,15 @@
   --color-warning-800: #9a3412;
   
   /* 2. BACKGROUND & SURFACES */
-  --color-bg-body: #f8fafc;    /* Light grayish blue for body */
-  --color-surface: #ffffff;    /* Pure white for cards/forms */
+  --color-bg-body: #f8fafc;         /* Light grayish blue for body */
+  --color-surface: #ffffff;         /* Pure white for cards/forms */
+  --color-bg-subtle: #f1f5f9;       /* Subtle hover / input bg */
   --color-border: #e2e8f0;
+
+  /* 3. TYPOGRAPHY COLORS */
+  --color-text-primary:   #0f172a;  /* slate-900 */
+  --color-text-secondary: #64748b;  /* slate-500 */
+  --color-text-muted:     #94a3b8;  /* slate-400 */
 
   /* 3. TYPOGRAPHY */
   --font-sans: 'Inter', system-ui, -apple-system, sans-serif;

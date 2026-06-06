@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import axios from 'axios';
+import api from '../../utils/api';
 import { toast } from 'react-hot-toast';
 import { motion } from 'framer-motion';
 import Input from '../../components/ui/Input';
@@ -13,7 +13,6 @@ import {
   validateCropName, validateQuantity, validatePrice, validateHarvestDate,
   validateCropLocation, validateMinOrderQuantity
 } from '../../utils/validation';
-import { getToken } from '../../utils/auth';
 
 const AddCrop = ({ isEditMode = false }) => {
   const navigate = useNavigate();
@@ -44,10 +43,8 @@ const AddCrop = ({ isEditMode = false }) => {
     if (isEditMode && id) {
       const fetchCrop = async () => {
         try {
-          const token = getToken();
-          const res = await axios.get(`/api/crops/${id}`, {
+          const res = await api.get(`/crops/${id}`, {
             headers: { 
-              Authorization: `Bearer ${token}`,
               'Cache-Control': 'no-cache',
               'Pragma': 'no-cache',
               'Expires': '0'
@@ -88,10 +85,7 @@ const AddCrop = ({ isEditMode = false }) => {
       // Fetch default location for new crop
       const fetchDefaultLocation = async () => {
         try {
-          const token = getToken();
-          const res = await axios.get('/api/farmers/profile', {
-            headers: { Authorization: `Bearer ${token}` }
-          });
+          const res = await api.get('/farmers/profile');
           const { user, profile } = res.data.data;
           
           let defaultLocation = user.location || '';
@@ -180,8 +174,6 @@ const AddCrop = ({ isEditMode = false }) => {
 
     setIsSubmitting(true);
     try {
-      const token = getToken();
-      
       // Upload new files first
       let finalImageUrls = [];
       const newFiles = images.filter(img => img.file).map(img => img.file);
@@ -191,9 +183,8 @@ const AddCrop = ({ isEditMode = false }) => {
         const uploadFormData = new FormData();
         newFiles.forEach(file => uploadFormData.append('images', file));
         
-        const uploadRes = await axios.post('/api/upload', uploadFormData, {
+        const uploadRes = await api.post('/upload', uploadFormData, {
           headers: { 
-            Authorization: `Bearer ${token}`,
             'Content-Type': 'multipart/form-data'
           }
         });
@@ -211,14 +202,10 @@ const AddCrop = ({ isEditMode = false }) => {
       };
 
       if (isEditMode) {
-        await axios.put(`/api/crops/${id}`, payload, {
-          headers: { Authorization: `Bearer ${token}` }
-        });
+        await api.put(`/crops/${id}`, payload);
         toast.success('Crop updated successfully!');
       } else {
-        await axios.post('/api/crops', payload, {
-          headers: { Authorization: `Bearer ${token}` }
-        });
+        await api.post('/crops', payload);
         toast.success('Crop added successfully!');
       }
       

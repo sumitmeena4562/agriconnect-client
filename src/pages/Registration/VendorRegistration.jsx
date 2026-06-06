@@ -5,7 +5,7 @@ import ProgressBar from '../../components/ui/ProgressBar';
 import Step1Basic from './Step1Basic';
 import VendorStep2Business from './VendorStep2Business';
 import VendorStep3Logistics from './VendorStep3Logistics';
-import axios from 'axios';
+import api from '../../utils/api';
 
 const VendorRegistration = () => {
   const [step, setStep] = useState(1);
@@ -53,7 +53,7 @@ const VendorRegistration = () => {
   const submitForm = async () => {
     const toastId = toast.loading('Creating Vendor Account...');
     try {
-      const response = await axios.post('/api/auth/register-vendor', formData);
+      const response = await api.post('/auth/register-vendor', formData);
       const { token, user } = response.data.data;
       
       // Save auth data to localStorage

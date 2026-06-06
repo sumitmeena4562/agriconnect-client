@@ -1,8 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import axios from 'axios';
+import api from '../../utils/api';
 import toast from 'react-hot-toast';
-import { getToken } from '../../utils/auth';
 
 const VendorCropDetails = () => {
   const { id } = useParams();
@@ -22,9 +21,7 @@ const VendorCropDetails = () => {
   useEffect(() => {
     const fetchCropDetails = async () => {
       try {
-        const res = await axios.get(`/api/crops/${id}`, {
-          headers: { Authorization: `Bearer ${getToken()}` }
-        });
+        const res = await api.get(`/crops/${id}`);
         // We need the crop to be populated with farmer details. Wait, GET /api/crops/:id doesn't populate farmer details currently!
         // For now, let's fetch it from marketplace endpoint trick, or we update backend.
         // Wait, the API returns what the controller provides. Let's see if we can get farmer info.
@@ -56,15 +53,13 @@ const VendorCropDetails = () => {
     const toastId = toast.loading('Sending Order Request...');
     
     try {
-        await axios.post('/api/orders', {
+        await api.post('/orders', {
             cropId: crop._id,
             requestedQuantity: Number(orderQuantity),
             offeredPrice: crop.price, // We can add negotiation later
             message: orderMessage,
             pickupDate: pickupDate || undefined,
             vehicleNumber: vehicleNumber || undefined
-        }, {
-            headers: { Authorization: `Bearer ${getToken()}` }
         });
 
         toast.success('Order request sent successfully! The farmer will be notified.', { id: toastId });

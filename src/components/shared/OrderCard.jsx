@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import toast from 'react-hot-toast';
 
-const OrderCard = ({ order, role = 'farmer', onUpdateStatus, onCancelOrder }) => {
+const OrderCard = ({ order, role = 'farmer', onUpdateStatus, onCancelOrder, onSubmitPayment, onVerifyPayment }) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
 
   const getStatusBadgeClass = (status) => {
@@ -186,6 +186,22 @@ const OrderCard = ({ order, role = 'farmer', onUpdateStatus, onCancelOrder }) =>
                 ₹{order.requestedQuantity * order.offeredPrice}
               </span>
             </div>
+            {order.status === 'Accepted' && (() => {
+              const ps = order.payment?.status || 'Unpaid';
+              const badgeClass = ps === 'Verified'
+                ? 'bg-emerald-50 border-emerald-200 text-emerald-700'
+                : ps === 'Submitted'
+                ? 'bg-blue-50 border-blue-200 text-blue-700'
+                : 'bg-orange-50 border-orange-200 text-orange-700';
+              const badgeIcon = ps === 'Verified' ? '✅' : ps === 'Submitted' ? '⏳' : '💳';
+              const badgeLabel = ps === 'Verified' ? 'Payment Verified' : ps === 'Submitted' ? 'Awaiting Verification' : 'Payment Pending';
+              return (
+                <div className={`flex items-center gap-1.5 px-2 py-1 rounded-lg border text-[10.5px] font-bold mt-1.5 ${badgeClass}`}>
+                  <span>{badgeIcon}</span>
+                  <span>{badgeLabel}</span>
+                </div>
+              );
+            })()}
           </div>
         </div>
 
@@ -225,6 +241,27 @@ const OrderCard = ({ order, role = 'farmer', onUpdateStatus, onCancelOrder }) =>
                 </button>
               </div>
             )}
+
+            {isFarmer && order.status === 'Accepted' && order.payment?.status === 'Submitted' && onVerifyPayment && (
+              <div onClick={(e) => e.stopPropagation()} className="mt-2.5">
+                <div className="bg-blue-50 border border-blue-200 rounded-lg p-2.5 mb-2">
+                  <p className="text-[10px] font-bold text-blue-700 mb-0.5">💳 Payment Submitted by Vendor</p>
+                  <p className="text-[11px] text-blue-900 font-bold">₹{(order.payment.amount || 0).toLocaleString('en-IN')} via {order.payment.method}</p>
+                  {order.payment.upiRef && <p className="text-[10px] text-blue-600 mt-0.5">Ref: {order.payment.upiRef}</p>}
+                  {order.payment.note && <p className="text-[10px] text-slate-500 mt-0.5">{order.payment.note}</p>}
+                </div>
+                <div className="flex gap-2">
+                  <button
+                    onClick={() => onVerifyPayment(order._id, 'reject')}
+                    className="flex-1 h-8 rounded-lg border border-red-200 text-red-600 bg-white hover:bg-red-50 text-[11px] font-bold transition-all active:scale-[0.98] cursor-pointer"
+                  >❌ Reject</button>
+                  <button
+                    onClick={() => onVerifyPayment(order._id, 'confirm')}
+                    className="flex-1 h-8 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white text-[11px] font-bold transition-all active:scale-[0.98] cursor-pointer"
+                  >✅ Confirm Paid</button>
+                </div>
+              </div>
+            )}
           </>
         ) : (
           <>
@@ -239,6 +276,23 @@ const OrderCard = ({ order, role = 'farmer', onUpdateStatus, onCancelOrder }) =>
                 >
                   Cancel Request
                 </button>
+              </div>
+            )}
+
+            {!isFarmer && order.status === 'Accepted' && order.payment?.status !== 'Verified' && onSubmitPayment && (
+              <div onClick={(e) => e.stopPropagation()} className="mt-2.5">
+                {order.payment?.status === 'Submitted' ? (
+                  <div className="w-full h-8 rounded-lg bg-blue-50 border border-blue-200 text-blue-700 text-[11px] font-bold flex items-center justify-center gap-1.5">
+                    <span>⏳</span><span>Awaiting farmer verification...</span>
+                  </div>
+                ) : (
+                  <button
+                    onClick={() => onSubmitPayment(order)}
+                    className="w-full h-8 rounded-lg bg-amber-500 hover:bg-amber-600 text-white text-[11.5px] font-bold transition-all active:scale-[0.98] cursor-pointer flex items-center justify-center gap-1.5"
+                  >
+                    <span>💳</span><span>Submit Payment</span>
+                  </button>
+                )}
               </div>
             )}
           </>

@@ -1,11 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import axios from 'axios';
+import api from '../../utils/api';
 import { toast } from 'react-hot-toast';
 import { motion } from 'framer-motion';
 import Input from '../../components/ui/Input';
 import Button from '../../components/ui/Button';
 
-import { getToken } from '../../utils/auth';
 
 const Profile = () => {
   const [formData, setFormData] = useState({
@@ -27,10 +26,7 @@ const Profile = () => {
   useEffect(() => {
     const fetchProfile = async () => {
       try {
-        const token = getToken();
-        const res = await axios.get('/api/farmers/profile', {
-          headers: { Authorization: `Bearer ${token}` }
-        });
+        const res = await api.get('/farmers/profile');
         
         const { user, profile } = res.data.data;
         
@@ -73,8 +69,6 @@ const Profile = () => {
     setIsSubmitting(true);
     
     try {
-      const token = getToken();
-      
       const payload = {
         name: formData.name,
         location: formData.location,
@@ -86,9 +80,7 @@ const Profile = () => {
         farmDetails: undefined // Not updating this right now
       };
       
-      await axios.put('/api/farmers/profile', payload, {
-        headers: { Authorization: `Bearer ${token}` }
-      });
+      await api.put('/farmers/profile', payload);
       
       toast.success('Profile updated successfully!');
     } catch (error) {

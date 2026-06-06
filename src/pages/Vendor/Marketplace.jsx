@@ -1,8 +1,8 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import axios from 'axios';
+import api from '../../utils/api';
 import toast from 'react-hot-toast';
 import CropCard from '../../components/shared/CropCard';
-import { getToken, getUser } from '../../utils/auth';
+import { getUser } from '../../utils/auth';
 
 const Marketplace = () => {
   const [crops, setCrops] = useState([]);
@@ -26,18 +26,14 @@ const Marketplace = () => {
   const fetchMarketplaceCrops = useCallback(async () => {
     setIsLoading(true);
     try {
-      let url = `/api/crops/marketplace?category=${category}&keyword=${keyword}&sort=${sort}&page=${page}&limit=10`;
+      let url = `/crops/marketplace?category=${category}&keyword=${keyword}&sort=${sort}&page=${page}&limit=10`;
       
       // Apply location filter if toggle is on and vendor has a state
       if (useMyLocation && vendorProfile?.state) {
         url += `&state=${vendorProfile.state}`;
       }
 
-      const res = await axios.get(url, {
-        headers: {
-          Authorization: `Bearer ${getToken()}`
-        }
-      });
+      const res = await api.get(url);
       setCrops(res.data.data);
       setTotalPages(res.data.totalPages);
       setTotalCrops(res.data.total);

@@ -5,7 +5,7 @@ import ProgressBar from '../../components/ui/ProgressBar';
 import Step1Basic from './Step1Basic';
 import Step2Location from './Step2Location';
 import Step3Farm from './Step3Farm';
-import axios from 'axios';
+import api from '../../utils/api';
 
 const FarmerRegistration = () => {
   const [step, setStep] = useState(1);
@@ -44,7 +44,7 @@ const FarmerRegistration = () => {
   const submitForm = async () => {
     const toastId = toast.loading('Registering account...');
     try {
-      const response = await axios.post('/api/farmers/register', formData);
+      const response = await api.post('/farmers/register', formData);
       const { token, user } = response.data.data;
       
       // Save auth data to localStorage

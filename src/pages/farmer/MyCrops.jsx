@@ -1,11 +1,10 @@
 import React, { useEffect, useState, useCallback } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import axios from 'axios';
+import api from '../../utils/api';
 import { toast } from 'react-hot-toast';
 import CropCard from '../../components/shared/CropCard';
 import ConfirmModal from '../../components/common/ConfirmModal';
 import { CROP_CATEGORIES } from '../../constants/cropConstants';
-import { getToken } from '../../utils/auth';
 
 const MyCrops = () => {
   const [crops, setCrops] = useState([]);
@@ -23,10 +22,8 @@ const MyCrops = () => {
   const fetchCrops = useCallback(async () => {
     setIsLoading(true);
     try {
-      const token = getToken();
-      const res = await axios.get(`/api/crops?keyword=${keyword}&category=${category}&sort=${sort}&page=${page}&limit=10`, {
+      const res = await api.get(`/crops?keyword=${keyword}&category=${category}&sort=${sort}&page=${page}&limit=10`, {
         headers: { 
-          Authorization: `Bearer ${token}`,
           'Cache-Control': 'no-cache',
           'Pragma': 'no-cache',
           'Expires': '0'
@@ -63,10 +60,7 @@ const MyCrops = () => {
 
   const handleToggleStatus = async (cropId) => {
     try {
-      const token = getToken();
-      const res = await axios.patch(`/api/crops/${cropId}/status`, {}, {
-        headers: { Authorization: `Bearer ${token}` }
-      });
+      const res = await api.patch(`/crops/${cropId}/status`, {});
       toast.success(res.data.message);
       
       // Update UI optimistically
@@ -88,10 +82,7 @@ const MyCrops = () => {
 
     setDeleteModal(prev => ({ ...prev, isLoading: true }));
     try {
-      const token = getToken();
-      await axios.delete(`/api/crops/${cropId}`, {
-        headers: { Authorization: `Bearer ${token}` }
-      });
+      await api.delete(`/crops/${cropId}`);
       toast.success('Crop deleted successfully');
       setDeleteModal({ isOpen: false, cropId: null, isLoading: false });
       // Refresh the current page to ensure pagination stays correct

@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import axios from 'axios';
+import api from '../utils/api';
 import toast from 'react-hot-toast';
-import { getToken, getUser } from '../utils/auth';
+import { getUser } from '../utils/auth';
 import { formatTimeAgo } from '../utils/time';
 
 const NotificationsPage = () => {
@@ -22,11 +22,7 @@ const NotificationsPage = () => {
   const fetchNotifications = async () => {
     setIsLoading(true);
     try {
-      const token = getToken();
-      if (!token) return;
-      const res = await axios.get('/api/notifications', {
-        headers: { Authorization: `Bearer ${token}` }
-      });
+      const res = await api.get('/notifications');
       setNotifications(res.data.data);
     } catch (error) {
       console.error('Error fetching notifications:', error);
@@ -46,10 +42,7 @@ const NotificationsPage = () => {
     
     const toastId = toast.loading('Marking all as read...');
     try {
-      const token = getToken();
-      await axios.patch('/api/notifications/mark-read', {}, {
-        headers: { Authorization: `Bearer ${token}` }
-      });
+      await api.patch('/notifications/mark-read', {});
       setNotifications(prev => prev.map(n => ({ ...n, read: true })));
       toast.success('All notifications marked as read', { id: toastId });
     } catch (error) {
@@ -65,10 +58,7 @@ const NotificationsPage = () => {
     setIsClearingRead(true);
     const toastId = toast.loading('Clearing read notifications...');
     try {
-      const token = getToken();
-      await axios.delete('/api/notifications/read', {
-        headers: { Authorization: `Bearer ${token}` }
-      });
+      await api.delete('/notifications/read');
       setNotifications(prev => prev.filter(n => !n.read));
       toast.success(`${readCount} read notification${readCount > 1 ? 's' : ''} cleared`, { id: toastId });
     } catch (error) {
@@ -83,10 +73,7 @@ const NotificationsPage = () => {
     // If unread, mark it as read on server first
     if (!n.read) {
       try {
-        const token = getToken();
-        await axios.patch(`/api/notifications/${n._id}/read`, {}, {
-          headers: { Authorization: `Bearer ${token}` }
-        });
+        await api.patch(`/notifications/${n._id}/read`, {});
         setNotifications(prev => prev.map(item => item._id === n._id ? { ...item, read: true } : item));
       } catch (error) {
         console.error('Error marking read:', error);
@@ -111,10 +98,7 @@ const NotificationsPage = () => {
     e.stopPropagation();
     setActionLoadingId(notificationId);
     try {
-      const token = getToken();
-      await axios.patch(`/api/orders/${orderId}/status`, { status: 'Accepted' }, {
-        headers: { Authorization: `Bearer ${token}` }
-      });
+      await api.patch(`/orders/${orderId}/status`, { status: 'Accepted' });
       toast.success('Order accepted successfully! OTP generated.');
       await fetchNotifications();
     } catch (error) {
@@ -131,10 +115,7 @@ const NotificationsPage = () => {
     e.stopPropagation();
     setActionLoadingId(notificationId);
     try {
-      const token = getToken();
-      await axios.patch(`/api/orders/${orderId}/status`, { status: 'Rejected' }, {
-        headers: { Authorization: `Bearer ${token}` }
-      });
+      await api.patch(`/orders/${orderId}/status`, { status: 'Rejected' });
       toast.success('Order rejected.');
       await fetchNotifications();
     } catch (error) {

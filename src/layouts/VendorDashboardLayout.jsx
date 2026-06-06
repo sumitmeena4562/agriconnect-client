@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import axios from 'axios';
+import api from '../utils/api';
 import { NavLink, Outlet, useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { toast } from 'react-hot-toast';
@@ -93,9 +93,7 @@ const VendorDashboardLayout = () => {
     try {
       const token = getToken();
       if (!token) return;
-      const res = await axios.get('/api/notifications', {
-        headers: { Authorization: `Bearer ${token}` }
-      });
+      const res = await api.get('/notifications');
       const newNotifications = res.data.data;
 
       // Trigger active toast messages, chime sound, and push for new unread notifications
@@ -106,11 +104,14 @@ const VendorDashboardLayout = () => {
           if (!exists && !n.read) {
             hasNewUnread = true;
             toast(n.text, {
-              icon: n.type === 'ORDER_RECEIVED' ? '🌾' :
-                    n.type === 'ORDER_ACCEPTED' ? '✅' :
-                    n.type === 'ORDER_REJECTED' ? '❌' :
-                    n.type === 'ORDER_COMPLETED' ? '🎉' :
-                    n.type === 'ORDER_CANCELLED' ? '⚠️' : '🔔',
+              icon: n.type === 'ORDER_RECEIVED'     ? '📦' :
+                    n.type === 'ORDER_ACCEPTED'     ? '✅' :
+                    n.type === 'ORDER_REJECTED'     ? '❌' :
+                    n.type === 'ORDER_COMPLETED'    ? '🎉' :
+                    n.type === 'ORDER_CANCELLED'    ? '⚠️' :
+                    n.type === 'PAYMENT_SUBMITTED'  ? '💳' :
+                    n.type === 'PAYMENT_VERIFIED'   ? '✅' :
+                    n.type === 'PAYMENT_REJECTED'   ? '🔴' : '🔔',
               duration: 5000,
               style: {
                 borderRadius: '10px',
@@ -158,10 +159,7 @@ const VendorDashboardLayout = () => {
 
   const handleMarkAllRead = async () => {
     try {
-      const token = getToken();
-      await axios.patch('/api/notifications/mark-read', {}, {
-        headers: { Authorization: `Bearer ${token}` }
-      });
+      await api.patch('/notifications/mark-read', {});
       setNotifications(prev => prev.map(n => ({ ...n, read: true })));
     } catch (error) {
       console.error('Error marking all read:', error);
@@ -173,10 +171,7 @@ const VendorDashboardLayout = () => {
     if (found && found.read) return;
 
     try {
-      const token = getToken();
-      await axios.patch(`/api/notifications/${notificationId}/read`, {}, {
-        headers: { Authorization: `Bearer ${token}` }
-      });
+      await api.patch(`/notifications/${notificationId}/read`, {});
       setNotifications(prev => prev.map(n => n._id === notificationId ? { ...n, read: true } : n));
     } catch (error) {
       console.error('Error marking read:', error);

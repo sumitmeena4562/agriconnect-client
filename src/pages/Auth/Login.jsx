@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Link, useNavigate, useSearchParams } from 'react-router-dom';
-import axios from 'axios';
+import api from '../../utils/api';
 import { auth } from '../../config/firebase';
 import { GoogleAuthProvider, signInWithPopup } from 'firebase/auth';
 import toast from 'react-hot-toast';
@@ -142,7 +142,7 @@ const Login = () => {
   const handlePasswordLogin = async () => {
     setIsLoading(true);
     try {
-      const response = await axios.post('/api/auth/login', { identifier: formData.identifier, password: formData.password });
+      const response = await api.post('/auth/login', { identifier: formData.identifier, password: formData.password });
       if (response.data.success) handleSuccessfulLogin(response.data);
     } catch (error) {
       handleError(error);
@@ -154,7 +154,7 @@ const Login = () => {
   const handleSendOtp = async () => {
     setIsLoading(true);
     try {
-      await axios.post('/api/auth/login-otp/send', { identifier: formData.identifier });
+      await api.post('/auth/login-otp/send', { identifier: formData.identifier });
       setOtpSent(true);
       setTimer(60);
       toast.success('OTP sent!');
@@ -169,7 +169,7 @@ const Login = () => {
   const handleVerifyOtp = async () => {
     setIsLoading(true);
     try {
-      const response = await axios.post('/api/auth/login-otp/verify', { identifier: formData.identifier, otp: formData.otp });
+      const response = await api.post('/auth/login-otp/verify', { identifier: formData.identifier, otp: formData.otp });
       if (response.data.success) handleSuccessfulLogin(response.data);
     } catch (error) {
       handleError(error);
@@ -198,7 +198,7 @@ const Login = () => {
     try {
       setIsLoading(true);
       const result = await signInWithPopup(auth, new GoogleAuthProvider());
-      const response = await axios.post('/api/auth/google-login', { email: result.user.email, googleId: result.user.uid });
+      const response = await api.post('/auth/google-login', { email: result.user.email, googleId: result.user.uid });
       if (response.data.success) handleSuccessfulLogin(response.data);
     } catch (error) {
       if (error.code !== 'auth/popup-closed-by-user') setGlobalError(error.response?.data?.error || 'Google login failed.');

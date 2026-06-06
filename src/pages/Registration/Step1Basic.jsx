@@ -3,7 +3,7 @@ import toast from 'react-hot-toast';
 import Input from '../../components/ui/Input';
 import Button from '../../components/ui/Button';
 import OtpInput from '../../components/ui/OtpInput';
-import axios from 'axios';
+import api from '../../utils/api';
 import { auth } from '../../config/firebase';
 import { GoogleAuthProvider, signInWithPopup } from 'firebase/auth';
 import { validateEmail, validatePhone, validateName, validatePassword, validateOtp, validateConfirmPassword } from '../../utils/validation';
@@ -83,7 +83,7 @@ const Step1Basic = ({ data, updateData, currentStep, nextStep, prevStep, setStep
     if (validateField('email', data.email)) {
       setIsSending(true);
       try {
-        await axios.post('/api/auth/send-otp', { email: data.email });
+        await api.post('/auth/send-otp', { email: data.email });
         setStep(2);
         setTimer(60);
         toast.success("OTP sent to your email!");

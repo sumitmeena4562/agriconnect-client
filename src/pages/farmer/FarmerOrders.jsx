@@ -1,8 +1,7 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
-import axios from 'axios';
+import api from '../../utils/api';
 import toast from 'react-hot-toast';
 import { motion, AnimatePresence } from 'framer-motion';
-import { getToken } from '../../utils/auth';
 import ConfirmModal from '../../components/common/ConfirmModal';
 import OrderCard from '../../components/shared/OrderCard';
 
@@ -30,14 +29,11 @@ const FarmerOrders = () => {
   const fetchOrders = useCallback(async () => {
     setIsLoading(true);
     try {
-      const token = getToken();
-      let url = '/api/orders';
+      let url = '/orders';
       if (activeTab !== 'All') {
         url += `?status=${activeTab}`;
       }
-      const res = await axios.get(url, {
-        headers: { Authorization: `Bearer ${token}` }
-      });
+      const res = await api.get(url);
       setOrders(res.data.data);
     } catch (error) {
       console.error('Error fetching farmer orders:', error);
@@ -102,12 +98,9 @@ const FarmerOrders = () => {
     setOtpModal(prev => ({ ...prev, isLoading: true }));
     const toastId = toast.loading('Verifying delivery OTP & completing order...');
     try {
-      const token = getToken();
-      const res = await axios.patch(`/api/orders/${orderId}/status`, { 
+      const res = await api.patch(`/orders/${orderId}/status`, { 
         status: 'Completed', 
         otp: otpValue.trim() 
-      }, {
-        headers: { Authorization: `Bearer ${token}` }
       });
       toast.success(res.data.message || 'Order completed & dispatched successfully!', { id: toastId });
       setOtpModal({ isOpen: false, orderId: null, otpValue: '', isLoading: false });
@@ -125,16 +118,24 @@ const FarmerOrders = () => {
     setConfirmModal(prev => ({ ...prev, isLoading: true }));
     const toastId = toast.loading('Updating order status...');
     try {
-      const token = getToken();
-      const res = await axios.patch(`/api/orders/${orderId}/status`, { status }, {
-        headers: { Authorization: `Bearer ${token}` }
-      });
+      const res = await api.patch(`/orders/${orderId}/status`, { status });
       toast.success(res.data.message || `Order successfully ${status.toLowerCase()}!`, { id: toastId });
       setConfirmModal({ isOpen: false, orderId: null, status: null, isLoading: false });
       fetchOrders();
     } catch (error) {
       toast.error(error.response?.data?.error || 'Failed to update order status', { id: toastId });
       setConfirmModal(prev => ({ ...prev, isLoading: false }));
+    }
+  };
+
+  const handleVerifyPayment = async (orderId, action) => {
+    const toastId = toast.loading(action === 'confirm' ? 'Confirming payment...' : 'Rejecting payment...');
+    try {
+      const res = await api.patch(`/orders/${orderId}/payment/verify`, { action });
+      toast.success(res.data.message || (action === 'confirm' ? 'Payment verified!' : 'Payment rejected.'), { id: toastId });
+      fetchOrders();
+    } catch (error) {
+      toast.error(error.response?.data?.error || 'Failed to update payment', { id: toastId });
     }
   };
 
@@ -257,6 +258,7 @@ const FarmerOrders = () => {
                 order={order}
                 role="farmer"
                 onUpdateStatus={handleUpdateStatusClick}
+                onVerifyPayment={handleVerifyPayment}
               />
             ))}
           </AnimatePresence>

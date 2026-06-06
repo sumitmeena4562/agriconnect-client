@@ -1,9 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
-import axios from 'axios';
+import api from '../../utils/api';
 import { toast } from 'react-hot-toast';
 
-import { getToken } from '../../utils/auth';
 
 const CropDetails = () => {
   const { id } = useParams();
@@ -15,10 +14,7 @@ const CropDetails = () => {
   useEffect(() => {
     const fetchCropDetails = async () => {
       try {
-        const token = getToken();
-        const res = await axios.get(`/api/crops/${id}`, {
-          headers: { Authorization: `Bearer ${token}` }
-        });
+        const res = await api.get(`/crops/${id}`);
         setCrop(res.data.data);
       } catch (error) {
         toast.error('Failed to load crop details');
@@ -33,10 +29,7 @@ const CropDetails = () => {
   const handleDelete = async () => {
     if (!window.confirm('Are you sure you want to delete this crop?')) return;
     try {
-      const token = getToken();
-      await axios.delete(`/api/crops/${id}`, {
-        headers: { Authorization: `Bearer ${token}` }
-      });
+      await api.delete(`/crops/${id}`);
       toast.success('Crop deleted successfully');
       navigate('/farmer-dashboard/crops');
     } catch (error) {
