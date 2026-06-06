@@ -54,7 +54,7 @@ const Step1Basic = ({ data, updateData, currentStep, nextStep, prevStep, setStep
       
       // Early Duplicate Check: Ensure email doesn't already exist
       try {
-        await axios.post('/api/auth/check-user', { email: user.email });
+        await api.post('/auth/check-user', { email: user.email });
       } catch (checkError) {
         toast.error(checkError.response?.data?.error || "This email is already registered.");
         return; // Stop execution
@@ -108,7 +108,7 @@ const Step1Basic = ({ data, updateData, currentStep, nextStep, prevStep, setStep
     }
 
     try {
-      await axios.post('/api/auth/verify-otp', { email: data.email, otp });
+      await api.post('/auth/verify-otp', { email: data.email, otp });
       setErrors((prev) => ({ ...prev, otp: '' }));
       
       // OTP verified successfully, proceed to collect Name and Phone

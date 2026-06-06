@@ -7,7 +7,7 @@ import { getUser } from '../../utils/auth';
 const Marketplace = () => {
   const [crops, setCrops] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
-  const [vendorProfile, setVendorProfile] = useState(() => {
+  const [vendorProfile] = useState(() => {
     const user = getUser() || {};
     return user.vendorProfile || null;
   });

@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import api from '../utils/api';
 import { NavLink, Link, Outlet, useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -15,8 +15,21 @@ const VendorDashboardLayout = () => {
   const [isLogoutModalOpen, setIsLogoutModalOpen] = useState(false);
   const [isLoggingOut, setIsLoggingOut] = useState(false);
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
-  const [userInitials, setUserInitials] = useState('VA');
-  const [userName, setUserName] = useState('');
+  const [userName] = useState(() => {
+    const user = getUser() || {};
+    return user.name || '';
+  });
+  const [userInitials] = useState(() => {
+    const user = getUser() || {};
+    if (user.name) {
+      const parts = user.name.split(' ');
+      if (parts.length > 1) {
+        return `${parts[0][0]}${parts[1][0]}`.toUpperCase();
+      }
+      return user.name.substring(0, 2).toUpperCase();
+    }
+    return 'VA';
+  });
 
   const [isNotificationsOpen, setIsNotificationsOpen] = useState(false);
   const [notifications, setNotifications] = useState([]);
@@ -90,7 +103,7 @@ const VendorDashboardLayout = () => {
     notificationsRef.current = notifications;
   }, [notifications]);
 
-  const fetchBankAccount = async () => {
+  const fetchBankAccount = useCallback(async () => {
     try {
       const token = getToken();
       if (!token) return;
@@ -99,13 +112,16 @@ const VendorDashboardLayout = () => {
     } catch (error) {
       console.error('Error fetching bank account:', error);
     }
-  };
+  }, []);
 
-  const fetchNotifications = async () => {
+  const fetchNotifications = useCallback(async () => {
     try {
       const token = getToken();
       if (!token) return;
+      
+      // Fetch bank account in parallel or sequence
       fetchBankAccount();
+      
       const res = await api.get('/notifications');
       const newNotifications = res.data.data;
 
@@ -114,7 +130,10 @@ const VendorDashboardLayout = () => {
         let hasNewUnread = false;
         newNotifications.forEach(n => {
           const exists = notificationsRef.current.some(prev => prev._id === n._id);
-          if (!exists && !n.read) {
+          
+          // Toast only if it's unread, doesn't exist in current state, AND is fresh (created in the last 30 seconds)
+          const isFresh = (new Date() - new Date(n.createdAt)) < 30000;
+          if (!exists && !n.read && isFresh) {
             hasNewUnread = true;
             toast(n.text, {
               icon: n.type === 'ORDER_RECEIVED'     ? '📦' :
@@ -160,13 +179,28 @@ const VendorDashboardLayout = () => {
     } catch (error) {
       console.error('Error fetching notifications:', error);
     }
-  };
+  }, [fetchBankAccount]);
 
   useEffect(() => {
-    fetchNotifications();
-    const interval = setInterval(fetchNotifications, 20000);
-    return () => clearInterval(interval);
-  }, []);
+    let active = true;
+    const initialFetch = async () => {
+      if (active) {
+        await fetchNotifications();
+      }
+    };
+    initialFetch();
+    
+    const interval = setInterval(() => {
+      if (active) {
+        fetchNotifications();
+      }
+    }, 20000);
+    
+    return () => {
+      active = false;
+      clearInterval(interval);
+    };
+  }, [fetchNotifications]);
 
 
 
@@ -214,16 +248,6 @@ const VendorDashboardLayout = () => {
     }
 
     const user = getUser() || {};
-    if (user.name) {
-      setUserName(user.name);
-      const parts = user.name.split(' ');
-      if (parts.length > 1) {
-        setUserInitials(`${parts[0][0]}${parts[1][0]}`.toUpperCase());
-      } else {
-        setUserInitials(user.name.substring(0, 2).toUpperCase());
-      }
-    }
-    
     if (user.role !== 'VENDOR' && user.role !== 'ADMIN') {
         toast.error('Unauthorized access. Please login as Vendor.');
         navigate('/', { replace: true });
