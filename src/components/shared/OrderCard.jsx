@@ -1,9 +1,50 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import toast from 'react-hot-toast';
+import LiveTrackingMap from './LiveTrackingMap';
+import api from '../../utils/api';
 
 const OrderCard = ({ order, role = 'farmer', onUpdateStatus, onCancelOrder, onSubmitPayment, onVerifyPayment }) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isTrackingMapOpen, setIsTrackingMapOpen] = useState(false);
+  const [isAssignModalOpen, setIsAssignModalOpen] = useState(false);
+  const [availableDrivers, setAvailableDrivers] = useState([]);
+  const [isAssigning, setIsAssigning] = useState(false);
+  const [selectedDriverId, setSelectedDriverId] = useState('');
+
+  const fetchAvailableDrivers = async () => {
+    try {
+      const res = await api.get('/drivers');
+      setAvailableDrivers(res.data.data.filter(d => d.status === 'Available'));
+    } catch (e) {
+      console.error("Failed to load drivers:", e);
+    }
+  };
+
+  const handleOpenAssignModal = () => {
+    fetchAvailableDrivers();
+    setIsAssignModalOpen(true);
+  };
+
+  const handleAssignDriver = async () => {
+    if (!selectedDriverId) {
+      toast.error('Please select a driver');
+      return;
+    }
+    setIsAssigning(true);
+    const toastId = toast.loading('Dispatching delivery...');
+    try {
+      await api.patch(`/orders/${order._id}/dispatch`, { driverId: selectedDriverId });
+      toast.success('Order dispatched successfully!', { id: toastId });
+      setIsAssignModalOpen(false);
+      setSelectedDriverId('');
+      if (onUpdateStatus) onUpdateStatus(order._id, 'REFRESH');
+    } catch (error) {
+      toast.error(error.response?.data?.error || 'Dispatch failed', { id: toastId });
+    } finally {
+      setIsAssigning(false);
+    }
+  };
 
   const getStatusBadgeClass = (status) => {
     switch (status) {
@@ -240,14 +281,49 @@ const OrderCard = ({ order, role = 'farmer', onUpdateStatus, onCancelOrder, onSu
             {order.status === 'Accepted' && order.payment?.status === 'Verified' && onUpdateStatus && (
               <div 
                 onClick={(e) => e.stopPropagation()} 
-                className="mt-2.5"
+                className="mt-2.5 space-y-2"
               >
-                <button
-                  onClick={() => onUpdateStatus(order._id, 'Completed')}
-                  className="w-full h-8 rounded-lg bg-success-600 hover:bg-success-700 text-white text-[11.5px] font-bold transition-all active:scale-[0.98] cursor-pointer"
-                >
-                  Mark Completed & Dispatched
-                </button>
+                {order.crop?.logisticsOption === 'Transport Available' ? (
+                  order.deliveryStatus === 'Pending' ? (
+                    <button
+                      onClick={handleOpenAssignModal}
+                      className="w-full h-8 rounded-lg bg-primary-600 hover:bg-primary-700 text-white text-[11.5px] font-bold transition-all active:scale-[0.98] cursor-pointer flex items-center justify-center gap-1.5"
+                    >
+                      <span className="material-symbols-outlined text-[15px]">local_shipping</span>
+                      Assign Driver & Dispatch
+                    </button>
+                  ) : (
+                    <>
+                      <div className="bg-emerald-50 border border-emerald-100 rounded-lg p-2 text-[10.5px] text-emerald-800 font-semibold text-center flex items-center justify-center gap-1">
+                        <span className="material-symbols-outlined text-[13px] animate-bounce">local_shipping</span>
+                        <span>
+                          {order.driver 
+                            ? `In Transit: ${order.driver.name} is delivering the crops.` 
+                            : 'Self-Transit: You are delivering the crops directly.'}
+                        </span>
+                      </div>
+                      <button
+                        onClick={() => onUpdateStatus(order._id, 'Completed')}
+                        className="w-full h-8 rounded-lg bg-success-600 hover:bg-success-700 text-white text-[11.5px] font-bold transition-all active:scale-[0.98] cursor-pointer"
+                      >
+                        Verify OTP & Complete Delivery
+                      </button>
+                    </>
+                  )
+                ) : (
+                  <>
+                    <div className="bg-blue-50 border border-blue-100 rounded-lg p-2 text-[10.5px] text-blue-800 font-semibold text-center flex items-center justify-center gap-1.5 shadow-sm">
+                      <span className="material-symbols-outlined text-[14px] text-blue-600 animate-pulse">storefront</span>
+                      <span>Awaiting Pickup: Vendor will collect the crops directly.</span>
+                    </div>
+                    <button
+                      onClick={() => onUpdateStatus(order._id, 'Completed')}
+                      className="w-full h-8 rounded-lg bg-success-600 hover:bg-success-700 text-white text-[11.5px] font-bold transition-all active:scale-[0.98] cursor-pointer"
+                    >
+                      Verify OTP & Complete Pickup
+                    </button>
+                  </>
+                )}
               </div>
             )}
 
@@ -284,6 +360,18 @@ const OrderCard = ({ order, role = 'farmer', onUpdateStatus, onCancelOrder, onSu
                   className="w-full h-8 rounded-lg border border-danger-200 text-danger-600 bg-white hover:bg-danger-50 text-[11.5px] font-bold transition-all active:scale-[0.98] cursor-pointer"
                 >
                   Cancel Request
+                </button>
+              </div>
+            )}
+
+            {!isFarmer && order.status === 'Accepted' && order.deliveryStatus === 'In Transit' && (
+              <div onClick={(e) => e.stopPropagation()} className="mt-2.5">
+                <button
+                  onClick={() => setIsTrackingMapOpen(true)}
+                  className="w-full h-8 rounded-lg bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-indigo-600 hover:to-purple-700 text-white text-[11.5px] font-bold transition-all active:scale-[0.98] cursor-pointer flex items-center justify-center gap-1.5 shadow-sm"
+                >
+                  <span className="material-symbols-outlined text-[15px]">navigation</span>
+                  Track Delivery 🚚
                 </button>
               </div>
             )}
@@ -520,6 +608,39 @@ const OrderCard = ({ order, role = 'farmer', onUpdateStatus, onCancelOrder, onSu
                             </span>
                           </div>
                         )}
+                        {order.driver && (
+                          <div className="flex justify-between items-center text-[11.5px] sm:text-[12px] pt-1">
+                            <span className="text-slate-500 font-medium flex items-center gap-1 shrink-0">
+                              <span className="material-symbols-outlined text-[14px] text-emerald-600">person</span>
+                              Driver Assigned:
+                            </span>
+                            <span className="font-bold text-slate-700 text-right truncate max-w-[150px]">
+                              {order.driver.name} ({order.driver.vehicleNumber})
+                            </span>
+                          </div>
+                        )}
+                        {order.deliveryStatus === 'In Transit' && !order.driver && (
+                          <div className="flex justify-between items-center text-[11.5px] sm:text-[12px] pt-1">
+                            <span className="text-slate-500 font-medium flex items-center gap-1 shrink-0">
+                              <span className="material-symbols-outlined text-[14px] text-emerald-600">motorcycle</span>
+                              Delivery Mode:
+                            </span>
+                            <span className="font-bold text-slate-700 text-right">
+                              Farmer Self-Delivery
+                            </span>
+                          </div>
+                        )}
+                        {order.crop?.logisticsOption === 'Self-Pickup' && (
+                          <div className="flex justify-between items-center text-[11.5px] sm:text-[12px] pt-1">
+                            <span className="text-slate-500 font-medium flex items-center gap-1 shrink-0">
+                              <span className="material-symbols-outlined text-[14px] text-emerald-600">storefront</span>
+                              Fulfillment:
+                            </span>
+                            <span className="font-bold text-slate-700 text-right">
+                              Vendor Self-Pickup
+                            </span>
+                          </div>
+                        )}
                         
                         {/* OTP display */}
                         {order.deliveryOTP && ['Accepted', 'Completed'].includes(order.status) && (
@@ -528,7 +649,11 @@ const OrderCard = ({ order, role = 'farmer', onUpdateStatus, onCancelOrder, onSu
                               order.status === 'Accepted' ? (
                                 order.payment?.status === 'Verified' ? (
                                   <div className="bg-primary-50 text-primary-700 px-3 py-2 rounded-lg border border-primary-200 text-[11px] font-bold w-full">
-                                    <span>Verify OTP from Buyer during pickup to mark completed.</span>
+                                    <span>
+                                      {order.crop?.logisticsOption === 'Self-Pickup' 
+                                        ? 'Verify OTP from Buyer during pickup to complete order.' 
+                                        : 'Verify OTP from Buyer upon delivery to complete order.'}
+                                    </span>
                                   </div>
                                 ) : (
                                   <div className="bg-orange-50 text-orange-700 px-3 py-2 rounded-lg border border-orange-200 text-[11px] font-bold w-full">
@@ -551,8 +676,12 @@ const OrderCard = ({ order, role = 'farmer', onUpdateStatus, onCancelOrder, onSu
                                     <span className="text-[18px] font-black tracking-widest text-slate-800 bg-white px-4 py-1.5 rounded-lg border border-yellow-300 shadow-inner">
                                       {order.deliveryOTP}
                                     </span>
-                                    <span className="text-[9px] font-medium text-yellow-700 mt-0.5">
-                                      Share this with the seller to complete the order.
+                                    <span className="text-[9.5px] font-bold text-yellow-850 mt-0.5">
+                                      {order.crop?.logisticsOption === 'Self-Pickup'
+                                        ? 'Self-Pickup: Show this OTP to the farmer when you collect the crops.'
+                                        : order.driver 
+                                        ? `Delivery: Share this OTP with driver ${order.driver.name} upon arrival.`
+                                        : 'Self-Delivery: Share this OTP with the farmer upon delivery.'}
                                     </span>
                                   </div>
                                 ) : (
@@ -653,6 +782,122 @@ const OrderCard = ({ order, role = 'farmer', onUpdateStatus, onCancelOrder, onSu
           </div>
         )}
       </AnimatePresence>
+
+      {/* Live Tracking Map Modal */}
+      {isTrackingMapOpen && (
+        <LiveTrackingMap 
+          orderId={order._id} 
+          onClose={() => setIsTrackingMapOpen(false)} 
+        />
+      )}
+
+      {/* Farmer Assign Driver Modal */}
+      {isAssignModalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4" onClick={(e) => { e.stopPropagation(); setIsAssignModalOpen(false); }}>
+          <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" />
+          <div className="bg-white rounded-2xl max-w-sm w-full shadow-2xl border border-slate-100 z-10 overflow-hidden" onClick={(e) => e.stopPropagation()}>
+            <div className="px-5 py-4 border-b border-slate-100 bg-slate-50 flex justify-between items-center">
+              <div>
+                <h2 className="text-[14.5px] font-extrabold text-slate-800">🚚 Dispatch Order</h2>
+                <p className="text-[10px] text-slate-500 mt-0.5">Assign fulfillment for order #{order._id?.slice(-6).toUpperCase()}</p>
+              </div>
+              <button 
+                onClick={() => setIsAssignModalOpen(false)}
+                className="w-7 h-7 rounded-full hover:bg-slate-200 flex items-center justify-center text-slate-450 cursor-pointer"
+              >
+                <span className="material-symbols-outlined text-[16px]">close</span>
+              </button>
+            </div>
+
+            <div className="p-4 overflow-y-auto max-h-[350px] space-y-2.5">
+              <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Choose Delivery Method</label>
+              
+              {/* Option 1: Self-Delivery (Always Available) */}
+              <div 
+                onClick={() => setSelectedDriverId('self')}
+                className={`p-3 rounded-xl border-2 transition-all cursor-pointer flex items-center justify-between hover:border-primary-500 hover:bg-slate-50/50 ${
+                  selectedDriverId === 'self'
+                    ? 'border-primary-600 bg-primary-50/20 ring-1 ring-primary-500/10'
+                    : 'border-slate-100 bg-white'
+                }`}
+              >
+                <div className="flex items-center gap-3">
+                  <div className="w-9 h-9 rounded-full bg-primary-100 text-primary-700 flex items-center justify-center shrink-0">
+                    <span className="material-symbols-outlined text-[20px]">directions_run</span>
+                  </div>
+                  <div>
+                    <h4 className="text-[12.5px] font-bold text-slate-800">Self-Delivery</h4>
+                    <p className="text-[9.5px] text-slate-400 font-semibold mt-0.5">I will deliver the crops myself</p>
+                  </div>
+                </div>
+                {selectedDriverId === 'self' && (
+                  <span className="material-symbols-outlined text-primary-600 font-black text-[18px]">check_circle</span>
+                )}
+              </div>
+
+              {/* Option 2: List of available drivers */}
+              {availableDrivers.map(drv => {
+                const getIcon = (type) => {
+                  if (type === 'Bike') return 'two_wheeler';
+                  if (type === 'Tractor') return 'agriculture';
+                  return 'local_shipping';
+                };
+                
+                return (
+                  <div 
+                    key={drv._id}
+                    onClick={() => setSelectedDriverId(drv._id)}
+                    className={`p-3 rounded-xl border-2 transition-all cursor-pointer flex items-center justify-between hover:border-primary-500 hover:bg-slate-50/50 ${
+                      selectedDriverId === drv._id
+                        ? 'border-primary-600 bg-primary-50/20 ring-1 ring-primary-500/10'
+                        : 'border-slate-100 bg-white'
+                    }`}
+                  >
+                    <div className="flex items-center gap-3">
+                      <div className="w-9 h-9 rounded-full bg-slate-100 text-slate-600 flex items-center justify-center shrink-0">
+                        <span className="material-symbols-outlined text-[20px]">{getIcon(drv.vehicleType)}</span>
+                      </div>
+                      <div className="min-w-0">
+                        <h4 className="text-[12.5px] font-bold text-slate-800 truncate">{drv.name}</h4>
+                        <p className="text-[9.5px] text-slate-400 font-mono mt-0.5 uppercase tracking-wide">
+                          {drv.vehicleNumber} • {drv.vehicleType}
+                        </p>
+                      </div>
+                    </div>
+                    {selectedDriverId === drv._id && (
+                      <span className="material-symbols-outlined text-primary-600 font-black text-[18px]">check_circle</span>
+                    )}
+                  </div>
+                );
+              })}
+
+              {availableDrivers.length === 0 && (
+                <div className="text-center py-2 bg-slate-50 rounded-xl border border-slate-150 p-2.5">
+                  <p className="text-[10px] text-slate-500 font-semibold leading-relaxed">
+                    No registered fleet drivers available right now. You can still use the <b>Self-Delivery</b> option above.
+                  </p>
+                </div>
+              )}
+            </div>
+
+            <div className="px-5 pb-5 flex gap-2 pt-2 border-t border-slate-100 bg-slate-50/50">
+              <button
+                onClick={() => setIsAssignModalOpen(false)}
+                className="flex-1 h-9 rounded-xl border border-slate-200 text-slate-600 text-[12px] font-bold hover:bg-slate-50 transition-colors cursor-pointer"
+              >Cancel</button>
+              <button
+                onClick={handleAssignDriver}
+                disabled={isAssigning || !selectedDriverId}
+                className="flex-1 h-9 rounded-xl bg-primary-600 hover:bg-primary-700 text-white text-[12px] font-bold transition-colors disabled:opacity-60 flex items-center justify-center gap-1.5 cursor-pointer"
+              >
+                {isAssigning ? (
+                  <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                ) : 'Dispatch'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </>
   );
 };

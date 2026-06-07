@@ -78,6 +78,10 @@ const FarmerOrders = () => {
   });
 
   const handleUpdateStatusClick = (orderId, newStatus) => {
+    if (newStatus === 'REFRESH') {
+      fetchOrders();
+      return;
+    }
     if (newStatus === 'Completed') {
       setOtpModal({
         isOpen: true,

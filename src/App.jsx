@@ -17,6 +17,7 @@ import AddCrop from './pages/Farmer/AddCrop';
 import CropDetails from './pages/Farmer/CropDetails';
 import Profile from './pages/Farmer/Profile';
 import FarmerOrders from './pages/farmer/FarmerOrders';
+import DriverRegistry from './pages/farmer/DriverRegistry';
 import VendorOrders from './pages/Vendor/VendorOrders';
 import SharedCropLinkHandler from './pages/SharedCropLinkHandler';
 import NotFound from './pages/NotFound';
@@ -60,6 +61,7 @@ function App() {
             <Route path="crops/edit/:id" element={<AddCrop isEditMode={true} />} />
             <Route path="crops/:id" element={<CropDetails />} />
             <Route path="orders" element={<FarmerOrders />} />
+            <Route path="fleet" element={<DriverRegistry />} />
             <Route path="bank" element={<BankPage />} />
             <Route path="notifications" element={<NotificationsPage />} />
             <Route path="profile" element={<Profile />} />
