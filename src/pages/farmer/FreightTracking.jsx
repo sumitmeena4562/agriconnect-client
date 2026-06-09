@@ -1,9 +1,11 @@
 import React, { useState, useEffect, useRef } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import api from '../../utils/api';
 import { toast } from 'react-hot-toast';
 import { motion, AnimatePresence } from 'framer-motion';
 
 const FreightTracking = () => {
+  const [searchParams] = useSearchParams();
   const [orders, setOrders] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [selectedOrder, setSelectedOrder] = useState(null);
@@ -32,6 +34,16 @@ const FreightTracking = () => {
         (o.deliveryStatus === 'In Transit' || o.deliveryStatus === 'Arrived')
       );
 
+      // Check if driverId query parameter is present to auto-select
+      const driverIdParam = searchParams.get('driverId');
+      if (driverIdParam && activeTransit.length > 0) {
+        const matchingOrder = activeTransit.find(o => o.driver?._id === driverIdParam);
+        if (matchingOrder) {
+          setSelectedOrder(matchingOrder);
+          return;
+        }
+      }
+
       // If active transit orders exist and none is selected, auto-select the first one
       if (activeTransit.length > 0 && !selectedOrder) {
         setSelectedOrder(activeTransit[0]);
@@ -45,7 +57,7 @@ const FreightTracking = () => {
 
   useEffect(() => {
     fetchOrders();
-  }, []);
+  }, [searchParams]);
 
   // 2. Load Leaflet CDN dynamically
   useEffect(() => {

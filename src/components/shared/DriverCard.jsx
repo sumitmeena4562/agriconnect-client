@@ -1,5 +1,6 @@
 import React from 'react';
 import { motion } from 'framer-motion';
+import { Link } from 'react-router-dom';
 
 const DriverCard = ({ driver, onDelete }) => {
   // Get vehicle-specific styles
@@ -147,6 +148,18 @@ const DriverCard = ({ driver, onDelete }) => {
           </div>
         )}
       </div>
+
+      {/* Track Active Trip Link (Only if On Delivery) */}
+      {driver.status === 'On Delivery' && (
+        <Link 
+          to={`/farmer-dashboard/tracking?driverId=${driver._id}`}
+          onClick={e => e.stopPropagation()}
+          className="mt-2.5 flex items-center justify-center gap-1.5 text-[10.5px] font-bold text-amber-800 bg-amber-50 hover:bg-amber-100 border border-amber-200 py-1.5 rounded-lg transition-all animate-pulse shadow-sm"
+        >
+          <span className="material-symbols-outlined text-[13px] font-bold">navigation</span>
+          <span>Track Active Trip 🚚</span>
+        </Link>
+      )}
 
       {/* Address (Full Width if present) */}
       {driver.address && (
