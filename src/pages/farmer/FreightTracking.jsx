@@ -34,6 +34,16 @@ const FreightTracking = () => {
         (o.deliveryStatus === 'In Transit' || o.deliveryStatus === 'Arrived')
       );
 
+      // Check if orderId query parameter is present to auto-select
+      const orderIdParam = searchParams.get('orderId');
+      if (orderIdParam && activeTransit.length > 0) {
+        const matchingOrder = activeTransit.find(o => o._id === orderIdParam);
+        if (matchingOrder) {
+          setSelectedOrder(matchingOrder);
+          return;
+        }
+      }
+
       // Check if driverId query parameter is present to auto-select
       const driverIdParam = searchParams.get('driverId');
       if (driverIdParam && activeTransit.length > 0) {

@@ -1,10 +1,12 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import toast from 'react-hot-toast';
 import LiveTrackingMap from './LiveTrackingMap';
 import api from '../../utils/api';
 
 const OrderCard = ({ order, role = 'farmer', onUpdateStatus, onCancelOrder, onSubmitPayment, onVerifyPayment }) => {
+  const navigate = useNavigate();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isTrackingMapOpen, setIsTrackingMapOpen] = useState(false);
   const [isAssignModalOpen, setIsAssignModalOpen] = useState(false);
@@ -302,12 +304,21 @@ const OrderCard = ({ order, role = 'farmer', onUpdateStatus, onCancelOrder, onSu
                             : 'Self-Transit: You are delivering the crops directly.'}
                         </span>
                       </div>
-                      <button
-                        onClick={() => onUpdateStatus(order._id, 'Completed')}
-                        className="w-full h-8 rounded-lg bg-success-600 hover:bg-success-700 text-white text-[11.5px] font-bold transition-all active:scale-[0.98] cursor-pointer"
-                      >
-                        Verify OTP & Complete Delivery
-                      </button>
+                      <div className="flex gap-2">
+                        <button
+                          onClick={() => navigate(`/farmer-dashboard/tracking?orderId=${order._id}`)}
+                          className="flex-1 h-8 rounded-lg border border-primary-200 text-primary-600 bg-white hover:bg-primary-50 text-[11.5px] font-bold transition-all active:scale-[0.98] cursor-pointer flex items-center justify-center gap-1"
+                        >
+                          <span className="material-symbols-outlined text-[14px]">navigation</span>
+                          Track Route
+                        </button>
+                        <button
+                          onClick={() => onUpdateStatus(order._id, 'Completed')}
+                          className="flex-1 h-8 rounded-lg bg-success-600 hover:bg-success-700 text-white text-[11.5px] font-bold transition-all active:scale-[0.98] cursor-pointer"
+                        >
+                          Complete Delivery
+                        </button>
+                      </div>
                     </>
                   )
                 ) : (
@@ -367,7 +378,7 @@ const OrderCard = ({ order, role = 'farmer', onUpdateStatus, onCancelOrder, onSu
             {!isFarmer && order.status === 'Accepted' && order.deliveryStatus === 'In Transit' && (
               <div onClick={(e) => e.stopPropagation()} className="mt-2.5">
                 <button
-                  onClick={() => setIsTrackingMapOpen(true)}
+                  onClick={() => navigate(`/vendor-dashboard/tracking?orderId=${order._id}`)}
                   className="w-full h-8 rounded-lg bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-indigo-600 hover:to-purple-700 text-white text-[11.5px] font-bold transition-all active:scale-[0.98] cursor-pointer flex items-center justify-center gap-1.5 shadow-sm"
                 >
                   <span className="material-symbols-outlined text-[15px]">navigation</span>
