@@ -18,7 +18,9 @@ import CropDetails from './pages/Farmer/CropDetails';
 import Profile from './pages/Farmer/Profile';
 import FarmerOrders from './pages/farmer/FarmerOrders';
 import DriverRegistry from './pages/farmer/DriverRegistry';
+import FreightTracking from './pages/farmer/FreightTracking';
 import VendorOrders from './pages/Vendor/VendorOrders';
+import VendorTracking from './pages/Vendor/VendorTracking';
 import SharedCropLinkHandler from './pages/SharedCropLinkHandler';
 import NotFound from './pages/NotFound';
 import ProtectedRoute from './components/common/ProtectedRoute';
@@ -62,6 +64,7 @@ function App() {
             <Route path="crops/:id" element={<CropDetails />} />
             <Route path="orders" element={<FarmerOrders />} />
             <Route path="fleet" element={<DriverRegistry />} />
+            <Route path="tracking" element={<FreightTracking />} />
             <Route path="bank" element={<BankPage />} />
             <Route path="notifications" element={<NotificationsPage />} />
             <Route path="profile" element={<Profile />} />
@@ -74,6 +77,7 @@ function App() {
             <Route index element={<Marketplace />} />
             <Route path="crops/:id" element={<VendorCropDetails />} />
             <Route path="orders" element={<VendorOrders />} />
+            <Route path="tracking" element={<VendorTracking />} />
             <Route path="bank" element={<BankPage />} />
             <Route path="notifications" element={<NotificationsPage />} />
             <Route path="profile" element={<div className="p-4"><h1 className="text-xl font-bold">Vendor Profile (Coming Soon)</h1></div>} />

@@ -289,6 +289,7 @@ const VendorDashboardLayout = () => {
   const navItems = [
     { name: 'Marketplace', path: '/vendor-dashboard', icon: 'storefront' },
     { name: 'My Orders', path: '/vendor-dashboard/orders', icon: 'shopping_bag' },
+    { name: 'Live Tracking', path: '/vendor-dashboard/tracking', icon: 'navigation' },
     { name: 'Bank Account', path: '/vendor-dashboard/bank', icon: 'account_balance' },
     { name: 'Profile', path: '/vendor-dashboard/profile', icon: 'business_center' },
   ];
