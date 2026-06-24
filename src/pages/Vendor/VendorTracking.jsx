@@ -440,42 +440,45 @@ const VendorTracking = () => {
             {selectedOrder && (
               <>
                 {/* Cargo Header Card */}
-                <div className="bg-[var(--color-surface)] border border-[var(--color-border)] p-4 rounded-2xl shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-4">
-                  <div className="flex items-start gap-3 min-w-0">
-                    <div className="w-10 h-10 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center shrink-0">
-                      <span className="material-symbols-outlined text-[22px]">package_2</span>
+                <div className="bg-[var(--color-surface)] border border-[var(--color-border)] py-2.5 px-4 rounded-xl shadow-xs flex flex-col md:flex-row md:items-center justify-between gap-4">
+                  {/* Left Side: Product & Status */}
+                  <div className="flex items-center gap-3">
+                    <div className="w-8 h-8 rounded-lg bg-blue-50 text-blue-600 flex items-center justify-center shrink-0">
+                      <span className="material-symbols-outlined text-[18px]">package_2</span>
                     </div>
-                    <div className="min-w-0">
-                      <div className="flex items-center gap-2 flex-wrap">
-                        <span className="text-[9px] font-mono font-bold text-[var(--color-text-muted)] uppercase tracking-wide bg-slate-100 px-1.5 py-0.5 rounded border border-slate-200">
+                    <div>
+                      <div className="flex items-center gap-2">
+                        <h3 className="text-[14px] font-black text-[var(--color-text-primary)] capitalize leading-none">
+                          {selectedOrder.crop?.name || 'Deleted Crop'}
+                        </h3>
+                        <span className="text-[8.5px] font-mono font-bold text-[var(--color-text-muted)] uppercase tracking-wide bg-slate-100 px-1.5 py-0.5 rounded border border-slate-200">
                           #{selectedOrder._id.slice(-6).toUpperCase()}
                         </span>
-                        <span className={`px-2 py-0.5 rounded-full text-[9px] font-black uppercase tracking-wider ${
-                          trackingData?.deliveryStatus === 'Arrived'
-                            ? 'bg-emerald-50 text-emerald-700 border border-emerald-100'
-                            : 'bg-blue-50 text-blue-700 border border-blue-100 animate-pulse'
-                        }`}>
-                          {trackingData?.deliveryStatus === 'Arrived' ? '⚡ Arrived' : '🚚 In Transit'}
+                      </div>
+                      <div className="flex items-center gap-1.5 mt-1">
+                        <span className={`w-1.5 h-1.5 rounded-full ${trackingData?.deliveryStatus === 'Arrived' ? 'bg-emerald-500' : 'bg-blue-500 animate-ping'}`} />
+                        <span className="text-[9.5px] font-bold text-[var(--color-text-secondary)]">
+                          Delivery Status: <span className={trackingData?.deliveryStatus === 'Arrived' ? "text-emerald-600 font-black uppercase" : "text-blue-600 font-black uppercase animate-pulse"}>
+                            {trackingData?.deliveryStatus === 'Arrived' ? 'Arrived' : 'In Transit'}
+                          </span>
                         </span>
                       </div>
-                      <h3 className="text-[16px] font-black text-[var(--color-text-primary)] mt-1 truncate">
-                        {selectedOrder.crop?.name || 'Deleted Crop'}
-                      </h3>
                     </div>
                   </div>
 
-                  <div className="grid grid-cols-3 md:flex md:items-center gap-4 md:gap-8 pt-3 md:pt-0 border-t md:border-t-0 border-slate-100">
+                  {/* Right Side: Quick Stats */}
+                  <div className="grid grid-cols-3 gap-6 md:gap-10 border-t md:border-t-0 border-slate-100 pt-2.5 md:pt-0">
                     <div>
-                      <span className="text-[9px] font-bold text-[var(--color-text-muted)] uppercase tracking-wider block">Quantity</span>
-                      <span className="font-bold text-[var(--color-text-primary)] text-[12.5px]">{selectedOrder.requestedQuantity} {selectedOrder.crop?.unit}</span>
+                      <span className="text-[8.5px] font-bold text-[var(--color-text-muted)] uppercase tracking-wider block">Quantity</span>
+                      <span className="font-extrabold text-[var(--color-text-primary)] text-[12px]">{selectedOrder.requestedQuantity} {selectedOrder.crop?.unit}</span>
                     </div>
                     <div>
-                      <span className="text-[9px] font-bold text-[var(--color-text-muted)] uppercase tracking-wider block">Total Cost</span>
-                      <span className="font-bold text-[var(--color-text-primary)] text-[12.5px]">₹{(selectedOrder.requestedQuantity * selectedOrder.offeredPrice).toLocaleString('en-IN')}</span>
+                      <span className="text-[8.5px] font-bold text-[var(--color-text-muted)] uppercase tracking-wider block">Total Cost</span>
+                      <span className="font-extrabold text-[var(--color-text-primary)] text-[12px]">₹{(selectedOrder.requestedQuantity * selectedOrder.offeredPrice).toLocaleString('en-IN')}</span>
                     </div>
                     <div>
-                      <span className="text-[9px] font-bold text-[var(--color-text-muted)] uppercase tracking-wider block">Payment</span>
-                      <span className="font-bold text-blue-600 text-[12.5px] truncate max-w-[100px] block">{selectedOrder.crop?.paymentTerms}</span>
+                      <span className="text-[8.5px] font-bold text-[var(--color-text-muted)] uppercase tracking-wider block">Payment</span>
+                      <span className="font-extrabold text-blue-600 text-[12px] truncate max-w-[100px] block">{selectedOrder.crop?.paymentTerms}</span>
                     </div>
                   </div>
                 </div>
