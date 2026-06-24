@@ -17,6 +17,7 @@ const FreightTracking = () => {
   const mapInstanceRef = useRef(null);
   const tileLayerRef = useRef(null);
   const overlayLayerRef = useRef(null);
+  const currentStyleRef = useRef(null);
   const driverMarkerRef = useRef(null);
   const startMarkerRef = useRef(null);
   const endMarkerRef = useRef(null);
@@ -125,41 +126,7 @@ const FreightTracking = () => {
     };
   }, [selectedOrder]);
 
-  // 4. Manage map style tile layers
-  useEffect(() => {
-    if (!mapLoaded || !mapInstanceRef.current) return;
-    const L = window.L;
-    const map = mapInstanceRef.current;
-
-    // Remove existing tile layers
-    if (tileLayerRef.current) {
-      map.removeLayer(tileLayerRef.current);
-      tileLayerRef.current = null;
-    }
-    if (overlayLayerRef.current) {
-      map.removeLayer(overlayLayerRef.current);
-      overlayLayerRef.current = null;
-    }
-
-    if (mapStyle === 'satellite') {
-      tileLayerRef.current = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
-        maxZoom: 19,
-        attribution: 'Tiles &copy; Esri &mdash; Source: Esri, i-cubed, USDA, USGS, AEX, GeoEye, Getmapping, Aerogrid, IGN, IGP, UPR-EGP, and the GIS User Community'
-      }).addTo(map);
-
-      overlayLayerRef.current = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/Reference/World_Boundaries_and_Places/MapServer/tile/{z}/{y}/{x}', {
-        maxZoom: 19,
-        opacity: 0.85
-      }).addTo(map);
-    } else {
-      tileLayerRef.current = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-        maxZoom: 19,
-        attribution: '&copy; OpenStreetMap contributors'
-      }).addTo(map);
-    }
-  }, [mapStyle, mapLoaded]);
-
-  // 5. Draw/Redraw markers and route on map
+  // 4. Draw/Redraw map, tiles, route and markers
   useEffect(() => {
     if (!mapLoaded || !trackingData || !mapRef.current) return;
 
@@ -176,6 +143,37 @@ const FreightTracking = () => {
     }
 
     const map = mapInstanceRef.current;
+
+    // Update tile layers if they don't exist or if style changed
+    if (!tileLayerRef.current || currentStyleRef.current !== mapStyle) {
+      // Remove old layers
+      if (tileLayerRef.current) {
+        map.removeLayer(tileLayerRef.current);
+        tileLayerRef.current = null;
+      }
+      if (overlayLayerRef.current) {
+        map.removeLayer(overlayLayerRef.current);
+        overlayLayerRef.current = null;
+      }
+
+      if (mapStyle === 'satellite') {
+        tileLayerRef.current = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
+          maxZoom: 19,
+          attribution: 'Tiles &copy; Esri &mdash; Source: Esri, i-cubed, USDA, USGS, AEX, GeoEye, Getmapping, Aerogrid, IGN, IGP, UPR-EGP, and the GIS User Community'
+        }).addTo(map);
+
+        overlayLayerRef.current = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/Reference/World_Boundaries_and_Places/MapServer/tile/{z}/{y}/{x}', {
+          maxZoom: 19,
+          opacity: 0.85
+        }).addTo(map);
+      } else {
+        tileLayerRef.current = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+          maxZoom: 19,
+          attribution: '&copy; OpenStreetMap contributors'
+        }).addTo(map);
+      }
+      currentStyleRef.current = mapStyle;
+    }
 
     // Helper for custom HTML markers
     const createHtmlIcon = (iconText, colorClass, textLabel) => {
@@ -247,7 +245,7 @@ const FreightTracking = () => {
     const bounds = L.latLngBounds([trackingData.startCoords, trackingData.endCoords]);
     map.fitBounds(bounds, { padding: [40, 40] });
 
-  }, [mapLoaded, trackingData]);
+  }, [mapLoaded, trackingData, mapStyle]);
 
   // Clean up markers and polyline on order change
   useEffect(() => {
