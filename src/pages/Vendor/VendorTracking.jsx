@@ -83,12 +83,72 @@ const VendorTracking = () => {
     document.body.appendChild(script);
   }, []);
 
+  // Helper to fetch actual driving route from OSRM on the frontend (browser has internet access)
+  const fetchFrontendOmsrRoute = async (startLat, startLng, endLat, endLng) => {
+    try {
+      const url = `https://router.projectosrm.org/route/v1/driving/${startLng},${startLat};${endLng},${endLat}?overview=full&geometries=geojson`;
+      const response = await fetch(url);
+      if (!response.ok) throw new Error(`Status ${response.status}`);
+      const data = await response.json();
+      if (data.code === 'Ok' && data.routes && data.routes.length > 0) {
+        const geojsonCoords = data.routes[0].geometry.coordinates;
+        return geojsonCoords.map(coord => [coord[1], coord[0]]);
+      }
+    } catch (error) {
+      console.warn('Frontend OSRM fetch failed, using fallback:', error.message);
+    }
+    return null;
+  };
+
   // 3. Fetch tracking details periodically for selected order
   const fetchTrackingDetails = async (orderId) => {
     try {
       const res = await api.get(`/orders/${orderId}/tracking`);
       if (res.data.success) {
-        setTrackingData(res.data);
+        const serverData = res.data;
+
+        // Try to fetch proper road routing directly on the frontend (bypassing backend offline sandbox)
+        if (serverData.startCoords && serverData.endCoords) {
+          const [startLat, startLng] = serverData.startCoords;
+          const [endLat, endLng] = serverData.endCoords;
+
+          const realRoute = await fetchFrontendOmsrRoute(startLat, startLng, endLat, endLng);
+          if (realRoute && realRoute.length > 0) {
+            const dispatchTime = serverData.dispatchTime 
+              ? new Date(serverData.dispatchTime).getTime() 
+              : Date.now();
+            const elapsedSeconds = Math.max(0, Math.floor((Date.now() - dispatchTime) / 1000));
+            const TRANSIT_DURATION = 180;
+            
+            let currentCoords;
+            let etaSeconds = 0;
+            let deliveryStatus = serverData.deliveryStatus;
+            const numPoints = realRoute.length - 1;
+            
+            if (elapsedSeconds >= TRANSIT_DURATION) {
+              currentCoords = realRoute[numPoints];
+              etaSeconds = 0;
+              deliveryStatus = 'Arrived';
+            } else {
+              const progress = elapsedSeconds / TRANSIT_DURATION;
+              const index = Math.min(numPoints, Math.floor(progress * realRoute.length));
+              currentCoords = realRoute[index] || realRoute[0];
+              etaSeconds = TRANSIT_DURATION - elapsedSeconds;
+              deliveryStatus = 'In Transit';
+            }
+
+            setTrackingData({
+              ...serverData,
+              route: realRoute,
+              currentCoords,
+              etaSeconds,
+              deliveryStatus
+            });
+            return;
+          }
+        }
+
+        setTrackingData(serverData);
       }
     } catch (e) {
       console.error('Failed to fetch live tracking coordinates', e);
