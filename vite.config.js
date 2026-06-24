@@ -16,11 +16,7 @@ export default defineConfig(({ mode }) => {
     ],
     server: {
       allowedHosts: true,
-      hmr: isNgrok ? {
-        host,
-        clientPort: 443,
-        protocol: 'wss',
-      } : true,
+      hmr: true,
       proxy: {
         '/api/v1': {
           target: 'http://127.0.0.1:5000',

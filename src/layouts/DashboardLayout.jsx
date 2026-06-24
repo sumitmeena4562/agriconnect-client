@@ -515,7 +515,7 @@ const DashboardLayout = () => {
         </header>
 
         {/* Page Content injected via Outlet */}
-        <div className="p-3 sm:p-5 w-full max-w-7xl mx-auto flex-1">
+        <div className="p-3 sm:p-5 pb-12 sm:pb-16 w-full max-w-7xl mx-auto flex-1">
           <Outlet />
         </div>
       </main>

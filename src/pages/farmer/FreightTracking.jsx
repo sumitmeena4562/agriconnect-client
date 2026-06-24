@@ -11,10 +11,12 @@ const FreightTracking = () => {
   const [selectedOrder, setSelectedOrder] = useState(null);
   const [trackingData, setTrackingData] = useState(null);
   const [mapLoaded, setMapLoaded] = useState(false);
-  const [activeTab, setActiveTab] = useState('order'); // 'order' | 'driver' | 'vehicle' | 'customer' | 'docs'
+  const [mapStyle, setMapStyle] = useState('satellite');
 
   const mapRef = useRef(null);
   const mapInstanceRef = useRef(null);
+  const tileLayerRef = useRef(null);
+  const overlayLayerRef = useRef(null);
   const driverMarkerRef = useRef(null);
   const startMarkerRef = useRef(null);
   const endMarkerRef = useRef(null);
@@ -123,7 +125,41 @@ const FreightTracking = () => {
     };
   }, [selectedOrder]);
 
-  // 4. Draw/Redraw map when mapLoaded or trackingData changes
+  // 4. Manage map style tile layers
+  useEffect(() => {
+    if (!mapLoaded || !mapInstanceRef.current) return;
+    const L = window.L;
+    const map = mapInstanceRef.current;
+
+    // Remove existing tile layers
+    if (tileLayerRef.current) {
+      map.removeLayer(tileLayerRef.current);
+      tileLayerRef.current = null;
+    }
+    if (overlayLayerRef.current) {
+      map.removeLayer(overlayLayerRef.current);
+      overlayLayerRef.current = null;
+    }
+
+    if (mapStyle === 'satellite') {
+      tileLayerRef.current = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
+        maxZoom: 19,
+        attribution: 'Tiles &copy; Esri &mdash; Source: Esri, i-cubed, USDA, USGS, AEX, GeoEye, Getmapping, Aerogrid, IGN, IGP, UPR-EGP, and the GIS User Community'
+      }).addTo(map);
+
+      overlayLayerRef.current = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/Reference/World_Boundaries_and_Places/MapServer/tile/{z}/{y}/{x}', {
+        maxZoom: 19,
+        opacity: 0.85
+      }).addTo(map);
+    } else {
+      tileLayerRef.current = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        maxZoom: 19,
+        attribution: '&copy; OpenStreetMap contributors'
+      }).addTo(map);
+    }
+  }, [mapStyle, mapLoaded]);
+
+  // 5. Draw/Redraw markers and route on map
   useEffect(() => {
     if (!mapLoaded || !trackingData || !mapRef.current) return;
 
@@ -137,12 +173,6 @@ const FreightTracking = () => {
       }).setView(trackingData.currentCoords, 11);
 
       mapInstanceRef.current = map;
-
-      // CartoDB Positron Tiles for sleek premium gray aesthetic
-      L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
-        maxZoom: 19,
-        attribution: '&copy; OpenStreetMap contributors &copy; CARTO'
-      }).addTo(map);
     }
 
     const map = mapInstanceRef.current;
@@ -292,18 +322,18 @@ const FreightTracking = () => {
         </div>
       ) : (
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-4">
-          {/* Left Panel: Shipments List (Col Span 4) */}
-          <div className="lg:col-span-4 space-y-3 flex flex-col max-h-[720px]">
+          {/* Left Panel: Active Shipments List (Col Span 3) */}
+          <div className="lg:col-span-3 space-y-3 flex flex-col max-h-[720px]">
             <div className="bg-[var(--color-surface)] border border-[var(--color-border)] rounded-xl p-3 shadow-sm flex items-center justify-between">
               <span className="text-[11px] font-extrabold uppercase text-[var(--color-text-secondary)] tracking-wider">
-                Active Shipments ({activeTransitOrders.length})
+                Active ({activeTransitOrders.length})
               </span>
               <span className="px-2 py-0.5 rounded-full bg-primary-50 border border-primary-100 text-primary-700 text-[9px] font-bold animate-pulse">
                 LIVE
               </span>
             </div>
 
-            <div className="overflow-y-auto space-y-2.5 flex-1 max-h-[600px] pr-1">
+            <div className="overflow-y-auto space-y-2.5 flex-1 max-h-[640px] pr-1">
               {activeTransitOrders.map((order) => {
                 const isSelected = selectedOrder?._id === order._id;
                 return (
@@ -347,9 +377,9 @@ const FreightTracking = () => {
                     </div>
 
                     <div className="mt-2.5 pt-2 border-t border-slate-100 flex items-center justify-between text-[9px] text-[var(--color-text-muted)] font-semibold">
-                      <span className="truncate max-w-[100px]">{order.farmer?.location || 'My Farm'}</span>
-                      <span className="text-[12px] font-normal text-slate-300">➔</span>
-                      <span className="truncate max-w-[100px] text-right">{order.crop?.location}</span>
+                      <span className="truncate max-w-[85px]">{order.farmer?.location || 'My Farm'}</span>
+                      <span className="text-[10px] text-slate-300">➔</span>
+                      <span className="truncate max-w-[85px] text-right">{order.crop?.location}</span>
                     </div>
                   </div>
                 );
@@ -357,221 +387,195 @@ const FreightTracking = () => {
             </div>
           </div>
 
-          {/* Right Panel: Map & Tabs Detail View (Col Span 8) */}
-          <div className="lg:col-span-8 space-y-4">
+          {/* Right Panel: Map & Details Workspace (Col Span 9) */}
+          <div className="lg:col-span-9 space-y-4">
             {selectedOrder && (
               <>
-                {/* 1. Dynamic Info Badges Row */}
-                <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-                  {/* Current Location */}
-                  <div className="bg-[var(--color-surface)] border border-[var(--color-border)] p-3 rounded-xl shadow-sm flex flex-col justify-between">
-                    <span className="text-[8.5px] font-bold text-[var(--color-text-muted)] uppercase tracking-wider block">Current Location</span>
-                    <span className="text-[12px] font-bold text-[var(--color-text-primary)] mt-1 truncate">
-                      {trackingData?.deliveryStatus === 'Arrived' ? 'At Destination' : 'In Transit Route'}
-                    </span>
+                {/* Cargo Header Card */}
+                <div className="bg-[var(--color-surface)] border border-[var(--color-border)] p-4 rounded-2xl shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-4">
+                  <div className="flex items-start gap-3 min-w-0">
+                    <div className="w-10 h-10 rounded-xl bg-primary-50 text-primary-600 flex items-center justify-center shrink-0">
+                      <span className="material-symbols-outlined text-[22px]">package_2</span>
+                    </div>
+                    <div className="min-w-0">
+                      <div className="flex items-center gap-2 flex-wrap">
+                        <span className="text-[9px] font-mono font-bold text-[var(--color-text-muted)] uppercase tracking-wide bg-slate-100 px-1.5 py-0.5 rounded border border-slate-200">
+                          #{selectedOrder._id.slice(-6).toUpperCase()}
+                        </span>
+                        <span className={`px-2 py-0.5 rounded-full text-[9px] font-black uppercase tracking-wider ${
+                          trackingData?.deliveryStatus === 'Arrived'
+                            ? 'bg-emerald-50 text-emerald-700 border border-emerald-100'
+                            : 'bg-primary-50 text-primary-700 border border-primary-100 animate-pulse'
+                        }`}>
+                          {trackingData?.deliveryStatus === 'Arrived' ? '⚡ Arrived' : '🚚 In Transit'}
+                        </span>
+                      </div>
+                      <h3 className="text-[16px] font-black text-[var(--color-text-primary)] mt-1 truncate">
+                        {selectedOrder.crop?.name || 'Deleted Crop'}
+                      </h3>
+                    </div>
                   </div>
 
-                  {/* Speed */}
-                  <div className="bg-[var(--color-surface)] border border-[var(--color-border)] p-3 rounded-xl shadow-sm flex flex-col justify-between">
-                    <span className="text-[8.5px] font-bold text-[var(--color-text-muted)] uppercase tracking-wider block">Current Speed</span>
-                    <span className="text-[12px] font-bold text-[var(--color-text-primary)] mt-1">
-                      {getSpeed()}
-                    </span>
-                  </div>
-
-                  {/* Distance Covered Percentage */}
-                  <div className="bg-[var(--color-surface)] border border-[var(--color-border)] p-3 rounded-xl shadow-sm flex flex-col justify-between">
-                    <span className="text-[8.5px] font-bold text-[var(--color-text-muted)] uppercase tracking-wider block">Transit Distance</span>
-                    <span className="text-[12px] font-bold text-[var(--color-text-primary)] mt-1">
-                      {getDistancePercent()} Covered
-                    </span>
-                  </div>
-
-                  {/* ETA */}
-                  <div className="bg-[var(--color-surface)] border border-[var(--color-border)] p-3 rounded-xl shadow-sm flex flex-col justify-between">
-                    <span className="text-[8.5px] font-bold text-[var(--color-text-muted)] uppercase tracking-wider block">Estimated ETA</span>
-                    <span className="text-[12px] font-black text-primary-600 mt-1">
-                      {trackingData ? formatEta(trackingData.etaSeconds) : 'Calculating...'}
-                    </span>
+                  <div className="grid grid-cols-3 md:flex md:items-center gap-4 md:gap-8 pt-3 md:pt-0 border-t md:border-t-0 border-slate-100">
+                    <div>
+                      <span className="text-[9px] font-bold text-[var(--color-text-muted)] uppercase tracking-wider block">Quantity</span>
+                      <span className="font-bold text-[var(--color-text-primary)] text-[12.5px]">{selectedOrder.requestedQuantity} {selectedOrder.crop?.unit}</span>
+                    </div>
+                    <div>
+                      <span className="text-[9px] font-bold text-[var(--color-text-muted)] uppercase tracking-wider block">Total Cost</span>
+                      <span className="font-bold text-[var(--color-text-primary)] text-[12.5px]">₹{(selectedOrder.requestedQuantity * selectedOrder.offeredPrice).toLocaleString('en-IN')}</span>
+                    </div>
+                    <div>
+                      <span className="text-[9px] font-bold text-[var(--color-text-muted)] uppercase tracking-wider block">Payment Terms</span>
+                      <span className="font-bold text-primary-600 text-[12.5px] truncate max-w-[100px] block">{selectedOrder.crop?.paymentTerms}</span>
+                    </div>
                   </div>
                 </div>
 
-                {/* 2. Interactive Map */}
-                <div className="bg-[var(--color-surface)] border border-[var(--color-border)] rounded-2xl overflow-hidden shadow-sm flex flex-col">
-                  <div className="px-4 py-2 border-b border-[var(--color-border)] bg-[var(--color-bg-subtle)] flex items-center justify-between">
-                    <span className="text-[10px] font-extrabold uppercase text-[var(--color-text-secondary)] tracking-wider">
+                {/* Map Card */}
+                <div className="bg-[var(--color-surface)] border border-[var(--color-border)] rounded-2xl overflow-hidden shadow-sm flex flex-col h-[400px]">
+                  <div className="px-4 py-2.5 border-b border-[var(--color-border)] bg-[var(--color-bg-subtle)] flex items-center justify-between">
+                    <span className="text-[10px] font-extrabold uppercase text-[var(--color-text-secondary)] tracking-wider flex items-center gap-1.5">
+                      <span className="w-2 h-2 rounded-full bg-primary-500 animate-ping" />
                       Live Route Map
                     </span>
-                    <span className="text-[9.5px] font-semibold text-[var(--color-text-secondary)] flex items-center gap-1">
-                      <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-ping" />
-                      Auto-refreshing every 3s
-                    </span>
+
+                    {/* Style Toggle */}
+                    <div className="flex bg-slate-200/70 p-0.5 rounded-lg border border-slate-300/30">
+                      <button
+                        onClick={() => setMapStyle('streets')}
+                        className={`px-2 py-0.5 rounded-md text-[9px] font-bold transition-all flex items-center gap-1 cursor-pointer ${
+                          mapStyle === 'streets'
+                            ? 'bg-white text-slate-800 shadow-xs'
+                            : 'text-slate-500 hover:text-slate-800'
+                        }`}
+                      >
+                        🗺️ Streets
+                      </button>
+                      <button
+                        onClick={() => setMapStyle('satellite')}
+                        className={`px-2 py-0.5 rounded-md text-[9px] font-bold transition-all flex items-center gap-1 cursor-pointer ${
+                          mapStyle === 'satellite'
+                            ? 'bg-white text-slate-800 shadow-xs'
+                            : 'text-slate-500 hover:text-slate-800'
+                        }`}
+                      >
+                        🛰️ Satellite
+                      </button>
+                    </div>
                   </div>
-                  <div className="h-[340px] relative bg-slate-100">
+                  <div className="flex-1 relative bg-slate-100">
                     {!mapLoaded && (
                       <div className="absolute inset-0 flex items-center justify-center gap-2">
                         <div className="w-5 h-5 border-2 border-primary-500 border-t-transparent rounded-full animate-spin" />
-                        <span className="text-[11px] font-bold text-slate-500">Loading Map components...</span>
+                        <span className="text-[11px] font-bold text-slate-500">Loading Map...</span>
                       </div>
                     )}
                     <div ref={mapRef} className="w-full h-full z-0" id="tracking-map-canvas" />
                   </div>
                 </div>
 
-                {/* 3. Detail Tabs System */}
-                <div className="bg-[var(--color-surface)] border border-[var(--color-border)] rounded-2xl shadow-sm overflow-hidden">
-                  <div className="flex border-b border-[var(--color-border)] overflow-x-auto bg-[var(--color-bg-subtle)] text-[11px] font-bold">
-                    <button
-                      onClick={() => setActiveTab('order')}
-                      className={`px-4 py-3 border-b-2 whitespace-nowrap transition-colors cursor-pointer ${
-                        activeTab === 'order'
-                          ? 'border-primary-600 text-primary-600 bg-white'
-                          : 'border-transparent text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)]'
-                      }`}
-                    >Order Details</button>
-                    <button
-                      onClick={() => setActiveTab('driver')}
-                      className={`px-4 py-3 border-b-2 whitespace-nowrap transition-colors cursor-pointer ${
-                        activeTab === 'driver'
-                          ? 'border-primary-600 text-primary-600 bg-white'
-                          : 'border-transparent text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)]'
-                      }`}
-                    >Driver Info</button>
-                    <button
-                      onClick={() => setActiveTab('vehicle')}
-                      className={`px-4 py-3 border-b-2 whitespace-nowrap transition-colors cursor-pointer ${
-                        activeTab === 'vehicle'
-                          ? 'border-primary-600 text-primary-600 bg-white'
-                          : 'border-transparent text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)]'
-                      }`}
-                    >Vehicle Specs</button>
-                    <button
-                      onClick={() => setActiveTab('customer')}
-                      className={`px-4 py-3 border-b-2 whitespace-nowrap transition-colors cursor-pointer ${
-                        activeTab === 'customer'
-                          ? 'border-primary-600 text-primary-600 bg-white'
-                          : 'border-transparent text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)]'
-                      }`}
-                    >Customer Details</button>
+                {/* Details Grid */}
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  {/* Card 1: ETA & Transit Progress */}
+                  <div className="bg-[var(--color-surface)] border border-[var(--color-border)] p-4 rounded-xl shadow-xs flex flex-col justify-between">
+                    <div>
+                      <span className="text-[9px] font-bold text-[var(--color-text-muted)] uppercase tracking-wider block mb-1">Transit Details</span>
+                      <div className="flex items-baseline gap-1.5">
+                        <span className="text-[22px] font-black text-[var(--color-text-primary)] leading-none">
+                          {trackingData ? formatEta(trackingData.etaSeconds) : 'Calculating...'}
+                        </span>
+                        <span className="text-[9.5px] font-semibold text-[var(--color-text-secondary)]">Remaining ETA</span>
+                      </div>
+
+                      <div className="mt-3 grid grid-cols-2 gap-2 text-[10.5px]">
+                        <div>
+                          <span className="text-[8.5px] font-bold text-[var(--color-text-muted)] uppercase tracking-wider block">Estimated Speed</span>
+                          <span className="font-bold text-[var(--color-text-primary)]">{getSpeed()}</span>
+                        </div>
+                        <div>
+                          <span className="text-[8.5px] font-bold text-[var(--color-text-muted)] uppercase tracking-wider block">Progress</span>
+                          <span className="font-bold text-primary-600">{getDistancePercent()} Covered</span>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="mt-3">
+                      <div className="relative w-full h-1.5 bg-slate-100 rounded-full overflow-hidden">
+                        <div 
+                          className="h-full bg-gradient-to-r from-primary-500 to-emerald-600 rounded-full transition-all duration-1000 ease-out" 
+                          style={{ width: getDistancePercent() }}
+                        />
+                      </div>
+                    </div>
                   </div>
 
-                  <div className="p-4 text-[12px] text-[var(--color-text-secondary)] min-h-[140px] bg-white">
-                    {/* Order Details Tab */}
-                    {activeTab === 'order' && (
-                      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                        <div>
-                          <p className="text-[10px] font-bold uppercase text-[var(--color-text-muted)]">Crop Name</p>
-                          <p className="font-bold text-[var(--color-text-primary)] mt-0.5">{selectedOrder.crop?.name}</p>
+                  {/* Card 2: Driver & Vehicle */}
+                  <div className="bg-[var(--color-surface)] border border-[var(--color-border)] p-4 rounded-xl shadow-xs flex flex-col justify-between">
+                    <div>
+                      <span className="text-[9px] font-bold text-[var(--color-text-muted)] uppercase tracking-wider block mb-2">Carrier Logistics</span>
+                      {selectedOrder.driver ? (
+                        <div className="space-y-2">
+                          <div className="flex items-center gap-2">
+                            <div className="w-7 h-7 rounded-full bg-slate-100 flex items-center justify-center text-slate-500 shrink-0">
+                              <span className="material-symbols-outlined text-[15px]">person</span>
+                            </div>
+                            <div className="min-w-0 flex-1">
+                              <h5 className="font-bold text-[var(--color-text-primary)] text-[11.5px] truncate">{selectedOrder.driver.name}</h5>
+                              <p className="text-[8.5px] text-[var(--color-text-secondary)] font-medium leading-none">Vehicle: {selectedOrder.driver.vehicleType}</p>
+                            </div>
+                            <a
+                              href={`tel:${selectedOrder.driver.phone}`}
+                              className="w-6.5 h-6.5 rounded-full bg-emerald-50 hover:bg-emerald-100 text-emerald-700 flex items-center justify-center transition-colors shadow-xs cursor-pointer shrink-0"
+                              title="Call Driver"
+                            >
+                              <span className="material-symbols-outlined text-[12px]">call</span>
+                            </a>
+                          </div>
+
+                          <div className="flex items-center justify-center bg-slate-50 border border-slate-200/50 py-1.5 rounded-lg mt-1">
+                            <div className="bg-[#FFD54F] border border-amber-400 rounded px-3 py-0.5 shadow-xs text-center">
+                              <span className="font-mono text-[10px] font-extrabold text-slate-900 tracking-wider uppercase select-all">
+                                {selectedOrder.driver.vehicleNumber}
+                              </span>
+                            </div>
+                          </div>
                         </div>
-                        <div>
-                          <p className="text-[10px] font-bold uppercase text-[var(--color-text-muted)]">Fulfillment Quantity</p>
-                          <p className="font-bold text-[var(--color-text-primary)] mt-0.5">{selectedOrder.requestedQuantity} {selectedOrder.crop?.unit}</p>
-                        </div>
-                        <div>
-                          <p className="text-[10px] font-bold uppercase text-[var(--color-text-muted)]">Total Amount</p>
-                          <p className="font-bold text-[var(--color-text-primary)] mt-0.5">₹{(selectedOrder.requestedQuantity * selectedOrder.offeredPrice).toLocaleString('en-IN')}</p>
-                        </div>
-                        <div>
-                          <p className="text-[10px] font-bold uppercase text-[var(--color-text-muted)]">Payment Preference</p>
-                          <p className="font-semibold text-slate-700 mt-0.5 text-[10.5px] bg-slate-100 px-1.5 py-0.5 rounded border border-slate-200/50 w-fit">
-                            {selectedOrder.crop?.paymentTerms}
+                      ) : (
+                        <div className="space-y-2">
+                          <div className="flex items-center gap-2">
+                            <div className="w-7 h-7 rounded-full bg-primary-50 text-primary-600 flex items-center justify-center shrink-0">
+                              <span className="material-symbols-outlined text-[15px]">person</span>
+                            </div>
+                            <div className="min-w-0 flex-1">
+                              <h5 className="font-bold text-[var(--color-text-primary)] text-[11.5px] truncate">Self-Delivery</h5>
+                              <p className="text-[8.5px] text-[var(--color-text-secondary)] font-medium leading-none">You Fulfilling Order</p>
+                            </div>
+                          </div>
+                          <p className="text-[9.5px] text-[var(--color-text-secondary)] leading-tight pt-1">
+                            You are fulfilling this crop delivery personally. Make sure to collect the handover OTP from the customer.
                           </p>
                         </div>
-                      </div>
-                    )}
+                      )}
+                    </div>
+                  </div>
 
-                    {/* Driver Info Tab */}
-                    {activeTab === 'driver' && (
-                      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
-                        {selectedOrder.driver ? (
-                          <>
-                            <div className="flex items-center gap-3">
-                              <div className="w-10 h-10 rounded-full bg-slate-100 flex items-center justify-center text-slate-500 shrink-0">
-                                <span className="material-symbols-outlined text-[22px]">person</span>
-                              </div>
-                              <div>
-                                <h4 className="font-bold text-[var(--color-text-primary)] text-[13px]">{selectedOrder.driver.name}</h4>
-                                <p className="text-[10px] text-[var(--color-text-muted)] font-semibold mt-0.5">Fleet registered carrier</p>
-                              </div>
-                            </div>
-                            <div className="flex items-center gap-3">
-                              <a
-                                href={`tel:${selectedOrder.driver.phone}`}
-                                className="bg-emerald-50 hover:bg-emerald-100 border border-emerald-100 rounded-full h-8 px-4 text-emerald-700 font-bold flex items-center justify-center gap-1.5 transition-colors cursor-pointer"
-                              >
-                                <span className="material-symbols-outlined text-[15px]">call</span>
-                                <span>Call Driver</span>
-                              </a>
-                            </div>
-                          </>
-                        ) : (
-                          <div className="flex items-center gap-3">
-                            <div className="w-10 h-10 rounded-full bg-primary-50 text-primary-600 flex items-center justify-center shrink-0">
-                              <span className="material-symbols-outlined text-[22px]">directions_run</span>
-                            </div>
-                            <div>
-                              <h4 className="font-bold text-[var(--color-text-primary)] text-[13px]">Self-Delivery (Farmer)</h4>
-                              <p className="text-[10.5px] text-[var(--color-text-secondary)] mt-0.5">You are fulfilling this crop delivery personally.</p>
-                            </div>
-                          </div>
-                        )}
-                      </div>
-                    )}
-
-                    {/* Vehicle Tab */}
-                    {activeTab === 'vehicle' && (
-                      <div>
-                        {selectedOrder.driver ? (
-                          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                            <div>
-                              <p className="text-[10px] font-bold uppercase text-[var(--color-text-muted)]">Vehicle Number</p>
-                              <p className="font-mono font-bold text-[var(--color-text-primary)] mt-0.5 uppercase tracking-wide bg-slate-50 border border-slate-200/50 px-2 py-0.5 rounded w-fit">
-                                {selectedOrder.driver.vehicleNumber}
-                              </p>
-                            </div>
-                            <div>
-                              <p className="text-[10px] font-bold uppercase text-[var(--color-text-muted)]">Vehicle Type</p>
-                              <p className="font-bold text-[var(--color-text-primary)] mt-0.5">{selectedOrder.driver.vehicleType}</p>
-                            </div>
-                            <div>
-                              <p className="text-[10px] font-bold uppercase text(--color-text-muted)">Payload Capacity</p>
-                              <p className="font-bold text-[var(--color-text-primary)] mt-0.5">{(selectedOrder.driver.payloadCapacity || 0).toLocaleString()} kg</p>
-                            </div>
-                            <div>
-                              <p className="text-[10px] font-bold uppercase text-[var(--color-text-muted)]">DL Number</p>
-                              <p className="font-mono font-bold text-[var(--color-text-primary)] mt-0.5 uppercase">{selectedOrder.driver.licenseNumber || 'None'}</p>
-                            </div>
-                          </div>
-                        ) : (
-                          <p className="text-slate-400 italic text-center py-4">No driver vehicle specs to show for self-delivery.</p>
-                        )}
-                      </div>
-                    )}
-
-                    {/* Customer Tab */}
-                    {activeTab === 'customer' && (
-                      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
-                        <div className="flex items-center gap-3">
-                          <div className="w-10 h-10 rounded-full bg-blue-50 text-blue-600 flex items-center justify-center shrink-0">
-                            <span className="material-symbols-outlined text-[22px]">storefront</span>
-                          </div>
-                          <div>
-                            <h4 className="font-bold text-[var(--color-text-primary)] text-[13px]">{selectedOrder.vendor?.name}</h4>
-                            <p className="text-[10.5px] text-[var(--color-text-secondary)] mt-0.5 flex items-center gap-1">
-                              <span className="material-symbols-outlined text-[13px] text-red-500">location_on</span>
-                              {selectedOrder.crop?.location} (Destination)
-                            </p>
-                          </div>
-                        </div>
-                        <a
-                          href={`tel:${selectedOrder.vendor?.phone}`}
-                          className="bg-blue-50 hover:bg-blue-100 border border-blue-100 rounded-full h-8 px-4 text-blue-700 font-bold flex items-center justify-center gap-1.5 transition-colors cursor-pointer"
-                        >
-                          <span className="material-symbols-outlined text-[15px]">call</span>
-                          <span>Call Customer</span>
-                        </a>
-                      </div>
-                    )}
+                  {/* Card 3: Customer Details */}
+                  <div className="bg-slate-50 border border-slate-200/60 rounded-xl p-4 flex flex-col justify-between h-full">
+                    <div>
+                      <span className="text-[9px] font-bold text-[var(--color-text-muted)] uppercase tracking-wider block mb-1">Customer / Destination</span>
+                      <h5 className="font-bold text-[var(--color-text-primary)] text-[12px]">{selectedOrder.vendor?.name}</h5>
+                      <p className="text-[10px] text-[var(--color-text-secondary)] leading-snug mt-1 truncate">
+                        {selectedOrder.crop?.location || 'Vendor shop location'}
+                      </p>
+                    </div>
+                    <a
+                      href={`tel:${selectedOrder.vendor?.phone}`}
+                      className="mt-3 flex items-center justify-center gap-1.5 w-full py-1.5 bg-slate-100 hover:bg-slate-200/80 text-slate-700 text-[10.5px] font-bold rounded-lg border border-slate-200 transition-colors cursor-pointer"
+                    >
+                      <span className="material-symbols-outlined text-[13px]">call</span>
+                      Call Customer
+                    </a>
                   </div>
                 </div>
               </>
@@ -581,6 +585,6 @@ const FreightTracking = () => {
       )}
     </div>
   );
-};
+}
 
 export default FreightTracking;
