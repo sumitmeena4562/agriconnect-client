@@ -235,7 +235,7 @@ const VendorTracking = () => {
   const statusInfo = () => {
     if (isDriverOnline) return { label: 'GPS Live', dot: 'bg-emerald-500 animate-ping', color: 'text-emerald-600' };
     if (isStale)        return { label: 'Weak Signal', dot: 'bg-amber-500 animate-pulse', color: 'text-amber-600' };
-    return               { label: 'GPS ka intezaar...', dot: 'bg-slate-400', color: 'text-slate-500' };
+    return               { label: 'Waiting for GPS...', dot: 'bg-slate-400', color: 'text-slate-500' };
   };
 
   const si = statusInfo();
@@ -427,7 +427,7 @@ const VendorTracking = () => {
                         </>
                       ) : (
                         <p className="text-[11px] text-[var(--color-text-secondary)] font-medium leading-snug">
-                          {isStale ? '⚠️ Weak signal — last location shown' : '⏳ Driver GPS share karne ka intezaar hai...'}
+                          {isStale ? '⚠️ Weak signal — last location shown' : '⏳ Waiting for driver to share GPS...'}
                         </p>
                       )}
                     </div>

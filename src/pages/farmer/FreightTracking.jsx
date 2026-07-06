@@ -444,7 +444,7 @@ const FreightTracking = () => {
                       </div>
                     ) : (
                       <p className="text-[11px] text-[var(--color-text-secondary)] font-medium">
-                        {isStale ? '⚠️ Weak signal — last location shown' : '⏳ Driver GPS ka intezaar...'}
+                        {isStale ? '⚠️ Weak signal — last location shown' : '⏳ Waiting for driver GPS...'}
                       </p>
                     )}
                   </div>

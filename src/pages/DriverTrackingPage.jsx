@@ -6,22 +6,22 @@ import useDriverTracking from '../hooks/useDriverTracking';
 // ── GPS Status config ─────────────────────────────────────────────────────
 const STATUS_CONFIG = {
   idle: {
-    label: 'Tracking Shuru Nahi Hua',
+    label: 'Tracking Not Started',
     dot: 'bg-[var(--color-text-muted)]',
     badge: 'bg-slate-100 text-slate-500 border-slate-200',
   },
   requesting: {
-    label: 'GPS Permission Maang Raha Hai...',
+    label: 'Requesting GPS Location...',
     dot: 'bg-[var(--color-warning-500)] animate-pulse',
     badge: 'bg-[var(--color-warning-50)] text-[var(--color-warning-700)] border-[var(--color-warning-200)]',
   },
   active: {
-    label: 'LIVE Tracking Chal Rahi Hai',
+    label: 'Live Tracking Active',
     dot: 'bg-[var(--color-success-500)] animate-ping',
     badge: 'bg-[var(--color-success-50)] text-[var(--color-success-600)] border-[var(--color-success-100)]',
   },
   error: {
-    label: 'GPS Nahi Mila — Permission Check Karo',
+    label: 'GPS Error — Check Permissions',
     dot: 'bg-[var(--color-danger-500)]',
     badge: 'bg-[var(--color-danger-50)] text-[var(--color-danger-600)] border-[var(--color-danger-100)]',
   },
@@ -214,7 +214,7 @@ const DriverTrackingPage = () => {
             style={{ background: 'var(--color-danger-50)', border: '1px solid var(--color-danger-100)' }}
           >
             <p className="text-[11.5px] font-semibold" style={{ color: 'var(--color-danger-600)' }}>
-              📵 Phone ki Settings mein Location permission allow karo, phir browser refresh karo.
+              Offline: Allow location permission in your phone settings, then refresh the page.
             </p>
           </div>
         )}
@@ -233,69 +233,73 @@ const DriverTrackingPage = () => {
             {isTracking ? 'stop_circle' : 'play_circle'}
           </span>
           {isTracking
-            ? (gpsStatus === 'requesting' ? 'GPS Dhoond Raha Hai...' : 'Tracking Band Karo')
-            : 'Tracking Shuru Karo 🚚'}
+            ? (gpsStatus === 'requesting' ? 'Finding GPS...' : 'Stop Tracking')
+            : 'Start Tracking 🚚'}
         </button>
 
         {/* ── 🧪 TEST/DEMO CONTROL PANEL (Only for testing) ────────────────── */}
         {isTracking && (
           <div className="mt-4 p-3 bg-blue-50 border border-blue-200 rounded-xl">
-            <p className="text-[10px] font-bold text-blue-700 uppercase tracking-wider mb-2">🧪 Test Controls (Bina phone hilaye test karein):</p>
+            <p className="text-[10px] font-bold text-blue-700 uppercase tracking-wider mb-2">🧪 Test Controls (Test without moving):</p>
             <div className="grid grid-cols-2 gap-2">
               <button
                 type="button"
                 onClick={() => {
                   // Simulate location 1 (Delhi area)
                   if (orderId) {
-                    import('firebase/database').then(({ ref, set }) => {
-                      import('../config/firebase').then(({ database }) => {
-                        set(ref(database, `locations/${orderId}`), {
-                          lat: 28.6139,
-                          lng: 77.2090,
-                          speed: 45,
-                          accuracy: 5,
-                          timestamp: Date.now(),
-                          active: true
-                        });
-                      });
-                    });
+                    const cleanDbUrl = dbUrl.endsWith('/') ? dbUrl : dbUrl + '/';
+                    const simUrl = `${cleanDbUrl}locations/${orderId}.json`;
+                    fetch(simUrl, {
+                      method: 'PUT',
+                      headers: { 'Content-Type': 'application/json' },
+                      body: JSON.stringify({
+                        lat: 28.6139,
+                        lng: 77.2090,
+                        speed: 45,
+                        accuracy: 5,
+                        timestamp: Date.now(),
+                        active: true
+                      })
+                    }).catch(err => console.error(err));
                   }
                 }}
                 className="py-1.5 px-2 bg-white border border-blue-300 text-blue-700 text-[10.5px] font-bold rounded-lg hover:bg-blue-50"
               >
-                📍 Delhi me dikhao
+                📍 Show in Delhi
               </button>
               <button
                 type="button"
                 onClick={() => {
                   // Simulate location 2 (Noida area)
                   if (orderId) {
-                    import('firebase/database').then(({ ref, set }) => {
-                      import('../config/firebase').then(({ database }) => {
-                        set(ref(database, `locations/${orderId}`), {
-                          lat: 28.5355,
-                          lng: 77.3910,
-                          speed: 60,
-                          accuracy: 4,
-                          timestamp: Date.now(),
-                          active: true
-                        });
-                      });
-                    });
+                    const cleanDbUrl = dbUrl.endsWith('/') ? dbUrl : dbUrl + '/';
+                    const simUrl = `${cleanDbUrl}locations/${orderId}.json`;
+                    fetch(simUrl, {
+                      method: 'PUT',
+                      headers: { 'Content-Type': 'application/json' },
+                      body: JSON.stringify({
+                        lat: 28.5355,
+                        lng: 77.3910,
+                        speed: 60,
+                        accuracy: 4,
+                        timestamp: Date.now(),
+                        active: true
+                      })
+                    }).catch(err => console.error(err));
                   }
                 }}
                 className="py-1.5 px-2 bg-white border border-blue-300 text-blue-700 text-[10.5px] font-bold rounded-lg hover:bg-blue-50"
               >
-                📍 Noida me dikhao
+                📍 Show in Noida
               </button>
             </div>
-            <p className="text-[9px] text-blue-600 mt-2 text-center font-medium">In buttons ko click karke doosre tab me Map par location badalte hue dekhein!</p>
+            <p className="text-[9px] text-blue-600 mt-2 text-center font-medium">Click these buttons to see the location change on the map in the other tab!</p>
           </div>
         )}
 
         {!orderId && (
           <p className="text-center text-[10px] mt-2 font-medium" style={{ color: 'var(--color-danger-500)' }}>
-            ⚠️ Invalid link — Farmer se dobara link maango
+            ⚠️ Invalid link — Ask the farmer for a new link
           </p>
         )}
       </motion.div>
@@ -307,13 +311,13 @@ const DriverTrackingPage = () => {
         transition={{ delay: 0.2 }}
         className="w-full max-w-sm global-card !p-3.5"
       >
-        <p className="text-caption mb-2">📌 Zaruri Baatein</p>
+        <p className="text-caption mb-2">📌 Important Instructions</p>
         <ul className="space-y-1.5">
           {[
-            'Ye page khula rakho — band mat karo delivery tak',
-            'Phone ki screen off mat karo (auto lock band rakho)',
-            'GPS / Location ON rakho phone settings mein',
-            'Internet (4G/WiFi) connected rakho',
+            'Keep this page open during the delivery',
+            'Keep the screen on (disable auto lock)',
+            'Keep GPS / Location turned ON in phone settings',
+            'Keep internet connection active (4G/WiFi)',
           ].map((tip, i) => (
             <li key={i} className="flex items-start gap-1.5">
               <span
