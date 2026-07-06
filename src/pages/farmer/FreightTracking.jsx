@@ -12,6 +12,8 @@ const FreightTracking = () => {
   const [selectedOrder, setSelectedOrder] = useState(null);
   const [mapLoaded, setMapLoaded] = useState(false);
   const [mapStyle, setMapStyle] = useState('satellite');
+  const [otpValue, setOtpValue] = useState('');
+  const [isVerifyingOtp, setIsVerifyingOtp] = useState(false);
 
   // Firebase real-time GPS — sirf selected order ke liye
   const { location: driverLocation, isDriverOnline, isStale } =
@@ -61,6 +63,29 @@ const FreightTracking = () => {
   }, [searchParams]);
 
   useEffect(() => { fetchOrders(); }, [fetchOrders]);
+
+  const handleVerifyOtp = async (e) => {
+    if (e) e.preventDefault();
+    if (!otpValue || otpValue.trim().length !== 4) {
+      toast.error('Please enter a valid 4-digit OTP');
+      return;
+    }
+    setIsVerifyingOtp(true);
+    const toastId = toast.loading('Verifying delivery OTP & completing order...');
+    try {
+      await api.patch(`/orders/${selectedOrder._id}/status`, {
+        status: 'Completed',
+        otp: otpValue.trim()
+      });
+      toast.success('Order completed & dispatched successfully!', { id: toastId });
+      setOtpValue('');
+      fetchOrders();
+    } catch (error) {
+      toast.error(error.response?.data?.error || 'Failed to complete order. Check OTP again.', { id: toastId });
+    } finally {
+      setIsVerifyingOtp(false);
+    }
+  };
 
   // ── 2. Load Leaflet CDN dynamically ──────────────────────────────────────
   useEffect(() => {
@@ -480,6 +505,39 @@ const FreightTracking = () => {
                               <span className="font-mono text-[9px] font-extrabold text-slate-900 tracking-wider uppercase">{selectedOrder.driver.vehicleNumber}</span>
                             </div>
                           </div>
+                          
+                          {/* Quick Link Share Controls */}
+                          <div className="grid grid-cols-2 gap-1.5 pt-1 border-t border-slate-100">
+                            <button
+                              type="button"
+                              onClick={() => {
+                                const link = `${window.location.origin}/driver-track?orderId=${selectedOrder._id}&name=${encodeURIComponent(selectedOrder.driver?.name || 'Driver')}&crop=${encodeURIComponent(selectedOrder.crop?.name || 'Crop')}&vendor=${encodeURIComponent(selectedOrder.vendor?.name || 'Vendor')}`;
+                                navigator.clipboard.writeText(link);
+                                toast.success('Driver tracking link copied!');
+                              }}
+                              className="py-1 bg-white border border-slate-250 text-slate-700 text-[9px] font-black rounded-lg hover:bg-slate-50 flex items-center justify-center gap-1 cursor-pointer transition-all active:scale-[0.98]"
+                            >
+                              <span className="material-symbols-outlined text-[11px]">content_copy</span>
+                              <span>Copy Link</span>
+                            </button>
+                            <a
+                              href={(() => {
+                                let phone = selectedOrder.driver ? selectedOrder.driver.phone : '';
+                                if (phone) {
+                                  const clean = phone.replace(/\D/g, '');
+                                  phone = clean.length === 10 ? `91${clean}` : clean;
+                                }
+                                const text = `Please click this link to start live GPS tracking for order #${selectedOrder._id.slice(-6).toUpperCase()}: ${window.location.origin}/driver-track?orderId=${selectedOrder._id}&name=${encodeURIComponent(selectedOrder.driver?.name || 'Driver')}&crop=${encodeURIComponent(selectedOrder.crop?.name || 'Crop')}&vendor=${encodeURIComponent(selectedOrder.vendor?.name || 'Vendor')}`;
+                                return `https://wa.me/${phone}?text=${encodeURIComponent(text)}`;
+                              })()}
+                              target="_blank"
+                              rel="noreferrer"
+                              className="py-1 bg-emerald-50 border border-emerald-250 text-emerald-700 text-[9px] font-black rounded-lg hover:bg-emerald-105 flex items-center justify-center gap-1 no-underline transition-all active:scale-[0.98]"
+                            >
+                              <span className="material-symbols-outlined text-[11px]">share</span>
+                              <span>WhatsApp</span>
+                            </a>
+                          </div>
                         </div>
                       ) : (
                         <div className="flex flex-col justify-between h-full">
@@ -502,12 +560,45 @@ const FreightTracking = () => {
                     </div>
                   </div>
 
-                  {/* Card 3: Customer Details */}
+                  {/* Card 3: Customer Details & OTP Verification */}
                   <div className="bg-slate-50 border border-slate-200/60 rounded-xl p-3 flex flex-col justify-between h-full">
                     <div>
                       <span className="text-[9px] font-extrabold uppercase tracking-wider text-[var(--color-text-muted)] mb-1 block">Customer / Destination</span>
                       <h5 className="font-bold text-[var(--color-text-primary)] text-[11px] truncate leading-none">{selectedOrder.vendor?.name}</h5>
                       <p className="text-[9.5px] text-[var(--color-text-secondary)] leading-snug mt-1.5 truncate">{selectedOrder.crop?.location || 'Vendor location'}</p>
+                      
+                      {/* OTP Form */}
+                      {selectedOrder.deliveryOTP && (
+                        <div className="mt-2 pt-2 border-t border-slate-200/60">
+                          {selectedOrder.payment?.status === 'Verified' ? (
+                            <form onSubmit={handleVerifyOtp} className="space-y-1.5">
+                              <span className="text-[8.5px] font-bold text-amber-800 uppercase tracking-wider block">Verify Handover OTP</span>
+                              <div className="flex gap-1">
+                                <input
+                                  type="text"
+                                  maxLength={4}
+                                  value={otpValue}
+                                  onChange={(e) => setOtpValue(e.target.value.replace(/\D/g, ''))}
+                                  placeholder="4-digit OTP"
+                                  className="w-full px-2 py-1 border border-slate-350 rounded-lg text-[10px] font-bold tracking-widest text-center focus:outline-none focus:border-primary-500 bg-white"
+                                  disabled={isVerifyingOtp}
+                                />
+                                <button
+                                  type="submit"
+                                  disabled={isVerifyingOtp || otpValue.length !== 4}
+                                  className="px-2.5 bg-primary-600 hover:bg-primary-700 disabled:opacity-40 disabled:hover:bg-primary-600 text-white text-[9.5px] font-black rounded-lg transition-all active:scale-[0.97] cursor-pointer border-0 shrink-0"
+                                >
+                                  Verify
+                                </button>
+                              </div>
+                            </form>
+                          ) : (
+                            <div className="bg-amber-50 border border-amber-250/60 rounded-lg p-1.5 text-[8.5px] font-bold text-amber-850 leading-snug text-center">
+                              ⚠️ Payment verification pending.
+                            </div>
+                          )}
+                        </div>
+                      )}
                     </div>
                     <a href={`tel:${selectedOrder.vendor?.phone}`} className="mt-2 flex items-center justify-center gap-1 w-full py-1 bg-slate-100 hover:bg-slate-200/80 text-slate-700 text-[10px] font-bold rounded-lg border border-slate-200 transition-colors cursor-pointer no-underline">
                       <span className="material-symbols-outlined text-[11px]">call</span>
