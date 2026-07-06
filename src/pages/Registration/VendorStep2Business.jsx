@@ -30,14 +30,15 @@ const VendorStep2Business = ({ data, updateData, nextStep, prevStep }) => {
 
   return (
     <form onSubmit={handleNext} className="animate-in fade-in slide-in-from-bottom-2 duration-300">
-      <div className="mb-6">
+      <div className="mb-4">
         <h2 className="text-xl font-black text-slate-800 mb-1">Business Profile</h2>
         <p className="text-[13px] font-medium text-slate-500">Tell us about your business.</p>
       </div>
 
-      <div className="space-y-4">
+      {/* Grouped Business details (Side-by-Side) */}
+      <div className="grid grid-cols-2 gap-4">
         <Input 
-          label="Shop / Business Name (Optional)" 
+          label="Shop Name (Optional)" 
           id="businessName" 
           name="businessName"
           type="text"
@@ -45,9 +46,8 @@ const VendorStep2Business = ({ data, updateData, nextStep, prevStep }) => {
           value={data.businessName || ''}
           onChange={handleChange}
         />
-
         <Input 
-          label="GST / PAN Number (Optional)" 
+          label="GST / PAN (Optional)" 
           id="gstNumber" 
           name="gstNumber"
           type="text"
@@ -55,30 +55,30 @@ const VendorStep2Business = ({ data, updateData, nextStep, prevStep }) => {
           value={data.gstNumber || ''}
           onChange={handleChange}
         />
+      </div>
 
-        <div className="mt-6">
-          <label className="block text-[13px] font-bold text-slate-700 mb-2">
-            Interested Categories (Select multiple)
-          </label>
-          <div className="flex flex-wrap gap-2">
-            {CATEGORIES.map(category => {
-              const isSelected = (data.interestedCategories || []).includes(category);
-              return (
-                <button
-                  key={category}
-                  type="button"
-                  onClick={() => handleCategoryToggle(category)}
-                  className={`px-3 py-1.5 rounded-full text-xs font-bold border transition-colors ${
-                    isSelected 
-                      ? 'bg-primary-50 border-primary-500 text-primary-700' 
-                      : 'bg-white border-slate-200 text-slate-600 hover:border-slate-300'
-                  }`}
-                >
-                  {category}
-                </button>
-              );
-            })}
-          </div>
+      <div className="mt-5">
+        <label className="block text-[13px] font-bold text-slate-700 mb-2">
+          Interested Categories (Select multiple)
+        </label>
+        <div className="flex flex-wrap gap-2">
+          {CATEGORIES.map(category => {
+            const isSelected = (data.interestedCategories || []).includes(category);
+            return (
+              <button
+                key={category}
+                type="button"
+                onClick={() => handleCategoryToggle(category)}
+                className={`px-3 py-1.5 rounded-full text-xs font-bold border transition-all cursor-pointer ${
+                  isSelected 
+                    ? 'bg-primary-50 border-primary-500 text-primary-700' 
+                    : 'bg-white border-slate-200 text-slate-600 hover:border-slate-300'
+                }`}
+              >
+                {category}
+              </button>
+            );
+          })}
         </div>
       </div>
 

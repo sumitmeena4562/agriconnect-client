@@ -304,17 +304,58 @@ const OrderCard = ({ order, role = 'farmer', onUpdateStatus, onCancelOrder, onSu
                             : 'Self-Transit: You are delivering the crops directly.'}
                         </span>
                       </div>
-                      <div className="flex gap-2">
+
+                      {/* Driver Link Share controls */}
+                      <div className="p-2 bg-slate-50 border border-slate-250 rounded-lg text-[10.5px] font-bold mt-1.5 shadow-sm space-y-1.5">
+                        <div className="text-slate-500 text-left">Share Tracking Link:</div>
+                        <div className="grid grid-cols-2 gap-1.5">
+                          <button
+                            type="button"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              const link = `${window.location.origin}/driver-track?orderId=${order._id}&name=${encodeURIComponent(order.driver?.name || 'Farmer')}&crop=${encodeURIComponent(order.crop?.name || 'Crop')}&vendor=${encodeURIComponent(order.vendor?.name || 'Vendor')}`;
+                              navigator.clipboard.writeText(link);
+                              toast.success('Driver tracking link copied!');
+                            }}
+                            className="bg-white border border-slate-200 py-1 px-2 rounded text-slate-700 hover:bg-slate-50 flex items-center justify-center gap-1 cursor-pointer transition-colors"
+                          >
+                            <span className="material-symbols-outlined text-[13px]">content_copy</span>
+                            <span>Copy Link</span>
+                          </button>
+                          <a
+                            href={(() => {
+                              let phone = order.driver ? order.driver.phone : '';
+                              if (phone) {
+                                // Clean up spaces or dashes
+                                const clean = phone.replace(/\D/g, '');
+                                // Prepend 91 for Indian numbers if it's 10 digits
+                                phone = clean.length === 10 ? `91${clean}` : clean;
+                              }
+                              const text = `Please click this link to start live GPS tracking for order #${order._id.slice(-6).toUpperCase()}: ${window.location.origin}/driver-track?orderId=${order._id}&name=${encodeURIComponent(order.driver?.name || 'Farmer')}&crop=${encodeURIComponent(order.crop?.name || 'Crop')}&vendor=${encodeURIComponent(order.vendor?.name || 'Vendor')}`;
+                              return `https://wa.me/${phone}?text=${encodeURIComponent(text)}`;
+                            })()}
+                            onClick={(e) => e.stopPropagation()}
+                            target="_blank"
+                            rel="noreferrer"
+                            className="bg-emerald-50 border border-emerald-200 py-1 px-2 rounded text-emerald-700 hover:bg-emerald-100 flex items-center justify-center gap-1 no-underline transition-all"
+                          >
+                            <span className="material-symbols-outlined text-[13px]">share</span>
+                            <span>WhatsApp</span>
+                          </a>
+                        </div>
+                      </div>
+
+                      <div className="flex gap-2 mt-2">
                         <button
                           onClick={() => navigate(`/farmer-dashboard/tracking?orderId=${order._id}`)}
-                          className="flex-1 h-8 rounded-lg border border-primary-200 text-primary-600 bg-white hover:bg-primary-50 text-[11.5px] font-bold transition-all active:scale-[0.98] cursor-pointer flex items-center justify-center gap-1"
+                          className="flex-1 h-8 rounded-lg border border-primary-200 text-primary-600 bg-white hover:bg-primary-50 text-[11px] font-bold transition-all active:scale-[0.98] cursor-pointer flex items-center justify-center gap-1"
                         >
                           <span className="material-symbols-outlined text-[14px]">navigation</span>
                           Track Route
                         </button>
                         <button
                           onClick={() => onUpdateStatus(order._id, 'Completed')}
-                          className="flex-1 h-8 rounded-lg bg-success-600 hover:bg-success-700 text-white text-[11.5px] font-bold transition-all active:scale-[0.98] cursor-pointer"
+                          className="flex-1 h-8 rounded-lg bg-success-600 hover:bg-success-700 text-white text-[11px] font-bold transition-all active:scale-[0.98] cursor-pointer flex items-center justify-center"
                         >
                           Complete Delivery
                         </button>

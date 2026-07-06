@@ -56,7 +56,7 @@ const FarmerRegistration = () => {
       toast.success("Welcome " + user.name + "!", { id: toastId });
       
       // Redirect to Dashboard
-      navigate('/dashboard');
+      navigate('/farmer-dashboard');
     } catch (error) {
       console.error("Registration Error:", error);
       toast.error(error.response?.data?.error || "Server error during registration", { id: toastId });

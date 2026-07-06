@@ -79,28 +79,29 @@ const Step3Farm = ({ data, updateData, submitForm, prevStep }) => {
         />
       </div>
 
-      <Input 
-        label="Primary Crops" 
-        id="crops" 
-        name="crops"
-        type="text"
-        placeholder="e.g. Wheat, Sugarcane" 
-        value={data.crops || ''}
-        onChange={handleChange}
-        error={errors.crops}
-        required
-      />
-
-      <Select 
-        label="Irrigation Source" 
-        id="irrigation" 
-        name="irrigation"
-        options={irrigationOptions}
-        value={data.irrigation || ''}
-        onChange={handleChange}
-        error={errors.irrigation}
-        required
-      />
+      <div className="grid grid-cols-2 gap-4">
+        <Input 
+          label="Primary Crops" 
+          id="crops" 
+          name="crops"
+          type="text"
+          placeholder="e.g. Wheat, Sugarcane" 
+          value={data.crops || ''}
+          onChange={handleChange}
+          error={errors.crops}
+          required
+        />
+        <Select 
+          label="Irrigation Source" 
+          id="irrigation" 
+          name="irrigation"
+          options={irrigationOptions}
+          value={data.irrigation || ''}
+          onChange={handleChange}
+          error={errors.irrigation}
+          required
+        />
+      </div>
 
       <div className="flex gap-4 mt-8">
         <Button type="button" variant="secondary" onClick={prevStep}>Back</Button>

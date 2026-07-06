@@ -346,18 +346,20 @@ const VendorCropDetails = () => {
                   />
                 </div>
                 
-                <div>
-                  <label className="block text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1 ml-0.5">
-                    Vehicle Number (Optional)
-                  </label>
-                  <input 
-                    type="text"
-                    value={vehicleNumber}
-                    onChange={(e) => setVehicleNumber(e.target.value)}
-                    placeholder="e.g. MH-12-AB-3456"
-                    className="form-input w-full !h-[36px] !text-[12px]"
-                  />
-                </div>
+                {crop.logisticsOption === 'Self-Pickup' && (
+                  <div>
+                    <label className="block text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1 ml-0.5">
+                      Vehicle Number (Optional)
+                    </label>
+                    <input 
+                      type="text"
+                      value={vehicleNumber}
+                      onChange={(e) => setVehicleNumber(e.target.value)}
+                      placeholder="e.g. MH-12-AB-3456"
+                      className="form-input w-full !h-[36px] !text-[12px]"
+                    />
+                  </div>
+                )}
 
                 <div>
                   <label className="block text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1 ml-0.5">

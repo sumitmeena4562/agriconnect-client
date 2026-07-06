@@ -23,6 +23,7 @@ import VendorOrders from './pages/Vendor/VendorOrders';
 import VendorTracking from './pages/Vendor/VendorTracking';
 import SharedCropLinkHandler from './pages/SharedCropLinkHandler';
 import NotFound from './pages/NotFound';
+import DriverTrackingPage from './pages/DriverTrackingPage';
 import ProtectedRoute from './components/common/ProtectedRoute';
 import NotificationsPage from './pages/NotificationsPage';
 import BankPage from './pages/BankPage';
@@ -53,6 +54,9 @@ function App() {
         
         {/* WhatsApp Shared Link Handler */}
         <Route path="/crops/:id" element={<SharedCropLinkHandler />} />
+        
+        {/* Driver Live Tracking — Public (no login needed, link shared via WhatsApp) */}
+        <Route path="/driver-track" element={<DriverTrackingPage />} />
         
         {/* Protected Dashboard Routes (Farmer) */}
         <Route element={<ProtectedRoute allowedRoles={['FARMER']} />}>

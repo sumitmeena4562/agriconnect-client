@@ -271,49 +271,52 @@ const Step1Basic = ({ data, updateData, currentStep, nextStep, prevStep, setStep
 
       {/* State 3: Enter Name and Phone */}
       {currentStep === 3 && (
-        <form onSubmit={handleNext} className="animate-in fade-in slide-in-from-bottom-2 duration-300">
-          <div className="mb-6 p-4 rounded-[var(--form-border-radius)] bg-primary-50 border border-primary-100 flex items-center gap-3">
-            <div className="w-8 h-8 rounded-full bg-primary-500 flex items-center justify-center text-white shrink-0">
-              <span className="material-symbols-outlined text-[18px]">verified</span>
+        <form onSubmit={handleNext} className="animate-in fade-in slide-in-from-bottom-2 duration-300 space-y-3">
+          <div className="mb-4 p-2.5 rounded-[var(--form-border-radius)] bg-primary-50 border border-primary-100 flex items-center gap-3">
+            <div className="w-7 h-7 rounded-full bg-primary-500 flex items-center justify-center text-white shrink-0">
+              <span className="material-symbols-outlined text-[16px]">verified</span>
             </div>
             <div className="overflow-hidden">
-              <p className="text-[11px] font-bold text-slate-500 uppercase">Verified Email</p>
-              <p className="text-sm font-black text-slate-800 truncate">{data.email}</p>
+              <p className="text-[10px] font-bold text-slate-500 uppercase leading-none mb-0.5">Verified Email</p>
+              <p className="text-[13px] font-black text-slate-800 truncate leading-none">{data.email}</p>
             </div>
           </div>
 
-          <Input 
-            label="Full Name" 
-            id="name" 
-            name="name"
-            type="text"
-            placeholder="e.g. Ramesh Kumar" 
-            value={data.name || ''}
-            onChange={handleChange}
-            error={errors.name}
-            required
-          />
+          {/* Grouped Name and Mobile (Side-by-Side) */}
+          <div className="grid grid-cols-2 gap-3">
+            <Input 
+              label="Full Name" 
+              id="name" 
+              name="name"
+              type="text"
+              placeholder="e.g. Ramesh Kumar" 
+              value={data.name || ''}
+              onChange={handleChange}
+              error={errors.name}
+              required
+            />
+            <Input 
+              label="Mobile Number" 
+              id="phone" 
+              name="phone"
+              type="tel"
+              placeholder="e.g. 9876543210" 
+              value={data.phone || ''}
+              onChange={handleChange}
+              error={errors.phone}
+              required
+            />
+          </div>
 
-          <Input 
-            label="Mobile Number" 
-            id="phone" 
-            name="phone"
-            type="tel"
-            placeholder="e.g. 9876543210" 
-            value={data.phone || ''}
-            onChange={handleChange}
-            error={errors.phone}
-            required
-          />
-
+          {/* Grouped Password fields (Side-by-Side) */}
           {data.authProvider !== 'GOOGLE' && (
-            <>
+            <div className="grid grid-cols-2 gap-3">
               <Input 
                 label="Create Password" 
                 id="password" 
                 name="password"
                 type="password"
-                placeholder="Secure password (min 6 chars)" 
+                placeholder="Password (min 6)" 
                 value={data.password || ''}
                 onChange={handleChange}
                 error={errors.password}
@@ -324,16 +327,16 @@ const Step1Basic = ({ data, updateData, currentStep, nextStep, prevStep, setStep
                 id="confirmPassword" 
                 name="confirmPassword"
                 type="password"
-                placeholder="Re-enter your password" 
+                placeholder="Re-enter password" 
                 value={data.confirmPassword || ''}
                 onChange={handleChange}
                 error={errors.confirmPassword}
                 required
               />
-            </>
+            </div>
           )}
 
-          <div className="mt-8 flex gap-3">
+          <div className="mt-6 flex gap-3 pt-1">
             <Button type="button" variant="outline" onClick={() => prevStep()}>Back</Button>
             <Button type="submit">Next Step</Button>
           </div>
