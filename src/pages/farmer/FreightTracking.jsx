@@ -475,7 +475,7 @@ const FreightTracking = () => {
                     ) : (
                       <div>
                         <h5 className="font-bold text-[var(--color-text-primary)] text-[11.5px]">Self-Delivery</h5>
-                        <p className="text-[9.5px] text-[var(--color-text-secondary)] mt-1">Aap khud deliver kar rahe hain. Vendor se OTP lena mat bhuolo.</p>
+                        <p className="text-[9.5px] text-[var(--color-text-secondary)] mt-1">You are delivering this yourself. Remember to verify the delivery OTP with the vendor.</p>
                       </div>
                     )}
                   </div>

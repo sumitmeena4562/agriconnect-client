@@ -488,7 +488,7 @@ const VendorTracking = () => {
                             Handover OTP
                           </h5>
                           <p className="text-[9.5px] text-amber-700/80 leading-snug mt-1">
-                            Ye OTP driver ko delivery ke waqt do — completion verify hogi.
+                            Share this OTP with the driver at handover to verify the delivery completion.
                           </p>
                         </div>
                         <div className="mt-3 bg-white border border-amber-200 rounded-lg py-1.5 text-center shadow-xs">
