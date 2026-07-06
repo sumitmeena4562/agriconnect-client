@@ -349,7 +349,7 @@ const FreightTracking = () => {
             {selectedOrder && (
               <>
                 {/* Cargo Header */}
-                <div className="bg-[var(--color-surface)] border border-[var(--color-border)] py-2.5 px-4 rounded-xl shadow-xs flex flex-col md:flex-row md:items-center justify-between gap-4">
+                <div className="bg-[var(--color-surface)] border border-[var(--color-border)] py-3 px-4 rounded-xl shadow-xs flex flex-col md:flex-row md:items-center justify-between gap-4">
                   <div className="flex items-center gap-3">
                     <div className="w-8 h-8 rounded-lg bg-primary-50 text-primary-600 flex items-center justify-center shrink-0">
                       <span className="material-symbols-outlined text-[18px]">package_2</span>
@@ -363,18 +363,24 @@ const FreightTracking = () => {
                           #{selectedOrder._id.slice(-6).toUpperCase()}
                         </span>
                       </div>
-                      {/* GPS Status indicator */}
-                      {statusInfo && (
-                        <div className="flex items-center gap-1.5 mt-1">
-                          <span className={`w-1.5 h-1.5 rounded-full shrink-0 ${statusInfo.dot}`} />
-                          <span className={`text-[9.5px] font-bold ${statusInfo.color}`}>{statusInfo.label}</span>
-                          {driverLocation?.speed != null && isDriverOnline && (
-                            <span className="text-[9px] text-[var(--color-text-muted)] font-semibold ml-1">
-                              · {driverLocation.speed} km/h
-                            </span>
-                          )}
+                      
+                      {/* Stepper progress timeline indicator */}
+                      <div className="flex items-center gap-2 mt-1.5 bg-slate-50 border border-slate-100 rounded-lg p-1.5 py-1">
+                        <div className="flex items-center gap-1">
+                          <span className="w-2 h-2 rounded-full bg-emerald-500 shadow-3xs" />
+                          <span className="text-[9px] font-extrabold text-emerald-700 uppercase">Dispatched</span>
                         </div>
-                      )}
+                        <span className="text-slate-350 text-[10px]">➔</span>
+                        <div className="flex items-center gap-1">
+                          <span className={`w-2 h-2 rounded-full ${selectedOrder.deliveryStatus === 'Arrived' ? 'bg-emerald-500' : 'bg-primary-500 animate-pulse'}`} />
+                          <span className={`text-[9px] font-extrabold uppercase ${selectedOrder.deliveryStatus === 'Arrived' ? 'text-emerald-700' : 'text-primary-700'}`}>In Transit</span>
+                        </div>
+                        <span className="text-slate-350 text-[10px]">➔</span>
+                        <div className="flex items-center gap-1">
+                          <span className={`w-2 h-2 rounded-full ${selectedOrder.deliveryStatus === 'Arrived' ? 'bg-emerald-500' : 'bg-slate-300'}`} />
+                          <span className={`text-[9px] font-extrabold uppercase ${selectedOrder.deliveryStatus === 'Arrived' ? 'text-emerald-700' : 'text-slate-400'}`}>Arrived</span>
+                        </div>
+                      </div>
                     </div>
                   </div>
 
