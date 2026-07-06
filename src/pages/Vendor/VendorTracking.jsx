@@ -242,7 +242,7 @@ const VendorTracking = () => {
 
   // ── Render ────────────────────────────────────────────────────────────────
   return (
-    <div className="space-y-4">
+    <div className="space-y-4 lg:h-[calc(100vh-100px)] lg:flex lg:flex-col lg:overflow-hidden pb-1">
       {/* Page Header */}
       <div>
         <h1 className="text-[20px] sm:text-[22px] font-black text-[var(--color-text-primary)] tracking-tight leading-none mb-1 flex items-center gap-2">
@@ -268,10 +268,10 @@ const VendorTracking = () => {
           </p>
         </div>
       ) : (
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-4">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 lg:flex-1 lg:min-h-0 lg:overflow-hidden">
 
           {/* ── Left: Incoming List ── */}
-          <div className="lg:col-span-3 space-y-3 flex flex-col max-h-[720px]">
+          <div className="lg:col-span-3 space-y-3 flex flex-col lg:h-full lg:overflow-hidden">
             <div className="bg-[var(--color-surface)] border border-[var(--color-border)] rounded-xl p-3 shadow-sm flex items-center justify-between">
               <span className="text-[11px] font-extrabold uppercase text-[var(--color-text-secondary)] tracking-wider">
                 Incoming ({activeTransitOrders.length})
@@ -279,7 +279,7 @@ const VendorTracking = () => {
               <span className="px-2 py-0.5 rounded-full bg-blue-50 border border-blue-100 text-blue-700 text-[9px] font-bold animate-pulse">LIVE</span>
             </div>
 
-            <div className="overflow-y-auto space-y-2.5 flex-1 max-h-[640px] pr-1">
+            <div className="overflow-y-auto space-y-2.5 flex-1 pr-1">
               {activeTransitOrders.map((order) => {
                 const isSel = selectedOrder?._id === order._id;
                 return (
@@ -330,7 +330,7 @@ const VendorTracking = () => {
           </div>
 
           {/* ── Right: Map & Details ── */}
-          <div className="lg:col-span-9 space-y-4">
+          <div className="lg:col-span-9 space-y-3 flex flex-col lg:h-full lg:overflow-hidden">
             {selectedOrder && (
               <>
                 {/* Cargo Header */}
@@ -377,7 +377,7 @@ const VendorTracking = () => {
                 </div>
 
                 {/* Map */}
-                <div className="bg-[var(--color-surface)] border border-[var(--color-border)] rounded-2xl overflow-hidden shadow-sm flex flex-col" style={{ height: 'clamp(300px, 50vh, 500px)' }}>
+                <div className="bg-[var(--color-surface)] border border-[var(--color-border)] rounded-2xl overflow-hidden shadow-sm flex flex-col lg:flex-1 lg:min-h-0" style={{ height: 'clamp(280px, 45vh, 450px)' }}>
                   <div className="px-4 py-2.5 border-b border-[var(--color-border)] bg-[var(--color-bg-subtle)] flex items-center justify-between">
                     <span className="text-[10px] font-extrabold uppercase text-[var(--color-text-secondary)] tracking-wider flex items-center gap-1.5">
                       <span className={`w-2 h-2 rounded-full ${isDriverOnline ? 'bg-blue-500 animate-ping' : 'bg-slate-400'}`} />
@@ -409,24 +409,24 @@ const VendorTracking = () => {
                 </div>
 
                 {/* Details Grid */}
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
                   {/* Card 1: GPS Info */}
-                  <div className="bg-[var(--color-surface)] border border-[var(--color-border)] p-4 rounded-xl shadow-xs flex flex-col justify-between">
+                  <div className="bg-[var(--color-surface)] border border-[var(--color-border)] p-3 rounded-xl shadow-xs flex flex-col justify-between">
                     <div>
-                      <span className="text-caption mb-2 block">Transit Details</span>
+                      <span className="text-[9px] font-extrabold uppercase tracking-wider text-[var(--color-text-muted)] mb-1.5 block">Transit Details</span>
                       {isDriverOnline && driverLocation ? (
                         <>
-                          <div className="text-[22px] font-black text-[var(--color-text-primary)] leading-none">
+                          <div className="text-[17px] font-black text-[var(--color-text-primary)] leading-none">
                             {driverLocation.speed ?? 0}
-                            <span className="text-[11px] font-semibold text-[var(--color-text-secondary)] ml-1">km/h</span>
+                            <span className="text-[10px] font-semibold text-[var(--color-text-secondary)] ml-1">km/h</span>
                           </div>
-                          <div className="mt-2 text-[10.5px]">
-                            <span className="text-[8.5px] font-bold text-[var(--color-text-muted)] uppercase tracking-wider block">GPS Accuracy</span>
+                          <div className="mt-1.5 text-[10.5px]">
+                            <span className="text-[8px] font-bold text-[var(--color-text-muted)] uppercase tracking-wider block">GPS Accuracy</span>
                             <span className="font-bold text-[var(--color-text-primary)]">{driverLocation.accuracy}m</span>
                           </div>
                         </>
                       ) : (
-                        <p className="text-[11px] text-[var(--color-text-secondary)] font-medium leading-snug">
+                        <p className="text-[10.5px] text-[var(--color-text-secondary)] font-medium leading-snug">
                           {isStale ? '⚠️ Weak signal — last location shown' : '⏳ Waiting for driver to share GPS...'}
                         </p>
                       )}
@@ -434,43 +434,43 @@ const VendorTracking = () => {
                   </div>
 
                   {/* Card 2: Driver / Carrier */}
-                  <div className="bg-[var(--color-surface)] border border-[var(--color-border)] p-4 rounded-xl shadow-xs flex flex-col justify-between">
+                  <div className="bg-[var(--color-surface)] border border-[var(--color-border)] p-3 rounded-xl shadow-xs flex flex-col justify-between">
                     <div>
-                      <span className="text-caption mb-2 block">Carrier Logistics</span>
+                      <span className="text-[9px] font-extrabold uppercase tracking-wider text-[var(--color-text-muted)] mb-1.5 block">Carrier Logistics</span>
                       {selectedOrder.driver ? (
-                        <div className="space-y-2">
+                        <div className="space-y-1.5">
                           <div className="flex items-center gap-2">
-                            <div className="w-7 h-7 rounded-full bg-slate-100 flex items-center justify-center text-slate-500 shrink-0">
-                              <span className="material-symbols-outlined text-[15px]">person</span>
+                            <div className="w-6 h-6 rounded-full bg-slate-100 flex items-center justify-center text-slate-500 shrink-0">
+                              <span className="material-symbols-outlined text-[13px]">person</span>
                             </div>
                             <div className="min-w-0 flex-1">
-                              <h5 className="font-bold text-[var(--color-text-primary)] text-[11.5px] truncate">{selectedOrder.driver.name}</h5>
-                              <p className="text-[8.5px] text-[var(--color-text-secondary)] font-medium leading-none">Vehicle: {selectedOrder.driver.vehicleType}</p>
+                              <h5 className="font-bold text-[var(--color-text-primary)] text-[11px] truncate leading-none">{selectedOrder.driver.name}</h5>
+                              <p className="text-[8px] text-[var(--color-text-secondary)] font-medium mt-0.5">Vehicle: {selectedOrder.driver.vehicleType}</p>
                             </div>
                             <a href={`tel:${selectedOrder.driver.phone}`}
-                              className="w-6 h-6 rounded-full bg-emerald-50 hover:bg-emerald-100 text-emerald-700 flex items-center justify-center transition-colors shrink-0">
-                              <span className="material-symbols-outlined text-[12px]">call</span>
+                              className="w-5 h-5 rounded-full bg-emerald-50 hover:bg-emerald-100 text-emerald-700 flex items-center justify-center transition-colors shrink-0">
+                              <span className="material-symbols-outlined text-[10px]">call</span>
                             </a>
                           </div>
-                          <div className="flex items-center justify-center bg-slate-50 border border-slate-200/50 py-1.5 rounded-lg">
-                            <div className="bg-[#FFD54F] border border-amber-400 rounded px-3 py-0.5">
-                              <span className="font-mono text-[10px] font-extrabold text-slate-900 tracking-wider uppercase select-all">{selectedOrder.driver.vehicleNumber}</span>
+                          <div className="flex items-center justify-center bg-slate-50 border border-slate-200/50 py-1 rounded-lg">
+                            <div className="bg-[#FFD54F] border border-amber-400 rounded px-2 py-0.2">
+                              <span className="font-mono text-[9px] font-extrabold text-slate-900 tracking-wider uppercase select-all">{selectedOrder.driver.vehicleNumber}</span>
                             </div>
                           </div>
                         </div>
                       ) : (
-                        <div className="space-y-2">
+                        <div className="space-y-1.5">
                           <div className="flex items-center gap-2">
-                            <div className="w-7 h-7 rounded-full bg-blue-50 text-blue-600 flex items-center justify-center shrink-0">
-                              <span className="material-symbols-outlined text-[15px]">agriculture</span>
+                            <div className="w-6 h-6 rounded-full bg-blue-50 text-blue-600 flex items-center justify-center shrink-0">
+                              <span className="material-symbols-outlined text-[13px]">agriculture</span>
                             </div>
                             <div className="min-w-0 flex-1">
-                              <h5 className="font-bold text-[var(--color-text-primary)] text-[11.5px]">Self-Delivery</h5>
-                              <p className="text-[8.5px] text-[var(--color-text-secondary)] font-medium">Farmer Fulfilling Order</p>
+                              <h5 className="font-bold text-[var(--color-text-primary)] text-[11px] leading-none">Self-Delivery</h5>
+                              <p className="text-[8px] text-[var(--color-text-secondary)] font-medium mt-0.5">Farmer Fulfilling Order</p>
                             </div>
                             <a href={`tel:${selectedOrder.farmer?.phone}`}
-                              className="w-6 h-6 rounded-full bg-emerald-50 hover:bg-emerald-100 text-emerald-700 flex items-center justify-center transition-colors shrink-0">
-                              <span className="material-symbols-outlined text-[12px]">call</span>
+                              className="w-5 h-5 rounded-full bg-emerald-50 hover:bg-emerald-100 text-emerald-700 flex items-center justify-center transition-colors shrink-0">
+                              <span className="material-symbols-outlined text-[10px]">call</span>
                             </a>
                           </div>
                         </div>
@@ -481,34 +481,34 @@ const VendorTracking = () => {
                   {/* Card 3: OTP or Seller */}
                   <div className="shadow-xs">
                     {selectedOrder.deliveryOTP ? (
-                      <div className="bg-amber-50/70 border border-amber-200/80 rounded-xl p-4 flex flex-col justify-between h-full">
+                      <div className="bg-amber-50/70 border border-amber-200/80 rounded-xl p-3 flex flex-col justify-between h-full">
                         <div>
-                          <h5 className="font-bold text-[10px] text-amber-900 flex items-center gap-1.5 uppercase tracking-wider">
-                            <span className="material-symbols-outlined text-[14px] text-amber-700">lock_open</span>
+                          <h5 className="font-bold text-[9px] text-amber-900 flex items-center gap-1.5 uppercase tracking-wider">
+                            <span className="material-symbols-outlined text-[12px] text-amber-700">lock_open</span>
                             Handover OTP
                           </h5>
-                          <p className="text-[9.5px] text-amber-700/80 leading-snug mt-1">
+                          <p className="text-[9px] text-amber-700/80 leading-snug mt-1">
                             Share this OTP with the driver at handover to verify the delivery completion.
                           </p>
                         </div>
-                        <div className="mt-3 bg-white border border-amber-200 rounded-lg py-1.5 text-center shadow-xs">
-                          <span className="text-[17px] font-black text-amber-950 tracking-widest font-mono">
+                        <div className="mt-2 bg-white border border-amber-200 rounded-lg py-1 text-center shadow-xs">
+                          <span className="text-[15px] font-black text-amber-950 tracking-widest font-mono">
                             {selectedOrder.deliveryOTP}
                           </span>
                         </div>
                       </div>
                     ) : (
-                      <div className="bg-slate-50 border border-slate-200/60 rounded-xl p-4 flex flex-col justify-between h-full">
+                      <div className="bg-slate-50 border border-slate-200/60 rounded-xl p-3 flex flex-col justify-between h-full">
                         <div>
-                          <span className="text-caption mb-1 block">Seller Location</span>
-                          <h5 className="font-bold text-[var(--color-text-primary)] text-[12px]">{selectedOrder.farmer?.name}</h5>
-                          <p className="text-[10px] text-[var(--color-text-secondary)] leading-snug mt-1">
+                          <span className="text-[9px] font-extrabold uppercase tracking-wider text-[var(--color-text-muted)] mb-1 block">Seller Location</span>
+                          <h5 className="font-bold text-[var(--color-text-primary)] text-[11px] leading-none">{selectedOrder.farmer?.name}</h5>
+                          <p className="text-[9.5px] text-[var(--color-text-secondary)] leading-snug mt-1.5 truncate">
                             {selectedOrder.farmer?.location || 'Farmer dispatch location'}
                           </p>
                         </div>
                         <a href={`tel:${selectedOrder.farmer?.phone}`}
-                          className="mt-3 flex items-center justify-center gap-1.5 w-full py-1.5 bg-slate-100 hover:bg-slate-200/80 text-slate-700 text-[10.5px] font-bold rounded-lg border border-slate-200 transition-colors cursor-pointer">
-                          <span className="material-symbols-outlined text-[13px]">call</span>
+                          className="mt-2 flex items-center justify-center gap-1 w-full py-1 bg-slate-100 hover:bg-slate-200/80 text-slate-700 text-[10px] font-bold rounded-lg border border-slate-200 transition-colors cursor-pointer no-underline">
+                          <span className="material-symbols-outlined text-[11px]">call</span>
                           Call Farmer
                         </a>
                       </div>
