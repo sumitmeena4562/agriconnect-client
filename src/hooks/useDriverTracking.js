@@ -1,10 +1,9 @@
 import { useEffect, useRef, useCallback, useState } from 'react';
-import { ref, set, onDisconnect, serverTimestamp } from 'firebase/database';
-import { database } from '../config/firebase';
 
 /**
  * useDriverTracking — Driver ke phone pe GPS coordinates
- * Firebase Realtime DB mein push karta hai.
+ * REST API se Firebase Realtime DB mein push karta hai.
+ * Bypasses SDK API Key mismatch errors.
  *
  * @param {string} orderId  - Order ka MongoDB _id
  * @param {boolean} isActive - Tracking on/off switch
@@ -18,9 +17,12 @@ const useDriverTracking = (orderId, isActive) => {
 
   const watchIdRef    = useRef(null);
   const wakeLockRef   = useRef(null);
-  const locationRef   = orderId ? ref(database, `locations/${orderId}`) : null;
 
-  // ── Screen wake lock — driver ki screen off na ho ────────────────────────
+  const dbUrl = import.meta.env.VITE_FIREBASE_DATABASE_URL || '';
+  const cleanDbUrl = dbUrl.endsWith('/') ? dbUrl : dbUrl + '/';
+  const fetchUrl = orderId ? `${cleanDbUrl}locations/${orderId}.json` : null;
+
+  // Screen wake lock — driver ki screen off na ho
   const acquireWakeLock = async () => {
     try {
       if ('wakeLock' in navigator) {
@@ -39,7 +41,25 @@ const useDriverTracking = (orderId, isActive) => {
     }
   };
 
-  // ── Stop tracking — GPS band karo ────────────────────────────────────────
+  // Helper: Write active: false to DB
+  const markOffline = useCallback(async () => {
+    if (!fetchUrl) return;
+    try {
+      await fetch(fetchUrl, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          active: false,
+          stoppedAt: Date.now()
+        })
+      });
+      console.log('[Driver] Marked offline in database');
+    } catch (err) {
+      console.warn('[Driver] Failed to mark offline:', err.message);
+    }
+  }, [fetchUrl]);
+
+  // Stop tracking — GPS band karo
   const stopTracking = useCallback(() => {
     if (watchIdRef.current !== null) {
       navigator.geolocation.clearWatch(watchIdRef.current);
@@ -47,19 +67,12 @@ const useDriverTracking = (orderId, isActive) => {
     }
     releaseWakeLock();
     setGpsStatus('idle');
+    markOffline();
+  }, [markOffline]);
 
-    // Firebase mein offline mark karo
-    if (locationRef) {
-      set(locationRef, {
-        active: false,
-        stoppedAt: Date.now(),
-      });
-    }
-  }, [locationRef]);
-
-  // ── Main tracking effect ─────────────────────────────────────────────────
+  // Main tracking effect
   useEffect(() => {
-    if (!isActive || !orderId || !locationRef) {
+    if (!isActive || !orderId || !fetchUrl) {
       if (!isActive && watchIdRef.current !== null) stopTracking();
       return;
     }
@@ -73,37 +86,49 @@ const useDriverTracking = (orderId, isActive) => {
     setGpsStatus('requesting');
     acquireWakeLock();
 
-    // Firebase mein auto-offline set karo — agar browser band ho jaaye
-    onDisconnect(locationRef).set({
-      active: false,
-      stoppedAt: Date.now(),
-    });
+    // Browser close par auto-offline mark karne ke liye keepalive beacon setup karein
+    const handleUnload = () => {
+      if (fetchUrl) {
+        fetch(fetchUrl, {
+          method: 'PUT',
+          keepalive: true, // Crucial for unload handlers
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            active: false,
+            stoppedAt: Date.now()
+          })
+        });
+      }
+    };
+    window.addEventListener('beforeunload', handleUnload);
 
     // GPS watch shuru karo
     watchIdRef.current = navigator.geolocation.watchPosition(
-      // ── SUCCESS — GPS mila ─────────────────────────────────────────────
-      (position) => {
+      // SUCCESS — GPS mila
+      async (position) => {
         const { latitude, longitude, accuracy: acc, speed: spd } = position.coords;
-
         const kmhSpeed = spd != null ? parseFloat((spd * 3.6).toFixed(1)) : null;
 
-        console.log(`[useDriverTracking] GPS coordinate fetched. Lat: ${latitude}, Lng: ${longitude}. Writing to: locations/${orderId}`);
+        console.log(`[useDriverTracking] GPS fetched. Lat: ${latitude}, Lng: ${longitude}`);
 
-        // Firebase update
-        set(locationRef, {
-          lat: latitude,
-          lng: longitude,
-          speed: kmhSpeed,
-          accuracy: Math.round(acc),
-          timestamp: Date.now(),
-          active: true,
-        })
-        .then(() => {
-          console.log(`[useDriverTracking] Successfully wrote coordinates for ${orderId} to Firebase`);
-        })
-        .catch((err) => {
-          console.error(`[useDriverTracking] Firebase write error for ${orderId}:`, err);
-        });
+        try {
+          const res = await fetch(fetchUrl, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              lat: latitude,
+              lng: longitude,
+              speed: kmhSpeed,
+              accuracy: Math.round(acc),
+              timestamp: Date.now(),
+              active: true,
+            })
+          });
+          if (!res.ok) throw new Error(`HTTP ${res.status}`);
+          console.log(`[useDriverTracking] Successfully wrote coordinates for ${orderId} via REST`);
+        } catch (err) {
+          console.error(`[useDriverTracking] REST write error for ${orderId}:`, err.message);
+        }
 
         setGpsStatus('active');
         setAccuracy(Math.round(acc));
@@ -111,13 +136,13 @@ const useDriverTracking = (orderId, isActive) => {
         setUpdateCount((c) => c + 1);
       },
 
-      // ── ERROR — GPS nahi mila ───────────────────────────────────────────
+      // ERROR — GPS nahi mila
       (err) => {
         console.error('[Driver] Geolocation API Error:', err.message);
         setGpsStatus('error');
       },
 
-      // ── Options ────────────────────────────────────────────────────────
+      // Options
       {
         enableHighAccuracy: true,   // Real GPS chip use karo
         timeout: 15000,             // 15 second mein response chahiye
@@ -125,8 +150,11 @@ const useDriverTracking = (orderId, isActive) => {
       }
     );
 
-    return () => stopTracking();
-  }, [isActive, orderId]);
+    return () => {
+      window.removeEventListener('beforeunload', handleUnload);
+      stopTracking();
+    };
+  }, [isActive, orderId, fetchUrl, stopTracking]);
 
   return { stopTracking, gpsStatus, accuracy, updateCount, speed };
 };
