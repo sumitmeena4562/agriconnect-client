@@ -365,20 +365,20 @@ const FreightTracking = () => {
                       </div>
                       
                       {/* Stepper progress timeline indicator */}
-                      <div className="flex items-center gap-2 mt-1.5 bg-slate-50 border border-slate-100 rounded-lg p-1.5 py-1">
+                      <div className="flex items-center gap-1.5 mt-1 text-[8.5px] font-black tracking-wide">
                         <div className="flex items-center gap-1">
-                          <span className="w-2 h-2 rounded-full bg-emerald-500 shadow-3xs" />
-                          <span className="text-[9px] font-extrabold text-emerald-700 uppercase">Dispatched</span>
+                          <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
+                          <span className="text-emerald-750 uppercase">Dispatched</span>
                         </div>
-                        <span className="text-slate-350 text-[10px]">➔</span>
+                        <span className="text-slate-300">➔</span>
                         <div className="flex items-center gap-1">
-                          <span className={`w-2 h-2 rounded-full ${selectedOrder.deliveryStatus === 'Arrived' ? 'bg-emerald-500' : 'bg-primary-500 animate-pulse'}`} />
-                          <span className={`text-[9px] font-extrabold uppercase ${selectedOrder.deliveryStatus === 'Arrived' ? 'text-emerald-700' : 'text-primary-700'}`}>In Transit</span>
+                          <span className={`w-1.5 h-1.5 rounded-full ${selectedOrder.deliveryStatus === 'Arrived' ? 'bg-emerald-500' : 'bg-primary-500 animate-pulse'}`} />
+                          <span className={`uppercase ${selectedOrder.deliveryStatus === 'Arrived' ? 'text-emerald-750' : 'text-primary-700'}`}>In Transit</span>
                         </div>
-                        <span className="text-slate-350 text-[10px]">➔</span>
+                        <span className="text-slate-300">➔</span>
                         <div className="flex items-center gap-1">
-                          <span className={`w-2 h-2 rounded-full ${selectedOrder.deliveryStatus === 'Arrived' ? 'bg-emerald-500' : 'bg-slate-300'}`} />
-                          <span className={`text-[9px] font-extrabold uppercase ${selectedOrder.deliveryStatus === 'Arrived' ? 'text-emerald-700' : 'text-slate-400'}`}>Arrived</span>
+                          <span className={`w-1.5 h-1.5 rounded-full ${selectedOrder.deliveryStatus === 'Arrived' ? 'bg-emerald-500' : 'bg-slate-300'}`} />
+                          <span className={`uppercase ${selectedOrder.deliveryStatus === 'Arrived' ? 'text-emerald-750' : 'text-slate-400'}`}>Arrived</span>
                         </div>
                       </div>
                     </div>
