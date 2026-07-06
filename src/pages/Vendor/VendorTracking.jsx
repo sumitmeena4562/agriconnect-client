@@ -5,6 +5,48 @@ import { toast } from 'react-hot-toast';
 import { motion, AnimatePresence } from 'framer-motion';
 import useLiveTracking from '../../hooks/useLiveTracking';
 
+// Haversine formula to compute distance in km
+const getDistance = (lat1, lon1, lat2, lon2) => {
+  const R = 6371; // Earth radius in km
+  const dLat = (lat2 - lat1) * Math.PI / 180;
+  const dLon = (lon2 - lon1) * Math.PI / 180;
+  const a =
+    Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+    Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+    Math.sin(dLon / 2) * Math.sin(dLon / 2);
+  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+  return R * c;
+};
+
+// Computes remaining distance along polyline starting from driver's projection
+const calculateRemainingRoute = (driverLat, driverLng, routePoints) => {
+  if (!routePoints || routePoints.length === 0) return { distance: 0, index: 0 };
+  if (!driverLat || !driverLng) {
+    let dist = 0;
+    for (let i = 0; i < routePoints.length - 1; i++) {
+      dist += getDistance(routePoints[i][0], routePoints[i][1], routePoints[i+1][0], routePoints[i+1][1]);
+    }
+    return { distance: dist, index: 0 };
+  }
+  let minIndex = 0;
+  let minDistance = Infinity;
+  for (let i = 0; i < routePoints.length; i++) {
+    const d = getDistance(driverLat, driverLng, routePoints[i][0], routePoints[i][1]);
+    if (d < minDistance) {
+      minDistance = d;
+      minIndex = i;
+    }
+  }
+  let totalRemaining = 0;
+  for (let i = minIndex; i < routePoints.length - 1; i++) {
+    totalRemaining += getDistance(
+      routePoints[i][0], routePoints[i][1],
+      routePoints[i+1][0], routePoints[i+1][1]
+    );
+  }
+  return { distance: totalRemaining, index: minIndex };
+};
+
 const VendorTracking = () => {
   const [searchParams] = useSearchParams();
   const [orders, setOrders] = useState([]);
@@ -12,6 +54,8 @@ const VendorTracking = () => {
   const [selectedOrder, setSelectedOrder] = useState(null);
   const [mapLoaded, setMapLoaded] = useState(false);
   const [mapStyle, setMapStyle] = useState('satellite');
+  const [currentRoute, setCurrentRoute] = useState(null);
+  const [shouldFollowDriver, setShouldFollowDriver] = useState(true);
 
   // Firebase real-time GPS receiver
   const { location: driverLocation, isDriverOnline, isStale } =
@@ -76,6 +120,8 @@ const VendorTracking = () => {
   // ── 3. Reset markers + bounds flag when order changes ────────────────────
   useEffect(() => {
     boundsSetRef.current = false;
+    setCurrentRoute(null);
+    setShouldFollowDriver(true); // Re-enable auto-follow when a new order is selected
     if (mapInstanceRef.current) {
       [startMarkerRef, endMarkerRef, driverMarkerRef, polylineRef].forEach((r) => {
         if (r.current) { mapInstanceRef.current.removeLayer(r.current); r.current = null; }
@@ -83,19 +129,33 @@ const VendorTracking = () => {
     }
   }, [selectedOrder]);
 
-  // ── 4. OSRM route fetch with cache ───────────────────────────────────────
+  // ── 4. OSRM route fetch with multi-mirror fallback ───────────────────────
   const fetchRoute = useCallback(async (sLat, sLng, eLat, eLng, key) => {
     if (routeCacheRef.current[key]) return routeCacheRef.current[key];
-    try {
-      const url = `https://router.project-osrm.org/route/v1/driving/${sLng},${sLat};${eLng},${eLat}?overview=full&geometries=geojson`;
-      const res = await fetch(url);
-      const data = await res.json();
-      if (data.code === 'Ok' && data.routes?.length) {
-        const pts = data.routes[0].geometry.coordinates.map(([lng, lat]) => [lat, lng]);
-        routeCacheRef.current[key] = pts;
-        return pts;
+    
+    // Try multiple OSRM server mirrors in sequence for reliability
+    const endpoints = [
+      `https://routing.openstreetmap.de/routed-car/route/v1/driving/${sLng},${sLat};${eLng},${eLat}?overview=full&geometries=geojson`,
+      `https://router.project-osrm.org/route/v1/driving/${sLng},${sLat};${eLng},${eLat}?overview=full&geometries=geojson`,
+      `https://osrm.routing.digital/route/v1/driving/${sLng},${sLat};${eLng},${eLat}?overview=full&geometries=geojson`
+    ];
+
+    for (const url of endpoints) {
+      try {
+        const res = await fetch(url);
+        if (!res.ok) continue;
+        const data = await res.json();
+        if (data.code === 'Ok' && data.routes?.length) {
+          const pts = data.routes[0].geometry.coordinates.map(([lng, lat]) => [lat, lng]);
+          routeCacheRef.current[key] = pts;
+          return pts;
+        }
+      } catch (err) {
+        console.warn(`Routing mirror failed: ${url}`, err);
       }
-    } catch { /* sine fallback */ }
+    }
+
+    // High-fidelity highway simulator fallback instead of straight line
     const pts = [];
     for (let i = 0; i <= 30; i++) {
       const t = i / 30;
@@ -111,8 +171,11 @@ const VendorTracking = () => {
     const L = window.L;
 
     if (!mapInstanceRef.current) {
-      mapInstanceRef.current = L.map(mapRef.current, { zoomControl: true, scrollWheelZoom: true })
+      const m = L.map(mapRef.current, { zoomControl: true, scrollWheelZoom: true })
         .setView([28.6, 77.2], 10);
+      // Stop auto-follow when user manually drags the map
+      m.on('dragstart', () => setShouldFollowDriver(false));
+      mapInstanceRef.current = m;
     }
     const map = mapInstanceRef.current;
 
@@ -140,17 +203,18 @@ const VendorTracking = () => {
     }
 
     // Vendor theme blue color for icons
-    const mkIcon = (icon, color, label) =>
+    const mkIcon = (icon, color, label, isPulsing = false) =>
       L.divIcon({
         className: 'custom-leaflet-icon',
-        html: `<div style="display:flex;flex-direction:column;align-items:center">
-          <div style="width:32px;height:32px;border-radius:50%;background:${color};color:#fff;display:flex;align-items:center;justify-content:center;box-shadow:0 2px 8px rgba(0,0,0,.35);border:2px solid #fff">
+        html: `<div style="display:flex;flex-direction:column;align-items:center;position:relative">
+          ${isPulsing ? `<div style="position:absolute;top:-6px;left:-6px;width:44px;height:44px;border-radius:50%;background:rgba(34,197,94,0.35);animation:ping 1.2s cubic-bezier(0,0,.2,1) infinite"></div>` : ''}
+          <div style="position:relative;width:32px;height:32px;border-radius:50%;background:${color};color:#fff;display:flex;align-items:center;justify-content:center;box-shadow:0 2px 8px rgba(0,0,0,.35);border:2px solid #fff">
             <span class="material-symbols-outlined" style="font-size:17px">${icon}</span>
           </div>
           <span style="background:rgba(15,23,42,.85);color:#fff;font-size:8.5px;font-weight:700;padding:1px 5px;border-radius:4px;margin-top:2px;white-space:nowrap">${label}</span>
         </div>`,
-        iconSize: [32, 48],
-        iconAnchor: [16, 44],
+        iconSize: [44, 54],
+        iconAnchor: [22, 50],
       });
 
     const id    = selectedOrder._id;
@@ -167,6 +231,7 @@ const VendorTracking = () => {
 
     fetchRoute(sLat, sLng, eLat, eLng, id).then((route) => {
       if (!route || !mapInstanceRef.current) return;
+      setCurrentRoute(route);
 
       // Start marker
       if (!startMarkerRef.current)
@@ -196,15 +261,15 @@ const VendorTracking = () => {
             selectedOrder.driver?.vehicleType === 'Bike'    ? 'two_wheeler' :
             selectedOrder.driver?.vehicleType === 'Tractor' ? 'agriculture' : 'local_shipping';
           const color = isDriverOnline ? '#f59e0b' : '#94a3b8';
-          driverMarkerRef.current.setIcon(mkIcon(vehicleIcon, color, selectedOrder.driver?.name || 'Driver'));
-          if (isDriverOnline) map.panTo(dPos, { animate: true });
+          driverMarkerRef.current.setIcon(mkIcon(vehicleIcon, color, selectedOrder.driver?.name || 'Driver', isDriverOnline));
+          if (isDriverOnline && shouldFollowDriver) map.panTo(dPos, { animate: true });
         } else {
           const vehicleIcon =
             selectedOrder.driver?.vehicleType === 'Bike'    ? 'two_wheeler' :
             selectedOrder.driver?.vehicleType === 'Tractor' ? 'agriculture' : 'local_shipping';
           const color = isDriverOnline ? '#f59e0b' : '#94a3b8';
           driverMarkerRef.current = L.marker(dPos, {
-            icon: mkIcon(vehicleIcon, color, selectedOrder.driver?.name || 'Driver'),
+            icon: mkIcon(vehicleIcon, color, selectedOrder.driver?.name || 'Driver', isDriverOnline),
           }).addTo(map).bindPopup('Live GPS Location');
         }
       } else {
@@ -383,6 +448,26 @@ const VendorTracking = () => {
                     </div>
                   </div>
                 </div>
+                
+                {/* Emergency SOS Flashing Banner */}
+                {driverLocation?.sos && (
+                  <div className="bg-rose-600 text-white px-4 py-2.5 rounded-xl shadow-md flex items-center justify-between animate-pulse">
+                    <div className="flex items-center gap-2">
+                      <span className="material-symbols-outlined text-[20px] font-bold">warning</span>
+                      <div className="min-w-0">
+                        <h4 className="font-extrabold text-[12px] uppercase tracking-wider leading-none">Emergency SOS Alert!</h4>
+                        <p className="text-[10px] font-medium mt-0.5 opacity-90">Driver {selectedOrder.driver?.name || 'Driver'} is in emergency. Contact immediately!</p>
+                      </div>
+                    </div>
+                    <a
+                      href={`tel:${selectedOrder.driver?.phone}`}
+                      className="px-3 py-1 bg-white text-rose-700 text-[10px] font-black rounded-lg hover:bg-slate-50 transition-colors flex items-center gap-1 shadow-sm shrink-0"
+                    >
+                      <span className="material-symbols-outlined text-[12px] font-bold">call</span>
+                      <span>Call Driver</span>
+                    </a>
+                  </div>
+                )}
 
                 {/* Map */}
                 <div className="bg-[var(--color-surface)] border border-[var(--color-border)] rounded-2xl overflow-hidden shadow-sm flex flex-col lg:flex-1 lg:min-h-0" style={{ height: 'clamp(280px, 45vh, 450px)' }}>
@@ -413,33 +498,124 @@ const VendorTracking = () => {
                       </div>
                     )}
                     <div ref={mapRef} id="vendor-tracking-map" className="w-full h-full z-0" />
+                    {/* Floating Recenter / Follow Driver Button */}
+                    {driverLocation?.lat && (
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setShouldFollowDriver(true);
+                          if (mapInstanceRef.current) {
+                            mapInstanceRef.current.panTo([driverLocation.lat, driverLocation.lng], { animate: true });
+                          }
+                        }}
+                        title={shouldFollowDriver ? 'Auto-following driver' : 'Click to re-center on driver'}
+                        className={`absolute bottom-3 right-3 z-[1000] w-9 h-9 rounded-full shadow-lg flex items-center justify-center transition-all duration-200 active:scale-90 ${
+                          shouldFollowDriver
+                            ? 'bg-blue-500 text-white hover:bg-blue-600'
+                            : 'bg-white text-slate-600 hover:bg-slate-50 border border-slate-200'
+                        }`}
+                      >
+                        <span className="material-symbols-outlined text-[18px]">
+                          {shouldFollowDriver ? 'my_location' : 'location_searching'}
+                        </span>
+                      </button>
+                    )}
                   </div>
                 </div>
 
                 {/* Details Grid */}
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-                  {/* Card 1: GPS Info */}
-                  <div className="bg-[var(--color-surface)] border border-[var(--color-border)] p-3 rounded-xl shadow-xs flex flex-col justify-between">
-                    <div>
-                      <span className="text-[9px] font-extrabold uppercase tracking-wider text-[var(--color-text-muted)] mb-1.5 block">Transit Details</span>
-                      {isDriverOnline && driverLocation ? (
-                        <>
-                          <div className="text-[17px] font-black text-[var(--color-text-primary)] leading-none">
-                            {driverLocation.speed ?? 0}
-                            <span className="text-[10px] font-semibold text-[var(--color-text-secondary)] ml-1">km/h</span>
+                  {/* Card 1: GPS Info & Transit details */}
+                  {(() => {
+                    let remainingDistanceStr = '—';
+                    let etaStr = '—';
+                    let arrivalStr = '—';
+
+                    if (currentRoute && currentRoute.length > 0) {
+                      const dLat = driverLocation?.lat;
+                      const dLng = driverLocation?.lng;
+                      const { distance } = calculateRemainingRoute(dLat, dLng, currentRoute);
+                      
+                      remainingDistanceStr = distance >= 1 ? `${distance.toFixed(1)} km` : `${(distance * 1000).toFixed(0)} m`;
+
+                      const speed = driverLocation?.speed || 0;
+                      const activeSpeed = speed > 10 ? speed : 50; // fallback to 50km/h
+                      const hours = distance / activeSpeed;
+                      const totalMinutes = Math.round(hours * 60);
+
+                      if (totalMinutes < 60) {
+                        etaStr = `${totalMinutes} mins`;
+                      } else {
+                        etaStr = `${(totalMinutes / 60).toFixed(1)} hrs`;
+                      }
+
+                      const arrivalDate = new Date();
+                      arrivalDate.setMinutes(arrivalDate.getMinutes() + totalMinutes);
+                      arrivalStr = arrivalDate.toLocaleTimeString('en-US', {
+                        hour: '2-digit',
+                        minute: '2-digit',
+                        hour12: true
+                      });
+                    }
+
+                    return (
+                      <div className="bg-[var(--color-surface)] border border-[var(--color-border)] p-3 rounded-xl shadow-xs flex flex-col justify-between">
+                        <div>
+                          <div className="flex items-center justify-between mb-2">
+                            <span className="text-[9px] font-extrabold uppercase tracking-wider text-[var(--color-text-muted)]">Transit Details</span>
+                            {/* Signal Alert Badge */}
+                            <span className={`inline-flex items-center gap-1 px-1.5 py-0.5 rounded-full text-[8px] font-bold border ${
+                              isDriverOnline
+                                ? 'bg-emerald-50 border-emerald-200 text-emerald-700'
+                                : isStale
+                                ? 'bg-amber-50 border-amber-200 text-amber-700'
+                                : 'bg-slate-100 border-slate-200 text-slate-500'
+                            }`}>
+                              <span className={`w-1.5 h-1.5 rounded-full ${
+                                isDriverOnline ? 'bg-emerald-500 animate-ping' : isStale ? 'bg-amber-500 animate-pulse' : 'bg-slate-400'
+                              }`} />
+                              {isDriverOnline ? '🟢 GPS Live' : isStale ? '⚠️ Weak Signal' : '📡 No Signal'}
+                            </span>
                           </div>
-                          <div className="mt-1.5 text-[10.5px]">
-                            <span className="text-[8px] font-bold text-[var(--color-text-muted)] uppercase tracking-wider block">GPS Accuracy</span>
-                            <span className="font-bold text-[var(--color-text-primary)]">{driverLocation.accuracy}m</span>
+                          
+                          {/* Info Grid */}
+                          <div className="grid grid-cols-2 gap-2 mt-1">
+                            {/* Left Col: Real-time Stats */}
+                            <div className="space-y-1">
+                              <div>
+                                <span className="text-[7.5px] font-bold text-[var(--color-text-muted)] uppercase tracking-wider block">Speed</span>
+                                <span className="text-[13px] font-black text-[var(--color-text-primary)] leading-none">
+                                  {driverLocation && isDriverOnline ? `${driverLocation.speed ?? 0} ` : '0 '}
+                                  <span className="text-[9px] font-semibold text-[var(--color-text-secondary)]">km/h</span>
+                                </span>
+                              </div>
+                              <div>
+                                <span className="text-[7.5px] font-bold text-[var(--color-text-muted)] uppercase tracking-wider block">Accuracy</span>
+                                <span className="text-[11px] font-black text-[var(--color-text-primary)]">
+                                  {driverLocation && isDriverOnline ? `${driverLocation.accuracy}m` : '—'}
+                                </span>
+                              </div>
+                            </div>
+
+                            {/* Right Col: Distance & ETA */}
+                            <div className="space-y-1 border-l border-slate-100 pl-2">
+                              <div>
+                                <span className="text-[7.5px] font-bold text-[var(--color-text-muted)] uppercase tracking-wider block">Remaining</span>
+                                <span className="text-[13px] font-black text-[var(--color-text-primary)] leading-none text-blue-600">{remainingDistanceStr}</span>
+                              </div>
+                              <div>
+                                <span className="text-[7.5px] font-bold text-[var(--color-text-muted)] uppercase tracking-wider block">Est. Arrival</span>
+                                <span className="text-[11px] font-black text-emerald-600 leading-none block">{etaStr}</span>
+                                {arrivalStr !== '—' && (
+                                  <span className="text-[7.5px] font-bold text-[var(--color-text-muted)] mt-0.5 block">{arrivalStr}</span>
+                                )}
+                              </div>
+                            </div>
                           </div>
-                        </>
-                      ) : (
-                        <p className="text-[10.5px] text-[var(--color-text-secondary)] font-medium leading-snug">
-                          {isStale ? '⚠️ Weak signal — last location shown' : '⏳ Waiting for driver to share GPS...'}
-                        </p>
-                      )}
-                    </div>
-                  </div>
+                        </div>
+                      </div>
+                    );
+                  })()}
 
                   {/* Card 2: Driver / Carrier */}
                   <div className="bg-[var(--color-surface)] border border-[var(--color-border)] p-3 rounded-xl shadow-xs flex flex-col justify-between">

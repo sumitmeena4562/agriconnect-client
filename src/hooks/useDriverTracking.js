@@ -46,10 +46,11 @@ const useDriverTracking = (orderId, isActive) => {
     if (!fetchUrl) return;
     try {
       await fetch(fetchUrl, {
-        method: 'PUT',
+        method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           active: false,
+          sos: false, // auto-clear SOS alert when tracking stops
           stoppedAt: Date.now()
         })
       });
@@ -90,11 +91,12 @@ const useDriverTracking = (orderId, isActive) => {
     const handleUnload = () => {
       if (fetchUrl) {
         fetch(fetchUrl, {
-          method: 'PUT',
+          method: 'PATCH',
           keepalive: true, // Crucial for unload handlers
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
             active: false,
+            sos: false, // clear SOS
             stoppedAt: Date.now()
           })
         });
@@ -113,7 +115,7 @@ const useDriverTracking = (orderId, isActive) => {
 
         try {
           const res = await fetch(fetchUrl, {
-            method: 'PUT',
+            method: 'PATCH',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
               lat: latitude,

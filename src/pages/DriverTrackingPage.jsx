@@ -34,6 +34,7 @@ const STATUS_CONFIG = {
 const DriverTrackingPage = () => {
   const [searchParams]        = useSearchParams();
   const [isTracking, setIsTracking] = useState(false);
+  const [isSos, setIsSos]            = useState(false);
 
   // URL parameters
   const orderId    = searchParams.get('orderId')   || '';
@@ -60,8 +61,24 @@ const DriverTrackingPage = () => {
     return () => { document.title = 'AgriConnect'; };
   }, [gpsStatus]);
 
+  const triggerSos = async (state) => {
+    try {
+      const cleanDbUrl = dbUrl.endsWith('/') ? dbUrl : dbUrl + '/';
+      const url = `${cleanDbUrl}locations/${orderId}.json`;
+      await fetch(url, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ sos: state })
+      });
+      setIsSos(state);
+    } catch (err) {
+      console.error('[Driver] SOS failed:', err.message);
+    }
+  };
+
   const handleToggle = () => {
     if (isTracking) {
+      triggerSos(false);
       stopTracking();
       setIsTracking(false);
     } else {
@@ -186,9 +203,33 @@ const DriverTrackingPage = () => {
             {isTracking ? (gpsStatus === 'requesting' ? 'Finding GPS...' : 'Stop Tracking') : 'Start Tracking 🚚'}
           </button>
 
+          {/* Emergency SOS Trigger */}
+          {isTracking && (
+            <button
+              type="button"
+              onClick={() => {
+                if (isSos) {
+                  triggerSos(false);
+                } else {
+                  if (window.confirm('Emergency SOS alert trigger karna chahte hain? Sabhi ko notification mil jayega.')) {
+                    triggerSos(true);
+                  }
+                }
+              }}
+              className={`w-full py-2.5 rounded-2xl font-black text-[11px] flex items-center justify-center gap-1.5 border-0 shadow-xs transition-all duration-300 active:scale-[0.98] cursor-pointer mt-2.5 ${
+                isSos
+                  ? 'bg-rose-600 text-white animate-pulse shadow-[0_0_12px_rgba(225,29,72,0.4)]'
+                  : 'bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200/40'
+              }`}
+            >
+              <span className="material-symbols-outlined text-[14px]">warning</span>
+              {isSos ? '🚨 SOS ACTIVE (Tap to Cancel)' : '⚠️ TRIGGER SOS ALERT'}
+            </button>
+          )}
+
           {/* Simulation Controls (Inline/Clean Layout) */}
           {isTracking && (
-            <div className="flex items-center justify-center gap-2 py-1 border-t border-slate-100 mt-1">
+            <div className="flex items-center justify-center gap-2 py-1 border-t border-slate-100 mt-2.5">
               <span className="text-[8px] font-extrabold text-slate-400 uppercase tracking-widest flex items-center gap-0.5">
                 <span className="material-symbols-outlined text-[10px]">science</span>
                 <span>Simulate:</span>
@@ -199,7 +240,7 @@ const DriverTrackingPage = () => {
                   if (orderId) {
                     const cleanDbUrl = dbUrl.endsWith('/') ? dbUrl : dbUrl + '/';
                     fetch(`${cleanDbUrl}locations/${orderId}.json`, {
-                      method: 'PUT',
+                      method: 'PATCH',
                       headers: { 'Content-Type': 'application/json' },
                       body: JSON.stringify({
                         lat: 28.6139,
@@ -222,7 +263,7 @@ const DriverTrackingPage = () => {
                   if (orderId) {
                     const cleanDbUrl = dbUrl.endsWith('/') ? dbUrl : dbUrl + '/';
                     fetch(`${cleanDbUrl}locations/${orderId}.json`, {
-                      method: 'PUT',
+                      method: 'PATCH',
                       headers: { 'Content-Type': 'application/json' },
                       body: JSON.stringify({
                         lat: 28.5355,
