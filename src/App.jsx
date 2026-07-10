@@ -24,6 +24,8 @@ import VendorTracking from './pages/Vendor/VendorTracking';
 import SharedCropLinkHandler from './pages/SharedCropLinkHandler';
 import NotFound from './pages/NotFound';
 import DriverTrackingPage from './pages/DriverTrackingPage';
+import DriverBatchConsole from './pages/DriverBatchConsole';
+import BatchManagement from './pages/farmer/BatchManagement';
 import ProtectedRoute from './components/common/ProtectedRoute';
 import NotificationsPage from './pages/NotificationsPage';
 import BankPage from './pages/BankPage';
@@ -58,6 +60,9 @@ function App() {
         {/* Driver Live Tracking — Public (no login needed, link shared via WhatsApp) */}
         <Route path="/driver-track" element={<DriverTrackingPage />} />
         
+        {/* Driver Batch Console — Public */}
+        <Route path="/driver-batch" element={<DriverBatchConsole />} />
+        
         {/* Protected Dashboard Routes (Farmer) */}
         <Route element={<ProtectedRoute allowedRoles={['FARMER']} />}>
           <Route path="/farmer-dashboard" element={<DashboardLayout />}>
@@ -68,6 +73,7 @@ function App() {
             <Route path="crops/:id" element={<CropDetails />} />
             <Route path="orders" element={<FarmerOrders />} />
             <Route path="fleet" element={<DriverRegistry />} />
+            <Route path="batches" element={<BatchManagement />} />
             <Route path="tracking" element={<FreightTracking />} />
             <Route path="bank" element={<BankPage />} />
             <Route path="notifications" element={<NotificationsPage />} />

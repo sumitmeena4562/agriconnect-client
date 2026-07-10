@@ -275,6 +275,7 @@ const DashboardLayout = () => {
     { name: 'Home', path: '/farmer-dashboard', icon: 'home' },
     { name: 'My Crops', path: '/farmer-dashboard/crops', icon: 'yard' },
     { name: 'Orders', path: '/farmer-dashboard/orders', icon: 'shopping_cart' },
+    { name: 'Delivery Batches', path: '/farmer-dashboard/batches', icon: 'hub' },
     { name: 'Live Tracking', path: '/farmer-dashboard/tracking', icon: 'navigation' },
     { name: 'My Drivers', path: '/farmer-dashboard/fleet', icon: 'local_shipping' },
     { name: 'Bank Account', path: '/farmer-dashboard/bank', icon: 'account_balance' },
