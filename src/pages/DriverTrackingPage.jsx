@@ -1,7 +1,8 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import useDriverTracking from '../hooks/useDriverTracking';
+import api from '../utils/api';
 
 // ── GPS Status Config ─────────────────────────────────────────────────────
 const STATUS_CONFIG = {
@@ -35,6 +36,13 @@ const DriverTrackingPage = () => {
   const [searchParams]        = useSearchParams();
   const [isTracking, setIsTracking] = useState(false);
   const [isSos, setIsSos]            = useState(false);
+  // Milk run / route consolidation state
+  const [suggestions, setSuggestions]           = useState([]);
+  const [acceptedIds, setAcceptedIds]           = useState(new Set());
+  const [dismissedIds, setDismissedIds]         = useState(new Set());
+  const [fetchingSuggestions, setFetchingSuggestions] = useState(false);
+  // Store route points received from hook (for sending to backend)
+  const [activeRoutePoints, setActiveRoutePoints] = useState(null);
 
   // URL parameters
   const orderId    = searchParams.get('orderId')   || '';
@@ -42,9 +50,12 @@ const DriverTrackingPage = () => {
   const cropName   = searchParams.get('crop')      || 'Crop';
   const vendorName = searchParams.get('vendor')    || 'Vendor';
 
+  // Pass primary orderId + accepted addon orderIds so GPS updates both
+  const trackingOrderIds = useMemo(() => [orderId, ...Array.from(acceptedIds)], [orderId, acceptedIds]);
+
   // GPS hook
-  const { gpsStatus, accuracy, updateCount, speed, stopTracking } =
-    useDriverTracking(orderId, isTracking);
+  const { gpsStatus, accuracy, updateCount, speed, stopTracking, routePoints } =
+    useDriverTracking(trackingOrderIds, isTracking);
 
   const config = STATUS_CONFIG[gpsStatus] || STATUS_CONFIG.idle;
 
@@ -64,12 +75,14 @@ const DriverTrackingPage = () => {
   const triggerSos = async (state) => {
     try {
       const cleanDbUrl = dbUrl.endsWith('/') ? dbUrl : dbUrl + '/';
-      const url = `${cleanDbUrl}locations/${orderId}.json`;
-      await fetch(url, {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ sos: state })
-      });
+      const trackingOrderIds = [orderId, ...Array.from(acceptedIds)];
+      await Promise.all(trackingOrderIds.map(id =>
+        fetch(`${cleanDbUrl}locations/${id}.json`, {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ sos: state })
+        })
+      ));
       setIsSos(state);
     } catch (err) {
       console.error('[Driver] SOS failed:', err.message);
@@ -81,8 +94,53 @@ const DriverTrackingPage = () => {
       triggerSos(false);
       stopTracking();
       setIsTracking(false);
+      setSuggestions([]);
+      setAcceptedIds(new Set());
+      setDismissedIds(new Set());
     } else {
       setIsTracking(true);
+    }
+  };
+
+  // Fetch route consolidation suggestions from backend
+  const fetchSuggestions = useCallback(async (routePts) => {
+    if (!orderId || !routePts || routePts.length < 2) return;
+    setFetchingSuggestions(true);
+    try {
+      const res = await api.get('/orders/route-suggestions', {
+        params: {
+          orderId,
+          routePoints: JSON.stringify(routePts)
+        }
+      });
+      if (res.data.success) {
+        setSuggestions(res.data.data || []);
+      }
+    } catch (err) {
+      console.warn('[Milk Run] Suggestions fetch failed:', err.message);
+    } finally {
+      setFetchingSuggestions(false);
+    }
+  }, [orderId]);
+
+  // When GPS becomes active, fetch suggestions once
+  useEffect(() => {
+    if (gpsStatus === 'active' && suggestions.length === 0 && !fetchingSuggestions) {
+      // Use a simple straight-line route as fallback for suggestion matching
+      // Real route points would come from the tracking hook if available
+      const pts = activeRoutePoints || routePoints || null;
+      fetchSuggestions(pts);
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [gpsStatus]);
+
+  const handleAcceptSuggestion = async (suggestion) => {
+    try {
+      await api.post(`/orders/${suggestion._id}/consolidate`, { primaryOrderId: orderId });
+      setAcceptedIds(prev => new Set([...prev, suggestion._id]));
+    } catch (err) {
+      console.error('[Milk Run] Accept failed:', err.message);
+      alert('Could not accept order. Please try again.');
     }
   };
 
@@ -226,6 +284,93 @@ const DriverTrackingPage = () => {
               {isSos ? '🚨 SOS ACTIVE (Tap to Cancel)' : '⚠️ TRIGGER SOS ALERT'}
             </button>
           )}
+
+          {/* ── Milk Run: Route Suggestions ─────────────────────────── */}
+          <AnimatePresence>
+            {isTracking && (suggestions.length > 0 || fetchingSuggestions) && (
+              <motion.div
+                key="milk-run-section"
+                initial={{ opacity: 0, y: 8 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: 8 }}
+                className="border-t border-slate-100 pt-3 mt-1 space-y-2"
+              >
+                <div className="flex items-center gap-1.5">
+                  <span className="material-symbols-outlined text-[13px] text-amber-500">route</span>
+                  <span className="text-[9.5px] font-black uppercase tracking-wider text-slate-500">Nearby Orders Along Route</span>
+                  {fetchingSuggestions && (
+                    <div className="w-3 h-3 border-2 border-amber-400 border-t-transparent rounded-full animate-spin ml-auto" />
+                  )}
+                </div>
+
+                {suggestions
+                  .filter(s => !dismissedIds.has(String(s._id)))
+                  .map((s) => {
+                    const isAccepted = acceptedIds.has(String(s._id));
+                    return (
+                      <motion.div
+                        key={s._id}
+                        initial={{ opacity: 0, x: 8 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        exit={{ opacity: 0, x: -8 }}
+                        className={`rounded-2xl border p-3 ${
+                          isAccepted
+                            ? 'bg-emerald-50 border-emerald-200/60'
+                            : 'bg-amber-50/60 border-amber-200/50'
+                        }`}
+                      >
+                        <div className="flex items-start justify-between gap-2">
+                          <div className="min-w-0 flex-1">
+                            <div className="flex items-center gap-1 mb-1">
+                              <span className="material-symbols-outlined text-[11px] text-amber-600">package_2</span>
+                              <span className="text-[11px] font-black text-slate-800 truncate">
+                                {s.crop?.name || 'Crop'} · {s.requestedQuantity} {s.crop?.unit || 'kg'}
+                              </span>
+                            </div>
+                            <p className="text-[9px] font-semibold text-slate-500 truncate">
+                              📍 {s.farmer?.name} → {s.vendor?.name}
+                            </p>
+                            <div className="flex items-center gap-2 mt-1.5">
+                              <span className="text-[8.5px] font-bold bg-amber-100 text-amber-700 px-1.5 py-0.5 rounded-full">
+                                +{s.detourKm} km detour
+                              </span>
+                              <span className="text-[8.5px] font-bold text-slate-400">
+                                Cap left: {s.remainingCapacityAfter} kg
+                              </span>
+                            </div>
+                          </div>
+
+                          {isAccepted ? (
+                            <div className="flex flex-col items-center gap-0.5 shrink-0">
+                              <span className="material-symbols-outlined text-[18px] text-emerald-600">check_circle</span>
+                              <span className="text-[8px] font-black text-emerald-700">Added!</span>
+                            </div>
+                          ) : (
+                            <div className="flex flex-col gap-1 shrink-0">
+                              <button
+                                type="button"
+                                onClick={() => handleAcceptSuggestion(s)}
+                                className="px-2.5 py-1 bg-emerald-500 hover:bg-emerald-600 text-white text-[9px] font-black rounded-xl transition-colors active:scale-95 cursor-pointer"
+                              >
+                                Accept ✓
+                              </button>
+                              <button
+                                type="button"
+                                onClick={() => setDismissedIds(prev => new Set([...prev, String(s._id)]))}
+                                className="px-2.5 py-1 bg-slate-100 hover:bg-slate-200 text-slate-500 text-[9px] font-bold rounded-xl transition-colors active:scale-95 cursor-pointer"
+                              >
+                                Skip
+                              </button>
+                            </div>
+                          )}
+                        </div>
+                      </motion.div>
+                    );
+                  })
+                }
+              </motion.div>
+            )}
+          </AnimatePresence>
 
           {/* Simulation Controls (Inline/Clean Layout) */}
           {isTracking && (

@@ -70,6 +70,8 @@ const VendorTracking = () => {
   const startMarkerRef   = useRef(null);
   const endMarkerRef     = useRef(null);
   const polylineRef      = useRef(null);
+  const addonStartMarkerRef = useRef(null);
+  const addonEndMarkerRef   = useRef(null);
   const boundsSetRef     = useRef(false); // ✅ fitBounds bug fix
   const routeCacheRef    = useRef({});
 
@@ -123,21 +125,22 @@ const VendorTracking = () => {
     setCurrentRoute(null);
     setShouldFollowDriver(true); // Re-enable auto-follow when a new order is selected
     if (mapInstanceRef.current) {
-      [startMarkerRef, endMarkerRef, driverMarkerRef, polylineRef].forEach((r) => {
+      [startMarkerRef, endMarkerRef, driverMarkerRef, polylineRef, addonStartMarkerRef, addonEndMarkerRef].forEach((r) => {
         if (r.current) { mapInstanceRef.current.removeLayer(r.current); r.current = null; }
       });
     }
   }, [selectedOrder]);
 
   // ── 4. OSRM route fetch with multi-mirror fallback ───────────────────────
-  const fetchRoute = useCallback(async (sLat, sLng, eLat, eLng, key) => {
+  const fetchRoute = useCallback(async (coords, key) => {
     if (routeCacheRef.current[key]) return routeCacheRef.current[key];
     
+    const coordString = coords.map(([lat, lng]) => `${lng},${lat}`).join(';');
     // Try multiple OSRM server mirrors in sequence for reliability
     const endpoints = [
-      `https://routing.openstreetmap.de/routed-car/route/v1/driving/${sLng},${sLat};${eLng},${eLat}?overview=full&geometries=geojson`,
-      `https://router.project-osrm.org/route/v1/driving/${sLng},${sLat};${eLng},${eLat}?overview=full&geometries=geojson`,
-      `https://osrm.routing.digital/route/v1/driving/${sLng},${sLat};${eLng},${eLat}?overview=full&geometries=geojson`
+      `https://routing.openstreetmap.de/routed-car/route/v1/driving/${coordString}?overview=full&geometries=geojson`,
+      `https://router.project-osrm.org/route/v1/driving/${coordString}?overview=full&geometries=geojson`,
+      `https://osrm.routing.digital/route/v1/driving/${coordString}?overview=full&geometries=geojson`
     ];
 
     for (const url of endpoints) {
@@ -157,9 +160,16 @@ const VendorTracking = () => {
 
     // High-fidelity highway simulator fallback instead of straight line
     const pts = [];
-    for (let i = 0; i <= 30; i++) {
-      const t = i / 30;
-      pts.push([sLat + (eLat - sLat) * t + 0.02 * Math.sin(t * Math.PI), sLng + (eLng - sLng) * t]);
+    for (let s = 0; s < coords.length - 1; s++) {
+      const [ptA_Lat, ptA_Lng] = coords[s];
+      const [ptB_Lat, ptB_Lng] = coords[s + 1];
+      for (let i = 0; i <= 20; i++) {
+        const t = i / 20;
+        pts.push([
+          ptA_Lat + (ptB_Lat - ptA_Lat) * t + 0.01 * Math.sin(t * Math.PI),
+          ptA_Lng + (ptB_Lng - ptA_Lng) * t
+        ]);
+      }
     }
     routeCacheRef.current[key] = pts;
     return pts;
@@ -229,7 +239,20 @@ const VendorTracking = () => {
     const eLat  = selectedOrder.vendorCoordinates?.lat || (28.61 + (s3 % 10) / 100);
     const eLng  = selectedOrder.vendorCoordinates?.lng || (77.20 + (s4 % 10) / 100);
 
-    fetchRoute(sLat, sLng, eLat, eLng, id).then((route) => {
+    // Build coordsList for multi-stop routing if consolidated
+    const coordsList = [[sLat, sLng]];
+    if (selectedOrder.consolidatedWith && selectedOrder.consolidatedWith.length > 0) {
+      const addon = selectedOrder.consolidatedWith[0];
+      if (addon.farmerCoordinates?.lat && addon.farmerCoordinates?.lng) {
+        coordsList.push([addon.farmerCoordinates.lat, addon.farmerCoordinates.lng]);
+      }
+      if (addon.vendorCoordinates?.lat && addon.vendorCoordinates?.lng) {
+        coordsList.push([addon.vendorCoordinates.lat, addon.vendorCoordinates.lng]);
+      }
+    }
+    coordsList.push([eLat, eLng]);
+
+    fetchRoute(coordsList, id).then((route) => {
       if (!route || !mapInstanceRef.current) return;
       setCurrentRoute(route);
 
@@ -242,6 +265,30 @@ const VendorTracking = () => {
       if (!endMarkerRef.current)
         endMarkerRef.current = L.marker([eLat, eLng], { icon: mkIcon('storefront', '#2563eb', 'My Shop') })
           .addTo(map).bindPopup('Your Shop — Delivery Destination');
+
+      // Addon markers
+      if (selectedOrder.consolidatedWith && selectedOrder.consolidatedWith.length > 0) {
+        const addon = selectedOrder.consolidatedWith[0];
+        if (addon.farmerCoordinates?.lat && addon.farmerCoordinates?.lng) {
+          if (!addonStartMarkerRef.current) {
+            addonStartMarkerRef.current = L.marker(
+              [addon.farmerCoordinates.lat, addon.farmerCoordinates.lng],
+              { icon: mkIcon('agriculture', '#9333ea', `Addon: ${addon.farmer?.name || 'Farmer'}`) }
+            ).addTo(map).bindPopup('Addon Dispatch Origin');
+          }
+        }
+        if (addon.vendorCoordinates?.lat && addon.vendorCoordinates?.lng) {
+          if (!addonEndMarkerRef.current) {
+            addonEndMarkerRef.current = L.marker(
+              [addon.vendorCoordinates.lat, addon.vendorCoordinates.lng],
+              { icon: mkIcon('storefront', '#4f46e5', `Addon Shop: ${addon.vendor?.name || 'Vendor'}`) }
+            ).addTo(map).bindPopup('Addon Delivery Destination');
+          }
+        }
+      } else {
+        if (addonStartMarkerRef.current) { map.removeLayer(addonStartMarkerRef.current); addonStartMarkerRef.current = null; }
+        if (addonEndMarkerRef.current)   { map.removeLayer(addonEndMarkerRef.current); addonEndMarkerRef.current = null; }
+      }
 
       // Route polyline
       if (polylineRef.current)
@@ -279,11 +326,20 @@ const VendorTracking = () => {
         }
       }
 
-      // ✅ fitBounds SIRF PEHLI BAAR - covers all 3 points
+      // ✅ fitBounds SIRF PEHLI BAAR - covers all points
       if (!boundsSetRef.current) {
         const boundsList = [[sLat, sLng], [eLat, eLng]];
         if (driverLocation?.lat && driverLocation?.lng) {
           boundsList.push([driverLocation.lat, driverLocation.lng]);
+        }
+        if (selectedOrder.consolidatedWith && selectedOrder.consolidatedWith.length > 0) {
+          const addon = selectedOrder.consolidatedWith[0];
+          if (addon.farmerCoordinates?.lat && addon.farmerCoordinates?.lng) {
+            boundsList.push([addon.farmerCoordinates.lat, addon.farmerCoordinates.lng]);
+          }
+          if (addon.vendorCoordinates?.lat && addon.vendorCoordinates?.lng) {
+            boundsList.push([addon.vendorCoordinates.lat, addon.vendorCoordinates.lng]);
+          }
         }
         map.fitBounds(L.latLngBounds(boundsList), { padding: [40, 40] });
         boundsSetRef.current = true;
@@ -412,6 +468,16 @@ const VendorTracking = () => {
                         <span className="text-[8.5px] font-mono font-bold text-[var(--color-text-muted)] uppercase tracking-wide bg-slate-100 px-1.5 py-0.5 rounded border border-slate-200">
                           #{selectedOrder._id.slice(-6).toUpperCase()}
                         </span>
+                        {selectedOrder.consolidationStatus && selectedOrder.consolidationStatus !== 'standalone' && (
+                          <span className={`text-[8px] font-extrabold px-1.5 py-0.5 rounded-full flex items-center gap-0.5 border ${
+                            selectedOrder.consolidationStatus === 'primary'
+                              ? 'bg-purple-50 text-purple-700 border-purple-200'
+                              : 'bg-indigo-50 text-indigo-700 border-indigo-200'
+                          }`}>
+                            <span className="material-symbols-outlined text-[10px]">alt_route</span>
+                            <span>{selectedOrder.consolidationStatus === 'primary' ? 'Primary Delivery' : 'Combined Pickup'}</span>
+                          </span>
+                        )}
                       </div>
                       {/* Stepper progress timeline indicator */}
                       <div className="flex items-center gap-1.5 mt-1 text-[8.5px] font-black tracking-wide">
@@ -448,6 +514,21 @@ const VendorTracking = () => {
                     </div>
                   </div>
                 </div>
+
+                {/* Consolidated / Milk Run Notice Banner */}
+                {selectedOrder.consolidationStatus && selectedOrder.consolidationStatus !== 'standalone' && (
+                  <div className="bg-slate-50 border border-slate-200 text-slate-700 px-4 py-2.5 rounded-xl shadow-xs flex items-center gap-2">
+                    <span className="material-symbols-outlined text-[18px] text-slate-500">info_outline</span>
+                    <div className="min-w-0">
+                      <h4 className="font-extrabold text-[11px] uppercase tracking-wider leading-none">Shared Delivery Route</h4>
+                      <p className="text-[9.5px] font-medium mt-0.5 opacity-90 leading-relaxed font-sans">
+                        {selectedOrder.consolidationStatus === 'primary'
+                          ? 'This shipment is consolidated. The driver is picking up and delivering another order along the route.'
+                          : 'This is an addon delivery. The carrier is delivering this order together with their primary shipment.'}
+                      </p>
+                    </div>
+                  </div>
+                )}
                 
                 {/* Emergency SOS Flashing Banner */}
                 {driverLocation?.sos && (

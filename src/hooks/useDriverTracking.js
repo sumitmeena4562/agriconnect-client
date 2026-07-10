@@ -1,4 +1,4 @@
-import { useEffect, useRef, useCallback, useState } from 'react';
+import { useEffect, useRef, useCallback, useState, useMemo } from 'react';
 
 /**
  * useDriverTracking — Driver ke phone pe GPS coordinates
@@ -20,7 +20,10 @@ const useDriverTracking = (orderId, isActive) => {
 
   const dbUrl = import.meta.env.VITE_FIREBASE_DATABASE_URL || '';
   const cleanDbUrl = dbUrl.endsWith('/') ? dbUrl : dbUrl + '/';
-  const fetchUrl = orderId ? `${cleanDbUrl}locations/${orderId}.json` : null;
+  const fetchUrls = useMemo(() => {
+    const ids = Array.isArray(orderId) ? orderId : (orderId ? [orderId] : []);
+    return ids.map(id => `${cleanDbUrl}locations/${id}.json`);
+  }, [orderId, cleanDbUrl]);
 
   // Screen wake lock — driver ki screen off na ho
   const acquireWakeLock = async () => {
@@ -43,22 +46,24 @@ const useDriverTracking = (orderId, isActive) => {
 
   // Helper: Write active: false to DB
   const markOffline = useCallback(async () => {
-    if (!fetchUrl) return;
+    if (fetchUrls.length === 0) return;
     try {
-      await fetch(fetchUrl, {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          active: false,
-          sos: false, // auto-clear SOS alert when tracking stops
-          stoppedAt: Date.now()
+      await Promise.all(fetchUrls.map(url =>
+        fetch(url, {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            active: false,
+            sos: false, // auto-clear SOS alert when tracking stops
+            stoppedAt: Date.now()
+          })
         })
-      });
+      ));
       console.log('[Driver] Marked offline in database');
     } catch (err) {
       console.warn('[Driver] Failed to mark offline:', err.message);
     }
-  }, [fetchUrl]);
+  }, [fetchUrls]);
 
   // Stop tracking — GPS band karo
   const stopTracking = useCallback(() => {
@@ -73,7 +78,7 @@ const useDriverTracking = (orderId, isActive) => {
 
   // Main tracking effect
   useEffect(() => {
-    if (!isActive || !orderId || !fetchUrl) {
+    if (!isActive || fetchUrls.length === 0) {
       if (!isActive && watchIdRef.current !== null) stopTracking();
       return;
     }
@@ -89,8 +94,8 @@ const useDriverTracking = (orderId, isActive) => {
 
     // Browser close par auto-offline mark karne ke liye keepalive beacon setup karein
     const handleUnload = () => {
-      if (fetchUrl) {
-        fetch(fetchUrl, {
+      fetchUrls.forEach(url => {
+        fetch(url, {
           method: 'PATCH',
           keepalive: true, // Crucial for unload handlers
           headers: { 'Content-Type': 'application/json' },
@@ -100,7 +105,7 @@ const useDriverTracking = (orderId, isActive) => {
             stoppedAt: Date.now()
           })
         });
-      }
+      });
     };
     window.addEventListener('beforeunload', handleUnload);
 
@@ -114,22 +119,23 @@ const useDriverTracking = (orderId, isActive) => {
         console.log(`[useDriverTracking] GPS fetched. Lat: ${latitude}, Lng: ${longitude}`);
 
         try {
-          const res = await fetch(fetchUrl, {
-            method: 'PATCH',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-              lat: latitude,
-              lng: longitude,
-              speed: kmhSpeed,
-              accuracy: Math.round(acc),
-              timestamp: Date.now(),
-              active: true,
+          await Promise.all(fetchUrls.map(url =>
+            fetch(url, {
+              method: 'PATCH',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                lat: latitude,
+                lng: longitude,
+                speed: kmhSpeed,
+                accuracy: Math.round(acc),
+                timestamp: Date.now(),
+                active: true,
+              })
             })
-          });
-          if (!res.ok) throw new Error(`HTTP ${res.status}`);
-          console.log(`[useDriverTracking] Successfully wrote coordinates for ${orderId} via REST`);
+          ));
+          console.log(`[useDriverTracking] Successfully wrote coordinates via REST`);
         } catch (err) {
-          console.error(`[useDriverTracking] REST write error for ${orderId}:`, err.message);
+          console.error(`[useDriverTracking] REST write error:`, err.message);
         }
 
         setGpsStatus('active');

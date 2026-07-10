@@ -456,6 +456,16 @@ const FreightTracking = () => {
                         <span className="text-[8.5px] font-mono font-bold text-[var(--color-text-muted)] uppercase tracking-wide bg-slate-100 px-1.5 py-0.5 rounded border border-slate-200">
                           #{selectedOrder._id.slice(-6).toUpperCase()}
                         </span>
+                        {selectedOrder.consolidationStatus && selectedOrder.consolidationStatus !== 'standalone' && (
+                          <span className={`text-[8px] font-extrabold px-1.5 py-0.5 rounded-full flex items-center gap-0.5 border ${
+                            selectedOrder.consolidationStatus === 'primary'
+                              ? 'bg-purple-55 text-purple-700 border-purple-200'
+                              : 'bg-indigo-55 text-indigo-700 border-indigo-200'
+                          }`}>
+                            <span className="material-symbols-outlined text-[10px]">alt_route</span>
+                            <span>{selectedOrder.consolidationStatus === 'primary' ? 'Primary Delivery' : 'Combined Pickup'}</span>
+                          </span>
+                        )}
                       </div>
                       
                       {/* Stepper progress timeline indicator */}
@@ -493,6 +503,21 @@ const FreightTracking = () => {
                     </div>
                   </div>
                 </div>
+
+                {/* Consolidated / Milk Run Notice Banner */}
+                {selectedOrder.consolidationStatus && selectedOrder.consolidationStatus !== 'standalone' && (
+                  <div className="bg-slate-50 border border-slate-200 text-slate-700 px-4 py-2.5 rounded-xl shadow-xs flex items-center gap-2">
+                    <span className="material-symbols-outlined text-[18px] text-slate-500">info_outline</span>
+                    <div className="min-w-0">
+                      <h4 className="font-extrabold text-[11px] uppercase tracking-wider leading-none">Shared Delivery Route</h4>
+                      <p className="text-[9.5px] font-medium mt-0.5 opacity-90 leading-relaxed">
+                        {selectedOrder.consolidationStatus === 'primary'
+                          ? 'Your shipment is consolidated with another pickup along the route to maximize truck efficiency.'
+                          : 'This is an addon pickup. The carrier will retrieve and deliver this order along with their primary shipment.'}
+                      </p>
+                    </div>
+                  </div>
+                )}
                 
                 {/* Emergency SOS Flashing Banner */}
                 {driverLocation?.sos && (
