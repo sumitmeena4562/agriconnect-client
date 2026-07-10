@@ -350,9 +350,8 @@ const VendorTracking = () => {
   // ── Helpers ───────────────────────────────────────────────────────────────
   const activeTransitOrders = orders.filter(
     (o) => o.status === 'Accepted' &&
-      (o.deliveryStatus === 'In Transit' || o.deliveryStatus === 'Arrived')
+      (o.deliveryStatus === 'In Transit' || o.deliveryStatus === 'Arrived' || o.deliveryStatus === 'Out For Delivery' || o.deliveryStatus === 'Partially Delivered')
   );
-
   const statusInfo = () => {
     if (isDriverOnline) return { label: 'GPS Live', dot: 'bg-emerald-500 animate-ping', color: 'text-emerald-600' };
     if (isStale)        return { label: 'Weak Signal', dot: 'bg-amber-500 animate-pulse', color: 'text-amber-600' };

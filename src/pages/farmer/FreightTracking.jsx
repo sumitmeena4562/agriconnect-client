@@ -385,9 +385,8 @@ const FreightTracking = () => {
   // ── Helpers ───────────────────────────────────────────────────────────────
   const activeTransitOrders = orders.filter(
     (o) => o.status === 'Accepted' &&
-      (o.deliveryStatus === 'In Transit' || o.deliveryStatus === 'Arrived')
+      (o.deliveryStatus === 'In Transit' || o.deliveryStatus === 'Arrived' || o.deliveryStatus === 'Out For Delivery' || o.deliveryStatus === 'Partially Delivered')
   );
-
   const getTrackingStatusLabel = () => {
     if (!selectedOrder) return null;
     if (isDriverOnline) return { label: 'GPS Live', color: 'text-[var(--color-success-600)]', dot: 'bg-[var(--color-success-500)] animate-ping' };
