@@ -58,6 +58,7 @@ const FreightTracking = () => {
   const [isVerifyingOtp, setIsVerifyingOtp] = useState(false);
   const [currentRoute, setCurrentRoute] = useState(null);
   const [shouldFollowDriver, setShouldFollowDriver] = useState(true);
+  const [expandedTrips, setExpandedTrips] = useState({});
 
   // Firebase real-time GPS — sirf selected order ke liye
   const { location: driverLocation, isDriverOnline, isStale } =
@@ -422,6 +423,40 @@ const FreightTracking = () => {
 
   const statusInfo = getTrackingStatusLabel();
 
+  // Group active orders by batch or standalone trip
+  const getGroupedTrips = useCallback(() => {
+    const tripsMap = {};
+    const standaloneOrders = [];
+
+    activeTransitOrders.forEach(order => {
+      if (order.deliveryBatchId && order.deliveryBatchId._id) {
+        const batchId = order.deliveryBatchId._id;
+        if (!tripsMap[batchId]) {
+          tripsMap[batchId] = {
+            id: batchId,
+            type: 'batch',
+            batch: order.deliveryBatchId,
+            driver: order.driver || order.deliveryBatchId.driver,
+            orders: [],
+            deliveryStatus: order.deliveryBatchId.batchStatus || 'Out For Delivery'
+          };
+        }
+        tripsMap[batchId].orders.push(order);
+      } else {
+        standaloneOrders.push({
+          id: order._id,
+          type: 'standalone',
+          order: order,
+          driver: order.driver,
+          orders: [order],
+          deliveryStatus: order.deliveryStatus
+        });
+      }
+    });
+
+    return [...Object.values(tripsMap), ...standaloneOrders];
+  }, [activeTransitOrders]);
+
   // ── Render ────────────────────────────────────────────────────────────────
   return (
     <div className="space-y-4 lg:h-[calc(100vh-100px)] lg:flex lg:flex-col lg:overflow-hidden pb-1">
@@ -452,11 +487,11 @@ const FreightTracking = () => {
       ) : (
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 lg:flex-1 lg:min-h-0 lg:overflow-hidden">
 
-          {/* ── Left Panel: Active Shipments List ── */}
+          {/* ── Left Panel: Active Trips Sidebar ── */}
           <div className="lg:col-span-3 space-y-3 flex flex-col lg:h-full lg:overflow-hidden">
             <div className="bg-[var(--color-surface)] border border-[var(--color-border)] rounded-xl p-3 shadow-sm flex items-center justify-between">
               <span className="text-[11px] font-extrabold uppercase text-[var(--color-text-secondary)] tracking-wider">
-                Active ({activeTransitOrders.length})
+                Active Trips ({getGroupedTrips().length})
               </span>
               <span className="px-2 py-0.5 rounded-full bg-primary-50 border border-primary-100 text-primary-700 text-[9px] font-bold animate-pulse">
                 LIVE
@@ -464,45 +499,110 @@ const FreightTracking = () => {
             </div>
 
             <div className="overflow-y-auto space-y-2.5 flex-1 pr-1">
-              {activeTransitOrders.map((order) => {
-                const isSel = selectedOrder?._id === order._id;
+              {getGroupedTrips().map((trip) => {
+                const isTripSelected = trip.orders.some(o => o._id === selectedOrder?._id);
+                const isExpanded = expandedTrips[trip.id] !== undefined ? expandedTrips[trip.id] : isTripSelected;
+
+                const toggleTripExpand = (tripId) => {
+                  setExpandedTrips(prev => ({ ...prev, [tripId]: !isExpanded }));
+                };
+
                 return (
                   <div
-                    key={order._id}
-                    onClick={() => setSelectedOrder(order)}
-                    className={`p-3 rounded-xl border transition-all cursor-pointer shadow-sm flex flex-col justify-between ${
-                      isSel
-                        ? 'border-primary-500 bg-primary-50/10 ring-1 ring-primary-500/10'
-                        : 'border-[var(--color-border)] bg-[var(--color-surface)] hover:border-slate-300'
+                    key={trip.id}
+                    className={`rounded-2xl border transition-all shadow-xs flex flex-col overflow-hidden ${
+                      isTripSelected
+                        ? 'border-primary-500 bg-primary-50/5 ring-1 ring-primary-500/10'
+                        : 'border-[var(--color-border)] bg-[var(--color-surface)] hover:border-slate-350'
                     }`}
                   >
-                    <div className="flex justify-between items-start gap-2">
-                      <div>
-                        <span className="text-[9px] font-mono font-bold text-[var(--color-text-muted)] uppercase tracking-wide bg-slate-100 px-1.5 py-0.5 rounded border border-slate-200">
-                          #{order._id.slice(-6).toUpperCase()}
-                        </span>
-                        <h4 className="text-[13px] font-bold text-[var(--color-text-primary)] mt-1.5 leading-none">
-                          {order.crop?.name || 'Deleted Crop'}
-                        </h4>
+                    {/* Main Trip Card Header */}
+                    <div
+                      onClick={() => {
+                        if (!isTripSelected) {
+                          setSelectedOrder(trip.orders[0]);
+                        }
+                        toggleTripExpand(trip.id);
+                      }}
+                      className="p-3 cursor-pointer flex flex-col gap-1.5"
+                    >
+                      <div className="flex justify-between items-start gap-2">
+                        <div className="flex items-center gap-2">
+                          <div className="w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center text-slate-650 shrink-0">
+                            <span className="material-symbols-outlined text-[17px]">
+                              {trip.driver?.vehicleType === 'Bike' ? 'two_wheeler' : trip.driver?.vehicleType === 'Tractor' ? 'agriculture' : 'local_shipping'}
+                            </span>
+                          </div>
+                          <div>
+                            <h4 className="text-[12.5px] font-black text-[var(--color-text-primary)] leading-tight">
+                              {trip.driver ? trip.driver.name : 'Self-Delivery'}
+                            </h4>
+                            <p className="text-[9px] text-[var(--color-text-muted)] font-extrabold uppercase tracking-wide">
+                              {trip.driver?.vehicleNumber || 'No Vehicle'} · {trip.driver?.vehicleType || 'Courier'}
+                            </p>
+                          </div>
+                        </div>
+
+                        <div className="flex flex-col items-end gap-1">
+                          <span className={`px-1.5 py-0.5 rounded text-[8px] font-bold uppercase tracking-wider shrink-0 ${
+                            trip.deliveryStatus === 'Completed'
+                              ? 'bg-emerald-50 text-emerald-700 border border-emerald-100'
+                              : 'bg-primary-50 text-primary-700 border border-primary-100'
+                          }`}>
+                            {trip.deliveryStatus}
+                          </span>
+                          <span className="text-[8px] font-black text-slate-400 bg-slate-100 border border-slate-200/50 px-1.5 py-0.5 rounded-full">
+                            {trip.orders.length} {trip.orders.length > 1 ? 'Orders' : 'Order'}
+                          </span>
+                        </div>
                       </div>
-                      <span className={`px-1.5 py-0.5 rounded text-[8px] font-bold uppercase tracking-wider shrink-0 ${
-                        order.deliveryStatus === 'Arrived'
-                          ? 'bg-emerald-50 text-emerald-700 border border-emerald-100'
-                          : 'bg-primary-50 text-primary-700 border border-primary-100'
-                      }`}>
-                        {order.deliveryStatus || 'In Transit'}
-                      </span>
+
+                      <div className="mt-1 flex items-center justify-between text-[9px] text-[var(--color-text-secondary)] font-bold">
+                        <span className="flex items-center gap-0.5 text-slate-500">
+                          <span className="material-symbols-outlined text-[12px] text-slate-400">route</span>
+                          {trip.type === 'batch'
+                            ? `${trip.orders[0]?.crop?.location?.split(' ')[0] || 'Farm'} ➔ ${trip.orders.length} Stops`
+                            : `${trip.orders[0]?.crop?.location?.split(' ')[0] || 'Farm'} ➔ ${trip.orders[0]?.vendor?.name?.split(' ')[0] || 'Shop'}`}
+                        </span>
+                        <span
+                          className="material-symbols-outlined text-[14px] text-slate-400 transition-transform duration-200"
+                          style={{ transform: isExpanded ? 'rotate(180deg)' : 'none' }}
+                        >
+                          keyboard_arrow_down
+                        </span>
+                      </div>
                     </div>
 
-                    <div className="mt-3 flex items-center justify-between text-[10.5px] text-[var(--color-text-secondary)]">
-                      <div className="flex items-center gap-1 min-w-0">
-                        <span className="material-symbols-outlined text-[13px] text-[var(--color-text-muted)] shrink-0">local_shipping</span>
-                        <span className="truncate font-semibold">{order.driver ? order.driver.name : 'Self-Delivery'}</span>
+                    {/* Expanded Orders List */}
+                    {isExpanded && (
+                      <div className="bg-slate-50/50 border-t border-slate-100 py-1.5 px-2.5 space-y-1.5">
+                        {trip.orders.map((order) => {
+                          const isOrderSel = selectedOrder?._id === order._id;
+                          return (
+                            <div
+                              key={order._id}
+                              onClick={(e) => {
+                                e.stopPropagation(); // prevent collapsing the parent trip
+                                setSelectedOrder(order);
+                              }}
+                              className={`p-2 rounded-lg border text-[11px] font-bold cursor-pointer transition-all flex items-center justify-between ${
+                                isOrderSel
+                                  ? 'bg-white border-primary-500 text-primary-750 shadow-xs'
+                                  : 'bg-white border-slate-100 hover:border-slate-300 text-slate-700'
+                              }`}
+                            >
+                              <div className="flex items-center gap-1.5 min-w-0">
+                                <span className="text-[10px] text-slate-450 font-normal">📦</span>
+                                <span className="truncate">{order.crop?.name || 'Crop'}</span>
+                              </div>
+                              <span className="text-[9.5px] font-extrabold text-slate-500 shrink-0 bg-slate-100/70 px-1 py-0.2 rounded border border-slate-200">
+                                {order.requestedQuantity} {order.crop?.unit}
+                              </span>
+                            </div>
+                          );
+                        })}
                       </div>
-                      <span className="text-[9.5px] font-bold text-[var(--color-text-primary)]">
-                        {order.requestedQuantity} {order.crop?.unit}
-                      </span>
-                    </div>
+                    )}
                   </div>
                 );
               })}
