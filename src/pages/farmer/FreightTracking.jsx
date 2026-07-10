@@ -74,6 +74,7 @@ const FreightTracking = () => {
   const polylineRef      = useRef(null);
   const addonStartMarkerRef = useRef(null);
   const addonEndMarkerRef   = useRef(null);
+  const batchMarkersRef     = useRef(null);
   const boundsSetRef     = useRef(false); // ✅ fitBounds bug fix
 
   // ── 1. Fetch Orders ───────────────────────────────────────────────────────
@@ -86,7 +87,7 @@ const FreightTracking = () => {
       const activeTransit = data.filter(
         (o) =>
           o.status === 'Accepted' &&
-          (o.deliveryStatus === 'In Transit' || o.deliveryStatus === 'Arrived')
+          (o.deliveryStatus === 'In Transit' || o.deliveryStatus === 'Arrived' || o.deliveryStatus === 'Out For Delivery' || o.deliveryStatus === 'Partially Delivered')
       );
 
       const orderIdParam  = searchParams.get('orderId');
@@ -157,6 +158,10 @@ const FreightTracking = () => {
       [startMarkerRef, endMarkerRef, driverMarkerRef, polylineRef, addonStartMarkerRef, addonEndMarkerRef].forEach((r) => {
         if (r.current) { mapInstanceRef.current.removeLayer(r.current); r.current = null; }
       });
+      if (batchMarkersRef.current) {
+        batchMarkersRef.current.forEach(m => mapInstanceRef.current.removeLayer(m));
+        batchMarkersRef.current = null;
+      }
     }
   }, [selectedOrder]);
 
@@ -273,55 +278,85 @@ const FreightTracking = () => {
     const eLat   = selectedOrder.vendorCoordinates?.lat || (28.61 + (seed3 % 10) / 100);
     const eLng   = selectedOrder.vendorCoordinates?.lng || (77.20 + (seed4 % 10) / 100);
 
-    // Build coordsList for multi-stop routing if consolidated
-    const coordsList = [[sLat, sLng]];
-    if (selectedOrder.consolidatedWith && selectedOrder.consolidatedWith.length > 0) {
-      const addon = selectedOrder.consolidatedWith[0];
-      if (addon.farmerCoordinates?.lat && addon.farmerCoordinates?.lng) {
-        coordsList.push([addon.farmerCoordinates.lat, addon.farmerCoordinates.lng]);
+    // Build coordsList for multi-stop routing
+    let coordsList = [];
+    if (selectedOrder.deliveryBatchId && selectedOrder.deliveryBatchId.optimizedRoute) {
+      coordsList = selectedOrder.deliveryBatchId.optimizedRoute.map(stop => [stop.coordinates.lat, stop.coordinates.lng]);
+    } else {
+      coordsList = [[sLat, sLng]];
+      if (selectedOrder.consolidatedWith && selectedOrder.consolidatedWith.length > 0) {
+        const addon = selectedOrder.consolidatedWith[0];
+        if (addon.farmerCoordinates?.lat && addon.farmerCoordinates?.lng) {
+          coordsList.push([addon.farmerCoordinates.lat, addon.farmerCoordinates.lng]);
+        }
+        if (addon.vendorCoordinates?.lat && addon.vendorCoordinates?.lng) {
+          coordsList.push([addon.vendorCoordinates.lat, addon.vendorCoordinates.lng]);
+        }
       }
-      if (addon.vendorCoordinates?.lat && addon.vendorCoordinates?.lng) {
-        coordsList.push([addon.vendorCoordinates.lat, addon.vendorCoordinates.lng]);
-      }
+      coordsList.push([eLat, eLng]);
     }
-    coordsList.push([eLat, eLng]);
 
     fetchRoute(coordsList, id).then((route) => {
       if (!route || !mapInstanceRef.current) return;
       setCurrentRoute(route);
 
-      // Start marker
-      if (!startMarkerRef.current)
-        startMarkerRef.current = L.marker([sLat, sLng], { icon: mkIcon('agriculture', '#16a34a', 'My Farm') })
-          .addTo(map).bindPopup('Dispatch Origin');
-
-      // End marker
-      if (!endMarkerRef.current)
-        endMarkerRef.current = L.marker([eLat, eLng], { icon: mkIcon('storefront', '#2563eb', selectedOrder.vendor?.name || 'Vendor') })
-          .addTo(map).bindPopup('Delivery Destination');
-
-      // Addon markers
-      if (selectedOrder.consolidatedWith && selectedOrder.consolidatedWith.length > 0) {
-        const addon = selectedOrder.consolidatedWith[0];
-        if (addon.farmerCoordinates?.lat && addon.farmerCoordinates?.lng) {
-          if (!addonStartMarkerRef.current) {
-            addonStartMarkerRef.current = L.marker(
-              [addon.farmerCoordinates.lat, addon.farmerCoordinates.lng],
-              { icon: mkIcon('agriculture', '#9333ea', `Addon: ${addon.farmer?.name || 'Farmer'}`) }
-            ).addTo(map).bindPopup('Addon Dispatch Origin');
-          }
-        }
-        if (addon.vendorCoordinates?.lat && addon.vendorCoordinates?.lng) {
-          if (!addonEndMarkerRef.current) {
-            addonEndMarkerRef.current = L.marker(
-              [addon.vendorCoordinates.lat, addon.vendorCoordinates.lng],
-              { icon: mkIcon('storefront', '#4f46e5', `Addon Shop: ${addon.vendor?.name || 'Vendor'}`) }
-            ).addTo(map).bindPopup('Addon Delivery Destination');
-          }
-        }
-      } else {
+      // Draw stops markers
+      if (selectedOrder.deliveryBatchId && selectedOrder.deliveryBatchId.optimizedRoute) {
         if (addonStartMarkerRef.current) { map.removeLayer(addonStartMarkerRef.current); addonStartMarkerRef.current = null; }
         if (addonEndMarkerRef.current)   { map.removeLayer(addonEndMarkerRef.current); addonEndMarkerRef.current = null; }
+        if (startMarkerRef.current)      { map.removeLayer(startMarkerRef.current);      startMarkerRef.current = null; }
+        if (endMarkerRef.current)        { map.removeLayer(endMarkerRef.current);        endMarkerRef.current = null; }
+
+        if (!batchMarkersRef.current) batchMarkersRef.current = [];
+        batchMarkersRef.current.forEach(m => map.removeLayer(m));
+        batchMarkersRef.current = [];
+
+        selectedOrder.deliveryBatchId.optimizedRoute.forEach(stop => {
+          const isStopPickup = stop.stopType === 'pickup';
+          const marker = L.marker([stop.coordinates.lat, stop.coordinates.lng], {
+            icon: mkIcon(isStopPickup ? 'agriculture' : 'storefront', isStopPickup ? '#16a34a' : '#2563eb', stop.address.split('\'s')[0])
+          }).addTo(map).bindPopup(`${isStopPickup ? 'Pickup' : 'Delivery'} Stop: ${stop.address}`);
+          batchMarkersRef.current.push(marker);
+        });
+      } else {
+        if (batchMarkersRef.current) {
+          batchMarkersRef.current.forEach(m => map.removeLayer(m));
+          batchMarkersRef.current = null;
+        }
+
+        // Start marker
+        if (!startMarkerRef.current)
+          startMarkerRef.current = L.marker([sLat, sLng], { icon: mkIcon('agriculture', '#16a34a', 'My Farm') })
+            .addTo(map).bindPopup('Dispatch Origin');
+
+        // End marker
+        if (!endMarkerRef.current)
+          endMarkerRef.current = L.marker([eLat, eLng], { icon: mkIcon('storefront', '#2563eb', selectedOrder.vendor?.name || 'Vendor') })
+            .addTo(map).bindPopup('Delivery Destination');
+
+        // Addon markers
+        if (selectedOrder.consolidatedWith && selectedOrder.consolidatedWith.length > 0) {
+          const addon = selectedOrder.consolidatedWith[0];
+          if (addon.farmerCoordinates?.lat && addon.farmerCoordinates?.lng) {
+            if (!addonStartMarkerRef.current) {
+              addonStartMarkerRef.current = L.marker(
+                [addon.farmerCoordinates.lat, addon.farmerCoordinates.lng],
+                { icon: mkIcon('agriculture', '#9333ea', `Addon: ${addon.farmer?.name || 'Farmer'}`) }
+              ).addTo(map).bindPopup('Addon Dispatch Origin');
+            }
+          }
+          if (addon.vendorCoordinates?.lat && addon.vendorCoordinates?.lng) {
+            if (!addonEndMarkerRef.current) {
+              addonEndMarkerRef.current = L.marker(
+                [addon.vendorCoordinates.lat, addon.vendorCoordinates.lng],
+                { icon: mkIcon('storefront', '#4f46e5', `Addon Shop: ${addon.vendor?.name || 'Vendor'}`) }
+              ).addTo(map).bindPopup('Addon Delivery Destination');
+            }
+          }
+        } else {
+          if (addonStartMarkerRef.current) { map.removeLayer(addonStartMarkerRef.current); addonStartMarkerRef.current = null; }
+          if (addonEndMarkerRef.current)   { map.removeLayer(addonEndMarkerRef.current); addonEndMarkerRef.current = null; }
+        }
       }
 
       // Route polyline
@@ -363,18 +398,9 @@ const FreightTracking = () => {
 
       // ✅ fitBounds SIRF PEHLI BAAR - covers all points
       if (!boundsSetRef.current) {
-        const boundsList = [[sLat, sLng], [eLat, eLng]];
+        const boundsList = [...coordsList];
         if (driverLocation?.lat && driverLocation?.lng) {
           boundsList.push([driverLocation.lat, driverLocation.lng]);
-        }
-        if (selectedOrder.consolidatedWith && selectedOrder.consolidatedWith.length > 0) {
-          const addon = selectedOrder.consolidatedWith[0];
-          if (addon.farmerCoordinates?.lat && addon.farmerCoordinates?.lng) {
-            boundsList.push([addon.farmerCoordinates.lat, addon.farmerCoordinates.lng]);
-          }
-          if (addon.vendorCoordinates?.lat && addon.vendorCoordinates?.lng) {
-            boundsList.push([addon.vendorCoordinates.lat, addon.vendorCoordinates.lng]);
-          }
         }
         map.fitBounds(L.latLngBounds(boundsList), { padding: [40, 40] });
         boundsSetRef.current = true;
