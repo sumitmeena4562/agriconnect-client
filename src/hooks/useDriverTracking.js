@@ -162,7 +162,7 @@ const useDriverTracking = (orderId, isActive) => {
       window.removeEventListener('beforeunload', handleUnload);
       stopTracking();
     };
-  }, [isActive, orderId, fetchUrl, stopTracking]);
+  }, [isActive, orderId, fetchUrls, stopTracking]);
 
   return { stopTracking, gpsStatus, accuracy, updateCount, speed };
 };
