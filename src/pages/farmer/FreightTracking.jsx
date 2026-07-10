@@ -72,6 +72,8 @@ const FreightTracking = () => {
   const startMarkerRef   = useRef(null);
   const endMarkerRef     = useRef(null);
   const polylineRef      = useRef(null);
+  const addonStartMarkerRef = useRef(null);
+  const addonEndMarkerRef   = useRef(null);
   const boundsSetRef     = useRef(false); // ✅ fitBounds bug fix
 
   // ── 1. Fetch Orders ───────────────────────────────────────────────────────
@@ -147,13 +149,12 @@ const FreightTracking = () => {
     document.body.appendChild(script);
   }, []);
 
-  // ── 3. Reset markers + bounds flag when order changes ────────────────────
   useEffect(() => {
     boundsSetRef.current = false;
     setCurrentRoute(null);
     setShouldFollowDriver(true); // Re-enable auto-follow when a new order is selected
     if (mapInstanceRef.current) {
-      [startMarkerRef, endMarkerRef, driverMarkerRef, polylineRef].forEach((r) => {
+      [startMarkerRef, endMarkerRef, driverMarkerRef, polylineRef, addonStartMarkerRef, addonEndMarkerRef].forEach((r) => {
         if (r.current) { mapInstanceRef.current.removeLayer(r.current); r.current = null; }
       });
     }
@@ -161,14 +162,15 @@ const FreightTracking = () => {
 
   // ── 4. OSRM route fetch with multi-mirror fallback ───────────────────────
   const routeCacheRef = useRef({});
-  const fetchRoute = useCallback(async (startLat, startLng, endLat, endLng, key) => {
+  const fetchRoute = useCallback(async (coords, key) => {
     if (routeCacheRef.current[key]) return routeCacheRef.current[key];
     
+    const coordString = coords.map(([lat, lng]) => `${lng},${lat}`).join(';');
     // Try multiple OSRM server mirrors in sequence for reliability
     const endpoints = [
-      `https://routing.openstreetmap.de/routed-car/route/v1/driving/${startLng},${startLat};${endLng},${endLat}?overview=full&geometries=geojson`,
-      `https://router.project-osrm.org/route/v1/driving/${startLng},${startLat};${endLng},${endLat}?overview=full&geometries=geojson`,
-      `https://osrm.routing.digital/route/v1/driving/${startLng},${startLat};${endLng},${endLat}?overview=full&geometries=geojson`
+      `https://routing.openstreetmap.de/routed-car/route/v1/driving/${coordString}?overview=full&geometries=geojson`,
+      `https://router.project-osrm.org/route/v1/driving/${coordString}?overview=full&geometries=geojson`,
+      `https://osrm.routing.digital/route/v1/driving/${coordString}?overview=full&geometries=geojson`
     ];
 
     for (const url of endpoints) {
@@ -188,18 +190,16 @@ const FreightTracking = () => {
 
     // High-fidelity highway simulator fallback instead of straight line
     const pts = [];
-    const steps = 40;
-    // Introduce natural curved road nodes mimicking a highway route path
-    for (let i = 0; i <= steps; i++) {
-      const t = i / steps;
-      const baseLat = startLat + (endLat - startLat) * t;
-      const baseLng = startLng + (endLng - startLng) * t;
-      // Add highway curves & bends
-      const curve = 0.05 * Math.sin(t * Math.PI * 2) * (1 - t) * t;
-      pts.push([
-        baseLat + curve,
-        baseLng - curve * 0.5
-      ]);
+    for (let s = 0; s < coords.length - 1; s++) {
+      const [ptA_Lat, ptA_Lng] = coords[s];
+      const [ptB_Lat, ptB_Lng] = coords[s + 1];
+      for (let i = 0; i <= 20; i++) {
+        const t = i / 20;
+        pts.push([
+          ptA_Lat + (ptB_Lat - ptA_Lat) * t + 0.01 * Math.sin(t * Math.PI),
+          ptA_Lng + (ptB_Lng - ptA_Lng) * t
+        ]);
+      }
     }
     routeCacheRef.current[key] = pts;
     return pts;
@@ -273,7 +273,20 @@ const FreightTracking = () => {
     const eLat   = selectedOrder.vendorCoordinates?.lat || (28.61 + (seed3 % 10) / 100);
     const eLng   = selectedOrder.vendorCoordinates?.lng || (77.20 + (seed4 % 10) / 100);
 
-    fetchRoute(sLat, sLng, eLat, eLng, id).then((route) => {
+    // Build coordsList for multi-stop routing if consolidated
+    const coordsList = [[sLat, sLng]];
+    if (selectedOrder.consolidatedWith && selectedOrder.consolidatedWith.length > 0) {
+      const addon = selectedOrder.consolidatedWith[0];
+      if (addon.farmerCoordinates?.lat && addon.farmerCoordinates?.lng) {
+        coordsList.push([addon.farmerCoordinates.lat, addon.farmerCoordinates.lng]);
+      }
+      if (addon.vendorCoordinates?.lat && addon.vendorCoordinates?.lng) {
+        coordsList.push([addon.vendorCoordinates.lat, addon.vendorCoordinates.lng]);
+      }
+    }
+    coordsList.push([eLat, eLng]);
+
+    fetchRoute(coordsList, id).then((route) => {
       if (!route || !mapInstanceRef.current) return;
       setCurrentRoute(route);
 
@@ -286,6 +299,30 @@ const FreightTracking = () => {
       if (!endMarkerRef.current)
         endMarkerRef.current = L.marker([eLat, eLng], { icon: mkIcon('storefront', '#2563eb', selectedOrder.vendor?.name || 'Vendor') })
           .addTo(map).bindPopup('Delivery Destination');
+
+      // Addon markers
+      if (selectedOrder.consolidatedWith && selectedOrder.consolidatedWith.length > 0) {
+        const addon = selectedOrder.consolidatedWith[0];
+        if (addon.farmerCoordinates?.lat && addon.farmerCoordinates?.lng) {
+          if (!addonStartMarkerRef.current) {
+            addonStartMarkerRef.current = L.marker(
+              [addon.farmerCoordinates.lat, addon.farmerCoordinates.lng],
+              { icon: mkIcon('agriculture', '#9333ea', `Addon: ${addon.farmer?.name || 'Farmer'}`) }
+            ).addTo(map).bindPopup('Addon Dispatch Origin');
+          }
+        }
+        if (addon.vendorCoordinates?.lat && addon.vendorCoordinates?.lng) {
+          if (!addonEndMarkerRef.current) {
+            addonEndMarkerRef.current = L.marker(
+              [addon.vendorCoordinates.lat, addon.vendorCoordinates.lng],
+              { icon: mkIcon('storefront', '#4f46e5', `Addon Shop: ${addon.vendor?.name || 'Vendor'}`) }
+            ).addTo(map).bindPopup('Addon Delivery Destination');
+          }
+        }
+      } else {
+        if (addonStartMarkerRef.current) { map.removeLayer(addonStartMarkerRef.current); addonStartMarkerRef.current = null; }
+        if (addonEndMarkerRef.current)   { map.removeLayer(addonEndMarkerRef.current); addonEndMarkerRef.current = null; }
+      }
 
       // Route polyline
       if (polylineRef.current)
@@ -324,11 +361,20 @@ const FreightTracking = () => {
         }
       }
 
-      // ✅ fitBounds SIRF PEHLI BAAR - covers all 3 points
+      // ✅ fitBounds SIRF PEHLI BAAR - covers all points
       if (!boundsSetRef.current) {
         const boundsList = [[sLat, sLng], [eLat, eLng]];
         if (driverLocation?.lat && driverLocation?.lng) {
           boundsList.push([driverLocation.lat, driverLocation.lng]);
+        }
+        if (selectedOrder.consolidatedWith && selectedOrder.consolidatedWith.length > 0) {
+          const addon = selectedOrder.consolidatedWith[0];
+          if (addon.farmerCoordinates?.lat && addon.farmerCoordinates?.lng) {
+            boundsList.push([addon.farmerCoordinates.lat, addon.farmerCoordinates.lng]);
+          }
+          if (addon.vendorCoordinates?.lat && addon.vendorCoordinates?.lng) {
+            boundsList.push([addon.vendorCoordinates.lat, addon.vendorCoordinates.lng]);
+          }
         }
         map.fitBounds(L.latLngBounds(boundsList), { padding: [40, 40] });
         boundsSetRef.current = true;

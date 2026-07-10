@@ -89,6 +89,27 @@ const DriverTrackingPage = () => {
     }
   };
 
+  // On page load, fetch consolidation status to populate already accepted consolidations
+  useEffect(() => {
+    if (!orderId) return;
+    const fetchConsolidationStatus = async () => {
+      try {
+        const res = await api.get(`/orders/${orderId}/consolidation`);
+        if (res.data.success && res.data.consolidatedWith) {
+          const activeAddons = res.data.consolidatedWith
+            .filter(o => o.status !== 'Completed' && o.status !== 'Cancelled')
+            .map(o => String(o._id));
+          if (activeAddons.length > 0) {
+            setAcceptedIds(new Set(activeAddons));
+          }
+        }
+      } catch (err) {
+        console.warn('[Milk Run] Failed to fetch consolidation status:', err.message);
+      }
+    };
+    fetchConsolidationStatus();
+  }, [orderId]);
+
   const handleToggle = () => {
     if (isTracking) {
       triggerSos(false);
