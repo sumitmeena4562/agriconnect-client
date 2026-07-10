@@ -1,8 +1,9 @@
-import React, { useState, useEffect, useRef, useCallback } from 'react';
+import React, { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import api from '../utils/api';
 import { toast } from 'react-hot-toast';
+import useDriverTracking from '../hooks/useDriverTracking';
 
 const DriverBatchConsole = () => {
   const [searchParams] = useSearchParams();
@@ -18,6 +19,14 @@ const DriverBatchConsole = () => {
   const mapInstanceRef = useRef(null);
   const markersRef = useRef([]);
   const polylineRef = useRef(null);
+
+  // Extract order IDs for GPS tracking
+  const orderIds = useMemo(() => {
+    return batch && batch.orders ? batch.orders.map(o => String(o._id)) : [];
+  }, [batch]);
+
+  const isTripActive = batch && (batch.batchStatus === 'Out For Delivery' || batch.batchStatus === 'Partially Delivered');
+  const { gpsStatus } = useDriverTracking(orderIds, isTripActive);
 
   // Fetch active batch for the driver
   const fetchActiveBatch = useCallback(async () => {
@@ -208,9 +217,21 @@ const DriverBatchConsole = () => {
           {/* Card 1: Batch Overview */}
           <div className="bg-white border border-slate-100 rounded-3xl p-5 shadow-xs flex justify-between items-center gap-3">
             <div>
-              <span className="font-mono text-[9px] font-black bg-slate-100 px-2 py-0.5 rounded text-slate-600 border border-slate-200 uppercase">
-                BATCH #{batch._id.slice(-6).toUpperCase()}
-              </span>
+              <div className="flex items-center gap-2">
+                <span className="font-mono text-[9px] font-black bg-slate-100 px-2 py-0.5 rounded text-slate-600 border border-slate-200 uppercase">
+                  BATCH #{batch._id.slice(-6).toUpperCase()}
+                </span>
+                {isTripActive && (
+                  <span className={`text-[8.5px] font-black uppercase px-2 py-0.5 rounded border flex items-center gap-1 ${
+                    gpsStatus === 'active'
+                      ? 'bg-emerald-50 border-emerald-250 text-emerald-700'
+                      : 'bg-slate-50 border-slate-200 text-slate-500 animate-pulse'
+                  }`}>
+                    <span className={`w-1.5 h-1.5 rounded-full ${gpsStatus === 'active' ? 'bg-emerald-500' : 'bg-slate-400'}`} />
+                    {gpsStatus === 'active' ? 'Live GPS Active' : 'Connecting GPS...'}
+                  </span>
+                )}
+              </div>
               <div className="flex items-center gap-2 mt-2">
                 <span className="text-[14px] font-black text-slate-800">
                   {batch.orders.length} orders

@@ -94,6 +94,12 @@ const BatchManagement = () => {
     }
   };
 
+  const handleCopyLink = (driverId) => {
+    const link = `${window.location.origin}/driver-batch?driverId=${driverId}`;
+    navigator.clipboard.writeText(link);
+    toast.success('Driver tracking link copied to clipboard! 📋');
+  };
+
   return (
     <div className="space-y-6 pb-12">
       {/* Header section */}
@@ -224,13 +230,23 @@ const BatchManagement = () => {
                           <div className="flex items-center gap-2">
                             <span className="material-symbols-outlined text-[16px] text-slate-400">person_pin</span>
                             {driverAssigned ? (
-                              <div>
-                                <p className="text-[11px] font-black text-slate-800 leading-none">
-                                  {batch.driver?.name} ({batch.driver?.vehicleNumber})
-                                </p>
-                                <p className="text-[9px] text-slate-400 font-bold mt-0.5">
-                                  Assigned Fleet Carrier · {batch.driver?.vehicleType}
-                                </p>
+                              <div className="flex items-center gap-2">
+                                <div>
+                                  <p className="text-[11px] font-black text-slate-800 leading-none">
+                                    {batch.driver?.name} ({batch.driver?.vehicleNumber})
+                                  </p>
+                                  <p className="text-[9px] text-slate-400 font-bold mt-0.5">
+                                    Assigned Fleet Carrier · {batch.driver?.vehicleType}
+                                  </p>
+                                </div>
+                                <button
+                                  onClick={() => handleCopyLink(batch.driver._id || batch.driver)}
+                                  className="px-2 py-1 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 border border-indigo-200 rounded-lg text-[9px] font-black cursor-pointer active:scale-95 transition-all flex items-center gap-0.5"
+                                  title="Copy Driver Tracking Link"
+                                >
+                                  <span className="material-symbols-outlined text-[11.5px]">content_copy</span>
+                                  <span>Copy Link</span>
+                                </button>
                               </div>
                             ) : (
                               <div className="flex items-center gap-1.5">
