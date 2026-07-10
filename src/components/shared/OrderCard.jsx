@@ -416,7 +416,7 @@ const OrderCard = ({ order, role = 'farmer', onUpdateStatus, onCancelOrder, onSu
               </div>
             )}
 
-            {!isFarmer && order.status === 'Accepted' && order.deliveryStatus === 'In Transit' && (
+            {!isFarmer && order.status === 'Accepted' && ['Out For Delivery', 'Partially Delivered', 'Arrived'].includes(order.deliveryStatus) && (
               <div onClick={(e) => e.stopPropagation()} className="mt-2.5">
                 <button
                   onClick={() => navigate(`/vendor-dashboard/tracking?orderId=${order._id}`)}
@@ -671,7 +671,7 @@ const OrderCard = ({ order, role = 'farmer', onUpdateStatus, onCancelOrder, onSu
                             </span>
                           </div>
                         )}
-                        {order.deliveryStatus === 'In Transit' && !order.driver && (
+                        {['Out For Delivery', 'Partially Delivered'].includes(order.deliveryStatus) && !order.driver && (
                           <div className="flex justify-between items-center text-[11.5px] sm:text-[12px] pt-1">
                             <span className="text-slate-500 font-medium flex items-center gap-1 shrink-0">
                               <span className="material-symbols-outlined text-[14px] text-emerald-600">motorcycle</span>

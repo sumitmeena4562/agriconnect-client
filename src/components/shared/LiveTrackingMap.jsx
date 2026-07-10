@@ -135,7 +135,7 @@ const LiveTrackingMap = ({ orderId, onClose }) => {
       driverMarkerRef.current.setLatLng(newPos);
       
       // Keep truck in view (slight pan)
-      if (trackingData.deliveryStatus === 'In Transit') {
+      if (['Out For Delivery', 'Partially Delivered'].includes(trackingData.deliveryStatus)) {
         mapInstanceRef.current.panTo(newPos);
       }
     }
@@ -195,7 +195,7 @@ const LiveTrackingMap = ({ orderId, onClose }) => {
                     ? 'bg-emerald-50 text-emerald-700 border border-emerald-100' 
                     : 'bg-primary-50 text-primary-700 border border-primary-100 animate-pulse'
                 }`}>
-                  {trackingData.deliveryStatus === 'In Transit' ? '🚚 In Transit' : '🏁 Arrived'}
+                  {['Out For Delivery', 'Partially Delivered'].includes(trackingData.deliveryStatus) ? '🚚 Out For Delivery' : '🏁 Arrived'}
                 </span>
               </div>
 
