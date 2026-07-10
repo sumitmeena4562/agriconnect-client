@@ -287,75 +287,115 @@ const DriverBatchConsole = () => {
             </h3>
             
             <div className="relative border-l-2 border-indigo-100 pl-4 ml-2.5 space-y-5">
-              {batch.optimizedRoute.map((stop) => {
-                const correspondingOrder = batch.orders.find(o => o._id === stop.orderId);
-                const isCompleted = correspondingOrder?.deliveryStatus === 'Completed';
+              {(() => {
+                const groupedStops = [];
+                let seq = 1;
+                batch.optimizedRoute.forEach(stop => {
+                  const last = groupedStops[groupedStops.length - 1];
+                  if (last && last.stopType === 'pickup' && stop.stopType === 'pickup' && last.address === stop.address) {
+                    last.items.push({
+                      orderId: stop.orderId,
+                      cropName: batch.orders.find(o => o._id === stop.orderId)?.crop?.name,
+                      quantity: batch.orders.find(o => o._id === stop.orderId)?.requestedQuantity,
+                      unit: batch.orders.find(o => o._id === stop.orderId)?.crop?.unit,
+                    });
+                  } else {
+                    groupedStops.push({
+                      ...stop,
+                      sequence: seq++,
+                      items: [{
+                        orderId: stop.orderId,
+                        cropName: batch.orders.find(o => o._id === stop.orderId)?.crop?.name,
+                        quantity: batch.orders.find(o => o._id === stop.orderId)?.requestedQuantity,
+                        unit: batch.orders.find(o => o._id === stop.orderId)?.crop?.unit,
+                      }]
+                    });
+                  }
+                });
 
-                return (
-                  <div key={`${stop.orderId}-${stop.stopType}`} className="relative">
-                    {/* Timeline Node Icon dot */}
-                    <div className={`absolute -left-[23px] top-0 w-4 h-4 rounded-full flex items-center justify-center border-2 ${
-                      isCompleted
-                        ? 'bg-emerald-500 border-emerald-500 text-white'
-                        : stop.stopType === 'pickup'
-                        ? 'bg-emerald-50 border-emerald-500 text-emerald-600'
-                        : 'bg-indigo-50 border-indigo-500 text-indigo-600'
-                    }`}>
-                      <span className="material-symbols-outlined text-[8px] font-bold">
-                        {isCompleted ? 'check' : stop.stopType === 'pickup' ? 'agriculture' : 'storefront'}
-                      </span>
-                    </div>
+                return groupedStops.map((stop, stopIdx) => {
+                  const isCompleted = stop.items.every(item => {
+                    const o = batch.orders.find(ord => ord._id === item.orderId);
+                    return o?.deliveryStatus === 'Completed';
+                  });
 
-                    {/* Timeline Node Content */}
-                    <div className="flex flex-col gap-1">
-                      <div className="flex items-center gap-1.5">
-                        <span className="text-[10px] font-black text-slate-400 uppercase">
-                          Stop {stop.sequence} · {stop.stopType}
+                  return (
+                    <div key={stopIdx} className="relative">
+                      {/* Timeline Node Icon dot */}
+                      <div className={`absolute -left-[23px] top-0 w-4 h-4 rounded-full flex items-center justify-center border-2 ${
+                        isCompleted
+                          ? 'bg-emerald-500 border-emerald-500 text-white'
+                          : stop.stopType === 'pickup'
+                          ? 'bg-emerald-50 border-emerald-500 text-emerald-600'
+                          : 'bg-indigo-50 border-indigo-500 text-indigo-600'
+                      }`}>
+                        <span className="material-symbols-outlined text-[8px] font-bold">
+                          {isCompleted ? 'check' : stop.stopType === 'pickup' ? 'agriculture' : 'storefront'}
                         </span>
-                        {isCompleted && (
-                          <span className="text-[8px] font-black uppercase bg-emerald-50 text-emerald-600 border border-emerald-100 px-1 rounded">
-                            Done
-                          </span>
-                        )}
                       </div>
-                      <h4 className="font-extrabold text-[13px] text-slate-800 leading-none">
-                        {correspondingOrder?.crop?.name} ({correspondingOrder?.requestedQuantity} {correspondingOrder?.crop?.unit})
-                      </h4>
-                      <p className="text-[10px] text-slate-500 font-medium">
-                        {stop.address}
-                      </p>
 
-                      {/* Delivery Verification block (Only for delivery stops if not completed and trip has started) */}
-                      {stop.stopType === 'delivery' && !isCompleted && batch.batchStatus !== 'Driver Assigned' && (
-                        <div className="mt-2 p-3 bg-slate-50 border border-slate-200/50 rounded-2xl max-w-sm">
-                          <span className="text-[9px] font-black text-indigo-900 flex items-center gap-1 uppercase tracking-wider mb-2">
-                            <span className="material-symbols-outlined text-[12px] text-indigo-600">lock_open</span>
-                            Verify Handover OTP
+                      {/* Timeline Node Content */}
+                      <div className="flex flex-col gap-1">
+                        <div className="flex items-center gap-1.5">
+                          <span className="text-[10px] font-black text-slate-400 uppercase">
+                            Stop {stop.sequence} · {stop.stopType}
                           </span>
-                          <div className="flex gap-1.5">
-                            <input
-                              type="text"
-                              maxLength={4}
-                              placeholder="4-digit OTP"
-                              value={otpValues[stop.orderId] || ''}
-                              onChange={(e) => setOtpValues(prev => ({ ...prev, [stop.orderId]: e.target.value.replace(/\D/g, '') }))}
-                              className="w-full px-3 py-1 bg-white border border-slate-350 rounded-xl text-[11px] font-bold tracking-widest text-center focus:outline-none focus:border-indigo-500"
-                              disabled={isVerifyingOtp[stop.orderId]}
-                            />
-                            <button
-                              onClick={() => handleVerifyOrderOtp(stop.orderId)}
-                              disabled={isVerifyingOtp[stop.orderId] || (otpValues[stop.orderId] || '').length !== 4}
-                              className="px-3.5 bg-indigo-600 hover:bg-indigo-750 disabled:opacity-40 text-white font-black text-[10px] rounded-xl cursor-pointer border-0 active:scale-95 transition-all"
-                            >
-                              Verify
-                            </button>
-                          </div>
+                          {isCompleted && (
+                            <span className="text-[8px] font-black uppercase bg-emerald-50 text-emerald-600 border border-emerald-100 px-1 rounded">
+                              Done
+                            </span>
+                          )}
                         </div>
-                      )}
+                        
+                        <div className="space-y-1.5 mt-0.5">
+                          {stop.items.map((item, itemIdx) => {
+                            const itemOrder = batch.orders.find(o => o._id === item.orderId);
+                            const itemDone = itemOrder?.deliveryStatus === 'Completed';
+                            return (
+                              <div key={itemIdx} className="flex flex-col">
+                                <h4 className={`font-extrabold text-[12.5px] ${itemDone ? 'text-slate-450 line-through' : 'text-slate-800'} leading-snug`}>
+                                  {item.cropName || 'Crop'} ({item.quantity} {item.unit})
+                                </h4>
+                                {stop.stopType === 'delivery' && !itemDone && batch.batchStatus !== 'Driver Assigned' && (
+                                  <div className="mt-1.5 p-2.5 bg-slate-50 border border-slate-200/50 rounded-xl max-w-xs">
+                                    <span className="text-[8.5px] font-black text-indigo-900 flex items-center gap-1 uppercase tracking-wider mb-1.5">
+                                      <span className="material-symbols-outlined text-[11px] text-indigo-600">lock_open</span>
+                                      Verify Handover OTP
+                                    </span>
+                                    <div className="flex gap-1.5">
+                                      <input
+                                        type="text"
+                                        maxLength={4}
+                                        placeholder="OTP"
+                                        value={otpValues[item.orderId] || ''}
+                                        onChange={(e) => setOtpValues(prev => ({ ...prev, [item.orderId]: e.target.value.replace(/\D/g, '') }))}
+                                        className="w-full px-2 py-0.5 bg-white border border-slate-300 rounded-lg text-[10.5px] font-bold tracking-widest text-center focus:outline-none focus:border-indigo-500"
+                                        disabled={isVerifyingOtp[item.orderId]}
+                                      />
+                                      <button
+                                        onClick={() => handleVerifyOrderOtp(item.orderId)}
+                                        disabled={isVerifyingOtp[item.orderId] || (otpValues[item.orderId] || '').length !== 4}
+                                        className="px-3 bg-indigo-600 hover:bg-indigo-700 disabled:opacity-40 text-white font-black text-[9.5px] rounded-lg cursor-pointer border-0 active:scale-95 transition-all"
+                                      >
+                                        Verify
+                                      </button>
+                                    </div>
+                                  </div>
+                                )}
+                              </div>
+                            );
+                          })}
+                        </div>
+
+                        <p className="text-[9.5px] text-slate-500 font-bold mt-0.5 flex items-center gap-1">
+                          <span className="material-symbols-outlined text-[11px] text-slate-400">pin_drop</span>
+                          <span>{stop.address}</span>
+                        </p>
+                      </div>
                     </div>
-                  </div>
-                );
-              })}
+                  );
+                });
+              })()}
             </div>
           </div>
         </div>
@@ -365,3 +405,4 @@ const DriverBatchConsole = () => {
 };
 
 export default DriverBatchConsole;
+

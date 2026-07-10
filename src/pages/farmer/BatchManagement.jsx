@@ -206,25 +206,38 @@ const BatchManagement = () => {
                           Optimized Delivery Sequence
                         </span>
                         <div className="flex flex-wrap items-center gap-1.5 pt-1">
-                          {batch.optimizedRoute.map((stop, index) => (
-                            <React.Fragment key={index}>
-                              {index > 0 && <span className="text-slate-350 text-[10px]">➔</span>}
-                              <div className={`flex items-center gap-1 px-2 py-0.5 rounded text-[9.5px] font-black border ${
-                                stop.stopType === 'pickup'
-                                  ? 'bg-emerald-50 border-emerald-250/60 text-emerald-700'
-                                  : 'bg-blue-50 border-blue-250/60 text-blue-750'
-                              }`}>
-                                <span className="material-symbols-outlined text-[10.5px]">
-                                  {stop.stopType === 'pickup' ? 'agriculture' : 'storefront'}
-                                </span>
-                                <span>{stop.address.split('\'s')[0]}</span>
-                              </div>
-                            </React.Fragment>
-                          ))}
+                          {(() => {
+                            const groupedStops = [];
+                            batch.optimizedRoute.forEach(stop => {
+                              const last = groupedStops[groupedStops.length - 1];
+                              if (last && last.stopType === stop.stopType && last.address === stop.address) {
+                                last.count++;
+                              } else {
+                                groupedStops.push({ ...stop, count: 1 });
+                              }
+                            });
+                            return groupedStops.map((stop, index) => (
+                              <React.Fragment key={index}>
+                                {index > 0 && <span className="text-slate-350 text-[10px]">➔</span>}
+                                <div className={`flex items-center gap-1 px-2 py-0.5 rounded text-[9.5px] font-black border ${
+                                  stop.stopType === 'pickup'
+                                    ? 'bg-emerald-50 border-emerald-250/60 text-emerald-700'
+                                    : 'bg-blue-50 border-blue-250/60 text-blue-755'
+                                }`}>
+                                  <span className="material-symbols-outlined text-[10.5px]">
+                                    {stop.stopType === 'pickup' ? 'agriculture' : 'storefront'}
+                                  </span>
+                                  <span>
+                                    {stop.address.split('\'s')[0]} 
+                                    {stop.count > 1 && ` (x${stop.count})`}
+                                  </span>
+                                </div>
+                              </React.Fragment>
+                            ));
+                          })()}
                         </div>
                       </div>
 
-                      {/* Driver actions block */}
                       {!isCompleted && (
                         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-t border-slate-100 pt-3">
                           <div className="flex items-center gap-2">
