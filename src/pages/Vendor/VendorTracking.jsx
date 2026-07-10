@@ -267,6 +267,7 @@ const VendorTracking = () => {
       setCurrentRoute(route);
 
       // Draw stops markers
+      // Draw stops markers
       if (selectedOrder.deliveryBatchId && selectedOrder.deliveryBatchId.optimizedRoute) {
         if (addonStartMarkerRef.current) { map.removeLayer(addonStartMarkerRef.current); addonStartMarkerRef.current = null; }
         if (addonEndMarkerRef.current)   { map.removeLayer(addonEndMarkerRef.current); addonEndMarkerRef.current = null; }
@@ -280,9 +281,28 @@ const VendorTracking = () => {
         selectedOrder.deliveryBatchId.optimizedRoute.forEach(stop => {
           const isStopPickup = stop.stopType === 'pickup';
           const isVendorShop = stop.coordinates.lat === eLat && stop.coordinates.lng === eLng;
+          const isCurrentOrderStop = stop.orderId === selectedOrder._id;
+
+          const color = isStopPickup 
+            ? '#16a34a' 
+            : isCurrentOrderStop 
+              ? '#ef4444' // Highlight selected stop in red
+              : '#2563eb'; // Blue for other stops
+          
+          const label = isVendorShop
+            ? 'My Shop'
+            : isCurrentOrderStop 
+              ? `🎯 ${stop.address.split('\'s')[0]}`
+              : stop.address.split('\'s')[0];
+
           const marker = L.marker([stop.coordinates.lat, stop.coordinates.lng], {
-            icon: mkIcon(isStopPickup ? 'agriculture' : 'storefront', isStopPickup ? '#16a34a' : '#2563eb', isVendorShop ? 'My Shop' : stop.address.split('\'s')[0])
-          }).addTo(map).bindPopup(`${isStopPickup ? 'Pickup' : 'Delivery'} Stop: ${stop.address}`);
+            icon: mkIcon(
+              isStopPickup ? 'agriculture' : 'storefront', 
+              color, 
+              label, 
+              isCurrentOrderStop // Pulse the selected order stop!
+            )
+          }).addTo(map).bindPopup(`${isStopPickup ? 'Pickup' : 'Delivery'} Stop: ${stop.address} ${isCurrentOrderStop ? '(Your Delivery Stop)' : ''}`);
           batchMarkersRef.current.push(marker);
         });
       } else {

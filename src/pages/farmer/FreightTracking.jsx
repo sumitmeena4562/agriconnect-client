@@ -314,9 +314,26 @@ const FreightTracking = () => {
 
         selectedOrder.deliveryBatchId.optimizedRoute.forEach(stop => {
           const isStopPickup = stop.stopType === 'pickup';
+          const isCurrentOrderStop = stop.orderId === selectedOrder._id;
+          
+          const color = isStopPickup 
+            ? '#16a34a' 
+            : isCurrentOrderStop 
+              ? '#ef4444' // Highlight selected stop in red
+              : '#2563eb'; // Blue for other stops
+          
+          const label = isCurrentOrderStop 
+            ? `🎯 ${stop.address.split('\'s')[0]}`
+            : stop.address.split('\'s')[0];
+
           const marker = L.marker([stop.coordinates.lat, stop.coordinates.lng], {
-            icon: mkIcon(isStopPickup ? 'agriculture' : 'storefront', isStopPickup ? '#16a34a' : '#2563eb', stop.address.split('\'s')[0])
-          }).addTo(map).bindPopup(`${isStopPickup ? 'Pickup' : 'Delivery'} Stop: ${stop.address}`);
+            icon: mkIcon(
+              isStopPickup ? 'agriculture' : 'storefront', 
+              color, 
+              label, 
+              isCurrentOrderStop // Pulse the selected order stop!
+            )
+          }).addTo(map).bindPopup(`${isStopPickup ? 'Pickup' : 'Delivery'} Stop: ${stop.address} ${isCurrentOrderStop ? '(Target Destination)' : ''}`);
           batchMarkersRef.current.push(marker);
         });
       } else {
