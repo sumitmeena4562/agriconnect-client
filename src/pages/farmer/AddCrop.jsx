@@ -85,6 +85,14 @@ const AddCrop = ({ isEditMode = false }) => {
       // Fetch default location for new crop
       const fetchDefaultLocation = async () => {
         try {
+          // Check localStorage first (remember last entered value)
+          const lastUsedLocation = localStorage.getItem('agriconnect_last_crop_location');
+          if (lastUsedLocation) {
+            setFormData(prev => ({ ...prev, location: lastUsedLocation }));
+            setIsLoading(false);
+            return;
+          }
+
           const res = await api.get('/farmers/profile');
           const { user, profile } = res.data.data;
           
@@ -206,6 +214,10 @@ const AddCrop = ({ isEditMode = false }) => {
         toast.success('Crop updated successfully!');
       } else {
         await api.post('/crops', payload);
+        // Save the location to localStorage so they don't have to enter it again
+        if (formData.location) {
+          localStorage.setItem('agriconnect_last_crop_location', formData.location);
+        }
         toast.success('Crop added successfully!');
       }
       
