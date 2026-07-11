@@ -356,101 +356,97 @@ const DriverRegistry = () => {
               {formStep === 0 && (
                 <div className="space-y-4">
                   {/* Section Title */}
-                  <div>
-                    <h3 className="text-[10px] font-black uppercase tracking-wider text-slate-450 border-b border-slate-100 pb-1 mb-3.5 flex items-center gap-1.5">
-                      <span className="w-1.5 h-3 rounded bg-indigo-500" />
-                      👤 Driver Profile Details
-                    </h3>
+                  <div className="border-b border-slate-100 pb-1 flex items-center gap-2">
+                    <span className="material-symbols-outlined text-[16px] text-indigo-500">person</span>
+                    <h3 className="text-[11px] font-black uppercase tracking-wider text-slate-700">Driver Profile Details</h3>
                   </div>
 
                   {/* Row 1: Name and Phone */}
-                  <div className="grid grid-cols-2 gap-3">
+                  <div className="grid grid-cols-2 gap-4">
                     <div>
-                      <label className="text-[9.5px] font-extrabold text-slate-500 uppercase tracking-wider mb-1 block">Driver Name <span className="text-rose-500">*</span></label>
+                      <label className="text-[10px] font-bold text-slate-500 mb-1 block">Driver Name <span className="text-rose-500">*</span></label>
                       <input
                         type="text"
                         placeholder="e.g. Ramesh Kumar"
                         value={name}
                         onChange={e => setName(e.target.value)}
-                        className="w-full h-9.5 px-3 text-[12px] rounded-xl border border-slate-200 bg-[var(--color-surface)] text-[var(--color-text-primary)] focus:border-[var(--color-primary-500)] focus:ring-2 focus:ring-[var(--color-primary-500)]/15 outline-none transition-all placeholder:text-slate-350"
+                        className="w-full h-9.5 px-3 text-[12px] rounded-xl border border-slate-200 bg-[var(--color-surface)] text-[var(--color-text-primary)] hover:border-slate-350 focus:border-slate-800 outline-none transition-all placeholder:text-slate-300"
                         required
                       />
                     </div>
                     <div>
-                      <label className="text-[9.5px] font-extrabold text-slate-500 uppercase tracking-wider mb-1 block">Phone Number <span className="text-rose-500">*</span></label>
+                      <label className="text-[10px] font-bold text-slate-500 mb-1 block">Phone Number <span className="text-rose-500">*</span></label>
                       <input
                         type="text"
                         placeholder="e.g. 9876543210"
                         value={phone}
                         onChange={e => setPhone(e.target.value)}
-                        className="w-full h-9.5 px-3 text-[12px] rounded-xl border border-slate-200 bg-[var(--color-surface)] text-[var(--color-text-primary)] focus:border-[var(--color-primary-500)] focus:ring-2 focus:ring-[var(--color-primary-500)]/15 outline-none transition-all placeholder:text-slate-350"
+                        className="w-full h-9.5 px-3 text-[12px] rounded-xl border border-slate-200 bg-[var(--color-surface)] text-[var(--color-text-primary)] hover:border-slate-350 focus:border-slate-800 outline-none transition-all placeholder:text-slate-300"
                         required
                       />
                     </div>
                   </div>
 
                   {/* Row 2: Aadhaar & Address */}
-                  <div className="grid grid-cols-2 gap-3">
+                  <div className="grid grid-cols-2 gap-4">
                     <div>
-                      <label className="text-[9.5px] font-extrabold text-slate-500 uppercase tracking-wider mb-1 block">
-                        Aadhaar Card No. <span className="text-[8px] font-semibold text-slate-400 normal-case">(Optional)</span>
+                      <label className="text-[10px] font-bold text-slate-500 mb-1 block">
+                        Aadhaar Card No. <span className="text-[8.5px] font-normal text-slate-400 italic">(Optional)</span>
                       </label>
                       <input
                         type="text"
                         placeholder="e.g. 1234 5678 9012"
                         value={aadhaarNumber}
                         onChange={e => setAadhaarNumber(e.target.value)}
-                        className="w-full h-9.5 px-3 text-[12px] rounded-xl border border-slate-200 bg-[var(--color-surface)] text-[var(--color-text-primary)] focus:border-[var(--color-primary-500)] focus:ring-2 focus:ring-[var(--color-primary-500)]/15 outline-none transition-all placeholder:text-slate-350"
+                        className="w-full h-9.5 px-3 text-[12px] rounded-xl border border-slate-200 bg-[var(--color-surface)] text-[var(--color-text-primary)] hover:border-slate-350 focus:border-slate-800 outline-none transition-all placeholder:text-slate-300"
                       />
-                      <span className="text-[8px] text-slate-400 font-semibold block mt-1 leading-none">12-digit UID for identity validation</span>
+                      <span className="text-[8px] text-slate-400 font-semibold block mt-1">12-digit UID for identity validation</span>
                     </div>
                     <div>
-                      <label className="text-[9.5px] font-extrabold text-slate-500 uppercase tracking-wider mb-1 block">
-                        Driver Address <span className="text-[8px] font-semibold text-slate-400 normal-case">(Optional)</span>
+                      <label className="text-[10px] font-bold text-slate-500 mb-1 block">
+                        Driver Address <span className="text-[8.5px] font-normal text-slate-400 italic">(Optional)</span>
                       </label>
                       <input
                         type="text"
                         placeholder="e.g. Town/Village, State"
                         value={address}
                         onChange={e => setAddress(e.target.value)}
-                        className="w-full h-9.5 px-3 text-[12px] rounded-xl border border-slate-200 bg-[var(--color-surface)] text-[var(--color-text-primary)] focus:border-[var(--color-primary-500)] focus:ring-2 focus:ring-[var(--color-primary-500)]/15 outline-none transition-all placeholder:text-slate-350"
+                        className="w-full h-9.5 px-3 text-[12px] rounded-xl border border-slate-200 bg-[var(--color-surface)] text-[var(--color-text-primary)] hover:border-slate-350 focus:border-slate-800 outline-none transition-all placeholder:text-slate-300"
                       />
-                      <span className="text-[8px] text-slate-400 font-semibold block mt-1 leading-none">Current address of the driver</span>
+                      <span className="text-[8px] text-slate-400 font-semibold block mt-1">Current address of the driver</span>
                     </div>
                   </div>
 
                   {/* Section Title */}
-                  <div className="pt-2">
-                    <h3 className="text-[10px] font-black uppercase tracking-wider text-slate-450 border-b border-slate-100 pb-1 mb-3.5 flex items-center gap-1.5">
-                      <span className="w-1.5 h-3 rounded bg-rose-400" />
-                      🚨 Emergency Contacts (Next of Kin)
-                    </h3>
+                  <div className="border-b border-slate-100 pb-1 pt-1.5 flex items-center gap-2">
+                    <span className="material-symbols-outlined text-[16px] text-rose-500">contact_phone</span>
+                    <h3 className="text-[11px] font-black uppercase tracking-wider text-slate-700">Emergency Contacts (Next of Kin)</h3>
                   </div>
 
                   {/* Row 3: Emergency Contact */}
-                  <div className="grid grid-cols-2 gap-3">
+                  <div className="grid grid-cols-2 gap-4">
                     <div>
-                      <label className="text-[9.5px] font-extrabold text-slate-500 uppercase tracking-wider mb-1 block">
-                        Contact Person <span className="text-[8px] font-semibold text-slate-400 normal-case">(Optional)</span>
+                      <label className="text-[10px] font-bold text-slate-500 mb-1 block">
+                        Contact Person <span className="text-[8.5px] font-normal text-slate-400 italic">(Optional)</span>
                       </label>
                       <input
                         type="text"
                         placeholder="Family member name"
                         value={emergencyContactName}
                         onChange={e => setEmergencyContactName(e.target.value)}
-                        className="w-full h-9.5 px-3 text-[12px] rounded-xl border border-slate-200 bg-[var(--color-surface)] text-[var(--color-text-primary)] focus:border-[var(--color-primary-500)] focus:ring-2 focus:ring-[var(--color-primary-500)]/15 outline-none transition-all placeholder:text-slate-350"
+                        className="w-full h-9.5 px-3 text-[12px] rounded-xl border border-slate-200 bg-[var(--color-surface)] text-[var(--color-text-primary)] hover:border-slate-350 focus:border-slate-800 outline-none transition-all placeholder:text-slate-300"
                       />
                     </div>
                     <div>
-                      <label className="text-[9.5px] font-extrabold text-slate-500 uppercase tracking-wider mb-1 block">
-                        Emergency Phone <span className="text-[8px] font-semibold text-slate-400 normal-case">(Optional)</span>
+                      <label className="text-[10px] font-bold text-slate-500 mb-1 block">
+                        Emergency Phone <span className="text-[8.5px] font-normal text-slate-400 italic">(Optional)</span>
                       </label>
                       <input
                         type="text"
                         placeholder="Emergency contact phone"
                         value={emergencyContactPhone}
                         onChange={e => setEmergencyContactPhone(e.target.value)}
-                        className="w-full h-9.5 px-3 text-[12px] rounded-xl border border-slate-200 bg-[var(--color-surface)] text-[var(--color-text-primary)] focus:border-[var(--color-primary-500)] focus:ring-2 focus:ring-[var(--color-primary-500)]/15 outline-none transition-all placeholder:text-slate-350"
+                        className="w-full h-9.5 px-3 text-[12px] rounded-xl border border-slate-200 bg-[var(--color-surface)] text-[var(--color-text-primary)] hover:border-slate-350 focus:border-slate-800 outline-none transition-all placeholder:text-slate-300"
                       />
                     </div>
                   </div>
@@ -461,33 +457,48 @@ const DriverRegistry = () => {
               {formStep === 1 && (
                 <div className="space-y-4">
                   {/* Section Title */}
-                  <div>
-                    <h3 className="text-[10px] font-black uppercase tracking-wider text-slate-450 border-b border-slate-100 pb-1 mb-3.5 flex items-center gap-1.5">
-                      <span className="w-1.5 h-3 rounded bg-indigo-500" />
-                      🛻 Vehicle Specs & fuel
-                    </h3>
+                  <div className="border-b border-slate-100 pb-1 flex items-center gap-2">
+                    <span className="material-symbols-outlined text-[16px] text-indigo-500">local_shipping</span>
+                    <h3 className="text-[11px] font-black uppercase tracking-wider text-slate-700">Vehicle Registry</h3>
                   </div>
 
-                  {/* Row 1: Vehicle No & Vehicle Type */}
-                  <div className="grid grid-cols-2 gap-3">
+                  {/* Row 1: Vehicle No & Vehicle Model */}
+                  <div className="grid grid-cols-2 gap-4">
                     <div>
-                      <label className="text-[9.5px] font-extrabold text-slate-500 uppercase tracking-wider mb-1 block">Vehicle Number <span className="text-rose-500">*</span></label>
+                      <label className="text-[10px] font-bold text-slate-500 mb-1 block">Vehicle Number <span className="text-rose-500">*</span></label>
                       <input
                         type="text"
                         placeholder="e.g. MH 12 AB 5678"
                         value={vehicleNumber}
                         onChange={e => setVehicleNumber(e.target.value)}
-                        className="w-full h-9.5 px-3 text-[12px] rounded-xl border border-slate-200 bg-[var(--color-surface)] text-[var(--color-text-primary)] focus:border-[var(--color-primary-500)] focus:ring-2 focus:ring-[var(--color-primary-500)]/15 outline-none transition-all font-mono uppercase tracking-wider placeholder:text-slate-350"
+                        className="w-full h-9.5 px-3 text-[12px] rounded-xl border border-slate-200 bg-[var(--color-surface)] text-[var(--color-text-primary)] font-mono uppercase hover:border-slate-350 focus:border-slate-800 outline-none transition-all placeholder:text-slate-300"
                         required
                       />
-                      <span className="text-[8px] text-slate-400 font-semibold block mt-1 leading-none">Enter RTO Plate registration number</span>
+                      <span className="text-[8px] text-slate-400 font-semibold block mt-1">RTO plate registration number</span>
                     </div>
                     <div>
-                      <label className="text-[9.5px] font-extrabold text-slate-500 uppercase tracking-wider mb-1 block">Vehicle Type <span className="text-rose-500">*</span></label>
+                      <label className="text-[10px] font-bold text-slate-500 mb-1 block">
+                        Vehicle Model <span className="text-[8.5px] font-normal text-slate-400 italic">(Optional)</span>
+                      </label>
+                      <input
+                        type="text"
+                        placeholder="e.g. Tata Ace Gold"
+                        value={vehicleModel}
+                        onChange={e => setVehicleModel(e.target.value)}
+                        className="w-full h-9.5 px-3 text-[12px] rounded-xl border border-slate-200 bg-[var(--color-surface)] text-[var(--color-text-primary)] hover:border-slate-350 focus:border-slate-800 outline-none transition-all placeholder:text-slate-300"
+                      />
+                      <span className="text-[8px] text-slate-400 font-semibold block mt-1">Vehicle brand & model name</span>
+                    </div>
+                  </div>
+
+                  {/* Row 2: Vehicle Type & Fuel Type */}
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <label className="text-[10px] font-bold text-slate-500 mb-1 block">Vehicle Type <span className="text-rose-500">*</span></label>
                       <select
                         value={vehicleType}
                         onChange={e => setVehicleType(e.target.value)}
-                        className="w-full h-9.5 px-2 text-[12px] rounded-xl border border-slate-200 bg-[var(--color-surface)] text-[var(--color-text-primary)] focus:border-[var(--color-primary-500)] focus:ring-2 focus:ring-[var(--color-primary-500)]/15 outline-none transition-all"
+                        className="w-full h-9.5 px-2 text-[12px] rounded-xl border border-slate-200 bg-[var(--color-surface)] text-[var(--color-text-primary)] hover:border-slate-350 focus:border-slate-800 outline-none transition-all"
                       >
                         <option value="Bike">🚴 Bike Box</option>
                         <option value="Tractor">🚜 Tractor Trolley</option>
@@ -495,111 +506,51 @@ const DriverRegistry = () => {
                         <option value="Mini Truck">🚚 Mini Truck</option>
                         <option value="Large Truck">🚛 Large Truck</option>
                       </select>
-                      <span className="text-[8px] text-slate-400 font-semibold block mt-1 leading-none">Determines the canvas load plan layout</span>
-                    </div>
-                  </div>
-
-                  {/* Row 2: Payload, Fuel Type & RC Number */}
-                  <div className="grid grid-cols-3 gap-2">
-                    <div>
-                      <label className="text-[9.5px] font-extrabold text-slate-500 uppercase tracking-wider mb-1 block">Payload (kg) <span className="text-rose-500">*</span></label>
-                      <input
-                        type="number"
-                        min="1"
-                        placeholder="e.g. 1000"
-                        value={payloadCapacity}
-                        onChange={e => setPayloadCapacity(e.target.value)}
-                        className="w-full h-9.5 px-2 text-[12px] rounded-xl border border-slate-200 bg-[var(--color-surface)] text-[var(--color-text-primary)] focus:border-[var(--color-primary-500)] focus:ring-2 focus:ring-[var(--color-primary-500)]/15 outline-none transition-all placeholder:text-slate-350"
-                        required
-                      />
+                      <span className="text-[8px] text-slate-400 font-semibold block mt-1">Determines load planning grids</span>
                     </div>
                     <div>
-                      <label className="text-[9.5px] font-extrabold text-slate-500 uppercase tracking-wider mb-1 block">Fuel Type</label>
+                      <label className="text-[10px] font-bold text-slate-500 mb-1 block">Fuel Type</label>
                       <select
                         value={fuelType}
                         onChange={e => setFuelType(e.target.value)}
-                        className="w-full h-9.5 px-1 text-[12px] rounded-xl border border-slate-200 bg-[var(--color-surface)] text-[var(--color-text-primary)] focus:border-[var(--color-primary-500)] focus:ring-2 focus:ring-[var(--color-primary-500)]/15 outline-none transition-all"
+                        className="w-full h-9.5 px-2 text-[12px] rounded-xl border border-slate-200 bg-[var(--color-surface)] text-[var(--color-text-primary)] hover:border-slate-350 focus:border-slate-800 outline-none transition-all"
                       >
                         <option value="Diesel">Diesel</option>
                         <option value="CNG">CNG</option>
                         <option value="Electric">Electric</option>
                         <option value="Petrol">Petrol</option>
                       </select>
+                      <span className="text-[8px] text-slate-400 font-semibold block mt-1">For trip fuel cost estimation</span>
+                    </div>
+                  </div>
+
+                  {/* Row 3: Payload Capacity & RC Number */}
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <label className="text-[10px] font-bold text-slate-500 mb-1 block">Payload Capacity (kg) <span className="text-rose-500">*</span></label>
+                      <input
+                        type="number"
+                        min="1"
+                        placeholder="e.g. 1000"
+                        value={payloadCapacity}
+                        onChange={e => setPayloadCapacity(e.target.value)}
+                        className="w-full h-9.5 px-3 text-[12px] rounded-xl border border-slate-200 bg-[var(--color-surface)] text-[var(--color-text-primary)] hover:border-slate-350 focus:border-slate-800 outline-none transition-all placeholder:text-slate-300"
+                        required
+                      />
+                      <span className="text-[8px] text-slate-400 font-semibold block mt-1">Maximum load limit in kg</span>
                     </div>
                     <div>
-                      <label className="text-[9.5px] font-extrabold text-slate-500 uppercase tracking-wider mb-1 block flex items-center gap-1 truncate">
-                        RC No. <span className="text-[8px] font-semibold text-slate-400 normal-case">(Opt)</span>
+                      <label className="text-[10px] font-bold text-slate-500 mb-1 block">
+                        RC Certificate No. <span className="text-[8.5px] font-normal text-slate-400 italic">(Optional)</span>
                       </label>
                       <input
                         type="text"
-                        placeholder="e.g. MH12AB"
+                        placeholder="e.g. MH12AB1234"
                         value={rcNumber}
                         onChange={e => setRcNumber(e.target.value)}
-                        className="w-full h-9.5 px-2 text-[12px] rounded-xl border border-slate-200 bg-[var(--color-surface)] text-[var(--color-text-primary)] focus:border-[var(--color-primary-500)] focus:ring-2 focus:ring-[var(--color-primary-500)]/15 outline-none transition-all uppercase placeholder:text-slate-350"
+                        className="w-full h-9.5 px-3 text-[12px] rounded-xl border border-slate-200 bg-[var(--color-surface)] text-[var(--color-text-primary)] hover:border-slate-350 focus:border-slate-800 outline-none transition-all uppercase placeholder:text-slate-300"
                       />
-                    </div>
-                  </div>
-
-                  {/* Section Title */}
-                  <div className="pt-2">
-                    <h3 className="text-[10px] font-black uppercase tracking-wider text-slate-450 border-b border-slate-100 pb-1 mb-3.5 flex items-center gap-1.5">
-                      <span className="w-1.5 h-3 rounded bg-rose-400" />
-                      ⚖️ Capacity & DL compliance
-                    </h3>
-                  </div>
-
-                  {/* Row 3: DL Number & DL Class */}
-                  <div className="grid grid-cols-2 gap-3">
-                    <div>
-                      <label className="text-[9.5px] font-extrabold text-slate-500 uppercase tracking-wider mb-1 block">
-                        DL Number <span className="text-[8px] font-semibold text-slate-400 normal-case">(Optional)</span>
-                      </label>
-                      <input
-                        type="text"
-                        placeholder="e.g. MH04201100"
-                        value={licenseNumber}
-                        onChange={e => setLicenseNumber(e.target.value)}
-                        className="w-full h-9.5 px-3 text-[12px] rounded-xl border border-slate-200 bg-[var(--color-surface)] text-[var(--color-text-primary)] focus:border-[var(--color-primary-500)] focus:ring-2 focus:ring-[var(--color-primary-500)]/15 outline-none transition-all uppercase placeholder:text-slate-350"
-                      />
-                    </div>
-                    <div>
-                      <label className="text-[9.5px] font-extrabold text-slate-500 uppercase tracking-wider mb-1 block">DL Class / Category</label>
-                      <select
-                        value={licenseClass}
-                        onChange={e => setLicenseClass(e.target.value)}
-                        className="w-full h-9.5 px-2 text-[12px] rounded-xl border border-slate-200 bg-[var(--color-surface)] text-[var(--color-text-primary)] focus:border-[var(--color-primary-500)] focus:ring-2 focus:ring-[var(--color-primary-500)]/15 outline-none transition-all"
-                      >
-                        <option value="LMV">LMV (Light Motor Vehicle)</option>
-                        <option value="HMV">HMV (Heavy Motor Vehicle)</option>
-                        <option value="MCWG">MCWG (Motorcycle with Gear)</option>
-                      </select>
-                    </div>
-                  </div>
-
-                  {/* Row 4: DL Expiry & Vehicle Model */}
-                  <div className="grid grid-cols-2 gap-3">
-                    <div>
-                      <label className="text-[9.5px] font-extrabold text-slate-500 uppercase tracking-wider mb-1 block">
-                        DL Expiry Date <span className="text-[8px] font-semibold text-slate-400 normal-case">(Optional)</span>
-                      </label>
-                      <input
-                        type="date"
-                        value={licenseExpiry}
-                        onChange={e => setLicenseExpiry(e.target.value)}
-                        className="w-full h-9.5 px-3 text-[12px] rounded-xl border border-slate-200 bg-[var(--color-surface)] text-[var(--color-text-primary)] focus:border-[var(--color-primary-500)] focus:ring-2 focus:ring-[var(--color-primary-500)]/15 outline-none transition-all"
-                      />
-                    </div>
-                    <div>
-                      <label className="text-[9.5px] font-extrabold text-slate-500 uppercase tracking-wider mb-1 block">
-                        Vehicle Model <span className="text-[8px] font-semibold text-slate-400 normal-case">(Optional)</span>
-                      </label>
-                      <input
-                        type="text"
-                        placeholder="e.g. Tata Ace Gold"
-                        value={vehicleModel}
-                        onChange={e => setVehicleModel(e.target.value)}
-                        className="w-full h-9.5 px-3 text-[12px] rounded-xl border border-slate-200 bg-[var(--color-surface)] text-[var(--color-text-primary)] focus:border-[var(--color-primary-500)] focus:ring-2 focus:ring-[var(--color-primary-500)]/15 outline-none transition-all placeholder:text-slate-350"
-                      />
+                      <span className="text-[8px] text-slate-400 font-semibold block mt-1">Vehicle Registration Certificate No.</span>
                     </div>
                   </div>
                 </div>
@@ -609,133 +560,170 @@ const DriverRegistry = () => {
               {formStep === 2 && (
                 <div className="space-y-4">
                   {/* Section Title */}
-                  <div>
-                    <h3 className="text-[10px] font-black uppercase tracking-wider text-slate-450 border-b border-slate-100 pb-1 mb-3.5 flex items-center gap-1.5">
-                      <span className="w-1.5 h-3 rounded bg-indigo-500" />
-                      🏦 Bank Payout Details
-                    </h3>
+                  <div className="border-b border-slate-100 pb-1 flex items-center gap-2">
+                    <span className="material-symbols-outlined text-[16px] text-indigo-500">payments</span>
+                    <h3 className="text-[11px] font-black uppercase tracking-wider text-slate-700">Bank Settlement Info</h3>
                   </div>
 
-                  {/* Row 1: Bank Account Name & UPI ID */}
-                  <div className="grid grid-cols-2 gap-3">
+                  {/* Row 1: Account Holder & UPI ID */}
+                  <div className="grid grid-cols-2 gap-4">
                     <div>
-                      <label className="text-[9.5px] font-extrabold text-slate-500 uppercase tracking-wider mb-1 block">
-                        Account Holder Name <span className="text-[8px] font-semibold text-slate-400 normal-case">(Optional)</span>
+                      <label className="text-[10px] font-bold text-slate-500 mb-1 block">
+                        Account Holder Name <span className="text-[8.5px] font-normal text-slate-400 italic">(Optional)</span>
                       </label>
                       <input
                         type="text"
                         placeholder="Account name"
                         value={bankAccountName}
                         onChange={e => setBankAccountName(e.target.value)}
-                        className="w-full h-9.5 px-3 text-[12px] rounded-xl border border-slate-200 bg-[var(--color-surface)] text-[var(--color-text-primary)] focus:border-[var(--color-primary-500)] focus:ring-2 focus:ring-[var(--color-primary-500)]/15 outline-none transition-all placeholder:text-slate-350"
+                        className="w-full h-9.5 px-3 text-[12px] rounded-xl border border-slate-200 bg-[var(--color-surface)] text-[var(--color-text-primary)] hover:border-slate-350 focus:border-slate-800 outline-none transition-all placeholder:text-slate-300"
                       />
                     </div>
                     <div>
-                      <label className="text-[9.5px] font-extrabold text-slate-500 uppercase tracking-wider mb-1 block">
-                        UPI ID for Payout <span className="text-[8px] font-semibold text-slate-400 normal-case">(Optional)</span>
+                      <label className="text-[10px] font-bold text-slate-500 mb-1 block">
+                        UPI ID for Payout <span className="text-[8.5px] font-normal text-slate-400 italic">(Optional)</span>
                       </label>
                       <input
                         type="text"
                         placeholder="e.g. driver@ybl"
                         value={upiId}
                         onChange={e => setUpiId(e.target.value)}
-                        className="w-full h-9.5 px-3 text-[12px] rounded-xl border border-slate-200 bg-[var(--color-surface)] text-[var(--color-text-primary)] focus:border-[var(--color-primary-500)] focus:ring-2 focus:ring-[var(--color-primary-500)]/15 outline-none transition-all placeholder:text-slate-350"
+                        className="w-full h-9.5 px-3 text-[12px] rounded-xl border border-slate-200 bg-[var(--color-surface)] text-[var(--color-text-primary)] hover:border-slate-350 focus:border-slate-800 outline-none transition-all placeholder:text-slate-300"
                       />
-                      <span className="text-[8px] text-slate-400 font-semibold block mt-1 leading-none">Instant settlement address</span>
+                      <span className="text-[8px] text-slate-400 font-semibold block mt-1">Instant payouts address (PhonePe/GPay)</span>
                     </div>
                   </div>
 
-                  {/* Row 2: Bank Account Number & IFSC Code */}
-                  <div className="grid grid-cols-2 gap-3">
+                  {/* Row 2: Account Number & IFSC Code */}
+                  <div className="grid grid-cols-2 gap-4">
                     <div>
-                      <label className="text-[9.5px] font-extrabold text-slate-500 uppercase tracking-wider mb-1 block">
-                        Bank Account Number <span className="text-[8px] font-semibold text-slate-400 normal-case">(Optional)</span>
+                      <label className="text-[10px] font-bold text-slate-500 mb-1 block">
+                        Bank Account Number <span className="text-[8.5px] font-normal text-slate-400 italic">(Optional)</span>
                       </label>
                       <input
                         type="text"
                         placeholder="Account number"
                         value={bankAccountNumber}
                         onChange={e => setBankAccountAccountNumber(e.target.value)}
-                        className="w-full h-9.5 px-3 text-[12px] rounded-xl border border-slate-200 bg-[var(--color-surface)] text-[var(--color-text-primary)] focus:border-[var(--color-primary-500)] focus:ring-2 focus:ring-[var(--color-primary-500)]/15 outline-none transition-all placeholder:text-slate-350"
+                        className="w-full h-9.5 px-3 text-[12px] rounded-xl border border-slate-200 bg-[var(--color-surface)] text-[var(--color-text-primary)] hover:border-slate-350 focus:border-slate-800 outline-none transition-all placeholder:text-slate-300"
                       />
                     </div>
                     <div>
-                      <label className="text-[9.5px] font-extrabold text-slate-500 uppercase tracking-wider mb-1 block">
-                        Bank IFSC Code <span className="text-[8px] font-semibold text-slate-400 normal-case">(Optional)</span>
+                      <label className="text-[10px] font-bold text-slate-500 mb-1 block">
+                        Bank IFSC Code <span className="text-[8.5px] font-normal text-slate-400 italic">(Optional)</span>
                       </label>
                       <input
                         type="text"
                         placeholder="e.g. SBIN0001234"
                         value={bankAccountIfsc}
                         onChange={e => setBankAccountIfsc(e.target.value)}
-                        className="w-full h-9.5 px-3 text-[12px] rounded-xl border border-slate-200 bg-[var(--color-surface)] text-[var(--color-text-primary)] focus:border-[var(--color-primary-500)] focus:ring-2 focus:ring-[var(--color-primary-500)]/15 outline-none transition-all uppercase placeholder:text-slate-350"
+                        className="w-full h-9.5 px-3 text-[12px] rounded-xl border border-slate-200 bg-[var(--color-surface)] text-[var(--color-text-primary)] hover:border-slate-350 focus:border-slate-800 outline-none transition-all uppercase placeholder:text-slate-300"
                       />
                     </div>
                   </div>
 
                   {/* Section Title */}
-                  <div className="pt-2">
-                    <h3 className="text-[10px] font-black uppercase tracking-wider text-slate-450 border-b border-slate-100 pb-1 mb-3.5 flex items-center gap-1.5">
-                      <span className="w-1.5 h-3 rounded bg-rose-400" />
-                      📄 Verification Documents & Insurance
-                    </h3>
+                  <div className="border-b border-slate-100 pb-1 pt-1.5 flex items-center gap-2">
+                    <span className="material-symbols-outlined text-[16px] text-rose-500">description</span>
+                    <h3 className="text-[11px] font-black uppercase tracking-wider text-slate-700">Identity & Insurance Docs</h3>
                   </div>
 
-                  {/* Row 3: PAN & Insurance Expiry */}
-                  <div className="grid grid-cols-2 gap-3">
+                  {/* Row 3: DL Number & DL Class */}
+                  <div className="grid grid-cols-2 gap-4">
                     <div>
-                      <label className="text-[9.5px] font-extrabold text-slate-500 uppercase tracking-wider mb-1 block">
-                        PAN Card Number <span className="text-[8px] font-semibold text-slate-400 normal-case">(Optional)</span>
+                      <label className="text-[10px] font-bold text-slate-500 mb-1 block">
+                        DL Number <span className="text-[8.5px] font-normal text-slate-400 italic">(Optional)</span>
+                      </label>
+                      <input
+                        type="text"
+                        placeholder="e.g. MH04201100"
+                        value={licenseNumber}
+                        onChange={e => setLicenseNumber(e.target.value)}
+                        className="w-full h-9.5 px-3 text-[12px] rounded-xl border border-slate-200 bg-[var(--color-surface)] text-[var(--color-text-primary)] hover:border-slate-350 focus:border-slate-800 outline-none transition-all uppercase placeholder:text-slate-300"
+                      />
+                    </div>
+                    <div>
+                      <label className="text-[10px] font-bold text-slate-500 mb-1 block">DL Class / Category</label>
+                      <select
+                        value={licenseClass}
+                        onChange={e => setLicenseClass(e.target.value)}
+                        className="w-full h-9.5 px-2 text-[12px] rounded-xl border border-slate-200 bg-[var(--color-surface)] text-[var(--color-text-primary)] hover:border-slate-350 focus:border-slate-800 outline-none transition-all"
+                      >
+                        <option value="LMV">LMV (Light Motor Vehicle)</option>
+                        <option value="HMV">HMV (Heavy Motor Vehicle)</option>
+                        <option value="MCWG">MCWG (Motorcycle with Gear)</option>
+                      </select>
+                    </div>
+                  </div>
+
+                  {/* Row 4: DL Expiry & PAN Card */}
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <label className="text-[10px] font-bold text-slate-500 mb-1 block">
+                        DL Expiry Date <span className="text-[8.5px] font-normal text-slate-400 italic">(Optional)</span>
+                      </label>
+                      <input
+                        type="date"
+                        value={licenseExpiry}
+                        onChange={e => setLicenseExpiry(e.target.value)}
+                        className="w-full h-9.5 px-3 text-[12px] rounded-xl border border-slate-200 bg-[var(--color-surface)] text-[var(--color-text-primary)] hover:border-slate-350 focus:border-slate-800 outline-none transition-all"
+                      />
+                    </div>
+                    <div>
+                      <label className="text-[10px] font-bold text-slate-500 mb-1 block">
+                        PAN Card Number <span className="text-[8.5px] font-normal text-slate-400 italic">(Optional)</span>
                       </label>
                       <input
                         type="text"
                         placeholder="e.g. ABCDE1234F"
                         value={panNumber}
                         onChange={e => setPanNumber(e.target.value)}
-                        className="w-full h-9.5 px-3 text-[12px] rounded-xl border border-slate-200 bg-[var(--var(--color-surface))] text-[var(--color-text-primary)] focus:border-[var(--color-primary-500)] focus:ring-2 focus:ring-[var(--color-primary-500)]/15 outline-none transition-all uppercase placeholder:text-slate-350"
+                        className="w-full h-9.5 px-3 text-[12px] rounded-xl border border-slate-200 bg-[var(--color-surface)] text-[var(--color-text-primary)] hover:border-slate-350 focus:border-slate-800 outline-none transition-all uppercase placeholder:text-slate-300"
                       />
-                      <span className="text-[8px] text-slate-400 font-semibold block mt-1 leading-none">For tax & TDS deductions</span>
-                    </div>
-                    <div>
-                      <label className="text-[9.5px] font-extrabold text-slate-500 uppercase tracking-wider mb-1 block">
-                        Insurance Policy No. <span className="text-[8px] font-semibold text-slate-400 normal-case">(Optional)</span>
-                      </label>
-                      <input
-                        type="text"
-                        placeholder="Policy number"
-                        value={insurancePolicyNumber}
-                        onChange={e => setInsurancePolicyNumber(e.target.value)}
-                        className="w-full h-9.5 px-3 text-[12px] rounded-xl border border-slate-200 bg-[var(--color-surface)] text-[var(--color-text-primary)] focus:border-[var(--color-primary-500)] focus:ring-2 focus:ring-[var(--color-primary-500)]/15 outline-none transition-all placeholder:text-slate-350"
-                      />
+                      <span className="text-[8px] text-slate-400 font-semibold block mt-1">For tax & TDS compliance check</span>
                     </div>
                   </div>
 
-                  {/* Row 4: Upload Insurance document */}
-                  <div>
-                    <label className="text-[9.5px] font-extrabold text-slate-500 uppercase tracking-wider mb-1 block">
-                      Insurance File Copy <span className="text-[8px] font-semibold text-slate-400 normal-case">(Optional)</span>
-                    </label>
-                    <div className="flex items-center gap-3">
-                      <label className="flex items-center justify-center h-10 px-4 rounded-xl border border-dashed border-slate-250 hover:border-slate-400 hover:bg-slate-50 text-[11px] font-bold text-slate-500 hover:text-slate-700 transition-all cursor-pointer flex-1">
-                        <span className="material-symbols-outlined text-[16px] mr-1.5">upload_file</span>
-                        <span className="truncate">{insuranceFile ? insuranceFile.name : 'Choose Insurance Doc / PDF'}</span>
-                        <input
-                          type="file"
-                          accept="image/*,.pdf"
-                          onChange={e => setInsuranceFile(e.target.files[0])}
-                          className="hidden"
-                        />
+                  {/* Row 5: Insurance Policy & Upload */}
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <label className="text-[10px] font-bold text-slate-500 mb-1 block">
+                        Insurance Policy No. <span className="text-[8.5px] font-normal text-slate-400 italic">(Optional)</span>
                       </label>
-                      {insuranceFile && (
-                        <button
-                          type="button"
-                          onClick={() => setInsuranceFile(null)}
-                          className="w-10 h-10 rounded-xl bg-red-50 hover:bg-red-100 text-red-600 flex items-center justify-center border border-red-100 transition-colors cursor-pointer"
-                          title="Remove file"
-                        >
-                          <span className="material-symbols-outlined text-[16px]">close</span>
-                        </button>
-                      )}
+                      <input
+                        type="text"
+                        placeholder="e.g. POL-1234"
+                        value={insurancePolicyNumber}
+                        onChange={e => setInsurancePolicyNumber(e.target.value)}
+                        className="w-full h-9.5 px-3 text-[12px] rounded-xl border border-slate-200 bg-[var(--color-surface)] text-[var(--color-text-primary)] hover:border-slate-350 focus:border-slate-800 outline-none transition-all placeholder:text-slate-300"
+                      />
+                    </div>
+                    <div>
+                      <label className="text-[10px] font-bold text-slate-500 mb-1 block">
+                        Insurance File Copy <span className="text-[8.5px] font-normal text-slate-400 italic">(Optional)</span>
+                      </label>
+                      <div className="flex items-center gap-3">
+                        <label className="flex items-center justify-center h-9.5 px-4 rounded-xl border border-dashed border-slate-250 hover:border-slate-400 hover:bg-slate-50 text-[11px] font-bold text-slate-500 hover:text-slate-700 transition-all cursor-pointer flex-1">
+                          <span className="material-symbols-outlined text-[16px] mr-1.5">upload_file</span>
+                          <span className="truncate">{insuranceFile ? insuranceFile.name : 'Choose Doc / PDF'}</span>
+                          <input
+                            type="file"
+                            accept="image/*,.pdf"
+                            onChange={e => setInsuranceFile(e.target.files[0])}
+                            className="hidden"
+                          />
+                        </label>
+                        {insuranceFile && (
+                          <button
+                            type="button"
+                            onClick={() => setInsuranceFile(null)}
+                            className="w-9.5 h-9.5 rounded-xl bg-red-50 hover:bg-red-100 text-red-600 flex items-center justify-center border border-red-100 transition-colors cursor-pointer"
+                            title="Remove file"
+                          >
+                            <span className="material-symbols-outlined text-[16px]">close</span>
+                          </button>
+                        )}
+                      </div>
                     </div>
                   </div>
                 </div>
