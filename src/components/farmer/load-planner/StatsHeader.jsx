@@ -27,7 +27,7 @@ const StatsHeader = () => {
   return (
     <div className="grid grid-cols-1 md:grid-cols-3 gap-4 shrink-0">
       {/* Weight KPI */}
-      <div className="bg-white border border-slate-150 rounded-2xl p-4 flex items-center justify-between shadow-xs">
+      <div className="bg-white border border-slate-100 rounded-2xl p-4.5 flex items-center justify-between shadow-[0_8px_30px_rgb(0,0,0,0.015)]">
         <div className="space-y-1">
           <span className="text-[9.5px] font-black text-slate-400 uppercase tracking-wider flex items-center gap-1.5">
             <Scale className="w-3.5 h-3.5 text-slate-400" />
@@ -39,7 +39,7 @@ const StatsHeader = () => {
           <p className="text-[8.5px] text-slate-400 font-medium">Max Limit: {maxCapacity} {activeOrders[0]?.crop?.unit || 'kg'}</p>
         </div>
         <div className={`flex flex-col items-center gap-1 px-3 py-1.5 rounded-xl border shrink-0 ${
-          isOverload ? 'bg-rose-50 border-rose-200 text-rose-700' : 'bg-emerald-50 border-emerald-200 text-emerald-700'
+          isOverload ? 'bg-rose-50 border-rose-200 text-rose-700' : 'bg-emerald-50 border-emerald-250/70 text-emerald-700'
         }`}>
           <span className="text-[12.5px] font-black leading-none">{weightPercent}%</span>
           <span className="text-[7.5px] font-bold uppercase">Loaded</span>
@@ -47,7 +47,7 @@ const StatsHeader = () => {
       </div>
 
       {/* Pallet KPI */}
-      <div className="bg-white border border-slate-150 rounded-2xl p-4 flex items-center justify-between shadow-xs">
+      <div className="bg-white border border-slate-100 rounded-2xl p-4.5 flex items-center justify-between shadow-[0_8px_30px_rgb(0,0,0,0.015)]">
         <div className="space-y-1">
           <span className="text-[9.5px] font-black text-slate-400 uppercase tracking-wider flex items-center gap-1.5">
             <Layers className="w-3.5 h-3.5 text-slate-400" />
@@ -64,7 +64,7 @@ const StatsHeader = () => {
       </div>
 
       {/* Routing alerts KPI */}
-      <div className="bg-white border border-slate-150 rounded-2xl p-4 flex items-center justify-between shadow-xs">
+      <div className="bg-white border border-slate-100 rounded-2xl p-4.5 flex items-center justify-between shadow-[0_8px_30px_rgb(0,0,0,0.015)]">
         <div className="space-y-1">
           <span className="text-[9.5px] font-black text-slate-400 uppercase tracking-wider flex items-center gap-1.5">
             <AlertCircle className="w-3.5 h-3.5 text-slate-400" />
