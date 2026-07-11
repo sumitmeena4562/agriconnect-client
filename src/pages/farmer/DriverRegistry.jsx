@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import api from '../../utils/api';
 import toast from 'react-hot-toast';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -50,6 +50,32 @@ const DriverRegistry = () => {
   const [dbVehicleTypes, setDbVehicleTypes] = useState([]);
   const [selectedVehicleType, setSelectedVehicleType] = useState(null);
 
+  // Search & custom select dropdown states
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
+  const dropdownRef = useRef(null);
+
+  const getCategoryIcon = (category) => {
+    switch (category) {
+      case 'Two Wheeler': return '🛵';
+      case 'Electric Vehicle': return '⚡';
+      case 'Three Wheeler': return '🛺';
+      case 'Mini Commercial Vehicle': return '🚚';
+      case 'Mini Truck': return '🚛';
+      case 'Pickup Truck': return '🛻';
+      case 'Light Commercial Vehicle': return '🚐';
+      case 'Agricultural Vehicle': return '🚜';
+      case 'Cold Chain Vehicle': return '❄️';
+      case 'Heavy Commercial Vehicle': return '🚛';
+      default: return '🚚';
+    }
+  };
+
+  const filteredVehicles = dbVehicleTypes.filter(v => 
+    v.vehicleName.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    v.vehicleCategory.toLowerCase().includes(searchQuery.toLowerCase())
+  );
+
   const fetchDrivers = async () => {
     setIsLoading(true);
     try {
@@ -85,6 +111,17 @@ const DriverRegistry = () => {
   useEffect(() => {
     fetchDrivers();
     fetchVehicleTypes();
+
+    // Click outside dropdown handler
+    function handleClickOutside(event) {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+        setIsDropdownOpen(false);
+      }
+    }
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
   }, []);
 
   const handleAddDriver = async (e) => {
@@ -528,41 +565,86 @@ const DriverRegistry = () => {
 
                   {/* Row 2: Vehicle Type & Fuel Type */}
                   <div className="grid grid-cols-2 gap-4">
-                    <div>
+                    <div className="relative" ref={dropdownRef}>
                       <label className="text-[10px] font-bold text-slate-500 mb-1 block">Vehicle Type <span className="text-rose-500">*</span></label>
-                      <select
-                        value={vehicleType}
-                        onChange={e => {
-                          const name = e.target.value;
-                          setVehicleType(name);
-                          const found = dbVehicleTypes.find(v => v.vehicleName === name);
-                          if (found) {
-                            setSelectedVehicleType(found);
-                            setPayloadCapacity(found.capacityKg);
-                            if (found.fuelType && found.fuelType.length > 0) {
-                              setFuelType(found.fuelType[0]);
-                            }
-                          }
-                        }}
-                        className="w-full h-9.5 px-2 text-[12px] rounded-xl border border-slate-200 bg-[var(--color-surface)] text-[var(--color-text-primary)] hover:border-slate-350 focus:border-slate-800 outline-none transition-all"
+                      <button
+                        type="button"
+                        onClick={() => setIsDropdownOpen(!isDropdownOpen)}
+                        className="w-full h-9.5 px-3 rounded-xl border border-slate-200 bg-[var(--color-surface)] text-[var(--color-text-primary)] hover:border-slate-350 focus:border-slate-800 flex items-center justify-between text-[12px] font-semibold transition-all cursor-pointer"
                       >
-                        {dbVehicleTypes.length > 0 ? (
-                          dbVehicleTypes.map(v => (
-                            <option key={v._id || v.vehicleName} value={v.vehicleName}>
-                              {v.vehicleName}
-                            </option>
-                          ))
+                        {selectedVehicleType ? (
+                          <span className="flex items-center gap-2">
+                            <span>{getCategoryIcon(selectedVehicleType.vehicleCategory)}</span>
+                            <span className="font-extrabold text-slate-850">{selectedVehicleType.vehicleName}</span>
+                            <span className="text-[8.5px] text-slate-400 font-bold">({selectedVehicleType.vehicleCategory})</span>
+                          </span>
                         ) : (
-                          <>
-                            <option value="Bike">🚴 Bike Box</option>
-                            <option value="Tractor">🚜 Tractor Trolley</option>
-                            <option value="Pickup">🛻 Pickup Vehicle</option>
-                            <option value="Mini Truck">🚚 Mini Truck</option>
-                            <option value="Large Truck">🚛 Large Truck</option>
-                          </>
+                          <span className="text-slate-400">Select Vehicle Type</span>
                         )}
-                      </select>
-                      <span className="text-[8px] text-slate-400 font-semibold block mt-1">Determines load planning grids</span>
+                        <span className="material-symbols-outlined text-[16px] text-slate-400 transition-transform duration-200" style={{ transform: isDropdownOpen ? 'rotate(180deg)' : 'none' }}>
+                          keyboard_arrow_down
+                        </span>
+                      </button>
+
+                      {isDropdownOpen && (
+                        <div className="absolute left-0 right-0 mt-1 bg-white border border-slate-200 rounded-2xl shadow-xl z-50 overflow-hidden flex flex-col">
+                          {/* Search Box */}
+                          <div className="p-2 border-b border-slate-100 flex items-center gap-1.5 bg-slate-50">
+                            <span className="material-symbols-outlined text-[15px] text-slate-400">search</span>
+                            <input
+                              type="text"
+                              placeholder="Search vehicle type or category..."
+                              value={searchQuery}
+                              onChange={e => setSearchQuery(e.target.value)}
+                              className="w-full text-[11px] bg-transparent outline-none border-none text-slate-705 placeholder:text-slate-400"
+                              onClick={e => e.stopPropagation()}
+                            />
+                          </div>
+
+                          {/* List items */}
+                          <div className="max-h-56 overflow-y-auto divide-y divide-slate-100">
+                            {filteredVehicles.map(v => (
+                              <button
+                                key={v._id || v.vehicleName}
+                                type="button"
+                                onClick={() => {
+                                  setSelectedVehicleType(v);
+                                  setVehicleType(v.vehicleName);
+                                  setPayloadCapacity(v.capacityKg);
+                                  if (v.fuelType && v.fuelType.length > 0) {
+                                    setFuelType(v.fuelType[0]);
+                                  }
+                                  setIsDropdownOpen(false);
+                                  setSearchQuery('');
+                                }}
+                                className="w-full px-3 py-2 flex items-center justify-between hover:bg-slate-50 transition-colors text-left cursor-pointer"
+                              >
+                                <div className="flex items-center gap-2.5">
+                                  <span className="text-base bg-slate-100 w-8 h-8 rounded-xl flex items-center justify-center border border-slate-200/50">
+                                    {getCategoryIcon(v.vehicleCategory)}
+                                  </span>
+                                  <div>
+                                    <p className="text-[11.5px] font-black text-slate-800 leading-tight">{v.vehicleName}</p>
+                                    <p className="text-[9px] text-slate-450 font-bold leading-none mt-0.5">{v.useCase}</p>
+                                  </div>
+                                </div>
+                                
+                                <div className="text-right">
+                                  <span className="px-2 py-0.5 rounded-lg text-[9px] font-black bg-indigo-50 border border-indigo-100 text-indigo-700 block">
+                                    {v.capacityKg} kg
+                                  </span>
+                                  <span className="text-[8px] text-slate-400 font-semibold block mt-0.5">Max {v.maxOrders} orders</span>
+                                </div>
+                              </button>
+                            ))}
+                            {filteredVehicles.length === 0 && (
+                              <div className="p-4 text-center text-slate-400 text-[10.5px]">
+                                No vehicles match search
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                      )}
                     </div>
                     <div>
                       <label className="text-[10px] font-bold text-slate-500 mb-1 block">Fuel Type</label>
