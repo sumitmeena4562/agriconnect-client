@@ -593,28 +593,35 @@ const FreightTracking = () => {
                     {/* Expanded Orders List */}
                     {isExpanded && (
                       <div className="bg-slate-50/50 border-t border-slate-100 py-1.5 px-2.5 space-y-1.5">
-                        {trip.orders.map((order) => {
+                        {trip.orders.map(order => {
                           const isOrderSel = selectedOrder?._id === order._id;
+                          const batchRoute = trip.batch?.optimizedRoute || [];
+                          const deliveryStop = batchRoute.find(s => s.stopType === 'delivery' && String(s.orderId) === String(order._id));
+                          const loadSeq = deliveryStop?.loadingSequence;
+                          const totalDeliveries = batchRoute.filter(s => s.stopType === 'delivery').length;
+                          const deliverSeq = loadSeq != null ? (totalDeliveries + 1 - loadSeq) : null;
                           return (
                             <div
                               key={order._id}
-                              onClick={(e) => {
-                                e.stopPropagation(); // prevent collapsing the parent trip
-                                setSelectedOrder(order);
-                              }}
-                              className={`p-2 rounded-lg border text-[11px] font-bold cursor-pointer transition-all flex items-center justify-between ${
-                                isOrderSel
-                                  ? 'bg-white border-primary-500 text-primary-750 shadow-xs'
-                                  : 'bg-white border-slate-100 hover:border-slate-300 text-slate-700'
+                              onClick={(e) => { e.stopPropagation(); setSelectedOrder(order); }}
+                              className={`p-2 rounded-lg border text-[11px] font-bold cursor-pointer transition-all ${
+                                isOrderSel ? 'bg-white border-primary-400 shadow-sm' : 'bg-white border-slate-100 hover:border-slate-300'
                               }`}
                             >
-                              <div className="flex items-center gap-1.5 min-w-0">
-                                <span className="text-[10px] text-slate-450 font-normal">📦</span>
-                                <span className="truncate">{order.crop?.name || 'Crop'}</span>
+                              <div className="flex items-center justify-between gap-1">
+                                <div className="flex items-center gap-1.5 min-w-0">
+                                  <span className="text-[10px]">📦</span>
+                                  <span className="truncate text-slate-700">{order.crop?.name || 'Crop'}</span>
+                                </div>
+                                <span className="text-[9px] font-mono text-slate-400 shrink-0">{order.requestedQuantity} {order.crop?.unit}</span>
                               </div>
-                              <span className="text-[9.5px] font-extrabold text-slate-500 shrink-0 bg-slate-100/70 px-1 py-0.2 rounded border border-slate-200">
-                                {order.requestedQuantity} {order.crop?.unit}
-                              </span>
+                              {loadSeq != null && (
+                                <div className="flex items-center gap-1 mt-1 flex-wrap">
+                                  <span className="text-[8px] font-black bg-indigo-100 text-indigo-700 px-1.5 py-0.5 rounded-full">Load #{loadSeq}</span>
+                                  {deliverSeq && <span className="text-[8px] font-black bg-emerald-100 text-emerald-700 px-1.5 py-0.5 rounded-full">Deliver #{deliverSeq}</span>}
+                                  {loadSeq === totalDeliveries && <span className="text-[7.5px] font-black bg-rose-100 text-rose-600 px-1 py-0.5 rounded-full">1st Delivered</span>}
+                                </div>
+                              )}
                             </div>
                           );
                         })}

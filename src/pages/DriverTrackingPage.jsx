@@ -43,6 +43,9 @@ const DriverTrackingPage = () => {
   const [fetchingSuggestions, setFetchingSuggestions] = useState(false);
   // Store route points received from hook (for sending to backend)
   const [activeRoutePoints, setActiveRoutePoints] = useState(null);
+  // Loading guide (LIFO batch loading checklist for driver)
+  const [loadingGuide, setLoadingGuide] = useState(null);
+  const [loadingConfirmed, setLoadingConfirmed] = useState(false);
 
   // URL parameters
   const orderId    = searchParams.get('orderId')   || '';
@@ -108,6 +111,42 @@ const DriverTrackingPage = () => {
       }
     };
     fetchConsolidationStatus();
+  }, [orderId]);
+
+  // On page load, fetch batch loading guide (LIFO)
+  useEffect(() => {
+    if (!orderId) return;
+    const fetchLoadingGuide = async () => {
+      try {
+        const res = await api.get(`/orders/${orderId}/consolidation`);
+        if (res.data.success && res.data.batchId) {
+          const batchRes = await api.get(`/batches/${res.data.batchId}`);
+          if (batchRes.data.success) {
+            const batch = batchRes.data.data;
+            if (batch.optimizedRoute && batch.orders?.length > 1) {
+              const pickupStops = batch.optimizedRoute
+                .filter(s => s.stopType === 'pickup')
+                .sort((a, b) => a.sequence - b.sequence)
+                .map(stop => ({
+                  ...stop,
+                  orderDetails: batch.orders?.find(o => String(o._id) === String(stop.orderId))
+                }));
+              const deliveryStops = batch.optimizedRoute
+                .filter(s => s.stopType === 'delivery')
+                .sort((a, b) => (a.loadingSequence || 0) - (b.loadingSequence || 0))
+                .map(stop => ({
+                  ...stop,
+                  orderDetails: batch.orders?.find(o => String(o._id) === String(stop.orderId))
+                }));
+              setLoadingGuide({ pickupStops, deliveryStops, totalOrders: batch.orders.length });
+            }
+          }
+        }
+      } catch (err) {
+        // Fail silently — not critical
+      }
+    };
+    fetchLoadingGuide();
   }, [orderId]);
 
   const handleToggle = () => {
@@ -268,10 +307,96 @@ const DriverTrackingPage = () => {
             </div>
           )}
 
+          {/* ── Loading Guide (LIFO batch only) ── */}
+          {loadingGuide && !isTracking && (
+            <div className="rounded-2xl border border-amber-200 bg-gradient-to-b from-amber-50 to-white overflow-hidden">
+              <div className="flex items-center gap-2 px-4 py-3 bg-amber-500 text-white">
+                <span className="text-[16px]">📦</span>
+                <div className="flex-1">
+                  <p className="text-[11px] font-black uppercase tracking-wider">Loading Guide</p>
+                  <p className="text-[9px] font-semibold opacity-80">{loadingGuide.totalOrders} orders in this batch — follow sequence carefully</p>
+                </div>
+                <span className="text-[9px] bg-white/20 text-white font-bold px-2 py-0.5 rounded-full">LIFO</span>
+              </div>
+
+              <div className="p-3 space-y-2.5">
+                {/* Step 1: Pickups */}
+                {loadingGuide.pickupStops.length > 0 && (
+                  <div>
+                    <div className="flex items-center gap-1.5 mb-1.5">
+                      <div className="w-5 h-5 rounded-full bg-emerald-600 text-white text-[9px] font-black flex items-center justify-center shrink-0">1</div>
+                      <p className="text-[9.5px] font-black text-emerald-700 uppercase tracking-wide">Pickup from Farms</p>
+                    </div>
+                    {loadingGuide.pickupStops.map((stop, idx) => (
+                      <div key={idx} className="flex items-center gap-2 bg-emerald-50 border border-emerald-100 rounded-xl p-2 mb-1">
+                        <div className="w-6 h-6 rounded-full bg-emerald-500 text-white text-[10px] font-black flex items-center justify-center shrink-0">{idx + 1}</div>
+                        <div className="min-w-0 flex-1">
+                          <p className="text-[10px] font-bold text-slate-700 truncate">{stop.address}</p>
+                          {stop.orderDetails?.crop && (
+                            <p className="text-[9px] text-emerald-600 font-semibold">
+                              🌾 {stop.orderDetails.crop.name}{stop.orderDetails.requestedQuantity ? ` · ${stop.orderDetails.requestedQuantity} ${stop.orderDetails.crop.unit || ''}` : ''}
+                            </p>
+                          )}
+                        </div>
+                        <span className="material-symbols-outlined text-emerald-400 text-[15px]">agriculture</span>
+                      </div>
+                    ))}
+                  </div>
+                )}
+
+                {/* Step 2: Load in LIFO order */}
+                {loadingGuide.deliveryStops.length > 0 && (
+                  <div>
+                    <div className="flex items-center gap-1.5 mb-1">
+                      <div className="w-5 h-5 rounded-full bg-indigo-600 text-white text-[9px] font-black flex items-center justify-center shrink-0">2</div>
+                      <p className="text-[9.5px] font-black text-indigo-700 uppercase tracking-wide">Load Truck (Bottom → Top)</p>
+                    </div>
+                    <p className="text-[8.5px] text-slate-400 mb-1.5 ml-6">Load #1 enters first (truck bottom) → delivered last</p>
+                    {loadingGuide.deliveryStops.map((stop, idx) => {
+                      const isLast = idx === loadingGuide.deliveryStops.length - 1;
+                      return (
+                        <div key={idx} className={`flex items-center gap-2 rounded-xl p-2 mb-1 border ${isLast ? 'bg-rose-50 border-rose-200' : 'bg-slate-50 border-slate-200'}`}>
+                          <div className={`w-6 h-6 rounded-full text-white text-[10px] font-black flex items-center justify-center shrink-0 ${isLast ? 'bg-rose-500' : 'bg-indigo-400'}`}>
+                            {stop.loadingSequence}
+                          </div>
+                          <div className="min-w-0 flex-1">
+                            <div className="flex items-center gap-1 flex-wrap">
+                              <p className="text-[10px] font-bold text-slate-700 truncate">{stop.address}</p>
+                              {isLast && <span className="text-[7px] bg-rose-200 text-rose-700 font-black px-1 py-0.5 rounded shrink-0">LOAD LAST</span>}
+                            </div>
+                            {stop.orderDetails?.crop && (
+                              <p className="text-[8.5px] text-slate-500">{stop.orderDetails.crop.name}</p>
+                            )}
+                            <p className={`text-[8px] font-bold ${isLast ? 'text-rose-500' : 'text-indigo-400'}`}>
+                              {isLast ? '✅ Delivers 1st — top of truck' : `📍 Delivers #${loadingGuide.deliveryStops.length - idx} in route`}
+                            </p>
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                )}
+
+                {/* Confirmation checkbox */}
+                <label className={`flex items-center gap-2.5 p-2.5 rounded-xl border cursor-pointer transition-all ${loadingConfirmed ? 'bg-emerald-50 border-emerald-300' : 'bg-slate-50 border-slate-200 hover:border-slate-300'}`}>
+                  <input
+                    type="checkbox"
+                    checked={loadingConfirmed}
+                    onChange={e => setLoadingConfirmed(e.target.checked)}
+                    className="w-4 h-4 accent-emerald-600 cursor-pointer"
+                  />
+                  <span className="text-[10px] font-bold text-slate-700">
+                    {loadingConfirmed ? '✅ All orders loaded as per sequence' : 'Mark as loaded to enable GPS start'}
+                  </span>
+                </label>
+              </div>
+            </div>
+          )}
+
           {/* Main Action Toggle Button */}
           <button
             onClick={handleToggle}
-            disabled={!orderId}
+            disabled={!orderId || (loadingGuide && !loadingConfirmed && !isTracking)}
             className={`w-full py-3 rounded-2xl font-black text-[13px] flex items-center justify-center gap-2 transition-all duration-300 active:scale-[0.98] disabled:opacity-40 disabled:cursor-not-allowed border-0 shadow-md cursor-pointer ${
               isTracking
                 ? 'bg-gradient-to-r from-rose-500 to-red-600 hover:from-rose-600 hover:to-red-700 text-white shadow-[0_4px_15px_rgba(244,63,94,0.2)]'
@@ -279,7 +404,7 @@ const DriverTrackingPage = () => {
             }`}
           >
             <span className="material-symbols-outlined text-[17px]">{isTracking ? 'stop_circle' : 'play_circle'}</span>
-            {isTracking ? (gpsStatus === 'requesting' ? 'Finding GPS...' : 'Stop Tracking') : 'Start Tracking 🚚'}
+            {isTracking ? (gpsStatus === 'requesting' ? 'Finding GPS...' : 'Stop Tracking') : (loadingGuide && !loadingConfirmed ? 'Confirm Loading First ☝️' : 'Start Tracking 🚚')}
           </button>
 
           {/* Emergency SOS Trigger */}

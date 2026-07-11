@@ -13,6 +13,7 @@ const OrderCard = ({ order, role = 'farmer', onUpdateStatus, onCancelOrder, onSu
   const [availableDrivers, setAvailableDrivers] = useState([]);
   const [isAssigning, setIsAssigning] = useState(false);
   const [selectedDriverId, setSelectedDriverId] = useState('');
+  const [batchChecklist, setBatchChecklist] = useState(null);
 
   const fetchAvailableDrivers = async () => {
     try {
@@ -25,6 +26,30 @@ const OrderCard = ({ order, role = 'farmer', onUpdateStatus, onCancelOrder, onSu
 
   const handleOpenAssignModal = () => {
     fetchAvailableDrivers();
+    setBatchChecklist(null);
+    if (order.deliveryBatchId) {
+      const batchId = typeof order.deliveryBatchId === 'object' ? order.deliveryBatchId._id : order.deliveryBatchId;
+      api.get(`/batches/${batchId}`).then(res => {
+        if (res.data.success) {
+          const batch = res.data.data;
+          const deliveryStops = (batch.optimizedRoute || [])
+            .filter(s => s.stopType === 'delivery')
+            .sort((a, b) => (a.loadingSequence || 0) - (b.loadingSequence || 0));
+          const pickupStops = (batch.optimizedRoute || [])
+            .filter(s => s.stopType === 'pickup')
+            .sort((a, b) => a.sequence - b.sequence);
+          const enrichStop = (stop) => {
+            const matched = batch.orders?.find(o => String(o._id) === String(stop.orderId));
+            return { ...stop, orderDetails: matched };
+          };
+          setBatchChecklist({
+            totalOrders: batch.orders?.length || 0,
+            pickupStops: pickupStops.map(enrichStop),
+            deliveryStops: deliveryStops.map(enrichStop),
+          });
+        }
+      }).catch(() => {});
+    }
     setIsAssignModalOpen(true);
   };
 
@@ -847,7 +872,7 @@ const OrderCard = ({ order, role = 'farmer', onUpdateStatus, onCancelOrder, onSu
       {isAssignModalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4" onClick={(e) => { e.stopPropagation(); setIsAssignModalOpen(false); }}>
           <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" />
-          <div className="bg-white rounded-2xl max-w-sm w-full shadow-2xl border border-slate-100 z-10 overflow-hidden" onClick={(e) => e.stopPropagation()}>
+          <div className="bg-white rounded-2xl max-w-sm w-full shadow-2xl border border-slate-100 z-10 overflow-hidden flex flex-col max-h-[90vh]" onClick={(e) => e.stopPropagation()}>
             <div className="px-5 py-4 border-b border-slate-100 bg-slate-50 flex justify-between items-center">
               <div>
                 <h2 className="text-[14.5px] font-extrabold text-slate-800">🚚 Dispatch Order</h2>
@@ -861,7 +886,7 @@ const OrderCard = ({ order, role = 'farmer', onUpdateStatus, onCancelOrder, onSu
               </button>
             </div>
 
-            <div className="p-4 overflow-y-auto max-h-[350px] space-y-2.5">
+            <div className="p-4 overflow-y-auto flex-1 space-y-2.5">
               <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Choose Delivery Method</label>
               
               {/* Option 1: Self-Delivery (Always Available) */}
@@ -928,6 +953,89 @@ const OrderCard = ({ order, role = 'farmer', onUpdateStatus, onCancelOrder, onSu
                   <p className="text-[10px] text-slate-500 font-semibold leading-relaxed">
                     No registered fleet drivers available right now. You can still use the <b>Self-Delivery</b> option above.
                   </p>
+                </div>
+              )}
+
+              {/* ── LIFO Loading Checklist (batch orders only) ── */}
+              {batchChecklist && batchChecklist.totalOrders > 1 && (
+                <div className="pt-3 border-t border-dashed border-slate-200">
+                  <div className="flex items-center gap-1.5 mb-1.5">
+                    <span className="text-[14px]">📦</span>
+                    <span className="text-[10px] font-black text-slate-700 uppercase tracking-wider">Loading Checklist</span>
+                    <span className="ml-auto text-[9px] bg-amber-100 text-amber-700 font-bold px-1.5 py-0.5 rounded-full border border-amber-200">
+                      {batchChecklist.totalOrders} orders
+                    </span>
+                  </div>
+                  <p className="text-[9px] text-slate-400 font-medium mb-3">
+                    ⚠️ Last loaded = First delivered (LIFO). Follow carefully.
+                  </p>
+
+                  {batchChecklist.pickupStops.length > 0 && (
+                    <div className="mb-3">
+                      <div className="flex items-center gap-1.5 mb-1.5">
+                        <div className="w-4 h-4 rounded-full bg-emerald-600 text-white text-[8px] font-black flex items-center justify-center">1</div>
+                        <p className="text-[9px] font-bold text-emerald-700 uppercase tracking-wide">Pick up from farms (route order)</p>
+                      </div>
+                      {batchChecklist.pickupStops.map((stop, idx) => (
+                        <div key={idx} className="flex items-start gap-2 mb-1.5 bg-emerald-50 rounded-lg p-2 border border-emerald-100">
+                          <div className="w-5 h-5 rounded-full bg-emerald-500 text-white text-[9px] font-black flex items-center justify-center shrink-0">{idx + 1}</div>
+                          <div className="min-w-0 flex-1">
+                            <p className="text-[10px] font-bold text-slate-700 truncate">{stop.address}</p>
+                            {stop.orderDetails?.crop && (
+                              <p className="text-[9px] text-emerald-600 font-semibold mt-0.5">
+                                🌾 {stop.orderDetails.crop.name}{stop.orderDetails.requestedQuantity ? ` — ${stop.orderDetails.requestedQuantity} ${stop.orderDetails.crop.unit || ''}` : ''}
+                              </p>
+                            )}
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+
+                  {batchChecklist.deliveryStops.length > 0 && (
+                    <div>
+                      <div className="flex items-center gap-1.5 mb-1">
+                        <div className="w-4 h-4 rounded-full bg-indigo-600 text-white text-[8px] font-black flex items-center justify-center">2</div>
+                        <p className="text-[9px] font-bold text-indigo-700 uppercase tracking-wide">Load truck in this order</p>
+                      </div>
+                      <p className="text-[8.5px] text-slate-400 mb-1.5">Load #1 first (truck bottom) → delivered last</p>
+                      {batchChecklist.deliveryStops.map((stop, idx) => {
+                        const isLast = idx === batchChecklist.deliveryStops.length - 1;
+                        return (
+                          <div key={idx} className={`flex items-start gap-2 mb-1.5 rounded-lg p-2 border ${isLast ? 'bg-rose-50 border-rose-200' : 'bg-slate-50 border-slate-200'}`}>
+                            <div className={`w-5 h-5 rounded-full text-white text-[9px] font-black flex items-center justify-center shrink-0 ${isLast ? 'bg-rose-500' : 'bg-indigo-400'}`}>
+                              {stop.loadingSequence}
+                            </div>
+                            <div className="min-w-0 flex-1">
+                              <div className="flex items-center gap-1 flex-wrap">
+                                <p className="text-[10px] font-bold text-slate-700 truncate">{stop.address}</p>
+                                {isLast && <span className="text-[7.5px] bg-rose-100 text-rose-600 font-black px-1 py-0.5 rounded shrink-0">LOAD LAST</span>}
+                              </div>
+                              {stop.orderDetails?.crop && (
+                                <p className="text-[9px] text-slate-500 font-medium mt-0.5">
+                                  {stop.orderDetails.crop.name}{stop.orderDetails.requestedQuantity ? ` — ${stop.orderDetails.requestedQuantity} ${stop.orderDetails.crop.unit || ''}` : ''}
+                                </p>
+                              )}
+                              <p className={`text-[8.5px] font-bold mt-0.5 ${isLast ? 'text-rose-500' : 'text-indigo-400'}`}>
+                                {isLast ? '✅ Delivers 1st — top of truck' : `📍 Delivers stop #${batchChecklist.deliveryStops.length - idx}`}
+                              </p>
+                            </div>
+                          </div>
+                        );
+                      })}
+                      <div className="mt-2 bg-gradient-to-b from-slate-100 to-slate-50 rounded-xl border border-slate-200 p-2.5">
+                        <p className="text-[8px] font-bold text-slate-500 text-center mb-1.5 uppercase tracking-wider">🚛 Truck View (top → bottom)</p>
+                        {[...batchChecklist.deliveryStops].reverse().map((stop, idx) => (
+                          <div key={idx} className={`text-[8.5px] font-semibold py-1 px-2 rounded mb-0.5 flex justify-between ${idx === 0 ? 'bg-rose-100 text-rose-700' : 'bg-white text-slate-600 border border-slate-200'}`}>
+                            <span>{idx === 0 ? '🔝 Top' : `↓ Layer ${idx + 1}`}</span>
+                            <span className="truncate mx-2">{stop.address?.split("'s")[0]}</span>
+                            <span className="shrink-0 text-slate-400">Deliver #{stop.loadingSequence}</span>
+                          </div>
+                        ))}
+                        <p className="text-[8px] text-slate-400 text-center mt-1">🏗️ Bottom of truck</p>
+                      </div>
+                    </div>
+                  )}
                 </div>
               )}
             </div>
