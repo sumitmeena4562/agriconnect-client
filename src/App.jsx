@@ -26,6 +26,7 @@ import NotFound from './pages/NotFound';
 import DriverTrackingPage from './pages/DriverTrackingPage';
 import DriverBatchConsole from './pages/DriverBatchConsole';
 import BatchManagement from './pages/farmer/BatchManagement';
+import LoadPlanning from './pages/farmer/LoadPlanning';
 import ProtectedRoute from './components/common/ProtectedRoute';
 import NotificationsPage from './pages/NotificationsPage';
 import BankPage from './pages/BankPage';
@@ -74,6 +75,7 @@ function App() {
             <Route path="orders" element={<FarmerOrders />} />
             <Route path="fleet" element={<DriverRegistry />} />
             <Route path="batches" element={<BatchManagement />} />
+            <Route path="batches/:id/load-plan" element={<LoadPlanning />} />
             <Route path="tracking" element={<FreightTracking />} />
             <Route path="bank" element={<BankPage />} />
             <Route path="notifications" element={<NotificationsPage />} />
