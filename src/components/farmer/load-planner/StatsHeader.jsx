@@ -59,7 +59,7 @@ const StatsHeader = () => {
           <p className="text-[8.5px] text-slate-400 font-medium">Calculated at ~250kg per unit</p>
         </div>
         <div className="w-10 h-10 rounded-2xl bg-indigo-50 border border-indigo-100 text-indigo-650 flex items-center justify-center shrink-0">
-          <span className="material-symbols-outlined text-[20px]">pallet</span>
+          <Layers className="w-5 h-5" />
         </div>
       </div>
 
