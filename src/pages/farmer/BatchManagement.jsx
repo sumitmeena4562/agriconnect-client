@@ -480,9 +480,8 @@ const BatchManagement = () => {
           const renderCargoSlot = (stop, slotNum) => {
             if (!stop) {
               return (
-                <div key={slotNum} className="border-2 border-dashed border-slate-350 rounded-2xl flex flex-col items-center justify-center p-3 text-slate-400 bg-slate-50/50 min-h-[95px] select-none">
-                  <span className="material-symbols-outlined text-[20px] opacity-40">inventory_2</span>
-                  <span className="text-[8.5px] font-bold mt-1 uppercase tracking-wider">Slot {slotNum} Empty</span>
+                <div key={slotNum} className="border border-dashed border-slate-300 rounded-xl flex items-center justify-center p-3 text-slate-400 bg-slate-100/50 min-h-[65px] select-none">
+                  <span className="text-[9px] font-bold uppercase tracking-wider">Empty Slot</span>
                 </div>
               );
             }
@@ -495,42 +494,27 @@ const BatchManagement = () => {
             return (
               <div 
                 key={stop.orderId} 
-                className={`border rounded-2xl p-3 flex flex-col justify-between shadow-xs transition-all relative min-h-[95px] bg-white text-left ${
+                className={`border rounded-xl p-2.5 flex flex-col justify-between shadow-xs transition-all min-h-[65px] bg-white text-left ${
                   isViolated 
-                    ? 'border-purple-400 bg-purple-50/10 ring-1 ring-purple-400/20' 
-                    : 'border-slate-200 hover:border-slate-350'
+                    ? 'border-purple-500 ring-1 ring-purple-400/20' 
+                    : 'border-slate-200'
                 }`}
               >
-                <div>
-                  <div className="flex justify-between items-start gap-1">
-                    <span className={`text-[8.5px] font-black px-1.5 py-0.5 rounded uppercase tracking-wider ${
-                      isViolated ? 'bg-purple-100 text-purple-700 border border-purple-200' : 'bg-indigo-50 border border-indigo-100 text-indigo-700'
-                    }`}>
-                      Stop #{stop.sequence - localRouteStops.filter(s => s.stopType === 'pickup').length}
-                    </span>
-                    <span className="text-[8px] font-mono font-bold text-slate-400">
-                      LOAD #{stop.loadingSequence}
-                    </span>
-                  </div>
-                  <h5 className="text-[11.5px] font-black text-slate-800 truncate mt-2 leading-none">
-                    {order?.crop?.name || 'Crop'}
-                  </h5>
-                  <p className="text-[9px] text-slate-450 font-semibold truncate leading-none mt-1">
-                    🏪 {order?.vendor?.name || 'Store'}
-                  </p>
+                <div className="flex justify-between items-center text-[9.5px] text-slate-400 font-bold">
+                  <span>S{stop.sequence - localRouteStops.filter(s => s.stopType === 'pickup').length}</span>
+                  <span>{order?.requestedQuantity} {order?.crop?.unit}</span>
                 </div>
-
-                <div className="flex items-center justify-between mt-3 pt-1.5 border-t border-slate-100">
-                  <span className="text-[10px] font-extrabold text-slate-700">
-                    {order?.requestedQuantity || 0} {order?.crop?.unit}
-                  </span>
-                  {isViolated && (
-                    <span 
-                      className="material-symbols-outlined text-[16px] text-purple-600 animate-pulse cursor-help"
-                      title="LIFO violation! Loaded item is blocked by items in front of it that deliver later."
-                    >
-                      warning
-                    </span>
+                
+                <h5 className="text-[11px] font-black text-slate-800 truncate leading-none my-1">
+                  {order?.crop?.name || 'Crop'}
+                </h5>
+                
+                <div className="flex justify-between items-center text-[8.5px] text-slate-400 font-bold border-t border-slate-100 pt-1">
+                  <span>L-{stop.loadingSequence}</span>
+                  {isViolated ? (
+                    <span className="text-purple-600 font-black animate-pulse text-[8px] uppercase">LIFO Alert</span>
+                  ) : (
+                    <span className="text-emerald-600 font-bold text-[8px] uppercase">OK</span>
                   )}
                 </div>
               </div>
@@ -550,21 +534,21 @@ const BatchManagement = () => {
                 animate={{ scale: 1, y: 0, opacity: 1 }}
                 exit={{ scale: 0.95, y: 20, opacity: 0 }}
                 onClick={(e) => e.stopPropagation()}
-                className="bg-white rounded-3xl w-full max-w-5xl shadow-2xl border border-slate-100 z-10 overflow-hidden flex flex-col max-h-[90vh]"
+                className="bg-white rounded-3xl w-full max-w-5xl shadow-2xl border border-slate-150 z-10 overflow-hidden flex flex-col h-[85vh] max-h-[720px]"
               >
                 {/* Modal Title bar */}
-                <div className="px-6 py-4 border-b border-slate-150 bg-slate-50/50 flex justify-between items-center shrink-0">
+                <div className="px-6 py-4 border-b border-slate-150 bg-white flex justify-between items-center shrink-0">
                   <div>
-                    <h2 className="text-[16px] font-black text-slate-800 tracking-tight leading-none">
+                    <h2 className="text-[15px] font-black text-slate-800 tracking-tight leading-none">
                       🚚 Batch #{planningBatch._id.slice(-6).toUpperCase()} Load Planning Console
                     </h2>
-                    <p className="text-[11px] text-slate-400 font-semibold mt-1">
+                    <p className="text-[10px] text-slate-400 font-semibold mt-1">
                       Carrier: {planningBatch.driver?.name || 'Self-Delivery'} • Vehicle Number: {planningBatch.driver?.vehicleNumber || 'N/A'}
                     </p>
                   </div>
                   <button 
                     onClick={handleClosePlanner}
-                    className="w-8 h-8 rounded-full hover:bg-slate-200 flex items-center justify-center text-slate-450 border-0 cursor-pointer transition-colors"
+                    className="w-8 h-8 rounded-full hover:bg-slate-100 flex items-center justify-center text-slate-450 border-0 cursor-pointer transition-colors"
                   >
                     <span className="material-symbols-outlined text-[18px]">close</span>
                   </button>
@@ -573,73 +557,43 @@ const BatchManagement = () => {
                 {/* Main Content Area */}
                 <div className="flex-1 flex overflow-hidden min-h-0">
                   {/* Left Visualizer Panel */}
-                  <div className="flex-1 overflow-y-auto p-6 space-y-5 bg-slate-50/20">
+                  <div className="flex-1 flex flex-col p-6 space-y-5 bg-white overflow-y-auto">
                     
                     {/* Stats Row */}
-                    <div className="grid grid-cols-3 gap-4">
-                      {/* Weight Card */}
-                      <div className="bg-white border border-slate-200/60 rounded-2xl p-4 flex items-center justify-between shadow-xs">
-                        <div>
-                          <p className="text-[8.5px] font-extrabold text-slate-400 uppercase tracking-wider">Loaded Weight</p>
-                          <h4 className="text-[16px] font-black text-slate-800 mt-1 leading-none">
-                            {totalWeight.toLocaleString()} <span className="text-[11px] font-bold text-slate-400">{activeOrders[0]?.crop?.unit || 'kg'}</span>
-                          </h4>
-                          <div className="w-24 h-1.5 bg-slate-100 rounded-full mt-2.5 overflow-hidden border border-slate-200/40">
-                            <div 
-                              className={`h-full rounded-full ${weightPercent > 100 ? 'bg-rose-500' : 'bg-emerald-500'}`} 
-                              style={{ width: `${weightPercent}%` }} 
-                            />
-                          </div>
-                        </div>
-                        <span className={`text-[10px] font-black px-2 py-0.8 rounded-full border shrink-0 ${
-                          weightPercent > 100 ? 'bg-rose-50 text-rose-700 border-rose-200' : 'bg-emerald-50 text-emerald-700 border-emerald-200'
-                        }`}>
-                          {weightPercent}%
+                    <div className="flex items-center gap-10 text-[12px] font-bold text-slate-500 bg-slate-50 p-4 rounded-2xl border border-slate-150">
+                      <div className="flex items-center gap-2">
+                        <span>Weight</span>
+                        <span className="text-[17px] font-black text-slate-800">{totalWeight.toLocaleString()}kg</span>
+                        <span className={`text-[9.5px] font-extrabold px-2 py-0.5 rounded ${weightPercent > 100 ? 'bg-rose-100 text-rose-700' : 'bg-emerald-100 text-emerald-700'}`}>
+                          +{weightPercent}%
                         </span>
                       </div>
-
-                      {/* Pallets Card */}
-                      <div className="bg-white border border-slate-200/60 rounded-2xl p-4 flex items-center justify-between shadow-xs">
-                        <div>
-                          <p className="text-[8.5px] font-extrabold text-slate-400 uppercase tracking-wider">Estimated Pallets</p>
-                          <h4 className="text-[16px] font-black text-slate-800 mt-1 leading-none">
-                            {totalPallets} <span className="text-[11px] font-bold text-slate-400">units</span>
-                          </h4>
-                          <p className="text-[8px] text-slate-400 mt-2 font-medium">Calculated at ~250kg per pallet unit</p>
-                        </div>
-                        <div className="w-9 h-9 rounded-2xl bg-indigo-50 border border-indigo-100 text-indigo-600 flex items-center justify-center shrink-0">
-                          <span className="material-symbols-outlined text-[18px]">pallet</span>
-                        </div>
+                      <div className="w-px h-6 bg-slate-200" />
+                      <div className="flex items-center gap-2">
+                        <span>Pallets</span>
+                        <span className="text-[17px] font-black text-slate-800">{totalPallets}</span>
+                        <span className="text-[9.5px] font-extrabold bg-indigo-50 border border-indigo-100 text-indigo-700 px-2 py-0.5 rounded">
+                          +{activeOrders.length}
+                        </span>
                       </div>
-
-                      {/* Alerts Card */}
-                      <div className="bg-white border border-slate-200/60 rounded-2xl p-4 flex items-center justify-between shadow-xs">
-                        <div>
-                          <p className="text-[8.5px] font-extrabold text-slate-400 uppercase tracking-wider">Routing Alerts</p>
-                          <h4 className="text-[16px] font-black text-slate-800 mt-1 leading-none flex items-center gap-1.5">
-                            {alertsCount}
-                            {alertsCount > 0 && <span className="w-2 h-2 rounded-full bg-rose-500 animate-ping" />}
-                          </h4>
-                          <p className="text-[8px] text-slate-400 mt-2 font-medium">LIFO sequence violations detected</p>
-                        </div>
-                        <div className={`w-9 h-9 rounded-2xl flex items-center justify-center shrink-0 border ${
-                          alertsCount > 0 
-                            ? 'bg-rose-50 border-rose-200 text-rose-600 animate-pulse' 
-                            : 'bg-emerald-50 border-emerald-100 text-emerald-600'
-                        }`}>
-                          <span className="material-symbols-outlined text-[18px]">
-                            {alertsCount > 0 ? 'notification_important' : 'verified'}
-                          </span>
-                        </div>
+                      <div className="w-px h-6 bg-slate-200" />
+                      <div className="flex items-center gap-2">
+                        <span>Alerts</span>
+                        <span className="text-[17px] font-black text-slate-800">{alertsCount}</span>
+                        {alertsCount > 0 ? (
+                          <span className="text-[9.5px] font-extrabold bg-purple-100 text-purple-700 px-2 py-0.5 rounded">-{alertsCount}</span>
+                        ) : (
+                          <span className="text-[9.5px] font-extrabold bg-slate-100 text-slate-500 px-2 py-0.5 rounded">OK</span>
+                        )}
                       </div>
                     </div>
 
                     {/* Truck Layout Graphic Section */}
-                    <div className="bg-white border border-slate-200/80 rounded-3xl p-6 shadow-sm flex flex-col gap-4">
+                    <div className="flex-1 flex flex-col gap-4">
                       <div className="flex justify-between items-center">
                         <div>
-                          <h3 className="text-[12.5px] font-black text-slate-800 uppercase tracking-wider">Trailer Visual Layout</h3>
-                          <p className="text-[10px] text-slate-400 font-semibold mt-0.5">Click "Plan Load" and shift sequence to rearrange stops</p>
+                          <h3 className="text-[12px] font-black text-slate-800 uppercase tracking-wider">Trailer Visual Layout</h3>
+                          <p className="text-[9.5px] text-slate-400 font-semibold mt-0.5">Click "Plan Load" and shift sequence to rearrange stops</p>
                         </div>
                         <span className="text-[9px] bg-slate-100 border border-slate-200 font-mono font-bold px-2 py-0.5 rounded text-slate-500 uppercase tracking-wide">
                           Capacity: {maxCapacity} {activeOrders[0]?.crop?.unit || 'kg'}
@@ -647,44 +601,49 @@ const BatchManagement = () => {
                       </div>
 
                       {/* Visual Semi-Truck and trailer grid */}
-                      <div className="flex items-center gap-2 bg-slate-50 border border-slate-200 rounded-3xl p-6 overflow-x-auto select-none min-h-[290px] relative">
-                        {/* Cab */}
-                        <div className="flex flex-col items-center shrink-0">
-                          <div className="w-32 h-22 relative flex items-end">
-                            <svg viewBox="0 0 160 100" className="w-full h-full fill-slate-800 drop-shadow-md">
-                              <path d="M10 90 L10 50 C10 45, 15 42, 20 42 L70 42 C85 42, 95 32, 102 22 L118 22 C125 22, 130 26, 134 32 L150 55 L150 90 Z" fill="#ffffff" stroke="#cbd5e1" strokeWidth="2.5"/>
-                              <path d="M82 48 L100 28 L116 28 C120 28, 122 30, 124 33 L134 48 Z" fill="#1e293b"/>
-                              <circle cx="45" cy="88" r="11" fill="#334155" stroke="#94a3b8" strokeWidth="2"/>
-                              <circle cx="45" cy="88" r="4" fill="#cbd5e1"/>
-                              <circle cx="115" cy="88" r="11" fill="#334155" stroke="#94a3b8" strokeWidth="2"/>
-                              <circle cx="115" cy="88" r="4" fill="#cbd5e1"/>
-                              <rect x="25" y="15" width="5" height="48" rx="1.5" fill="#64748b"/>
-                              <rect x="142" y="70" width="8" height="5" fill="#f59e0b"/>
+                      <div className="flex-1 flex items-center justify-center p-6 bg-slate-50 border border-slate-200 rounded-3xl min-h-[300px] w-full select-none">
+                        <div className="flex items-end w-full max-w-4xl gap-0 justify-center">
+                          {/* Clean realistic truck cab profile */}
+                          <div className="shrink-0 -mr-1 z-10 flex flex-col items-center">
+                            <svg viewBox="0 0 160 110" className="w-44 h-26 fill-white stroke-slate-350 stroke-[2] drop-shadow-xs">
+                              {/* Exhaust stack */}
+                              <line x1="25" y1="10" x2="25" y2="50" stroke="#94a3b8" strokeWidth="4" strokeLinecap="round" />
+                              {/* Cab shape */}
+                              <path d="M10 80 L10 42 C10 38, 14 36, 18 36 L68 36 C78 36, 88 26, 94 16 L118 16 C124 16, 128 20, 131 25 L145 48 L148 48 C149 48, 150 49, 150 50 L150 80 Z" />
+                              {/* Window outline */}
+                              <path d="M80 42 L94 22 L116 22 C118 22, 120 23, 121 25 L130 42 Z" fill="#1e293b" />
+                              {/* Front bumper */}
+                              <rect x="144" y="65" width="8" height="15" rx="2" fill="#e2e8f0" stroke="#cbd5e1" strokeWidth="1" />
+                              {/* Wheels */}
+                              <circle cx="45" cy="78" r="12" fill="#1e293b" stroke="#64748b" strokeWidth="2.5"/>
+                              <circle cx="45" cy="78" r="4" fill="#f8fafc"/>
+                              <circle cx="115" cy="78" r="12" fill="#1e293b" stroke="#64748b" strokeWidth="2.5"/>
+                              <circle cx="115" cy="78" r="4" fill="#f8fafc"/>
                             </svg>
-                          </div>
-                          <span className="text-[8.5px] font-black text-slate-400 mt-1 uppercase tracking-wide">CABIN (FRONT)</span>
-                        </div>
-
-                        {/* Trailer Container */}
-                        <div className="flex-1 bg-slate-100 border-3 border-slate-300 rounded-3xl p-4 min-w-[500px] relative flex flex-col justify-between gap-3 shadow-inner">
-                          {/* Top Row: Slots 4, 5, 6 */}
-                          <div className="grid grid-cols-3 gap-3 flex-1">
-                            {topRow.map((stop, idx) => renderCargoSlot(stop, idx + 4))}
-                          </div>
-                          {/* Bottom Row: Slots 1, 2, 3 */}
-                          <div className="grid grid-cols-3 gap-3 flex-1">
-                            {bottomRow.map((stop, idx) => renderCargoSlot(stop, idx + 1))}
+                            <span className="text-[8.5px] font-black text-slate-400 mt-1 uppercase tracking-wide">CABIN (FRONT)</span>
                           </div>
 
-                          {/* Wheels of Trailer */}
-                          <div className="absolute -bottom-4 left-10 right-10 flex justify-between px-10 pointer-events-none">
-                            <div className="flex gap-1">
-                              <div className="w-7 h-7 rounded-full bg-slate-800 border-2 border-slate-400 flex items-center justify-center shadow-md"><div className="w-2 h-2 rounded-full bg-slate-400"/></div>
-                              <div className="w-7 h-7 rounded-full bg-slate-800 border-2 border-slate-400 flex items-center justify-center shadow-md"><div className="w-2 h-2 rounded-full bg-slate-400"/></div>
+                          {/* Trailer Container */}
+                          <div className="flex-1 bg-[#f1f3f5] border border-slate-300 rounded-r-2xl p-4 min-h-[190px] relative flex flex-col justify-between shadow-inner">
+                            {/* Top Row: Slots 4, 5, 6 */}
+                            <div className="grid grid-cols-3 gap-3 flex-1 mb-3">
+                              {topRow.map((stop, idx) => renderCargoSlot(stop, idx + 4))}
                             </div>
-                            <div className="flex gap-1">
-                              <div className="w-7 h-7 rounded-full bg-slate-800 border-2 border-slate-400 flex items-center justify-center shadow-md"><div className="w-2 h-2 rounded-full bg-slate-400"/></div>
-                              <div className="w-7 h-7 rounded-full bg-slate-800 border-2 border-slate-400 flex items-center justify-center shadow-md"><div className="w-2 h-2 rounded-full bg-slate-400"/></div>
+                            {/* Bottom Row: Slots 1, 2, 3 */}
+                            <div className="grid grid-cols-3 gap-3 flex-1">
+                              {bottomRow.map((stop, idx) => renderCargoSlot(stop, idx + 1))}
+                            </div>
+
+                            {/* Wheels of Trailer */}
+                            <div className="absolute -bottom-4 left-10 right-10 flex justify-between px-10 pointer-events-none">
+                              <div className="flex gap-1">
+                                <div className="w-7 h-7 rounded-full bg-slate-800 border-2 border-slate-400 flex items-center justify-center shadow-md"><div className="w-2 h-2 rounded-full bg-slate-400"/></div>
+                                <div className="w-7 h-7 rounded-full bg-slate-800 border-2 border-slate-400 flex items-center justify-center shadow-md"><div className="w-2 h-2 rounded-full bg-slate-400"/></div>
+                              </div>
+                              <div className="flex gap-1">
+                                <div className="w-7 h-7 rounded-full bg-slate-800 border-2 border-slate-400 flex items-center justify-center shadow-md"><div className="w-2 h-2 rounded-full bg-slate-400"/></div>
+                                <div className="w-7 h-7 rounded-full bg-slate-800 border-2 border-slate-400 flex items-center justify-center shadow-md"><div className="w-2 h-2 rounded-full bg-slate-400"/></div>
+                              </div>
                             </div>
                           </div>
                         </div>
@@ -693,8 +652,8 @@ const BatchManagement = () => {
                   </div>
 
                   {/* Right Plan List Sidebar */}
-                  <div className="w-80 border-l border-slate-150 flex flex-col bg-slate-50/50">
-                    <div className="p-4 border-b border-slate-150 bg-white">
+                  <div className="w-80 border-l border-slate-150 flex flex-col bg-white h-full overflow-hidden shrink-0">
+                    <div className="p-4 border-b border-slate-150 shrink-0 bg-white">
                       <div className="flex items-center justify-between">
                         <h4 className="text-[12.5px] font-black text-slate-800 uppercase tracking-wider">Load Sequence</h4>
                         <span className="text-[9px] font-bold text-slate-400 uppercase">Interactive</span>
@@ -708,69 +667,60 @@ const BatchManagement = () => {
                               setRemovedOrderIds(new Set());
                             }
                           }}
-                          className="flex-1 py-1.5 bg-white border border-slate-250 text-slate-700 text-[10px] font-black rounded-xl hover:bg-slate-50 transition-all cursor-pointer active:scale-95"
+                          className="flex-1 py-1.5 bg-white border border-slate-200 text-slate-700 text-[10px] font-black rounded-xl hover:bg-slate-50 transition-all cursor-pointer"
                         >
-                          Reset Route
+                          Clear Plan
                         </button>
                       </div>
                     </div>
 
-                    <div className="flex-1 overflow-y-auto p-3 space-y-2">
-                      <span className="text-[9px] font-black uppercase text-slate-400 tracking-wider block px-1">Sequence Stops</span>
+                    <div className="flex-1 overflow-y-auto p-4 space-y-2.5">
                       {deliveryStops.map((stop, idx, arr) => {
                         const order = activeOrders.find(o => String(o._id) === String(stop.orderId));
                         return (
-                          <div key={stop.orderId} className="bg-white border border-slate-200 rounded-2xl p-3 shadow-xs flex items-center justify-between gap-2">
+                          <div key={stop.orderId} className="flex items-center justify-between p-2.5 hover:bg-slate-50 rounded-xl transition-all border border-slate-100">
                             <div className="min-w-0 flex-1">
-                              <div className="flex items-center gap-1.5">
-                                <span className="w-5 h-5 rounded-full bg-slate-100 text-slate-650 text-[10px] font-black flex items-center justify-center shrink-0">
+                              <div className="flex items-center gap-2">
+                                <span className="w-5 h-5 rounded-full bg-slate-100 text-slate-600 text-[10px] font-bold flex items-center justify-center">
                                   {idx + 1}
                                 </span>
-                                <h5 className="font-extrabold text-[11.5px] text-slate-800 truncate leading-none">
+                                <span className="font-extrabold text-[11px] text-slate-800 truncate">
                                   {order?.crop?.name || 'Crop'}
-                                </h5>
+                                </span>
                               </div>
-                              <p className="text-[9px] text-slate-400 font-semibold mt-1 leading-none truncate">
-                                🏪 {order?.vendor?.name}
+                              <p className="text-[9px] text-slate-400 font-semibold pl-7 truncate leading-none mt-1">
+                                {order?.vendor?.name}
                               </p>
-                              <div className="flex items-center gap-2 mt-2.5 pt-1.5 border-t border-slate-100">
-                                <span className="text-[9px] font-black text-slate-600 bg-slate-100 px-1.5 py-0.5 rounded">
-                                  {order?.requestedQuantity} {order?.crop?.unit}
-                                </span>
-                                <span className="text-[9px] font-bold text-slate-400">
-                                  Load #{stop.loadingSequence}
-                                </span>
-                              </div>
                             </div>
 
-                            <div className="flex flex-col items-center gap-0.5 shrink-0">
+                            <div className="flex items-center gap-1 shrink-0">
                               {/* Up Arrow */}
                               <button
                                 disabled={idx === 0}
                                 onClick={() => handleMoveStop(idx, 'up')}
-                                className="w-6 h-6 rounded hover:bg-slate-100 disabled:opacity-30 flex items-center justify-center text-slate-500 border-0 cursor-pointer"
+                                className="w-6 h-6 rounded-md hover:bg-slate-100 disabled:opacity-30 flex items-center justify-center text-slate-500 border-0 cursor-pointer"
                               >
-                                <span className="material-symbols-outlined text-[13px]">arrow_upward</span>
+                                <span className="material-symbols-outlined text-[15px]">expand_less</span>
                               </button>
                               {/* Down Arrow */}
                               <button
                                 disabled={idx === arr.length - 1}
                                 onClick={() => handleMoveStop(idx, 'down')}
-                                className="w-6 h-6 rounded hover:bg-slate-100 disabled:opacity-30 flex items-center justify-center text-slate-500 border-0 cursor-pointer"
+                                className="w-6 h-6 rounded-md hover:bg-slate-100 disabled:opacity-30 flex items-center justify-center text-slate-500 border-0 cursor-pointer"
                               >
-                                <span className="material-symbols-outlined text-[13px]">arrow_downward</span>
+                                <span className="material-symbols-outlined text-[15px]">expand_more</span>
                               </button>
                               {/* Unassign Order Button */}
                               <button
                                 onClick={() => {
-                                  if (window.confirm('Unassign this order from this batch?')) {
+                                  if (window.confirm('Unassign this order?')) {
                                     handleRemoveOrderFromBatch(stop.orderId);
                                   }
                                 }}
-                                className="w-6 h-6 rounded hover:bg-rose-50 text-rose-600 border-0 cursor-pointer flex items-center justify-center mt-1"
-                                title="Remove Order from Batch"
+                                className="w-6 h-6 rounded-md hover:bg-rose-50 text-rose-600 border-0 cursor-pointer flex items-center justify-center"
+                                title="Remove Order"
                               >
-                                <span className="material-symbols-outlined text-[13px]">delete</span>
+                                <span className="material-symbols-outlined text-[14px]">delete</span>
                               </button>
                             </div>
                           </div>
@@ -778,20 +728,15 @@ const BatchManagement = () => {
                       })}
                     </div>
 
-                    <div className="p-4 border-t border-slate-150 bg-white">
+                    <div className="p-4 border-t border-slate-150 shrink-0 bg-white">
                       <button
                         onClick={handleSaveLoadPlan}
                         disabled={savingPlan}
-                        className="w-full py-2 bg-indigo-600 hover:bg-indigo-700 text-white font-black text-[12.5px] rounded-2xl cursor-pointer border-0 active:scale-95 transition-all shadow-md flex items-center justify-center gap-1.5"
+                        className="w-full py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white font-black text-[12.5px] rounded-xl cursor-pointer border-0 active:scale-95 transition-all shadow-md flex items-center justify-center gap-1.5"
                       >
                         {savingPlan ? (
                           <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                        ) : (
-                          <>
-                            <span className="material-symbols-outlined text-[16px]">save</span>
-                            <span>Save Load Plan</span>
-                          </>
-                        )}
+                        ) : 'Save Load Plan'}
                       </button>
                     </div>
                   </div>
