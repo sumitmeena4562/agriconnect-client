@@ -1,5 +1,5 @@
 import React, { useRef } from 'react';
-import { Stage, Layer, Rect, Circle, Line, Text, Group } from 'react-konva';
+import { Stage, Layer, Rect, Circle, Line, Text, Group, Path } from 'react-konva';
 import { useLoadPlannerStore } from '../../../store/useLoadPlannerStore';
 import { toast } from 'react-hot-toast';
 
@@ -157,9 +157,9 @@ const VehicleCanvas = () => {
       return (
         <Group>
           {/* Cab body */}
-          <path d={`M${startX - 50} ${bottomY} L${startX - 50} ${bottomY - 45} C${startX - 50} ${bottomY - 48}, ${startX - 46} ${bottomY - 50}, ${startX - 40} ${bottomY - 50} L${startX - 15} ${bottomY - 50} C${startX - 8} ${bottomY - 50}, ${startX - 4} ${bottomY - 45}, ${startX - 2} ${bottomY - 35} L${startX} ${bottomY - 35} L${startX} ${bottomY} Z`} fill={baseColor} stroke={borderColor} strokeWidth={2} />
+          <Path data={`M${startX - 50} ${bottomY} L${startX - 50} ${bottomY - 45} C${startX - 50} ${bottomY - 48}, ${startX - 46} ${bottomY - 50}, ${startX - 40} ${bottomY - 50} L${startX - 15} ${bottomY - 50} C${startX - 8} ${bottomY - 50}, ${startX - 4} ${bottomY - 45}, ${startX - 2} ${bottomY - 35} L${startX} ${bottomY - 35} L${startX} ${bottomY} Z`} fill={baseColor} stroke={borderColor} strokeWidth={2} />
           {/* Window */}
-          <path d={`M${startX - 30} ${bottomY - 45} L${startX - 15} ${bottomY - 45} L${startX - 6} ${bottomY - 35} L${startX - 30} ${bottomY - 35} Z`} fill="#334155" />
+          <Path data={`M${startX - 30} ${bottomY - 45} L${startX - 15} ${bottomY - 45} L${startX - 6} ${bottomY - 35} L${startX - 30} ${bottomY - 35} Z`} fill="#334155" />
           {/* Wheel */}
           <Circle cx={startX - 25} cy={bottomY - 10} r={10} fill="#1e293b" stroke={borderColor} strokeWidth={2.5} />
           <Circle cx={startX - 25} cy={bottomY - 10} r={4} fill="#f8fafc" />
@@ -178,9 +178,9 @@ const VehicleCanvas = () => {
         {/* Exhaust pipe */}
         <Line points={[startX - 120, startY + 5, startX - 120, bottomY - 35]} stroke="#64748b" strokeWidth={4} lineCap="round" />
         {/* Cabin shell */}
-        <path d={`M${startX - 130} ${bottomY} L${startX - 130} ${bottomY - 58} C${startX - 130} ${bottomY - 62}, ${startX - 126} ${bottomY - 64}, ${startX - 120} ${bottomY - 64} L${startX - 75} ${bottomY - 64} C${startX - 65} ${bottomY - 64}, ${startX - 55} ${bottomY - 74}, ${startX - 49} ${bottomY - 84} L${startX - 22} ${bottomY - 84} C${startX - 16} ${bottomY - 84}, ${startX - 12} ${bottomY - 80}, ${startX - 9} ${bottomY - 75} L${startX - 3} ${bottomY - 52} L${startX} ${bottomY - 52} L${startX} ${bottomY} Z`} fill={baseColor} stroke={borderColor} strokeWidth={2} />
+        <Path data={`M${startX - 130} ${bottomY} L${startX - 130} ${bottomY - 58} C${startX - 130} ${bottomY - 62}, ${startX - 126} ${bottomY - 64}, ${startX - 120} ${bottomY - 64} L${startX - 75} ${bottomY - 64} C${startX - 65} ${bottomY - 64}, ${startX - 55} ${bottomY - 74}, ${startX - 49} ${bottomY - 84} L${startX - 22} ${bottomY - 84} C${startX - 16} ${bottomY - 84}, ${startX - 12} ${bottomY - 80}, ${startX - 9} ${bottomY - 75} L${startX - 3} ${bottomY - 52} L${startX} ${bottomY - 52} L${startX} ${bottomY} Z`} fill={baseColor} stroke={borderColor} strokeWidth={2} />
         {/* Window */}
-        <path d={`M${startX - 62} ${bottomY - 58} L${startX - 48} ${bottomY - 78} L${startX - 32} ${bottomY - 78} C${startX - 30} ${bottomY - 78}, ${startX - 28} ${bottomY - 77}, ${startX - 27} ${bottomY - 75} L${startX - 18} ${bottomY - 58} Z`} fill="#1e293b" />
+        <Path data={`M${startX - 62} ${bottomY - 58} L${startX - 48} ${bottomY - 78} L${startX - 32} ${bottomY - 78} C${startX - 30} ${bottomY - 78}, ${startX - 28} ${bottomY - 77}, ${startX - 27} ${bottomY - 75} L${startX - 18} ${bottomY - 58} Z`} fill="#1e293b" />
         {/* Front wheel */}
         <Circle cx={startX - 35} cy={bottomY - 10} r={12} fill="#1e293b" stroke="#64748b" strokeWidth="2.5" />
         <Circle cx={startX - 35} cy={bottomY - 10} r={4} fill="#f8fafc" />
