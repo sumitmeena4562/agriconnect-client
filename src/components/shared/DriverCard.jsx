@@ -5,38 +5,53 @@ import { Link } from 'react-router-dom';
 const DriverCard = ({ driver, onDelete }) => {
   // Get vehicle-specific styles
   const getVehicleConfig = (type) => {
-    switch (type) {
-      case 'Bike':
-        return {
-          bgGradient: 'from-amber-400 to-amber-500',
-          badgeText: '🏍️ Bike'
-        };
-      case 'Tractor':
-        return {
-          bgGradient: 'from-emerald-400 to-emerald-500',
-          badgeText: '🚜 Tractor'
-        };
-      case 'Mini Truck':
-        return {
-          bgGradient: 'from-blue-400 to-blue-500',
-          badgeText: '🚚 Mini Truck'
-        };
-      case 'Large Truck':
-        return {
-          bgGradient: 'from-purple-400 to-purple-500',
-          badgeText: '🚛 Large Truck'
-        };
-      case 'Pickup':
-        return {
-          bgGradient: 'from-sky-400 to-sky-500',
-          badgeText: '🛻 Pickup Vehicle'
-        };
-      default:
-        return {
-          bgGradient: 'from-slate-400 to-slate-500',
-          badgeText: '🚚 Vehicle'
-        };
+    const t = (type || '').toLowerCase();
+    if (t.includes('bike') || t.includes('scooter')) {
+      return {
+        bgGradient: 'from-amber-400 to-amber-500',
+        badgeText: `🛵 ${type}`
+      };
     }
+    if (t.includes('tractor')) {
+      return {
+        bgGradient: 'from-emerald-400 to-emerald-500',
+        badgeText: `🚜 ${type}`
+      };
+    }
+    if (t.includes('auto') || t.includes('rickshaw')) {
+      return {
+        bgGradient: 'from-teal-400 to-teal-500',
+        badgeText: `🛺 ${type}`
+      };
+    }
+    if (t.includes('jeeto') || t.includes('ace')) {
+      return {
+        bgGradient: 'from-blue-400 to-blue-500',
+        badgeText: `🚚 ${type}`
+      };
+    }
+    if (t.includes('pickup') || t.includes('intra') || t.includes('dost')) {
+      return {
+        bgGradient: 'from-sky-400 to-sky-500',
+        badgeText: `🛻 ${type}`
+      };
+    }
+    if (t.includes('van') || t.includes('refrigerated') || t.includes('cold')) {
+      return {
+        bgGradient: 'from-cyan-400 to-cyan-500',
+        badgeText: `❄️ ${type}`
+      };
+    }
+    if (t.includes('container') || t.includes('truck')) {
+      return {
+        bgGradient: 'from-purple-400 to-purple-500',
+        badgeText: `🚛 ${type}`
+      };
+    }
+    return {
+      bgGradient: 'from-slate-400 to-slate-500',
+      badgeText: `🚚 ${type || 'Vehicle'}`
+    };
   };
 
   const config = getVehicleConfig(driver.vehicleType);
