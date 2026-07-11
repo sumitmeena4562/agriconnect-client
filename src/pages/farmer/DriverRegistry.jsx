@@ -47,6 +47,9 @@ const DriverRegistry = () => {
 
   const [deleteModal, setDeleteModal] = useState({ isOpen: false, driverId: null, isLoading: false });
 
+  const [dbVehicleTypes, setDbVehicleTypes] = useState([]);
+  const [selectedVehicleType, setSelectedVehicleType] = useState(null);
+
   const fetchDrivers = async () => {
     setIsLoading(true);
     try {
@@ -59,8 +62,29 @@ const DriverRegistry = () => {
     }
   };
 
+  const fetchVehicleTypes = async () => {
+    try {
+      const res = await api.get('/drivers/vehicle-types');
+      if (res.data.success) {
+        setDbVehicleTypes(res.data.data);
+        if (res.data.data.length > 0) {
+          const first = res.data.data[0];
+          setSelectedVehicleType(first);
+          setVehicleType(first.vehicleName);
+          setPayloadCapacity(first.capacityKg);
+          if (first.fuelType && first.fuelType.length > 0) {
+            setFuelType(first.fuelType[0]);
+          }
+        }
+      }
+    } catch (error) {
+      console.error('Failed to fetch vehicle types', error);
+    }
+  };
+
   useEffect(() => {
     fetchDrivers();
+    fetchVehicleTypes();
   }, []);
 
   const handleAddDriver = async (e) => {
@@ -121,8 +145,20 @@ const DriverRegistry = () => {
       setName('');
       setPhone('');
       setVehicleNumber('');
-      setVehicleType('Mini Truck');
-      setPayloadCapacity('');
+      if (dbVehicleTypes.length > 0) {
+        const first = dbVehicleTypes[0];
+        setSelectedVehicleType(first);
+        setVehicleType(first.vehicleName);
+        setPayloadCapacity(first.capacityKg);
+        if (first.fuelType && first.fuelType.length > 0) {
+          setFuelType(first.fuelType[0]);
+        }
+      } else {
+        setSelectedVehicleType(null);
+        setVehicleType('');
+        setPayloadCapacity('');
+        setFuelType('Diesel');
+      }
       setLicenseNumber('');
       setRcNumber('');
       setAddress('');
@@ -135,7 +171,6 @@ const DriverRegistry = () => {
       setLicenseExpiry('');
       setRcExpiry('');
       setVehicleModel('');
-      setFuelType('Diesel');
       setInsurancePolicyNumber('');
       setInsuranceExpiry('');
       setPanNumber('');
@@ -497,14 +532,35 @@ const DriverRegistry = () => {
                       <label className="text-[10px] font-bold text-slate-500 mb-1 block">Vehicle Type <span className="text-rose-500">*</span></label>
                       <select
                         value={vehicleType}
-                        onChange={e => setVehicleType(e.target.value)}
+                        onChange={e => {
+                          const name = e.target.value;
+                          setVehicleType(name);
+                          const found = dbVehicleTypes.find(v => v.vehicleName === name);
+                          if (found) {
+                            setSelectedVehicleType(found);
+                            setPayloadCapacity(found.capacityKg);
+                            if (found.fuelType && found.fuelType.length > 0) {
+                              setFuelType(found.fuelType[0]);
+                            }
+                          }
+                        }}
                         className="w-full h-9.5 px-2 text-[12px] rounded-xl border border-slate-200 bg-[var(--color-surface)] text-[var(--color-text-primary)] hover:border-slate-350 focus:border-slate-800 outline-none transition-all"
                       >
-                        <option value="Bike">🚴 Bike Box</option>
-                        <option value="Tractor">🚜 Tractor Trolley</option>
-                        <option value="Pickup">🛻 Pickup Vehicle</option>
-                        <option value="Mini Truck">🚚 Mini Truck</option>
-                        <option value="Large Truck">🚛 Large Truck</option>
+                        {dbVehicleTypes.length > 0 ? (
+                          dbVehicleTypes.map(v => (
+                            <option key={v._id || v.vehicleName} value={v.vehicleName}>
+                              {v.vehicleName}
+                            </option>
+                          ))
+                        ) : (
+                          <>
+                            <option value="Bike">🚴 Bike Box</option>
+                            <option value="Tractor">🚜 Tractor Trolley</option>
+                            <option value="Pickup">🛻 Pickup Vehicle</option>
+                            <option value="Mini Truck">🚚 Mini Truck</option>
+                            <option value="Large Truck">🚛 Large Truck</option>
+                          </>
+                        )}
                       </select>
                       <span className="text-[8px] text-slate-400 font-semibold block mt-1">Determines load planning grids</span>
                     </div>
@@ -515,10 +571,18 @@ const DriverRegistry = () => {
                         onChange={e => setFuelType(e.target.value)}
                         className="w-full h-9.5 px-2 text-[12px] rounded-xl border border-slate-200 bg-[var(--color-surface)] text-[var(--color-text-primary)] hover:border-slate-350 focus:border-slate-800 outline-none transition-all"
                       >
-                        <option value="Diesel">Diesel</option>
-                        <option value="CNG">CNG</option>
-                        <option value="Electric">Electric</option>
-                        <option value="Petrol">Petrol</option>
+                        {selectedVehicleType && selectedVehicleType.fuelType && selectedVehicleType.fuelType.length > 0 ? (
+                          selectedVehicleType.fuelType.map(f => (
+                            <option key={f} value={f}>{f}</option>
+                          ))
+                        ) : (
+                          <>
+                            <option value="Diesel">Diesel</option>
+                            <option value="CNG">CNG</option>
+                            <option value="Electric">Electric</option>
+                            <option value="Petrol">Petrol</option>
+                          </>
+                        )}
                       </select>
                       <span className="text-[8px] text-slate-400 font-semibold block mt-1">For trip fuel cost estimation</span>
                     </div>
@@ -553,6 +617,72 @@ const DriverRegistry = () => {
                       <span className="text-[8px] text-slate-400 font-semibold block mt-1">Vehicle Registration Certificate No.</span>
                     </div>
                   </div>
+
+                  {/* Dynamic Specifications Card */}
+                  {selectedVehicleType && (
+                    <div className="bg-slate-50 border border-slate-150 rounded-2xl p-4.5 space-y-3.5 text-[11px] text-slate-600 transition-all select-none">
+                      <div className="flex justify-between items-center pb-2 border-b border-slate-200/50">
+                        <span className="font-extrabold text-slate-800 text-[12.5px] tracking-tight flex items-center gap-1.5">
+                          <span className="material-symbols-outlined text-[17px] text-indigo-500 leading-none">info</span>
+                          {selectedVehicleType.vehicleName} Specifications
+                        </span>
+                        <span className="px-2 py-0.5 rounded-lg text-[9px] font-black bg-indigo-50 border border-indigo-100 text-indigo-700 uppercase tracking-wider">
+                          {selectedVehicleType.vehicleCategory}
+                        </span>
+                      </div>
+                      
+                      <div className="grid grid-cols-2 gap-x-4 gap-y-2">
+                        <div className="flex items-center gap-1.5">
+                          <span className="material-symbols-outlined text-[15px] text-slate-400">scale</span>
+                          <span>Max Payload: <span className="font-black text-slate-800">{selectedVehicleType.capacityKg} kg</span></span>
+                        </div>
+                        <div className="flex items-center gap-1.5">
+                          <span className="material-symbols-outlined text-[15px] text-slate-400">assignment</span>
+                          <span>Max Orders: <span className="font-black text-slate-800">{selectedVehicleType.maxOrders}</span></span>
+                        </div>
+                        <div className="flex items-center gap-1.5">
+                          <span className="material-symbols-outlined text-[15px] text-slate-400">straighten</span>
+                          <span>Dimensions: <span className="font-black text-slate-800">
+                            {selectedVehicleType.dimensions.length} × {selectedVehicleType.dimensions.width} × {selectedVehicleType.dimensions.height}
+                          </span></span>
+                        </div>
+                        <div className="flex items-center gap-1.5">
+                          <span className="material-symbols-outlined text-[15px] text-slate-400">local_gas_station</span>
+                          <span>Allowed Fuel: <span className="font-black text-slate-800">{selectedVehicleType.fuelType.join(', ')}</span></span>
+                        </div>
+                        {selectedVehicleType.batteryRange && (
+                          <div className="flex items-center gap-1.5">
+                            <span className="material-symbols-outlined text-[15px] text-slate-400">battery_charging_full</span>
+                            <span>Battery Range: <span className="font-black text-slate-800">{selectedVehicleType.batteryRange}</span></span>
+                          </div>
+                        )}
+                        {selectedVehicleType.temperatureRange && (
+                          <div className="flex items-center gap-1.5">
+                            <span className="material-symbols-outlined text-[15px] text-slate-400">thermostat</span>
+                            <span>Temp Range: <span className="font-black text-slate-800">{selectedVehicleType.temperatureRange}</span></span>
+                          </div>
+                        )}
+                      </div>
+
+                      <div className="pt-2.5 border-t border-slate-200/50 flex flex-col gap-1.5">
+                        <div className="flex items-start gap-1">
+                          <span className="material-symbols-outlined text-[15px] text-slate-400 mt-0.5">track_changes</span>
+                          <span><span className="font-bold text-slate-500">Ideal Use Case:</span> <span className="font-semibold text-slate-700 italic">{selectedVehicleType.useCase}</span></span>
+                        </div>
+                        <div className="mt-1 flex flex-col gap-1">
+                          <span className="text-[9px] font-black text-slate-450 uppercase tracking-wider">Required Documents checklist:</span>
+                          <div className="flex flex-wrap gap-1.5">
+                            {selectedVehicleType.requiredDocuments.map((doc, dIdx) => (
+                              <span key={dIdx} className="px-2 py-0.5 rounded-lg bg-emerald-50 border border-emerald-100 text-emerald-700 text-[8.5px] font-black flex items-center gap-0.5">
+                                <span className="material-symbols-outlined text-[9px] font-black">check</span>
+                                {doc}
+                              </span>
+                            ))}
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  )}
                 </div>
               )}
 
