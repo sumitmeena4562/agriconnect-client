@@ -315,102 +315,142 @@ const DriverRegistry = () => {
               </button>
             </div>
 
-            {/* Steps Progress Tabs */}
-            <div className="px-5 pt-3.5 flex border-b border-[var(--color-border)] bg-[var(--color-bg-subtle)] gap-4 select-none">
+            {/* Horizontal Stepper Progress Indicator */}
+            <div className="px-6 py-4.5 border-b border-slate-100 bg-slate-50/50 flex items-center justify-between select-none">
               {[
-                { id: 0, label: '👤 Driver Info' },
-                { id: 1, label: '🛻 Vehicle Specs' },
-                { id: 2, label: '💳 Payout & Docs' }
-              ].map(tab => (
-                <button
-                  key={tab.id}
-                  type="button"
-                  onClick={() => setFormStep(tab.id)}
-                  className={`pb-2.5 text-[10.5px] font-black tracking-wide border-b-2 transition-all cursor-pointer ${
-                    formStep === tab.id 
-                      ? 'border-[var(--color-primary-500)] text-[var(--color-primary-600)]' 
-                      : 'border-transparent text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)]'
-                  }`}
-                >
-                  {tab.label}
-                </button>
-              ))}
+                { step: 0, title: 'Driver Info', desc: 'Personal & Contacts' },
+                { step: 1, title: 'Vehicle Specs', desc: 'DL, RC & Payload' },
+                { step: 2, title: 'Payout & Docs', desc: 'Bank & Insurance' }
+              ].map((item, index) => {
+                const isActive = formStep === item.step;
+                const isCompleted = formStep > item.step;
+                return (
+                  <React.Fragment key={item.step}>
+                    <div className="flex items-center gap-2">
+                      <div className={`w-6 h-6 rounded-full flex items-center justify-center text-[10px] font-black transition-all ${
+                        isActive
+                          ? 'bg-slate-900 text-white ring-4 ring-slate-900/10'
+                          : isCompleted
+                          ? 'bg-emerald-500 text-white'
+                          : 'bg-slate-100 text-slate-400 border border-slate-200'
+                      }`}>
+                        {isCompleted ? '✓' : item.step + 1}
+                      </div>
+                      <div className="hidden sm:block">
+                        <p className={`text-[10px] font-black leading-none ${isActive ? 'text-slate-800' : 'text-slate-400'}`}>
+                          {item.title}
+                        </p>
+                        <p className="text-[8px] font-bold text-slate-400/80 mt-0.5">{item.desc}</p>
+                      </div>
+                    </div>
+                    {index < 2 && (
+                      <div className={`flex-1 h-0.5 mx-2 ${formStep > item.step ? 'bg-emerald-500' : 'bg-slate-200'}`} />
+                    )}
+                  </React.Fragment>
+                );
+              })}
             </div>
             
             <form onSubmit={handleAddDriver} className="p-5 space-y-4">
               {/* STEP 0: DRIVER INFO */}
               {formStep === 0 && (
-                <div className="space-y-3.5">
+                <div className="space-y-4">
+                  {/* Section Title */}
+                  <div>
+                    <h3 className="text-[10px] font-black uppercase tracking-wider text-slate-450 border-b border-slate-100 pb-1 mb-3.5 flex items-center gap-1.5">
+                      <span className="w-1.5 h-3 rounded bg-indigo-500" />
+                      👤 Driver Profile Details
+                    </h3>
+                  </div>
+
                   {/* Row 1: Name and Phone */}
                   <div className="grid grid-cols-2 gap-3">
                     <div>
-                      <label className="text-[9.5px] font-bold text-[var(--color-text-secondary)] uppercase tracking-wider mb-1 block">Driver Name *</label>
+                      <label className="text-[9.5px] font-extrabold text-slate-500 uppercase tracking-wider mb-1 block">Driver Name <span className="text-rose-500">*</span></label>
                       <input
                         type="text"
                         placeholder="e.g. Ramesh Kumar"
                         value={name}
                         onChange={e => setName(e.target.value)}
-                        className="w-full h-9.5 px-3 text-[12px] rounded-[var(--form-border-radius)] border border-[var(--color-border)] bg-[var(--color-surface)] text-[var(--color-text-primary)] focus:border-[var(--color-primary-500)] focus:ring-2 focus:ring-[var(--color-primary-500)]/15 outline-none transition-all placeholder:text-[var(--color-text-muted)] placeholder:font-medium"
+                        className="w-full h-9.5 px-3 text-[12px] rounded-xl border border-slate-200 bg-[var(--color-surface)] text-[var(--color-text-primary)] focus:border-[var(--color-primary-500)] focus:ring-2 focus:ring-[var(--color-primary-500)]/15 outline-none transition-all placeholder:text-slate-350"
                         required
                       />
                     </div>
                     <div>
-                      <label className="text-[9.5px] font-bold text-[var(--color-text-secondary)] uppercase tracking-wider mb-1 block">Phone Number *</label>
+                      <label className="text-[9.5px] font-extrabold text-slate-500 uppercase tracking-wider mb-1 block">Phone Number <span className="text-rose-500">*</span></label>
                       <input
                         type="text"
                         placeholder="e.g. 9876543210"
                         value={phone}
                         onChange={e => setPhone(e.target.value)}
-                        className="w-full h-9.5 px-3 text-[12px] rounded-[var(--form-border-radius)] border border-[var(--color-border)] bg-[var(--color-surface)] text-[var(--color-text-primary)] focus:border-[var(--color-primary-500)] focus:ring-2 focus:ring-[var(--color-primary-500)]/15 outline-none transition-all placeholder:text-[var(--color-text-muted)] placeholder:font-medium"
+                        className="w-full h-9.5 px-3 text-[12px] rounded-xl border border-slate-200 bg-[var(--color-surface)] text-[var(--color-text-primary)] focus:border-[var(--color-primary-500)] focus:ring-2 focus:ring-[var(--color-primary-500)]/15 outline-none transition-all placeholder:text-slate-350"
                         required
                       />
                     </div>
                   </div>
 
-                  {/* Row 2: Emergency Contact */}
+                  {/* Row 2: Aadhaar & Address */}
                   <div className="grid grid-cols-2 gap-3">
                     <div>
-                      <label className="text-[9.5px] font-bold text-[var(--color-text-secondary)] uppercase tracking-wider mb-1 block">Emergency Name</label>
-                      <input
-                        type="text"
-                        placeholder="Next of kin name"
-                        value={emergencyContactName}
-                        onChange={e => setEmergencyContactName(e.target.value)}
-                        className="w-full h-9.5 px-3 text-[12px] rounded-[var(--form-border-radius)] border border-[var(--color-border)] bg-[var(--color-surface)] text-[var(--color-text-primary)] focus:border-[var(--color-primary-500)] focus:ring-2 focus:ring-[var(--color-primary-500)]/15 outline-none transition-all placeholder:text-[var(--color-text-muted)]"
-                      />
-                    </div>
-                    <div>
-                      <label className="text-[9.5px] font-bold text-[var(--color-text-secondary)] uppercase tracking-wider mb-1 block">Emergency Phone</label>
-                      <input
-                        type="text"
-                        placeholder="Next of kin phone"
-                        value={emergencyContactPhone}
-                        onChange={e => setEmergencyContactPhone(e.target.value)}
-                        className="w-full h-9.5 px-3 text-[12px] rounded-[var(--form-border-radius)] border border-[var(--color-border)] bg-[var(--color-surface)] text-[var(--color-text-primary)] focus:border-[var(--color-primary-500)] focus:ring-2 focus:ring-[var(--color-primary-500)]/15 outline-none transition-all placeholder:text-[var(--color-text-muted)]"
-                      />
-                    </div>
-                  </div>
-
-                  {/* Row 3: Aadhaar & Address */}
-                  <div className="grid grid-cols-2 gap-3">
-                    <div>
-                      <label className="text-[9.5px] font-bold text-[var(--color-text-secondary)] uppercase tracking-wider mb-1 block">Aadhaar Card No.</label>
+                      <label className="text-[9.5px] font-extrabold text-slate-500 uppercase tracking-wider mb-1 block">
+                        Aadhaar Card No. <span className="text-[8px] font-semibold text-slate-400 normal-case">(Optional)</span>
+                      </label>
                       <input
                         type="text"
                         placeholder="e.g. 1234 5678 9012"
                         value={aadhaarNumber}
                         onChange={e => setAadhaarNumber(e.target.value)}
-                        className="w-full h-9.5 px-3 text-[12px] rounded-[var(--form-border-radius)] border border-[var(--color-border)] bg-[var(--color-surface)] text-[var(--color-text-primary)] focus:border-[var(--color-primary-500)] focus:ring-2 focus:ring-[var(--color-primary-500)]/15 outline-none transition-all placeholder:text-[var(--color-text-muted)]"
+                        className="w-full h-9.5 px-3 text-[12px] rounded-xl border border-slate-200 bg-[var(--color-surface)] text-[var(--color-text-primary)] focus:border-[var(--color-primary-500)] focus:ring-2 focus:ring-[var(--color-primary-500)]/15 outline-none transition-all placeholder:text-slate-350"
                       />
+                      <span className="text-[8px] text-slate-400 font-semibold block mt-1 leading-none">12-digit UID for identity validation</span>
                     </div>
                     <div>
-                      <label className="text-[9.5px] font-bold text-[var(--color-text-secondary)] uppercase tracking-wider mb-1 block">Driver Address</label>
+                      <label className="text-[9.5px] font-extrabold text-slate-500 uppercase tracking-wider mb-1 block">
+                        Driver Address <span className="text-[8px] font-semibold text-slate-400 normal-case">(Optional)</span>
+                      </label>
                       <input
                         type="text"
                         placeholder="e.g. Town/Village, State"
                         value={address}
                         onChange={e => setAddress(e.target.value)}
-                        className="w-full h-9.5 px-3 text-[12px] rounded-[var(--form-border-radius)] border border-[var(--color-border)] bg-[var(--color-surface)] text-[var(--color-text-primary)] focus:border-[var(--color-primary-500)] focus:ring-2 focus:ring-[var(--color-primary-500)]/15 outline-none transition-all placeholder:text-[var(--color-text-muted)]"
+                        className="w-full h-9.5 px-3 text-[12px] rounded-xl border border-slate-200 bg-[var(--color-surface)] text-[var(--color-text-primary)] focus:border-[var(--color-primary-500)] focus:ring-2 focus:ring-[var(--color-primary-500)]/15 outline-none transition-all placeholder:text-slate-350"
+                      />
+                      <span className="text-[8px] text-slate-400 font-semibold block mt-1 leading-none">Current address of the driver</span>
+                    </div>
+                  </div>
+
+                  {/* Section Title */}
+                  <div className="pt-2">
+                    <h3 className="text-[10px] font-black uppercase tracking-wider text-slate-450 border-b border-slate-100 pb-1 mb-3.5 flex items-center gap-1.5">
+                      <span className="w-1.5 h-3 rounded bg-rose-400" />
+                      🚨 Emergency Contacts (Next of Kin)
+                    </h3>
+                  </div>
+
+                  {/* Row 3: Emergency Contact */}
+                  <div className="grid grid-cols-2 gap-3">
+                    <div>
+                      <label className="text-[9.5px] font-extrabold text-slate-500 uppercase tracking-wider mb-1 block">
+                        Contact Person <span className="text-[8px] font-semibold text-slate-400 normal-case">(Optional)</span>
+                      </label>
+                      <input
+                        type="text"
+                        placeholder="Family member name"
+                        value={emergencyContactName}
+                        onChange={e => setEmergencyContactName(e.target.value)}
+                        className="w-full h-9.5 px-3 text-[12px] rounded-xl border border-slate-200 bg-[var(--color-surface)] text-[var(--color-text-primary)] focus:border-[var(--color-primary-500)] focus:ring-2 focus:ring-[var(--color-primary-500)]/15 outline-none transition-all placeholder:text-slate-350"
+                      />
+                    </div>
+                    <div>
+                      <label className="text-[9.5px] font-extrabold text-slate-500 uppercase tracking-wider mb-1 block">
+                        Emergency Phone <span className="text-[8px] font-semibold text-slate-400 normal-case">(Optional)</span>
+                      </label>
+                      <input
+                        type="text"
+                        placeholder="Emergency contact phone"
+                        value={emergencyContactPhone}
+                        onChange={e => setEmergencyContactPhone(e.target.value)}
+                        className="w-full h-9.5 px-3 text-[12px] rounded-xl border border-slate-200 bg-[var(--color-surface)] text-[var(--color-text-primary)] focus:border-[var(--color-primary-500)] focus:ring-2 focus:ring-[var(--color-primary-500)]/15 outline-none transition-all placeholder:text-slate-350"
                       />
                     </div>
                   </div>
@@ -419,75 +459,35 @@ const DriverRegistry = () => {
 
               {/* STEP 1: LICENSE & VEHICLE SPECS */}
               {formStep === 1 && (
-                <div className="space-y-3.5">
-                  {/* Row 1: DL Number & DL Class */}
-                  <div className="grid grid-cols-2 gap-3">
-                    <div>
-                      <label className="text-[9.5px] font-bold text-[var(--color-text-secondary)] uppercase tracking-wider mb-1 block">DL Number</label>
-                      <input
-                        type="text"
-                        placeholder="e.g. MH04201100"
-                        value={licenseNumber}
-                        onChange={e => setLicenseNumber(e.target.value)}
-                        className="w-full h-9.5 px-3 text-[12px] rounded-[var(--form-border-radius)] border border-[var(--color-border)] bg-[var(--color-surface)] text-[var(--color-text-primary)] focus:border-[var(--color-primary-500)] focus:ring-2 focus:ring-[var(--color-primary-500)]/15 outline-none transition-all uppercase placeholder:text-[var(--color-text-muted)]"
-                      />
-                    </div>
-                    <div>
-                      <label className="text-[9.5px] font-bold text-[var(--color-text-secondary)] uppercase tracking-wider mb-1 block">DL Class / Category</label>
-                      <select
-                        value={licenseClass}
-                        onChange={e => setLicenseClass(e.target.value)}
-                        className="w-full h-9.5 px-2 text-[12px] rounded-[var(--form-border-radius)] border border-[var(--color-border)] bg-[var(--color-surface)] text-[var(--color-text-primary)] focus:border-[var(--color-primary-500)] focus:ring-2 focus:ring-[var(--color-primary-500)]/15 outline-none transition-all"
-                      >
-                        <option value="LMV">LMV (Light Motor Vehicle)</option>
-                        <option value="HMV">HMV (Heavy Motor Vehicle)</option>
-                        <option value="MCWG">MCWG (Motorcycle with Gear)</option>
-                      </select>
-                    </div>
+                <div className="space-y-4">
+                  {/* Section Title */}
+                  <div>
+                    <h3 className="text-[10px] font-black uppercase tracking-wider text-slate-450 border-b border-slate-100 pb-1 mb-3.5 flex items-center gap-1.5">
+                      <span className="w-1.5 h-3 rounded bg-indigo-500" />
+                      🛻 Vehicle Specs & fuel
+                    </h3>
                   </div>
 
-                  {/* Row 2: DL Expiry & Vehicle Model */}
+                  {/* Row 1: Vehicle No & Vehicle Type */}
                   <div className="grid grid-cols-2 gap-3">
                     <div>
-                      <label className="text-[9.5px] font-bold text-[var(--color-text-secondary)] uppercase tracking-wider mb-1 block">DL Expiry Date</label>
-                      <input
-                        type="date"
-                        value={licenseExpiry}
-                        onChange={e => setLicenseExpiry(e.target.value)}
-                        className="w-full h-9.5 px-3 text-[12px] rounded-[var(--form-border-radius)] border border-[var(--color-border)] bg-[var(--color-surface)] text-[var(--color-text-primary)] focus:border-[var(--color-primary-500)] focus:ring-2 focus:ring-[var(--color-primary-500)]/15 outline-none transition-all"
-                      />
-                    </div>
-                    <div>
-                      <label className="text-[9.5px] font-bold text-[var(--color-text-secondary)] uppercase tracking-wider mb-1 block">Vehicle Model</label>
-                      <input
-                        type="text"
-                        placeholder="e.g. Tata Ace Gold"
-                        value={vehicleModel}
-                        onChange={e => setVehicleModel(e.target.value)}
-                        className="w-full h-9.5 px-3 text-[12px] rounded-[var(--form-border-radius)] border border-[var(--color-border)] bg-[var(--color-surface)] text-[var(--color-text-primary)] focus:border-[var(--color-primary-500)] focus:ring-2 focus:ring-[var(--color-primary-500)]/15 outline-none transition-all placeholder:text-[var(--color-text-muted)]"
-                      />
-                    </div>
-                  </div>
-
-                  {/* Row 3: Vehicle No & Vehicle Type */}
-                  <div className="grid grid-cols-2 gap-3">
-                    <div>
-                      <label className="text-[9.5px] font-bold text-[var(--color-text-secondary)] uppercase tracking-wider mb-1 block">Vehicle Number *</label>
+                      <label className="text-[9.5px] font-extrabold text-slate-500 uppercase tracking-wider mb-1 block">Vehicle Number <span className="text-rose-500">*</span></label>
                       <input
                         type="text"
                         placeholder="e.g. MH 12 AB 5678"
                         value={vehicleNumber}
                         onChange={e => setVehicleNumber(e.target.value)}
-                        className="w-full h-9.5 px-3 text-[12px] rounded-[var(--form-border-radius)] border border-[var(--color-border)] bg-[var(--color-surface)] text-[var(--color-text-primary)] focus:border-[var(--color-primary-500)] focus:ring-2 focus:ring-[var(--color-primary-500)]/15 outline-none transition-all font-mono uppercase tracking-wider placeholder:text-[var(--color-text-muted)]"
+                        className="w-full h-9.5 px-3 text-[12px] rounded-xl border border-slate-200 bg-[var(--color-surface)] text-[var(--color-text-primary)] focus:border-[var(--color-primary-500)] focus:ring-2 focus:ring-[var(--color-primary-500)]/15 outline-none transition-all font-mono uppercase tracking-wider placeholder:text-slate-350"
                         required
                       />
+                      <span className="text-[8px] text-slate-400 font-semibold block mt-1 leading-none">Enter RTO Plate registration number</span>
                     </div>
                     <div>
-                      <label className="text-[9.5px] font-bold text-[var(--color-text-secondary)] uppercase tracking-wider mb-1 block">Vehicle Type *</label>
+                      <label className="text-[9.5px] font-extrabold text-slate-500 uppercase tracking-wider mb-1 block">Vehicle Type <span className="text-rose-500">*</span></label>
                       <select
                         value={vehicleType}
                         onChange={e => setVehicleType(e.target.value)}
-                        className="w-full h-9.5 px-2 text-[12px] rounded-[var(--form-border-radius)] border border-[var(--color-border)] bg-[var(--color-surface)] text-[var(--color-text-primary)] focus:border-[var(--color-primary-500)] focus:ring-2 focus:ring-[var(--color-primary-500)]/15 outline-none transition-all"
+                        className="w-full h-9.5 px-2 text-[12px] rounded-xl border border-slate-200 bg-[var(--color-surface)] text-[var(--color-text-primary)] focus:border-[var(--color-primary-500)] focus:ring-2 focus:ring-[var(--color-primary-500)]/15 outline-none transition-all"
                       >
                         <option value="Bike">🚴 Bike Box</option>
                         <option value="Tractor">🚜 Tractor Trolley</option>
@@ -495,29 +495,30 @@ const DriverRegistry = () => {
                         <option value="Mini Truck">🚚 Mini Truck</option>
                         <option value="Large Truck">🚛 Large Truck</option>
                       </select>
+                      <span className="text-[8px] text-slate-400 font-semibold block mt-1 leading-none">Determines the canvas load plan layout</span>
                     </div>
                   </div>
 
-                  {/* Row 4: Payload, Fuel Type & RC */}
+                  {/* Row 2: Payload, Fuel Type & RC Number */}
                   <div className="grid grid-cols-3 gap-2">
                     <div>
-                      <label className="text-[9.5px] font-bold text-[var(--color-text-secondary)] uppercase tracking-wider mb-1 block">Payload (kg) *</label>
+                      <label className="text-[9.5px] font-extrabold text-slate-500 uppercase tracking-wider mb-1 block">Payload (kg) <span className="text-rose-500">*</span></label>
                       <input
                         type="number"
                         min="1"
                         placeholder="e.g. 1000"
                         value={payloadCapacity}
                         onChange={e => setPayloadCapacity(e.target.value)}
-                        className="w-full h-9.5 px-2 text-[12px] rounded-[var(--form-border-radius)] border border-[var(--color-border)] bg-[var(--color-surface)] text-[var(--color-text-primary)] focus:border-[var(--color-primary-500)] focus:ring-2 focus:ring-[var(--color-primary-500)]/15 outline-none transition-all placeholder:text-[var(--color-text-muted)]"
+                        className="w-full h-9.5 px-2 text-[12px] rounded-xl border border-slate-200 bg-[var(--color-surface)] text-[var(--color-text-primary)] focus:border-[var(--color-primary-500)] focus:ring-2 focus:ring-[var(--color-primary-500)]/15 outline-none transition-all placeholder:text-slate-350"
                         required
                       />
                     </div>
                     <div>
-                      <label className="text-[9.5px] font-bold text-[var(--color-text-secondary)] uppercase tracking-wider mb-1 block">Fuel Type</label>
+                      <label className="text-[9.5px] font-extrabold text-slate-500 uppercase tracking-wider mb-1 block">Fuel Type</label>
                       <select
                         value={fuelType}
                         onChange={e => setFuelType(e.target.value)}
-                        className="w-full h-9.5 px-1 text-[12px] rounded-[var(--form-border-radius)] border border-[var(--color-border)] bg-[var(--color-surface)] text-[var(--color-text-primary)] focus:border-[var(--color-primary-500)] focus:ring-2 focus:ring-[var(--color-primary-500)]/15 outline-none transition-all"
+                        className="w-full h-9.5 px-1 text-[12px] rounded-xl border border-slate-200 bg-[var(--color-surface)] text-[var(--color-text-primary)] focus:border-[var(--color-primary-500)] focus:ring-2 focus:ring-[var(--color-primary-500)]/15 outline-none transition-all"
                       >
                         <option value="Diesel">Diesel</option>
                         <option value="CNG">CNG</option>
@@ -526,13 +527,78 @@ const DriverRegistry = () => {
                       </select>
                     </div>
                     <div>
-                      <label className="text-[9.5px] font-bold text-[var(--color-text-secondary)] uppercase tracking-wider mb-1 block">RC Number</label>
+                      <label className="text-[9.5px] font-extrabold text-slate-500 uppercase tracking-wider mb-1 block flex items-center gap-1 truncate">
+                        RC No. <span className="text-[8px] font-semibold text-slate-400 normal-case">(Opt)</span>
+                      </label>
                       <input
                         type="text"
                         placeholder="e.g. MH12AB"
                         value={rcNumber}
                         onChange={e => setRcNumber(e.target.value)}
-                        className="w-full h-9.5 px-2 text-[12px] rounded-[var(--form-border-radius)] border border-[var(--color-border)] bg-[var(--color-surface)] text-[var(--color-text-primary)] focus:border-[var(--color-primary-500)] focus:ring-2 focus:ring-[var(--color-primary-500)]/15 outline-none transition-all uppercase placeholder:text-[var(--color-text-muted)]"
+                        className="w-full h-9.5 px-2 text-[12px] rounded-xl border border-slate-200 bg-[var(--color-surface)] text-[var(--color-text-primary)] focus:border-[var(--color-primary-500)] focus:ring-2 focus:ring-[var(--color-primary-500)]/15 outline-none transition-all uppercase placeholder:text-slate-350"
+                      />
+                    </div>
+                  </div>
+
+                  {/* Section Title */}
+                  <div className="pt-2">
+                    <h3 className="text-[10px] font-black uppercase tracking-wider text-slate-450 border-b border-slate-100 pb-1 mb-3.5 flex items-center gap-1.5">
+                      <span className="w-1.5 h-3 rounded bg-rose-400" />
+                      ⚖️ Capacity & DL compliance
+                    </h3>
+                  </div>
+
+                  {/* Row 3: DL Number & DL Class */}
+                  <div className="grid grid-cols-2 gap-3">
+                    <div>
+                      <label className="text-[9.5px] font-extrabold text-slate-500 uppercase tracking-wider mb-1 block">
+                        DL Number <span className="text-[8px] font-semibold text-slate-400 normal-case">(Optional)</span>
+                      </label>
+                      <input
+                        type="text"
+                        placeholder="e.g. MH04201100"
+                        value={licenseNumber}
+                        onChange={e => setLicenseNumber(e.target.value)}
+                        className="w-full h-9.5 px-3 text-[12px] rounded-xl border border-slate-200 bg-[var(--color-surface)] text-[var(--color-text-primary)] focus:border-[var(--color-primary-500)] focus:ring-2 focus:ring-[var(--color-primary-500)]/15 outline-none transition-all uppercase placeholder:text-slate-350"
+                      />
+                    </div>
+                    <div>
+                      <label className="text-[9.5px] font-extrabold text-slate-500 uppercase tracking-wider mb-1 block">DL Class / Category</label>
+                      <select
+                        value={licenseClass}
+                        onChange={e => setLicenseClass(e.target.value)}
+                        className="w-full h-9.5 px-2 text-[12px] rounded-xl border border-slate-200 bg-[var(--color-surface)] text-[var(--color-text-primary)] focus:border-[var(--color-primary-500)] focus:ring-2 focus:ring-[var(--color-primary-500)]/15 outline-none transition-all"
+                      >
+                        <option value="LMV">LMV (Light Motor Vehicle)</option>
+                        <option value="HMV">HMV (Heavy Motor Vehicle)</option>
+                        <option value="MCWG">MCWG (Motorcycle with Gear)</option>
+                      </select>
+                    </div>
+                  </div>
+
+                  {/* Row 4: DL Expiry & Vehicle Model */}
+                  <div className="grid grid-cols-2 gap-3">
+                    <div>
+                      <label className="text-[9.5px] font-extrabold text-slate-500 uppercase tracking-wider mb-1 block">
+                        DL Expiry Date <span className="text-[8px] font-semibold text-slate-400 normal-case">(Optional)</span>
+                      </label>
+                      <input
+                        type="date"
+                        value={licenseExpiry}
+                        onChange={e => setLicenseExpiry(e.target.value)}
+                        className="w-full h-9.5 px-3 text-[12px] rounded-xl border border-slate-200 bg-[var(--color-surface)] text-[var(--color-text-primary)] focus:border-[var(--color-primary-500)] focus:ring-2 focus:ring-[var(--color-primary-500)]/15 outline-none transition-all"
+                      />
+                    </div>
+                    <div>
+                      <label className="text-[9.5px] font-extrabold text-slate-500 uppercase tracking-wider mb-1 block">
+                        Vehicle Model <span className="text-[8px] font-semibold text-slate-400 normal-case">(Optional)</span>
+                      </label>
+                      <input
+                        type="text"
+                        placeholder="e.g. Tata Ace Gold"
+                        value={vehicleModel}
+                        onChange={e => setVehicleModel(e.target.value)}
+                        className="w-full h-9.5 px-3 text-[12px] rounded-xl border border-slate-200 bg-[var(--color-surface)] text-[var(--color-text-primary)] focus:border-[var(--color-primary-500)] focus:ring-2 focus:ring-[var(--color-primary-500)]/15 outline-none transition-all placeholder:text-slate-350"
                       />
                     </div>
                   </div>
@@ -541,84 +607,116 @@ const DriverRegistry = () => {
 
               {/* STEP 2: DOCUMENTS & PAYOUTS */}
               {formStep === 2 && (
-                <div className="space-y-3.5">
-                  {/* Row 1: PAN & Insurance Expiry */}
-                  <div className="grid grid-cols-2 gap-3">
-                    <div>
-                      <label className="text-[9.5px] font-bold text-[var(--color-text-secondary)] uppercase tracking-wider mb-1 block">PAN Number</label>
-                      <input
-                        type="text"
-                        placeholder="e.g. ABCDE1234F"
-                        value={panNumber}
-                        onChange={e => setPanNumber(e.target.value)}
-                        className="w-full h-9.5 px-3 text-[12px] rounded-[var(--form-border-radius)] border border-[var(--color-border)] bg-[var(--color-surface)] text-[var(--color-text-primary)] focus:border-[var(--color-primary-500)] focus:ring-2 focus:ring-[var(--color-primary-500)]/15 outline-none transition-all uppercase placeholder:text-[var(--color-text-muted)]"
-                      />
-                    </div>
-                    <div>
-                      <label className="text-[9.5px] font-bold text-[var(--color-text-secondary)] uppercase tracking-wider mb-1 block">Insurance Policy No.</label>
-                      <input
-                        type="text"
-                        placeholder="Policy number"
-                        value={insurancePolicyNumber}
-                        onChange={e => setInsurancePolicyNumber(e.target.value)}
-                        className="w-full h-9.5 px-3 text-[12px] rounded-[var(--form-border-radius)] border border-[var(--color-border)] bg-[var(--color-surface)] text-[var(--color-text-primary)] focus:border-[var(--color-primary-500)] focus:ring-2 focus:ring-[var(--color-primary-500)]/15 outline-none transition-all placeholder:text-[var(--color-text-muted)]"
-                      />
-                    </div>
+                <div className="space-y-4">
+                  {/* Section Title */}
+                  <div>
+                    <h3 className="text-[10px] font-black uppercase tracking-wider text-slate-450 border-b border-slate-100 pb-1 mb-3.5 flex items-center gap-1.5">
+                      <span className="w-1.5 h-3 rounded bg-indigo-500" />
+                      🏦 Bank Payout Details
+                    </h3>
                   </div>
 
-                  {/* Row 2: Bank Account Name & UPI ID */}
+                  {/* Row 1: Bank Account Name & UPI ID */}
                   <div className="grid grid-cols-2 gap-3">
                     <div>
-                      <label className="text-[9.5px] font-bold text-[var(--color-text-secondary)] uppercase tracking-wider mb-1 block">Bank Account Holder</label>
+                      <label className="text-[9.5px] font-extrabold text-slate-500 uppercase tracking-wider mb-1 block">
+                        Account Holder Name <span className="text-[8px] font-semibold text-slate-400 normal-case">(Optional)</span>
+                      </label>
                       <input
                         type="text"
                         placeholder="Account name"
                         value={bankAccountName}
                         onChange={e => setBankAccountName(e.target.value)}
-                        className="w-full h-9.5 px-3 text-[12px] rounded-[var(--form-border-radius)] border border-[var(--color-border)] bg-[var(--color-surface)] text-[var(--color-text-primary)] focus:border-[var(--color-primary-500)] focus:ring-2 focus:ring-[var(--color-primary-500)]/15 outline-none transition-all placeholder:text-[var(--color-text-muted)]"
+                        className="w-full h-9.5 px-3 text-[12px] rounded-xl border border-slate-200 bg-[var(--color-surface)] text-[var(--color-text-primary)] focus:border-[var(--color-primary-500)] focus:ring-2 focus:ring-[var(--color-primary-500)]/15 outline-none transition-all placeholder:text-slate-350"
                       />
                     </div>
                     <div>
-                      <label className="text-[9.5px] font-bold text-[var(--color-text-secondary)] uppercase tracking-wider mb-1 block">UPI ID for Payout</label>
+                      <label className="text-[9.5px] font-extrabold text-slate-500 uppercase tracking-wider mb-1 block">
+                        UPI ID for Payout <span className="text-[8px] font-semibold text-slate-400 normal-case">(Optional)</span>
+                      </label>
                       <input
                         type="text"
                         placeholder="e.g. driver@ybl"
                         value={upiId}
                         onChange={e => setUpiId(e.target.value)}
-                        className="w-full h-9.5 px-3 text-[12px] rounded-[var(--form-border-radius)] border border-[var(--color-border)] bg-[var(--color-surface)] text-[var(--color-text-primary)] focus:border-[var(--color-primary-500)] focus:ring-2 focus:ring-[var(--color-primary-500)]/15 outline-none transition-all placeholder:text-[var(--color-text-muted)]"
+                        className="w-full h-9.5 px-3 text-[12px] rounded-xl border border-slate-200 bg-[var(--color-surface)] text-[var(--color-text-primary)] focus:border-[var(--color-primary-500)] focus:ring-2 focus:ring-[var(--color-primary-500)]/15 outline-none transition-all placeholder:text-slate-350"
                       />
+                      <span className="text-[8px] text-slate-400 font-semibold block mt-1 leading-none">Instant settlement address</span>
                     </div>
                   </div>
 
-                  {/* Row 3: Bank Account Number & IFSC Code */}
+                  {/* Row 2: Bank Account Number & IFSC Code */}
                   <div className="grid grid-cols-2 gap-3">
                     <div>
-                      <label className="text-[9.5px] font-bold text-[var(--color-text-secondary)] uppercase tracking-wider mb-1 block">Bank Account Number</label>
+                      <label className="text-[9.5px] font-extrabold text-slate-500 uppercase tracking-wider mb-1 block">
+                        Bank Account Number <span className="text-[8px] font-semibold text-slate-400 normal-case">(Optional)</span>
+                      </label>
                       <input
                         type="text"
                         placeholder="Account number"
                         value={bankAccountNumber}
                         onChange={e => setBankAccountAccountNumber(e.target.value)}
-                        className="w-full h-9.5 px-3 text-[12px] rounded-[var(--form-border-radius)] border border-[var(--color-border)] bg-[var(--color-surface)] text-[var(--color-text-primary)] focus:border-[var(--color-primary-500)] focus:ring-2 focus:ring-[var(--color-primary-500)]/15 outline-none transition-all placeholder:text-[var(--color-text-muted)]"
+                        className="w-full h-9.5 px-3 text-[12px] rounded-xl border border-slate-200 bg-[var(--color-surface)] text-[var(--color-text-primary)] focus:border-[var(--color-primary-500)] focus:ring-2 focus:ring-[var(--color-primary-500)]/15 outline-none transition-all placeholder:text-slate-350"
                       />
                     </div>
                     <div>
-                      <label className="text-[9.5px] font-bold text-[var(--color-text-secondary)] uppercase tracking-wider mb-1 block">Bank IFSC Code</label>
+                      <label className="text-[9.5px] font-extrabold text-slate-500 uppercase tracking-wider mb-1 block">
+                        Bank IFSC Code <span className="text-[8px] font-semibold text-slate-400 normal-case">(Optional)</span>
+                      </label>
                       <input
                         type="text"
                         placeholder="e.g. SBIN0001234"
                         value={bankAccountIfsc}
                         onChange={e => setBankAccountIfsc(e.target.value)}
-                        className="w-full h-9.5 px-3 text-[12px] rounded-[var(--form-border-radius)] border border-[var(--color-border)] bg-[var(--color-surface)] text-[var(--color-text-primary)] focus:border-[var(--color-primary-500)] focus:ring-2 focus:ring-[var(--color-primary-500)]/15 outline-none transition-all uppercase placeholder:text-[var(--color-text-muted)]"
+                        className="w-full h-9.5 px-3 text-[12px] rounded-xl border border-slate-200 bg-[var(--color-surface)] text-[var(--color-text-primary)] focus:border-[var(--color-primary-500)] focus:ring-2 focus:ring-[var(--color-primary-500)]/15 outline-none transition-all uppercase placeholder:text-slate-350"
+                      />
+                    </div>
+                  </div>
+
+                  {/* Section Title */}
+                  <div className="pt-2">
+                    <h3 className="text-[10px] font-black uppercase tracking-wider text-slate-450 border-b border-slate-100 pb-1 mb-3.5 flex items-center gap-1.5">
+                      <span className="w-1.5 h-3 rounded bg-rose-400" />
+                      📄 Verification Documents & Insurance
+                    </h3>
+                  </div>
+
+                  {/* Row 3: PAN & Insurance Expiry */}
+                  <div className="grid grid-cols-2 gap-3">
+                    <div>
+                      <label className="text-[9.5px] font-extrabold text-slate-500 uppercase tracking-wider mb-1 block">
+                        PAN Card Number <span className="text-[8px] font-semibold text-slate-400 normal-case">(Optional)</span>
+                      </label>
+                      <input
+                        type="text"
+                        placeholder="e.g. ABCDE1234F"
+                        value={panNumber}
+                        onChange={e => setPanNumber(e.target.value)}
+                        className="w-full h-9.5 px-3 text-[12px] rounded-xl border border-slate-200 bg-[var(--var(--color-surface))] text-[var(--color-text-primary)] focus:border-[var(--color-primary-500)] focus:ring-2 focus:ring-[var(--color-primary-500)]/15 outline-none transition-all uppercase placeholder:text-slate-350"
+                      />
+                      <span className="text-[8px] text-slate-400 font-semibold block mt-1 leading-none">For tax & TDS deductions</span>
+                    </div>
+                    <div>
+                      <label className="text-[9.5px] font-extrabold text-slate-500 uppercase tracking-wider mb-1 block">
+                        Insurance Policy No. <span className="text-[8px] font-semibold text-slate-400 normal-case">(Optional)</span>
+                      </label>
+                      <input
+                        type="text"
+                        placeholder="Policy number"
+                        value={insurancePolicyNumber}
+                        onChange={e => setInsurancePolicyNumber(e.target.value)}
+                        className="w-full h-9.5 px-3 text-[12px] rounded-xl border border-slate-200 bg-[var(--color-surface)] text-[var(--color-text-primary)] focus:border-[var(--color-primary-500)] focus:ring-2 focus:ring-[var(--color-primary-500)]/15 outline-none transition-all placeholder:text-slate-350"
                       />
                     </div>
                   </div>
 
                   {/* Row 4: Upload Insurance document */}
                   <div>
-                    <label className="text-[9.5px] font-bold text-[var(--color-text-secondary)] uppercase tracking-wider mb-1 block">Insurance File Upload</label>
+                    <label className="text-[9.5px] font-extrabold text-slate-500 uppercase tracking-wider mb-1 block">
+                      Insurance File Copy <span className="text-[8px] font-semibold text-slate-400 normal-case">(Optional)</span>
+                    </label>
                     <div className="flex items-center gap-3">
-                      <label className="flex items-center justify-center h-10 px-4 rounded-[var(--form-border-radius)] border border-dashed border-[var(--color-border)] hover:border-primary-500 hover:bg-primary-50/20 text-[11px] font-bold text-[var(--color-text-secondary)] hover:text-primary-600 transition-all cursor-pointer flex-1">
+                      <label className="flex items-center justify-center h-10 px-4 rounded-xl border border-dashed border-slate-250 hover:border-slate-400 hover:bg-slate-50 text-[11px] font-bold text-slate-500 hover:text-slate-700 transition-all cursor-pointer flex-1">
                         <span className="material-symbols-outlined text-[16px] mr-1.5">upload_file</span>
                         <span className="truncate">{insuranceFile ? insuranceFile.name : 'Choose Insurance Doc / PDF'}</span>
                         <input
@@ -632,7 +730,7 @@ const DriverRegistry = () => {
                         <button
                           type="button"
                           onClick={() => setInsuranceFile(null)}
-                          className="w-10 h-10 rounded-[var(--form-border-radius)] bg-red-50 hover:bg-red-100 text-red-600 flex items-center justify-center border border-red-100 transition-colors cursor-pointer"
+                          className="w-10 h-10 rounded-xl bg-red-50 hover:bg-red-100 text-red-600 flex items-center justify-center border border-red-100 transition-colors cursor-pointer"
                           title="Remove file"
                         >
                           <span className="material-symbols-outlined text-[16px]">close</span>
@@ -650,7 +748,7 @@ const DriverRegistry = () => {
                     type="button"
                     onClick={() => setFormStep(prev => prev - 1)}
                     disabled={isSubmitting}
-                    className="flex-1 h-10 rounded-[var(--form-border-radius)] border border-[var(--color-border)] text-[var(--color-text-secondary)] hover:bg-[var(--color-bg-subtle)] text-[11.5px] font-black transition-all cursor-pointer active:scale-[0.98]"
+                    className="flex-1 h-10 rounded-xl border border-slate-250 text-slate-500 hover:bg-slate-50 text-[11.5px] font-black transition-all cursor-pointer active:scale-[0.98]"
                   >
                     Back
                   </button>
@@ -659,7 +757,7 @@ const DriverRegistry = () => {
                     type="button"
                     onClick={() => setIsAddModalOpen(false)}
                     disabled={isSubmitting}
-                    className="flex-1 h-10 rounded-[var(--form-border-radius)] border border-[var(--color-border)] text-[var(--color-text-secondary)] hover:bg-[var(--color-bg-subtle)] text-[11.5px] font-black transition-all cursor-pointer active:scale-[0.98]"
+                    className="flex-1 h-10 rounded-xl border border-slate-250 text-slate-500 hover:bg-slate-50 text-[11.5px] font-black transition-all cursor-pointer active:scale-[0.98]"
                   >
                     Cancel
                   </button>
@@ -675,7 +773,7 @@ const DriverRegistry = () => {
                       }
                       setFormStep(prev => prev + 1);
                     }}
-                    className="flex-1 h-10 rounded-[var(--form-border-radius)] bg-slate-900 hover:bg-slate-800 text-white text-[11.5px] font-black transition-all flex items-center justify-center gap-1 cursor-pointer active:scale-[0.98]"
+                    className="flex-1 h-10 rounded-xl bg-slate-900 hover:bg-slate-800 text-white text-[11.5px] font-black transition-all flex items-center justify-center gap-1 cursor-pointer active:scale-[0.98]"
                   >
                     Next Step ➔
                   </button>
@@ -683,7 +781,7 @@ const DriverRegistry = () => {
                   <button
                     type="submit"
                     disabled={isSubmitting}
-                    className="flex-1 h-10 rounded-[var(--form-border-radius)] bg-[var(--color-primary-600)] hover:bg-[var(--color-primary-700)] text-white text-[11.5px] font-black shadow-sm shadow-[var(--color-primary-500)]/10 transition-all flex items-center justify-center gap-1.5 cursor-pointer active:scale-[0.98]"
+                    className="flex-1 h-10 rounded-xl bg-[var(--color-primary-600)] hover:bg-[var(--color-primary-700)] text-white text-[11.5px] font-black shadow-sm shadow-[var(--color-primary-500)]/10 transition-all flex items-center justify-center gap-1.5 cursor-pointer active:scale-[0.98]"
                   >
                     {isSubmitting ? (
                       <div className="w-4.5 h-4.5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
