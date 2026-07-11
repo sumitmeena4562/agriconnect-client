@@ -26,6 +26,11 @@ const DriverCard = ({ driver, onDelete }) => {
           bgGradient: 'from-purple-400 to-purple-500',
           badgeText: '🚛 Large Truck'
         };
+      case 'Pickup':
+        return {
+          bgGradient: 'from-sky-400 to-sky-500',
+          badgeText: '🛻 Pickup Vehicle'
+        };
       default:
         return {
           bgGradient: 'from-slate-400 to-slate-500',

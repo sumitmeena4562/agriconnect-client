@@ -263,55 +263,60 @@ const DriverRegistry = () => {
                 <span className="material-symbols-outlined text-[16px]">close</span>
               </button>
             </div>
-            
-            <form onSubmit={handleAddDriver} className="p-5 space-y-4">
-              <div>
-                <label className="text-[10px] font-bold text-[var(--color-text-secondary)] uppercase tracking-wider mb-1 block">Driver Name</label>
-                <input
-                  type="text"
-                  placeholder="e.g. Ramesh Kumar"
-                  value={name}
-                  onChange={e => setName(e.target.value)}
-                  className="w-full h-10 px-3 text-[12.5px] rounded-[var(--form-border-radius)] border border-[var(--color-border)] bg-[var(--color-surface)] text-[var(--color-text-primary)] focus:border-[var(--color-primary-500)] focus:ring-2 focus:ring-[var(--color-primary-500)]/15 outline-none transition-all placeholder:text-[var(--color-text-muted)] placeholder:font-medium"
-                />
+                    <form onSubmit={handleAddDriver} className="p-5 space-y-3.5">
+              {/* Row 1: Name and Phone */}
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="text-[10px] font-bold text-[var(--color-text-secondary)] uppercase tracking-wider mb-1 block">Driver Name</label>
+                  <input
+                    type="text"
+                    placeholder="e.g. Ramesh Kumar"
+                    value={name}
+                    onChange={e => setName(e.target.value)}
+                    className="w-full h-10 px-3 text-[12.5px] rounded-[var(--form-border-radius)] border border-[var(--color-border)] bg-[var(--color-surface)] text-[var(--color-text-primary)] focus:border-[var(--color-primary-500)] focus:ring-2 focus:ring-[var(--color-primary-500)]/15 outline-none transition-all placeholder:text-[var(--color-text-muted)] placeholder:font-medium"
+                  />
+                </div>
+                <div>
+                  <label className="text-[10px] font-bold text-[var(--color-text-secondary)] uppercase tracking-wider mb-1 block">Phone Number</label>
+                  <input
+                    type="text"
+                    placeholder="e.g. 9876543210"
+                    value={phone}
+                    onChange={e => setPhone(e.target.value)}
+                    className="w-full h-10 px-3 text-[12.5px] rounded-[var(--form-border-radius)] border border-[var(--color-border)] bg-[var(--color-surface)] text-[var(--color-text-primary)] focus:border-[var(--color-primary-500)] focus:ring-2 focus:ring-[var(--color-primary-500)]/15 outline-none transition-all placeholder:text-[var(--color-text-muted)] placeholder:font-medium"
+                  />
+                </div>
               </div>
 
-              <div>
-                <label className="text-[10px] font-bold text-[var(--color-text-secondary)] uppercase tracking-wider mb-1 block">Phone Number</label>
-                <input
-                  type="text"
-                  placeholder="e.g. 9876543210"
-                  value={phone}
-                  onChange={e => setPhone(e.target.value)}
-                  className="w-full h-10 px-3 text-[12.5px] rounded-[var(--form-border-radius)] border border-[var(--color-border)] bg-[var(--color-surface)] text-[var(--color-text-primary)] focus:border-[var(--color-primary-500)] focus:ring-2 focus:ring-[var(--color-primary-500)]/15 outline-none transition-all placeholder:text-[var(--color-text-muted)] placeholder:font-medium"
-                />
+              {/* Row 2: Vehicle Number and Vehicle Type */}
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="text-[10px] font-bold text-[var(--color-text-secondary)] uppercase tracking-wider mb-1 block">Vehicle Number</label>
+                  <input
+                    type="text"
+                    placeholder="e.g. MH 12 AB 5678"
+                    value={vehicleNumber}
+                    onChange={e => setVehicleNumber(e.target.value)}
+                    className="w-full h-10 px-3 text-[12.5px] rounded-[var(--form-border-radius)] border border-[var(--color-border)] bg-[var(--color-surface)] text-[var(--color-text-primary)] focus:border-[var(--color-primary-500)] focus:ring-2 focus:ring-[var(--color-primary-500)]/15 outline-none transition-all font-mono uppercase tracking-wider placeholder:text-[var(--color-text-muted)] placeholder:font-medium"
+                  />
+                </div>
+                <div>
+                  <label className="text-[10px] font-bold text-[var(--color-text-secondary)] uppercase tracking-wider mb-1 block">Vehicle Type</label>
+                  <select
+                    value={vehicleType}
+                    onChange={e => setVehicleType(e.target.value)}
+                    className="w-full h-10 px-2 text-[12.5px] rounded-[var(--form-border-radius)] border border-[var(--color-border)] bg-[var(--color-surface)] text-[var(--color-text-primary)] focus:border-[var(--color-primary-500)] focus:ring-2 focus:ring-[var(--color-primary-500)]/15 outline-none transition-all"
+                  >
+                    <option value="Bike">🚴 Bike Box</option>
+                    <option value="Tractor">🚜 Tractor Trolley</option>
+                    <option value="Pickup">🛻 Pickup Vehicle</option>
+                    <option value="Mini Truck">🚚 Mini Truck</option>
+                    <option value="Large Truck">🚛 Large Truck</option>
+                  </select>
+                </div>
               </div>
 
-              <div>
-                <label className="text-[10px] font-bold text-[var(--color-text-secondary)] uppercase tracking-wider mb-1 block">Vehicle Number</label>
-                <input
-                  type="text"
-                  placeholder="e.g. MH 12 AB 5678"
-                  value={vehicleNumber}
-                  onChange={e => setVehicleNumber(e.target.value)}
-                  className="w-full h-10 px-3 text-[12.5px] rounded-[var(--form-border-radius)] border border-[var(--color-border)] bg-[var(--color-surface)] text-[var(--color-text-primary)] focus:border-[var(--color-primary-500)] focus:ring-2 focus:ring-[var(--color-primary-500)]/15 outline-none transition-all font-mono uppercase tracking-wider placeholder:text-[var(--color-text-muted)] placeholder:font-medium"
-                />
-              </div>
-
-              <div>
-                <label className="text-[10px] font-bold text-[var(--color-text-secondary)] uppercase tracking-wider mb-1 block">Vehicle Type</label>
-                <select
-                  value={vehicleType}
-                  onChange={e => setVehicleType(e.target.value)}
-                  className="w-full h-10 px-2 text-[12.5px] rounded-[var(--form-border-radius)] border border-[var(--color-border)] bg-[var(--color-surface)] text-[var(--color-text-primary)] focus:border-[var(--color-primary-500)] focus:ring-2 focus:ring-[var(--color-primary-500)]/15 outline-none transition-all"
-                >
-                  <option value="Bike">Bike</option>
-                  <option value="Tractor">Tractor</option>
-                  <option value="Mini Truck">Mini Truck (Chota Hathi)</option>
-                  <option value="Large Truck">Large Truck</option>
-                </select>
-              </div>
-
+              {/* Row 3: Payload Capacity and License No. */}
               <div className="grid grid-cols-2 gap-3">
                 <div>
                   <label className="text-[10px] font-bold text-[var(--color-text-secondary)] uppercase tracking-wider mb-1 block">Payload (kg)</label>
@@ -336,6 +341,7 @@ const DriverRegistry = () => {
                 </div>
               </div>
 
+              {/* Row 4: RC Number and Address */}
               <div className="grid grid-cols-2 gap-3">
                 <div>
                   <label className="text-[10px] font-bold text-[var(--color-text-secondary)] uppercase tracking-wider mb-1 block">RC Number (Opt)</label>
@@ -359,6 +365,7 @@ const DriverRegistry = () => {
                 </div>
               </div>
 
+              {/* Row 5: Insurance Document */}
               <div>
                 <label className="text-[10px] font-bold text-[var(--color-text-secondary)] uppercase tracking-wider mb-1 block">Insurance Document (Opt)</label>
                 <div className="flex items-center gap-3">
