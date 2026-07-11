@@ -536,57 +536,121 @@ const FreightTracking = () => {
                     {/* Main Trip Card Header */}
                     <div
                       onClick={() => {
-                        if (!isTripSelected) {
-                          setSelectedOrder(trip.orders[0]);
-                        }
+                        if (!isTripSelected) { setSelectedOrder(trip.orders[0]); }
                         toggleTripExpand(trip.id);
                       }}
-                      className="p-3 cursor-pointer flex flex-col gap-1.5"
+                      className="cursor-pointer"
                     >
-                      <div className="flex justify-between items-start gap-2">
-                        <div className="flex items-center gap-2">
-                          <div className="w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center text-slate-650 shrink-0">
-                            <span className="material-symbols-outlined text-[17px]">
-                              {trip.driver?.vehicleType === 'Bike' ? 'two_wheeler' : trip.driver?.vehicleType === 'Tractor' ? 'agriculture' : 'local_shipping'}
-                            </span>
+                      {/* Vehicle Illustration Banner */}
+                      {(() => {
+                        const vType = trip.driver?.vehicleType || 'Truck';
+                        const totalQty = trip.orders.reduce((s, o) => s + (o.requestedQuantity || 0), 0);
+                        const capacity = trip.driver?.payloadCapacity || 0;
+                        const loadPct = capacity > 0 ? Math.min(100, Math.round((totalQty / capacity) * 100)) : null;
+                        const isBike = vType === 'Bike';
+                        const isTractor = vType === 'Tractor';
+                        const bgGrad = isBike
+                          ? 'from-violet-500 to-indigo-600'
+                          : isTractor
+                          ? 'from-amber-500 to-orange-600'
+                          : 'from-primary-500 to-blue-600';
+                        return (
+                          <div className={`relative bg-gradient-to-r ${bgGrad} px-3 pt-2.5 pb-1 overflow-hidden`}>
+                            {/* Background pattern */}
+                            <div className="absolute inset-0 opacity-10">
+                              <svg width="100%" height="100%"><defs><pattern id={`g${trip.id}`} x="0" y="0" width="20" height="20" patternUnits="userSpaceOnUse"><circle cx="10" cy="10" r="1.5" fill="white"/></pattern></defs><rect width="100%" height="100%" fill={`url(#g${trip.id})`}/></svg>
+                            </div>
+                            <div className="relative flex items-end justify-between gap-2">
+                              <div className="flex-1">
+                                <p className="text-white/70 text-[8px] font-bold uppercase tracking-wider">
+                                  {trip.driver ? trip.driver.vehicleType : 'Self Delivery'}
+                                </p>
+                                <h4 className="text-white text-[13px] font-black leading-tight truncate">
+                                  {trip.driver ? trip.driver.name : 'You'}
+                                </h4>
+                                {trip.driver?.vehicleNumber && (
+                                  <div className="mt-1 inline-block bg-white/20 backdrop-blur-sm rounded px-1.5 py-0.5">
+                                    <span className="text-white font-mono text-[9px] font-black tracking-wider">{trip.driver.vehicleNumber}</span>
+                                  </div>
+                                )}
+                              </div>
+                              {/* Vehicle SVG Illustration */}
+                              <div className="shrink-0 w-16 h-10 flex items-end justify-end opacity-90">
+                                {isBike ? (
+                                  <svg viewBox="0 0 80 50" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-full h-full drop-shadow-md">
+                                    <circle cx="20" cy="38" r="10" fill="white" fillOpacity="0.25" stroke="white" strokeWidth="2"/>
+                                    <circle cx="60" cy="38" r="10" fill="white" fillOpacity="0.25" stroke="white" strokeWidth="2"/>
+                                    <path d="M20 38 L35 20 L45 20 L55 28 L60 38" stroke="white" strokeWidth="2.5" strokeLinecap="round"/>
+                                    <path d="M35 20 L40 12 L50 12" stroke="white" strokeWidth="2" strokeLinecap="round"/>
+                                    <circle cx="40" cy="20" r="3" fill="white" fillOpacity="0.4"/>
+                                  </svg>
+                                ) : isTractor ? (
+                                  <svg viewBox="0 0 80 50" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-full h-full drop-shadow-md">
+                                    <circle cx="22" cy="36" r="13" fill="white" fillOpacity="0.2" stroke="white" strokeWidth="2"/>
+                                    <circle cx="60" cy="40" r="8" fill="white" fillOpacity="0.2" stroke="white" strokeWidth="2"/>
+                                    <rect x="30" y="18" width="32" height="18" rx="3" fill="white" fillOpacity="0.3" stroke="white" strokeWidth="1.5"/>
+                                    <rect x="34" y="22" width="14" height="10" rx="2" fill="white" fillOpacity="0.5"/>
+                                    <rect x="25" y="30" width="8" height="6" rx="1" fill="white" fillOpacity="0.3"/>
+                                    <line x1="22" y1="36" x2="62" y2="36" stroke="white" strokeWidth="1.5" strokeDasharray="3,2"/>
+                                  </svg>
+                                ) : (
+                                  <svg viewBox="0 0 90 50" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-full h-full drop-shadow-md">
+                                    <rect x="5" y="15" width="55" height="24" rx="3" fill="white" fillOpacity="0.25" stroke="white" strokeWidth="1.5"/>
+                                    <rect x="60" y="22" width="24" height="17" rx="3" fill="white" fillOpacity="0.35" stroke="white" strokeWidth="1.5"/>
+                                    <rect x="63" y="25" width="14" height="8" rx="1.5" fill="white" fillOpacity="0.5"/>
+                                    <circle cx="18" cy="41" r="7" fill="white" fillOpacity="0.3" stroke="white" strokeWidth="2"/>
+                                    <circle cx="70" cy="41" r="7" fill="white" fillOpacity="0.3" stroke="white" strokeWidth="2"/>
+                                    <rect x="5" y="24" width="20" height="8" rx="1" fill="white" fillOpacity="0.15"/>
+                                  </svg>
+                                )}
+                              </div>
+                            </div>
+                            {/* Payload capacity bar */}
+                            {loadPct !== null && (
+                              <div className="relative mt-2 mb-0.5">
+                                <div className="flex justify-between items-center mb-0.5">
+                                  <span className="text-white/70 text-[7.5px] font-bold uppercase tracking-wide">Cargo Load</span>
+                                  <span className="text-white text-[9px] font-black">{loadPct}%</span>
+                                </div>
+                                <div className="h-1.5 bg-white/20 rounded-full overflow-hidden">
+                                  <div
+                                    className={`h-full rounded-full transition-all duration-700 ${
+                                      loadPct > 85 ? 'bg-rose-300' : loadPct > 60 ? 'bg-amber-300' : 'bg-emerald-300'
+                                    }`}
+                                    style={{ width: `${loadPct}%` }}
+                                  />
+                                </div>
+                              </div>
+                            )}
                           </div>
-                          <div>
-                            <h4 className="text-[12.5px] font-black text-[var(--color-text-primary)] leading-tight">
-                              {trip.driver ? trip.driver.name : 'Self-Delivery'}
-                            </h4>
-                            <p className="text-[9px] text-[var(--color-text-muted)] font-extrabold uppercase tracking-wide">
-                              {trip.driver?.vehicleNumber || 'No Vehicle'} · {trip.driver?.vehicleType || 'Courier'}
-                            </p>
-                          </div>
-                        </div>
+                        );
+                      })()}
 
-                        <div className="flex flex-col items-end gap-1">
-                          <span className={`px-1.5 py-0.5 rounded text-[8px] font-bold uppercase tracking-wider shrink-0 ${
+                      {/* Card Meta Row */}
+                      <div className="px-3 py-2 flex items-center justify-between gap-2">
+                        <div className="flex items-center gap-1.5">
+                          <span className="material-symbols-outlined text-[12px] text-slate-400">route</span>
+                          <span className="text-[9px] text-slate-500 font-bold truncate">
+                            {trip.type === 'batch'
+                              ? `${trip.orders.length} stops route`
+                              : `${trip.orders[0]?.crop?.location?.split(' ')[0] || 'Farm'} ➔ ${trip.orders[0]?.vendor?.name?.split(' ')[0] || 'Shop'}`}
+                          </span>
+                        </div>
+                        <div className="flex items-center gap-1.5 shrink-0">
+                          <span className={`px-1.5 py-0.5 rounded text-[7.5px] font-bold uppercase tracking-wider border ${
                             trip.deliveryStatus === 'Completed'
-                              ? 'bg-emerald-50 text-emerald-700 border border-emerald-100'
-                              : 'bg-primary-50 text-primary-700 border border-primary-100'
+                              ? 'bg-emerald-50 text-emerald-700 border-emerald-100'
+                              : 'bg-primary-50 text-primary-700 border-primary-100'
                           }`}>
                             {trip.deliveryStatus}
                           </span>
-                          <span className="text-[8px] font-black text-slate-400 bg-slate-100 border border-slate-200/50 px-1.5 py-0.5 rounded-full">
-                            {trip.orders.length} {trip.orders.length > 1 ? 'Orders' : 'Order'}
+                          <span
+                            className="material-symbols-outlined text-[14px] text-slate-400 transition-transform duration-200"
+                            style={{ transform: isExpanded ? 'rotate(180deg)' : 'none' }}
+                          >
+                            keyboard_arrow_down
                           </span>
                         </div>
-                      </div>
-
-                      <div className="mt-1 flex items-center justify-between text-[9px] text-[var(--color-text-secondary)] font-bold">
-                        <span className="flex items-center gap-0.5 text-slate-500">
-                          <span className="material-symbols-outlined text-[12px] text-slate-400">route</span>
-                          {trip.type === 'batch'
-                            ? `${trip.orders[0]?.crop?.location?.split(' ')[0] || 'Farm'} ➔ ${trip.orders.length} Stops`
-                            : `${trip.orders[0]?.crop?.location?.split(' ')[0] || 'Farm'} ➔ ${trip.orders[0]?.vendor?.name?.split(' ')[0] || 'Shop'}`}
-                        </span>
-                        <span
-                          className="material-symbols-outlined text-[14px] text-slate-400 transition-transform duration-200"
-                          style={{ transform: isExpanded ? 'rotate(180deg)' : 'none' }}
-                        >
-                          keyboard_arrow_down
-                        </span>
                       </div>
                     </div>
 
@@ -698,6 +762,138 @@ const FreightTracking = () => {
                     </div>
                   </div>
                 </div>
+
+                {/* ── Truck Capacity Visual Panel ── */}
+                {(() => {
+                  const driver = selectedOrder.driver;
+                  const capacity = driver?.payloadCapacity || 0;
+                  // Sum all orders in same batch/trip
+                  const trip = getGroupedTrips().find(t => t.orders.some(o => o._id === selectedOrder._id));
+                  const totalQty = trip
+                    ? trip.orders.reduce((s, o) => s + (o.requestedQuantity || 0), 0)
+                    : selectedOrder.requestedQuantity || 0;
+                  const unit = selectedOrder.crop?.unit || 'kg';
+                  const loadPct = capacity > 0 ? Math.min(100, Math.round((totalQty / capacity) * 100)) : null;
+                  const vType = driver?.vehicleType || 'Truck';
+                  const isBike = vType === 'Bike';
+                  const isTractor = vType === 'Tractor';
+                  const barColor = loadPct > 85 ? 'from-rose-500 to-rose-400' : loadPct > 60 ? 'from-amber-500 to-yellow-400' : 'from-emerald-500 to-teal-400';
+                  const barBg = loadPct > 85 ? 'bg-rose-50 border-rose-200' : loadPct > 60 ? 'bg-amber-50 border-amber-200' : 'bg-emerald-50 border-emerald-200';
+                  const textColor = loadPct > 85 ? 'text-rose-700' : loadPct > 60 ? 'text-amber-700' : 'text-emerald-700';
+                  return (
+                    <div className="bg-[var(--color-surface)] border border-[var(--color-border)] rounded-2xl overflow-hidden shadow-xs">
+                      <div className="flex items-stretch">
+                        {/* Left: Capacity bar section */}
+                        <div className="flex-1 p-4">
+                          <div className="flex items-center justify-between mb-3">
+                            <div>
+                              <p className="text-[9px] font-extrabold text-[var(--color-text-muted)] uppercase tracking-wider">Current Truck Capacity</p>
+                              <p className="text-[11px] font-black text-[var(--color-text-primary)] mt-0.5">
+                                {driver ? driver.name : 'Self Delivery'} · <span className="text-[var(--color-text-muted)] font-bold">{vType}</span>
+                              </p>
+                            </div>
+                            {loadPct !== null && (
+                              <div className={`w-12 h-12 rounded-2xl ${barBg} border flex flex-col items-center justify-center`}>
+                                <span className={`text-[16px] font-black leading-none ${textColor}`}>{loadPct}</span>
+                                <span className={`text-[8px] font-bold ${textColor}`}>%</span>
+                              </div>
+                            )}
+                          </div>
+                          {/* Big capacity bar */}
+                          {loadPct !== null ? (
+                            <div>
+                              <div className="relative h-7 bg-slate-100 rounded-xl overflow-hidden border border-slate-200">
+                                <div
+                                  className={`h-full rounded-xl bg-gradient-to-r ${barColor} transition-all duration-1000 ease-out flex items-center justify-end pr-2`}
+                                  style={{ width: `${loadPct}%` }}
+                                >
+                                  {loadPct > 20 && (
+                                    <span className="text-white text-[10px] font-black">{loadPct}%</span>
+                                  )}
+                                </div>
+                                {/* Tick marks */}
+                                <div className="absolute inset-0 flex justify-between px-0 pointer-events-none">
+                                  {[25, 50, 75].map(tick => (
+                                    <div key={tick} className="absolute top-0 bottom-0 w-px bg-white/50" style={{ left: `${tick}%` }} />
+                                  ))}
+                                </div>
+                              </div>
+                              <div className="flex justify-between mt-1">
+                                <span className="text-[8px] text-slate-400 font-bold">0</span>
+                                <span className="text-[8px] text-slate-400 font-bold">{capacity} {unit}</span>
+                              </div>
+                              <div className="flex items-center gap-3 mt-2">
+                                <div>
+                                  <span className="text-[7.5px] text-slate-400 font-bold uppercase block">Loaded</span>
+                                  <span className="text-[12px] font-black text-[var(--color-text-primary)]">{totalQty} <span className="text-[9px] font-semibold text-slate-500">{unit}</span></span>
+                                </div>
+                                <div className="w-px h-6 bg-slate-200" />
+                                <div>
+                                  <span className="text-[7.5px] text-slate-400 font-bold uppercase block">Remaining</span>
+                                  <span className="text-[12px] font-black text-[var(--color-text-primary)]">{Math.max(0, capacity - totalQty)} <span className="text-[9px] font-semibold text-slate-500">{unit}</span></span>
+                                </div>
+                                <div className="w-px h-6 bg-slate-200" />
+                                <div>
+                                  <span className="text-[7.5px] text-slate-400 font-bold uppercase block">Orders</span>
+                                  <span className="text-[12px] font-black text-[var(--color-text-primary)]">{trip?.orders.length || 1}</span>
+                                </div>
+                              </div>
+                            </div>
+                          ) : (
+                            <div className="flex items-center gap-2 py-2">
+                              <span className="material-symbols-outlined text-[18px] text-slate-400">info</span>
+                              <span className="text-[10px] text-slate-500 font-medium">Payload capacity not set for this vehicle.</span>
+                            </div>
+                          )}
+                        </div>
+
+                        {/* Right: Vehicle illustration */}
+                        <div className={`w-28 bg-gradient-to-b ${loadPct > 85 ? 'from-rose-500 to-rose-600' : loadPct > 60 ? 'from-amber-500 to-amber-600' : 'from-primary-500 to-primary-700'} flex flex-col items-center justify-center p-3 relative overflow-hidden`}>
+                          <div className="absolute inset-0 opacity-10">
+                            <svg width="100%" height="100%"><defs><pattern id="dots-cap" x="0" y="0" width="16" height="16" patternUnits="userSpaceOnUse"><circle cx="8" cy="8" r="1.5" fill="white"/></pattern></defs><rect width="100%" height="100%" fill="url(#dots-cap)"/></svg>
+                          </div>
+                          <div className="relative w-full flex flex-col items-center gap-2">
+                            {/* Vehicle SVG */}
+                            <div className="w-20 h-12">
+                              {isBike ? (
+                                <svg viewBox="0 0 80 50" fill="none" className="w-full h-full drop-shadow-lg">
+                                  <circle cx="20" cy="38" r="10" fill="white" fillOpacity="0.3" stroke="white" strokeWidth="2"/>
+                                  <circle cx="60" cy="38" r="10" fill="white" fillOpacity="0.3" stroke="white" strokeWidth="2"/>
+                                  <path d="M20 38 L35 18 L45 18 L55 28 L60 38" stroke="white" strokeWidth="2.5" strokeLinecap="round"/>
+                                  <path d="M35 18 L40 10 L50 10" stroke="white" strokeWidth="2" strokeLinecap="round"/>
+                                  <circle cx="40" cy="18" r="3" fill="white" fillOpacity="0.5"/>
+                                </svg>
+                              ) : isTractor ? (
+                                <svg viewBox="0 0 80 50" fill="none" className="w-full h-full drop-shadow-lg">
+                                  <circle cx="22" cy="36" r="13" fill="white" fillOpacity="0.25" stroke="white" strokeWidth="2"/>
+                                  <circle cx="60" cy="40" r="8" fill="white" fillOpacity="0.25" stroke="white" strokeWidth="2"/>
+                                  <rect x="30" y="16" width="32" height="20" rx="4" fill="white" fillOpacity="0.3" stroke="white" strokeWidth="1.5"/>
+                                  <rect x="34" y="20" width="14" height="10" rx="2" fill="white" fillOpacity="0.6"/>
+                                  <rect x="25" y="28" width="8" height="8" rx="1" fill="white" fillOpacity="0.3"/>
+                                </svg>
+                              ) : (
+                                <svg viewBox="0 0 90 52" fill="none" className="w-full h-full drop-shadow-lg">
+                                  <rect x="2" y="14" width="57" height="26" rx="4" fill="white" fillOpacity="0.25" stroke="white" strokeWidth="1.5"/>
+                                  <rect x="59" y="22" width="27" height="18" rx="4" fill="white" fillOpacity="0.35" stroke="white" strokeWidth="1.5"/>
+                                  <rect x="62" y="25" width="16" height="9" rx="2" fill="white" fillOpacity="0.6"/>
+                                  <circle cx="17" cy="42" r="8" fill="white" fillOpacity="0.3" stroke="white" strokeWidth="2"/>
+                                  <circle cx="71" cy="42" r="8" fill="white" fillOpacity="0.3" stroke="white" strokeWidth="2"/>
+                                  <rect x="2" y="22" width="22" height="9" rx="1.5" fill="white" fillOpacity="0.15"/>
+                                </svg>
+                              )}
+                            </div>
+                            {loadPct !== null && (
+                              <div className="text-center">
+                                <span className="text-white text-[20px] font-black leading-none">{loadPct}%</span>
+                                <p className="text-white/70 text-[8px] font-bold">Full</p>
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })()}
 
                 {/* Consolidated / Milk Run Notice Banner */}
                 {selectedOrder.consolidationStatus && selectedOrder.consolidationStatus !== 'standalone' && (
