@@ -2,7 +2,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import api from '../../utils/api';
 import { toast } from 'react-hot-toast';
-import { motion, AnimatePresence } from 'framer-motion';
+import ConfirmModal from '../../components/common/ConfirmModal';
 
 const BatchManagement = () => {
   const navigate = useNavigate();
@@ -11,6 +11,7 @@ const BatchManagement = () => {
   const [drivers, setDrivers] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [selectedDriverMap, setSelectedDriverMap] = useState({}); // batchId -> driverId
+  const [dispatchConfirm, setDispatchConfirm] = useState({ open: false, batchId: null, isLoading: false });
 
 
   // Fetch batches, unbatched orders and drivers
@@ -76,6 +77,12 @@ const BatchManagement = () => {
       const res = await api.post(`/batches/${batchId}/assign-driver`, { driverId });
       if (res.data.success) {
         toast.success('Driver assigned successfully!', { id: toastId });
+        // Clear stale dropdown selection for this batch
+        setSelectedDriverMap(prev => {
+          const updated = { ...prev };
+          delete updated[batchId];
+          return updated;
+        });
         fetchData();
       }
     } catch (error) {
@@ -83,27 +90,41 @@ const BatchManagement = () => {
     }
   };
 
-  // Dispatch Batch (Out for Delivery)
-  const handleDispatchBatch = async (batchId) => {
+  // Dispatch Batch (Out for Delivery) — called only after confirm modal
+  const handleDispatchBatch = async () => {
+    const batchId = dispatchConfirm.batchId;
+    if (!batchId) return;
+    setDispatchConfirm(prev => ({ ...prev, isLoading: true }));
     const toastId = toast.loading('Dispatching batch. Notification sent to customers...');
     try {
       const res = await api.patch(`/batches/${batchId}/status`, { status: 'Out For Delivery' });
       if (res.data.success) {
         toast.success('Batch is now Out For Delivery! 🚚', { id: toastId });
+        setDispatchConfirm({ open: false, batchId: null, isLoading: false });
         fetchData();
       }
     } catch (error) {
       toast.error(error.response?.data?.error || 'Failed to dispatch batch', { id: toastId });
+      setDispatchConfirm(prev => ({ ...prev, isLoading: false }));
     }
   };
 
-  const handleCopyLink = (driverId) => {
+  // Safely extract driver ID — handles both populated object & raw ObjectId string
+  const getDriverId = (driver) => (driver && typeof driver === 'object' ? driver._id : driver);
+
+  const handleCopyLink = (driver) => {
+    const driverId = getDriverId(driver);
+    if (!driverId) {
+      toast.error('Driver ID not found');
+      return;
+    }
     const link = `${window.location.origin}/driver-batch?driverId=${driverId}`;
     navigator.clipboard.writeText(link);
     toast.success('Driver tracking link copied to clipboard! 📋');
   };
 
   return (
+    <>
     <div className="space-y-6 pb-12">
       {/* Header section */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
@@ -169,7 +190,9 @@ const BatchManagement = () => {
                               ? 'bg-emerald-50 border-emerald-200 text-emerald-700'
                               : batch.batchStatus === 'Out For Delivery'
                               ? 'bg-amber-50 border-amber-200 text-amber-700 animate-pulse'
-                              : 'bg-blue-50 border-blue-200 text-blue-700'
+                              : batch.batchStatus === 'Driver Assigned'
+                              ? 'bg-violet-50 border-violet-200 text-violet-700'
+                              : 'bg-slate-100 border-slate-200 text-slate-500'
                           }`}>
                             {batch.batchStatus}
                           </span>
@@ -210,8 +233,16 @@ const BatchManagement = () => {
                         </span>
                         <div className="flex flex-wrap items-center gap-1.5 pt-1">
                           {(() => {
+                            const route = batch.optimizedRoute || [];
+                            if (route.length === 0) {
+                              return (
+                                <span className="text-[10px] text-slate-400 italic font-medium">
+                                  Route data unavailable
+                                </span>
+                              );
+                            }
                             const groupedStops = [];
-                            batch.optimizedRoute.forEach(stop => {
+                            route.forEach(stop => {
                               const last = groupedStops[groupedStops.length - 1];
                               if (last && last.stopType === stop.stopType && last.address === stop.address) {
                                 last.count++;
@@ -231,7 +262,7 @@ const BatchManagement = () => {
                                     {stop.stopType === 'pickup' ? 'agriculture' : 'storefront'}
                                   </span>
                                   <span>
-                                    {stop.address.split('\'s')[0]} 
+                                    {stop.address.split("'s")[0]} 
                                     {stop.count > 1 && ` (x${stop.count})`}
                                   </span>
                                 </div>
@@ -256,7 +287,7 @@ const BatchManagement = () => {
                                   </p>
                                 </div>
                                 <button
-                                  onClick={() => handleCopyLink(batch.driver._id || batch.driver)}
+                                  onClick={() => handleCopyLink(batch.driver)}
                                   className="px-2 py-1 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 border border-indigo-200 rounded-lg text-[9px] font-black cursor-pointer active:scale-95 transition-all flex items-center gap-0.5"
                                   title="Copy Driver Tracking Link"
                                 >
@@ -299,7 +330,7 @@ const BatchManagement = () => {
                             </button>
                             {canDispatch && (
                               <button
-                                onClick={() => handleDispatchBatch(batch._id)}
+                                onClick={() => setDispatchConfirm({ open: true, batchId: batch._id, isLoading: false })}
                                 className="px-4 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white font-black text-[10.5px] rounded-xl cursor-pointer border-0 active:scale-95 transition-all flex items-center gap-1 shadow-sm"
                               >
                                 <span className="material-symbols-outlined text-[14px]">local_shipping</span>
@@ -326,7 +357,7 @@ const BatchManagement = () => {
                 <span className="material-symbols-outlined text-[28px] text-slate-400">done_all</span>
                 <p className="text-[11.5px] font-bold text-slate-500 mt-1">All orders batched!</p>
                 <p className="text-[9.5px] text-slate-400 mt-0.5 leading-snug">
-                  Naye accepted orders aane par auto-batch run karke assign kar sakte hain.
+                  When new accepted orders arrive, run Auto-Group to batch and assign them.
                 </p>
               </div>
             ) : (
@@ -357,6 +388,21 @@ const BatchManagement = () => {
         </div>
       )}
     </div>
+
+    {/* Dispatch Confirmation Modal */}
+    <ConfirmModal
+      isOpen={dispatchConfirm.open}
+      onClose={() => !dispatchConfirm.isLoading && setDispatchConfirm({ open: false, batchId: null, isLoading: false })}
+      onConfirm={handleDispatchBatch}
+      title="Dispatch this batch?"
+      description="This will mark the batch as 'Out For Delivery' and send notifications to all customers. This action cannot be undone."
+      confirmText="Yes, Dispatch 🚚"
+      cancelText="Cancel"
+      icon="local_shipping"
+      isDanger={false}
+      isLoading={dispatchConfirm.isLoading}
+    />
+    </>
   );
 };
 
