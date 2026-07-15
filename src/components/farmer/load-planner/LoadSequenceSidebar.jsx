@@ -14,6 +14,20 @@ const VEHICLE_EMOJIS = {
 // Color accent per stop index
 const STOP_ACCENTS = ['#10b981','#3b82f6','#f59e0b','#8b5cf6','#ef4444','#06b6d4'];
 
+const getCropType = (name = '') => {
+  const lower = name.toLowerCase();
+  if (lower.includes('tomato') || lower.includes('egg') || lower.includes('strawberr')) {
+    return { label: 'Fragile', color: 'bg-amber-50 border-amber-250 text-amber-700', badge: '🥚 Fragile' };
+  }
+  if (lower.includes('milk') || lower.includes('paneer') || lower.includes('dairy') || lower.includes('berr')) {
+    return { label: 'Perishable', color: 'bg-rose-50 border-rose-250 text-rose-700', badge: '🧊 Cold' };
+  }
+  if (lower.includes('potato') || lower.includes('wheat') || lower.includes('onion') || lower.includes('grain')) {
+    return { label: 'Heavy', color: 'bg-indigo-50 border-indigo-250 text-indigo-700', badge: '⚓ Heavy' };
+  }
+  return { label: 'Standard', color: 'bg-emerald-50 border-emerald-250 text-emerald-700', badge: '📦 Standard' };
+};
+
 const LoadSequenceSidebar = () => {
   const navigate = useNavigate();
   const [confirmRemoveId, setConfirmRemoveId] = useState(null);
@@ -70,6 +84,35 @@ const LoadSequenceSidebar = () => {
     }
   };
 
+  // ── Stacking Safety Rule Checks ──
+  const cols = activeTemplate.cols || 3;
+  const getStopGrid = (stop) => {
+    const idx = stop.loadingSequence - 1;
+    return {
+      c: idx % cols,
+      r: Math.floor(idx / cols)
+    };
+  };
+
+  const checkStackingViolation = (stop) => {
+    const cropName = activeOrders.find(o => String(o._id) === String(stop.orderId))?.crop?.name;
+    const cropType = getCropType(cropName).label;
+    if (cropType !== 'Heavy') return false;
+
+    const thisGrid = getStopGrid(stop);
+
+    return deliveryStops.some(other => {
+      if (other.orderId === stop.orderId) return false;
+      const otherGrid = getStopGrid(other);
+      // Same column but in a lower row index (loaded first/bottom)
+      if (otherGrid.c !== thisGrid.c || otherGrid.r >= thisGrid.r) return false;
+
+      const otherCropName = activeOrders.find(o => String(o._id) === String(other.orderId))?.crop?.name;
+      const otherCropType = getCropType(otherCropName).label;
+      return otherCropType === 'Fragile';
+    });
+  };
+
   return (
     <div className="flex flex-col bg-white h-full overflow-hidden">
 
@@ -105,8 +148,25 @@ const LoadSequenceSidebar = () => {
         </div>
       </div>
 
+      {/* ── Crop Class Legend ── */}
+      <div className="px-4 py-2 border-b border-slate-100 bg-slate-50/40 flex items-center justify-between gap-1 flex-wrap shrink-0">
+        <span className="text-[7.5px] font-black text-slate-400 uppercase tracking-wider">Legend:</span>
+        <span className="flex items-center gap-1 text-[8px] font-bold text-slate-500">
+          <span className="w-2 h-2 rounded-full bg-rose-500" /> Cold
+        </span>
+        <span className="flex items-center gap-1 text-[8px] font-bold text-slate-500">
+          <span className="w-2 h-2 rounded-full bg-amber-500" /> Fragile
+        </span>
+        <span className="flex items-center gap-1 text-[8px] font-bold text-slate-500">
+          <span className="w-2 h-2 rounded-full bg-indigo-500" /> Heavy
+        </span>
+        <span className="flex items-center gap-1 text-[8px] font-bold text-slate-500">
+          <span className="w-2 h-2 rounded-full bg-emerald-500" /> Standard
+        </span>
+      </div>
+
       {/* ── Sidebar Header ── */}
-      <div className="px-4 py-3 border-b border-slate-100 shrink-0 flex items-center justify-between bg-slate-50/50">
+      <div className="px-4 py-3 border-b border-slate-100 shrink-0 flex items-center justify-between bg-slate-50/20">
         <div>
           <h4 className="text-[11px] font-black text-slate-800 uppercase tracking-wider leading-none">
             Load Sequence
@@ -140,6 +200,8 @@ const LoadSequenceSidebar = () => {
             const order       = activeOrders.find(o => String(o._id) === String(stop.orderId));
             const accentColor = STOP_ACCENTS[idx % STOP_ACCENTS.length];
             const isRemoving  = confirmRemoveId === stop.orderId;
+            const typeInfo    = getCropType(order?.crop?.name);
+            const hasViolation = checkStackingViolation(stop);
 
             return (
               <div
@@ -150,6 +212,8 @@ const LoadSequenceSidebar = () => {
                 className={`relative bg-white rounded-2xl border transition-all cursor-grab active:cursor-grabbing shadow-xs group ${
                   isRemoving
                     ? 'border-rose-200 bg-rose-50/30'
+                    : hasViolation
+                    ? 'border-rose-300 bg-rose-50/5 hover:border-rose-450 hover:shadow-md'
                     : 'border-slate-150 hover:border-slate-300 hover:shadow-md'
                 }`}
               >
@@ -180,10 +244,21 @@ const LoadSequenceSidebar = () => {
                       <span className="text-[8px] font-black bg-indigo-50 border border-indigo-100 text-indigo-700 px-1.5 py-0.5 rounded-md uppercase">
                         Load #{stop.loadingSequence}
                       </span>
-                      <span className="text-[8px] font-bold text-slate-400 bg-slate-50 border border-slate-100 px-1.5 py-0.5 rounded-md">
+                      <span className={`text-[8px] font-black border px-1.5 py-0.5 rounded-md ${typeInfo.color}`}>
+                        {typeInfo.badge}
+                      </span>
+                      <span className="text-[8px] font-bold text-slate-450 bg-slate-50 border border-slate-100 px-1.5 py-0.5 rounded-md">
                         {order?.requestedQuantity} {order?.crop?.unit}
                       </span>
                     </div>
+
+                    {/* Stacking Rule Warning */}
+                    {hasViolation && (
+                      <div className="mt-2 flex items-center gap-1 text-[8px] font-black text-rose-600 bg-rose-50 border border-rose-200 p-1.5 rounded-lg">
+                        <AlertTriangle className="w-3.5 h-3.5 text-rose-500 shrink-0" />
+                        <span>Heavy cargo loaded above Fragile cargo!</span>
+                      </div>
+                    )}
                   </div>
 
                   {/* Actions */}
@@ -210,7 +285,7 @@ const LoadSequenceSidebar = () => {
                           : 'border-rose-100 bg-rose-50/50 hover:bg-rose-50 text-rose-400 hover:text-rose-600'
                       }`}
                     >
-                      <Trash2 className="w-3 h-3" />
+                      <Trash2 className="w-3.5 h-3.5" />
                     </button>
                   </div>
                 </div>
@@ -219,7 +294,7 @@ const LoadSequenceSidebar = () => {
                 {isRemoving && (
                   <div className="mx-3 mb-3 p-2.5 bg-rose-50 border border-rose-200 rounded-xl flex items-center justify-between gap-2">
                     <div className="flex items-center gap-1.5">
-                      <AlertTriangle className="w-3 h-3 text-rose-500 shrink-0" />
+                      <AlertTriangle className="w-3.5 h-3.5 text-rose-500 shrink-0" />
                       <span className="text-[9px] font-bold text-rose-700">Remove from batch?</span>
                     </div>
                     <div className="flex gap-1.5">
@@ -269,3 +344,4 @@ const LoadSequenceSidebar = () => {
 };
 
 export default LoadSequenceSidebar;
+export { getCropType };

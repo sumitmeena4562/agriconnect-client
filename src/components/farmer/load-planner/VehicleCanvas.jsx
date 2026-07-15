@@ -6,18 +6,9 @@ import { useLoadPlannerStore } from '../../../store/useLoadPlannerStore';
 import { toast } from 'react-hot-toast';
 import { Loader2 } from 'lucide-react';
 
-const SLOT_COLORS = [
-  { fill: 0x10b981, stroke: 0x34d399 }, // Emerald
-  { fill: 0x3b82f6, stroke: 0x60a5fa }, // Blue
-  { fill: 0xf59e0b, stroke: 0xfbbf24 }, // Amber
-  { fill: 0x8b5cf6, stroke: 0xa78bfa }, // Violet
-  { fill: 0xec4899, stroke: 0xf472b6 }, // Pink
-  { fill: 0x06b6d4, stroke: 0x22d3ee }, // Cyan
-];
-
 let cachedGltfModel = null;
 
-// Dynamic Cargo Slot Generator
+// Dynamic Cargo Slot Generator (with Realistic Wooden Pallets & Cardboard Packing Boxes)
 const update3DSlots = (scene, activeTemplate, routeStops, removedOrderIds, slotMeshesRef, checkLifoViolation, trailerBounds) => {
   slotMeshesRef.current.forEach((obj) => scene.remove(obj));
   slotMeshesRef.current = [];
@@ -41,6 +32,11 @@ const update3DSlots = (scene, activeTemplate, routeStops, removedOrderIds, slotM
   const deliveryStops = routeStops.filter(s => s.stopType === 'delivery' && !removedOrderIds.has(String(s.orderId)));
   const pickupCount = routeStops.filter(s => s.stopType === 'pickup').length;
 
+  let totalW = 0;
+  let weightedX = 0;
+  let weightedY = 0;
+  let weightedZ = 0;
+
   for (let r = 0; r < rows; r++) {
     for (let c = 0; c < cols; c++) {
       const slotNum = r * cols + c + 1;
@@ -55,10 +51,11 @@ const update3DSlots = (scene, activeTemplate, routeStops, removedOrderIds, slotM
       const boxGeo = new THREE.BoxGeometry(slotW - 3, slotH - 3, slotD - 3);
       
       if (!stop) {
+        // Empty slot helper (Storage wireframe frame look)
         const emptyMesh = new THREE.Mesh(boxGeo, new THREE.MeshStandardMaterial({
           color: 0x94a3b8,
           transparent: true,
-          opacity: 0.15,
+          opacity: 0.1,
           roughness: 0.8
         }));
         emptyMesh.userData = { slotNum };
@@ -66,28 +63,141 @@ const update3DSlots = (scene, activeTemplate, routeStops, removedOrderIds, slotM
         slotMeshGroup.add(emptyMesh);
 
         const edges = new THREE.EdgesGeometry(boxGeo);
-        slotMeshGroup.add(new THREE.LineSegments(edges, new THREE.LineBasicMaterial({ color: 0xcbd5e1 })));
+        slotMeshGroup.add(new THREE.LineSegments(edges, new THREE.LineBasicMaterial({ color: 0xcbd5e1, opacity: 0.4, transparent: true })));
       } else {
+        // Filled cargo box
         const order = activeOrders.find(o => String(o._id) === String(stop.orderId));
         const isViolated = checkLifoViolation(stop, deliveryStops);
-        const palette = isViolated ? { fill: 0xef4444, stroke: 0xfca5a5 } : SLOT_COLORS[(slotNum - 1) % SLOT_COLORS.length];
+        
+        // Dynamic Cargo Classification Colors
+        const cropName = order?.crop?.name || '';
+        const lowerName = cropName.toLowerCase();
+        
+        let boxColor = 0xe7d3c1; // Cardboard Kraft Brown
+        let tapeColor = 0x92400e; // Standard Brown Tape
+        
+        if (lowerName.includes('tomato') || lowerName.includes('egg') || lowerName.includes('strawberr')) {
+          boxColor = 0xffedd5;  // Fragile Amber Kraft
+          tapeColor = 0xe24a00; // Red Warning Tape
+        } else if (lowerName.includes('milk') || lowerName.includes('paneer') || lowerName.includes('dairy') || lowerName.includes('berr')) {
+          boxColor = 0xe0f2fe;  // Cold Chain Sky Blue
+          tapeColor = 0x0284c7; // Blue Packing Tape
+        } else if (lowerName.includes('potato') || lowerName.includes('wheat') || lowerName.includes('onion') || lowerName.includes('grain')) {
+          boxColor = 0xd9b48f;  // Heavy Cargo Kraft
+          tapeColor = 0x78350f; // Dark Brown Tape
+        }
 
-        const cargoMesh = new THREE.Mesh(boxGeo, new THREE.MeshStandardMaterial({
-          color: palette.fill,
-          roughness: 0.3,
-          metalness: 0.1,
-          transparent: true,
-          opacity: 0.9
-        }));
-        cargoMesh.userData = { slotNum };
-        cargoMesh.castShadow = true;
-        cargoMesh.receiveShadow = true;
-        slotMeshGroup.add(cargoMesh);
+        if (isViolated) {
+          boxColor = 0xfee2e2;  // LIFO Violation Light Red
+          tapeColor = 0xef4444; // Violation Bright Red Tape
+        }
 
-        const edges = new THREE.EdgesGeometry(boxGeo);
-        slotMeshGroup.add(new THREE.LineSegments(edges, new THREE.LineBasicMaterial({ color: palette.stroke, linewidth: 2 })));
+        // 1. Wooden Pallet Base (Height = 12% of slot)
+        const palletH = slotH * 0.12;
+        const palletGeo = new THREE.BoxGeometry(slotW - 3, palletH, slotD - 3);
+        const palletMat = new THREE.MeshStandardMaterial({
+          color: 0x85583f, // Wooden texture
+          roughness: 0.95,
+          metalness: 0.05
+        });
+        const palletMesh = new THREE.Mesh(palletGeo, palletMat);
+        palletMesh.position.y = -slotH / 2 + palletH / 2;
+        palletMesh.castShadow = true;
+        palletMesh.receiveShadow = true;
+        slotMeshGroup.add(palletMesh);
+
+        // 2. Cardboard Box (sitting on top of pallet)
+        const boxH = slotH * 0.82;
+        const mainBoxGeo = new THREE.BoxGeometry(slotW - 4, boxH, slotD - 4);
+        const mainBoxMat = new THREE.MeshStandardMaterial({
+          color: boxColor,
+          roughness: 0.85,
+          metalness: 0.0
+        });
+        const mainBoxMesh = new THREE.Mesh(mainBoxGeo, mainBoxMat);
+        mainBoxMesh.position.y = -slotH / 2 + palletH + boxH / 2;
+        mainBoxMesh.castShadow = true;
+        mainBoxMesh.receiveShadow = true;
+        mainBoxMesh.userData = { slotNum };
+        slotMeshGroup.add(mainBoxMesh);
+
+        // 3. Packaging Tape Strap (running vertically across center of cardboard box)
+        const tapeGeo = new THREE.BoxGeometry(slotW / 3.5, boxH + 0.1, slotD - 3.6);
+        const tapeMat = new THREE.MeshStandardMaterial({
+          color: tapeColor,
+          roughness: 0.25,
+          metalness: 0.15
+        });
+        const tapeMesh = new THREE.Mesh(tapeGeo, tapeMat);
+        tapeMesh.position.y = -slotH / 2 + palletH + boxH / 2;
+        slotMeshGroup.add(tapeMesh);
+
+        // Subtle box edges highlight
+        const edges = new THREE.EdgesGeometry(mainBoxGeo);
+        const edgesLines = new THREE.LineSegments(edges, new THREE.LineBasicMaterial({ color: tapeColor, opacity: 0.35, transparent: true }));
+        edgesLines.position.y = -slotH / 2 + palletH + boxH / 2;
+        slotMeshGroup.add(edgesLines);
+
+        // Accumulate center of gravity metrics
+        const weight = order?.requestedQuantity || 0;
+        totalW += weight;
+        weightedX += cellX * weight;
+        weightedY += cellY * weight;
+        weightedZ += center.z * weight;
       }
     }
+  }
+
+  // ── Render 3D Center of Gravity (CoG) Indicator ──
+  if (totalW > 0) {
+    const cogX = weightedX / totalW;
+    const cogY = weightedY / totalW;
+    const cogZ = weightedZ / totalW;
+
+    const cogGroup = new THREE.Group();
+    cogGroup.position.set(cogX, cogY, cogZ);
+    slotGroup.add(cogGroup);
+
+    const isTopHeavy = cogY > (startY + size.y * 0.6);
+    const cogColor = isTopHeavy ? 0xef4444 : 0x3b82f6;
+
+    // Glowing core sphere
+    const sphere = new THREE.Mesh(
+      new THREE.SphereGeometry(3.5, 16, 16),
+      new THREE.MeshBasicMaterial({
+        color: cogColor,
+        transparent: true,
+        opacity: 0.85,
+        depthTest: false,
+        depthWrite: false
+      })
+    );
+    sphere.renderOrder = 999;
+    cogGroup.add(sphere);
+
+    // 3D Axis crosshairs
+    const lineMat = new THREE.LineBasicMaterial({
+      color: cogColor,
+      transparent: true,
+      opacity: 0.65,
+      depthTest: false,
+      depthWrite: false
+    });
+    
+    const xGeo = new THREE.BufferGeometry().setFromPoints([new THREE.Vector3(-15, 0, 0), new THREE.Vector3(15, 0, 0)]);
+    const xLine = new THREE.Line(xGeo, lineMat);
+    xLine.renderOrder = 999;
+    cogGroup.add(xLine);
+
+    const yGeo = new THREE.BufferGeometry().setFromPoints([new THREE.Vector3(0, -15, 0), new THREE.Vector3(0, 15, 0)]);
+    const yLine = new THREE.Line(yGeo, lineMat);
+    yLine.renderOrder = 999;
+    cogGroup.add(yLine);
+
+    const zGeo = new THREE.BufferGeometry().setFromPoints([new THREE.Vector3(0, 0, -15), new THREE.Vector3(0, 0, 15)]);
+    const zLine = new THREE.Line(zGeo, lineMat);
+    zLine.renderOrder = 999;
+    cogGroup.add(zLine);
   }
 };
 
@@ -392,8 +502,10 @@ const VehicleCanvas = () => {
           </div>
         )}
       </div>
-      <p className="text-center text-[9px] text-slate-400 font-semibold tracking-wide">
-        🖱 Drag stops onto 3D container slots · Drag scene to rotate camera view
+      <p className="text-center text-[9.5px] text-slate-400 font-semibold tracking-wide flex items-center justify-center gap-1.5">
+        <span>🖱 Drag stops onto 3D container slots</span>
+        <span className="text-slate-200">|</span>
+        <span className="flex items-center gap-1"><span className="w-2.5 h-2.5 rounded-full bg-blue-500 inline-block shadow-xs" /> Center of Gravity overlay</span>
       </p>
     </div>
   );

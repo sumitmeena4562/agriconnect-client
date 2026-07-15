@@ -5,18 +5,59 @@ import api from '../../utils/api';
 import { useLoadPlannerStore } from '../../store/useLoadPlannerStore';
 import StatsHeader from '../../components/farmer/load-planner/StatsHeader';
 import VehicleCanvas from '../../components/farmer/load-planner/VehicleCanvas';
-import LoadSequenceSidebar from '../../components/farmer/load-planner/LoadSequenceSidebar';
+import LoadSequenceSidebar, { getCropType } from '../../components/farmer/load-planner/LoadSequenceSidebar';
 import AnalyticsSummary from '../../components/farmer/load-planner/AnalyticsSummary';
-import { ArrowLeft, RefreshCw, Wifi } from 'lucide-react';
+import { ArrowLeft, RefreshCw, Wifi, FileText, AlertTriangle } from 'lucide-react';
 import { toast } from 'react-hot-toast';
+
+const getPhysicalBlocks = (stops, activeTemplate, activeOrders) => {
+  const cols = activeTemplate.cols || 3;
+  const blocks = [];
+  const deliveryStops = stops.filter(s => s.stopType === 'delivery');
+
+  deliveryStops.forEach(stopA => {
+    const idxA = stopA.loadingSequence - 1;
+    const cA = idxA % cols;
+    const rA = Math.floor(idxA / cols);
+    const nameA = activeOrders.find(o => String(o._id) === String(stopA.orderId))?.crop?.name || 'Crop';
+
+    deliveryStops.forEach(stopB => {
+      if (stopB.orderId === stopA.orderId) return;
+
+      const idxB = stopB.loadingSequence - 1;
+      const cB = idxB % cols;
+      const rB = Math.floor(idxB / cols);
+      const nameB = activeOrders.find(o => String(o._id) === String(stopB.orderId))?.crop?.name || 'Crop';
+
+      // If stopA must be delivered before stopB
+      if (stopA.sequence < stopB.sequence) {
+        // 1. Stacking Block: B sits on top of A
+        if (cA === cB && rB > rA) {
+          blocks.push(`⚠️ ${nameB} is stacked on top of ${nameA}. You must unload ${nameB} first.`);
+        }
+        // 2. Door/Corridor Block: B is in the same row but closer to the door (column is larger)
+        if (rA === rB && cB > cA) {
+          blocks.push(`⚠️ ${nameB} is blocking the rear door path for ${nameA}.`);
+        }
+      }
+    });
+  });
+
+  return Array.from(new Set(blocks));
+};
 
 const LoadPlanning = () => {
   const { id } = useParams();
   const navigate = useNavigate();
-  const { setBatch, batch } = useLoadPlannerStore();
+  const { setBatch, batch, localRouteStops, removedOrderIds, activeTemplate } = useLoadPlannerStore();
   const [loading, setLoading]     = useState(true);
   const [isLive, setIsLive]       = useState(false);
   const [refreshing, setRefreshing] = useState(false);
+
+  const activeOrders = batch?.orders?.filter(o => !removedOrderIds.has(String(o._id))) || [];
+  const deliveryStops = localRouteStops.filter(
+    s => s.stopType === 'delivery' && !removedOrderIds.has(String(s.orderId))
+  );
 
   const fetchBatch = useCallback(async () => {
     setLoading(true);
@@ -38,6 +79,74 @@ const LoadPlanning = () => {
     await fetchBatch();
     setRefreshing(false);
     toast.success('Batch refreshed');
+  };
+
+  const handlePrintManifest = () => {
+    if (deliveryStops.length === 0) {
+      toast.error('No cargo in loading plan to print.');
+      return;
+    }
+
+    const printWindow = window.open('', '_blank');
+    printWindow.document.write(`
+      <html>
+        <head>
+          <title>AgriConnect - Loading Manifest</title>
+          <style>
+            body { font-family: system-ui, -apple-system, sans-serif; padding: 40px; color: #1e293b; line-height: 1.5; }
+            h1 { font-size: 22px; font-weight: 900; border-bottom: 2px solid #e2e8f0; padding-bottom: 12px; margin-bottom: 24px; color: #0f172a; }
+            .meta { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 30px; background: #f8fafc; padding: 20px; border-radius: 12px; border: 1px solid #e2e8f0; font-size: 13px; }
+            .meta div { margin-bottom: 4px; }
+            table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+            th, td { border: 1px solid #e2e8f0; padding: 12px; text-align: left; font-size: 13px; }
+            th { background: #f1f5f9; font-weight: 800; color: #334155; }
+            .step { font-weight: 800; color: #4f46e5; }
+            .sign { margin-top: 60px; display: grid; grid-template-columns: 1fr 1fr; gap: 60px; }
+            .sign-box { border-top: 1px solid #cbd5e1; padding-top: 12px; text-align: center; font-size: 12px; font-weight: bold; color: #64748b; }
+          </style>
+        </head>
+        <body>
+          <h1>📦 Loading Manifest & Dispatch Checklist</h1>
+          <div class="meta">
+            <div><strong>Batch ID:</strong> #${batch._id.toUpperCase()}</div>
+            <div><strong>Driver Name:</strong> ${batch.driver?.name || 'Unassigned'}</div>
+            <div><strong>Vehicle Profile:</strong> ${activeTemplate.name}</div>
+            <div><strong>Consolidation Route Distance:</strong> ${batch.totalDistance} km</div>
+          </div>
+          <table>
+            <thead>
+              <tr>
+                <th>Load Order</th>
+                <th>Placement Slot</th>
+                <th>Crop Type</th>
+                <th>Weight Quantity</th>
+                <th>Delivery Address</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${deliveryStops.map((stop, idx) => {
+                const order = activeOrders.find(o => String(o._id) === String(stop.orderId));
+                return `
+                  <tr>
+                    <td class="step">Step ${idx + 1}</td>
+                    <td>Slot #${stop.loadingSequence}</td>
+                    <td><strong>${order?.crop?.name}</strong> (${getCropType(order?.crop?.name).label})</td>
+                    <td>${order?.requestedQuantity} ${order?.crop?.unit}</td>
+                    <td>${order?.vendor?.name} - ${stop.address}</td>
+                  </tr>
+                `;
+              }).join('')}
+            </tbody>
+          </table>
+          <div class="sign">
+            <div class="sign-box">Warehouse Dispatcher Signature</div>
+            <div class="sign-box">Driver Acknowledgment Signature</div>
+          </div>
+          <script>window.print();</script>
+        </body>
+      </html>
+    `);
+    printWindow.document.close();
   };
 
   useEffect(() => {
@@ -62,6 +171,8 @@ const LoadPlanning = () => {
 
     return () => socket.disconnect();
   }, [id, fetchBatch]);
+
+  const physicalBlocks = getPhysicalBlocks(localRouteStops, activeTemplate, activeOrders);
 
   if (loading) {
     return (
@@ -107,14 +218,26 @@ const LoadPlanning = () => {
           </div>
         </div>
 
-        <button
-          onClick={handleRefresh}
-          disabled={refreshing}
-          className="w-8 h-8 rounded-lg hover:bg-slate-100 border border-slate-200 flex items-center justify-center text-slate-500 cursor-pointer transition-colors"
-          title="Reload"
-        >
-          <RefreshCw className={`w-3.5 h-3.5 ${refreshing ? 'animate-spin' : ''}`} />
-        </button>
+        <div className="flex items-center gap-2">
+          {/* Print Manifest Button */}
+          <button
+            onClick={handlePrintManifest}
+            className="px-3 py-1.5 bg-indigo-50 border border-indigo-200 hover:bg-indigo-100 text-indigo-600 rounded-lg text-[10px] font-black cursor-pointer transition-colors flex items-center gap-1.5 shadow-xs"
+            title="Print Cargo Manifest Checklist"
+          >
+            <FileText className="w-3.5 h-3.5" />
+            <span>Print Manifest</span>
+          </button>
+
+          <button
+            onClick={handleRefresh}
+            disabled={refreshing}
+            className="w-8 h-8 rounded-lg hover:bg-slate-100 border border-slate-200 flex items-center justify-center text-slate-500 cursor-pointer transition-colors"
+            title="Reload"
+          >
+            <RefreshCw className={`w-3.5 h-3.5 ${refreshing ? 'animate-spin' : ''}`} />
+          </button>
+        </div>
       </div>
 
       {/* Main Grid (Unified Height) */}
@@ -133,11 +256,28 @@ const LoadPlanning = () => {
                 </h3>
               </div>
               <span className="text-[8px] font-black bg-slate-100 border border-slate-200 text-slate-600 px-2 py-0.5 rounded uppercase tracking-wide">
-                {useLoadPlannerStore.getState().activeTemplate?.name}
+                {activeTemplate?.name}
               </span>
             </div>
             <VehicleCanvas />
           </div>
+
+          {/* Stacking / Blocking Warnings Board */}
+          {physicalBlocks.length > 0 && (
+            <div className="bg-rose-50/50 border border-rose-250 rounded-2xl p-3 shadow-xs">
+              <h4 className="text-[9.5px] font-black text-rose-700 uppercase tracking-wider mb-2 flex items-center gap-1.5">
+                <AlertTriangle className="w-4 h-4 text-rose-500" />
+                Physical Accessibility Warnings (LIFO Obstruction)
+              </h4>
+              <ul className="space-y-1">
+                {physicalBlocks.map((block, idx) => (
+                  <li key={idx} className="text-[9px] font-bold text-rose-600 list-disc ml-4">
+                    {block}
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
 
           <AnalyticsSummary />
         </div>

@@ -29,10 +29,39 @@ const StatsHeader = () => {
     weightPercent > 90 ? '#ef4444' :
     weightPercent > 70 ? '#f59e0b' : '#10b981';
 
+  // ── Axle Load Calculations ──
+  const cols = activeTemplate.cols || 3;
+  let frontWeight = 0;
+  let rearWeight = 0;
+
+  deliveryStops.forEach(stop => {
+    const order = activeOrders.find(o => String(o._id) === String(stop.orderId));
+    if (order) {
+      const slotIdx = stop.loadingSequence - 1;
+      const c = slotIdx % cols;
+      const weight = order.requestedQuantity || 0;
+      // Front is c < cols / 2, Rear is c >= cols / 2
+      if (c < cols / 2) {
+        frontWeight += weight;
+      } else {
+        rearWeight += weight;
+      }
+    }
+  });
+
+  const totalLoaded = frontWeight + rearWeight;
+  const frontPercent = totalLoaded > 0 ? Math.round((frontWeight / totalLoaded) * 100) : 50;
+  const rearPercent = totalLoaded > 0 ? 100 - frontPercent : 50;
+
+  const balanceStatus = 
+    totalLoaded === 0 ? 'Empty' :
+    frontPercent > 70 ? '⚠️ Front Heavy' :
+    rearPercent > 70 ? '⚠️ Rear Heavy' : '✅ Balanced';
+
   return (
     <div className="grid grid-cols-1 md:grid-cols-3 gap-3 shrink-0">
 
-      {/* ── Weight KPI ── */}
+      {/* ── Weight & Axle Balance KPI ── */}
       <div className="bg-white border border-slate-100 rounded-xl p-3 shadow-xs flex flex-col gap-2 hover:shadow-sm transition-shadow">
         <div className="flex items-start justify-between">
           <div>
@@ -49,11 +78,22 @@ const StatsHeader = () => {
             {weightPercent}%
           </div>
         </div>
-        <div className="space-y-1">
-          <div className="h-1 bg-slate-100 rounded-full overflow-hidden">
-            <div className="h-full rounded-full transition-all duration-500" style={{ width: `${weightPercent}%`, backgroundColor: barColor }} />
+        
+        {/* Axle load balance bar */}
+        <div className="pt-1.5 border-t border-slate-50 flex flex-col gap-1">
+          <div className="flex justify-between text-[8px] font-bold text-slate-400">
+            <span>Front ({frontPercent}%)</span>
+            <span>Rear ({rearPercent}%)</span>
           </div>
-          <p className="text-[8px] text-slate-400 font-medium">Max: {maxCapacity} {unit}</p>
+          <div className="h-1 bg-slate-100 rounded-full flex overflow-hidden">
+            <div className="h-full bg-indigo-500" style={{ width: `${frontPercent}%` }} />
+            <div className="h-full bg-emerald-500" style={{ width: `${rearPercent}%` }} />
+          </div>
+          <span className={`text-[7.5px] font-black uppercase tracking-wider ${
+            balanceStatus.includes('Balanced') ? 'text-emerald-600' : 'text-amber-600'
+          }`}>
+            Axle: {balanceStatus}
+          </span>
         </div>
       </div>
 
