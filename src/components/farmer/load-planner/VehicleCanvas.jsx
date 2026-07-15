@@ -112,10 +112,12 @@ const update3DSlots = (scene, activeTemplate, routeStops, removedOrderIds, slotM
         palletMesh.receiveShadow = true;
         slotMeshGroup.add(palletMesh);
 
-        // ── 2x2 BOX STACK LOAD LOGIC (DIVIDE GIANT SLOTS INTO CUBIC PACKAGE BLOCKS) ──
-        const subW = (slotW - 6) / 2;
-        const subD = (slotD - 6) / 2;
-        const boxH = slotH * 0.82 * fillRatio;
+        // ── 2x2 BOX STACK LOAD LOGIC (CONSTRAIN TO CUBIC PACKAGE PROPORTIONS) ──
+        // Instead of expanding to fill long slots, we calculate a standard cubic package box size
+        const boxSize = Math.min(slotW / 2.3, slotD / 2.3, slotH * 0.38);
+        const subW = boxSize;
+        const subD = boxSize;
+        const boxH = boxSize * 1.25 * fillRatio; // Proportional height, scaling dynamically with weight
 
         const subBoxGeo = new THREE.BoxGeometry(subW, boxH, subD);
         const subBoxMat = new THREE.MeshStandardMaterial({
@@ -144,13 +146,13 @@ const update3DSlots = (scene, activeTemplate, routeStops, removedOrderIds, slotM
         const offsets = [
           { dx: -1, dz: 1, label: true },  // Front-Left (Has shipping labels & glyphs facing camera)
           { dx: 1,  dz: 1, label: true },  // Front-Right
-          { dx: -1, dz: -1, label: false }, // Back-Left (hidden behind, no labels to save WebGL draw calls)
+          { dx: -1, dz: -1, label: false }, // Back-Left
           { dx: 1,  dz: -1, label: false }  // Back-Right
         ];
 
         offsets.forEach(({ dx, dz, label }) => {
-          const px = dx * (subW / 2 + 1);
-          const pz = dz * (subD / 2 + 1);
+          const px = dx * (subW / 2 + 1.2);
+          const pz = dz * (subD / 2 + 1.2);
           const py = -slotH / 2 + palletH + boxH / 2;
 
           // Cardboard Box Mesh
