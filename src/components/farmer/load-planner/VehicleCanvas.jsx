@@ -8,7 +8,7 @@ import { Loader2 } from 'lucide-react';
 
 let cachedGltfModel = null;
 
-// Dynamic Cargo Slot Generator (with Realistic 3D Taped Cardboard Packages & Handling Symbols)
+// Dynamic Cargo Slot Generator (with Realistic 2x2 stacks of taped cardboard boxes on wooden pallets)
 const update3DSlots = (scene, activeTemplate, routeStops, removedOrderIds, slotMeshesRef, checkLifoViolation, trailerBounds) => {
   slotMeshesRef.current.forEach((obj) => scene.remove(obj));
   slotMeshesRef.current = [];
@@ -58,7 +58,7 @@ const update3DSlots = (scene, activeTemplate, routeStops, removedOrderIds, slotM
         const emptyMesh = new THREE.Mesh(boxGeo, new THREE.MeshStandardMaterial({
           color: 0x94a3b8,
           transparent: true,
-          opacity: 0.08,
+          opacity: 0.05,
           roughness: 0.8
         }));
         emptyMesh.userData = { slotNum };
@@ -66,14 +66,14 @@ const update3DSlots = (scene, activeTemplate, routeStops, removedOrderIds, slotM
         slotMeshGroup.add(emptyMesh);
 
         const edges = new THREE.EdgesGeometry(boxGeo);
-        slotMeshGroup.add(new THREE.LineSegments(edges, new THREE.LineBasicMaterial({ color: 0xcbd5e1, opacity: 0.3, transparent: true })));
+        slotMeshGroup.add(new THREE.LineSegments(edges, new THREE.LineBasicMaterial({ color: 0xcbd5e1, opacity: 0.25, transparent: true })));
       } else {
         // Filled cargo box
         const order = activeOrders.find(o => String(o._id) === String(stop.orderId));
         const isViolated = checkLifoViolation(stop, deliveryStops);
         const weight = order?.requestedQuantity || 0;
 
-        const fillRatio = Math.max(0.2, Math.min(1.0, weight / maxWeightPerSlot));
+        const fillRatio = Math.max(0.25, Math.min(1.0, weight / maxWeightPerSlot));
         
         const cropName = order?.crop?.name || '';
         const lowerName = cropName.toLowerCase();
@@ -112,79 +112,93 @@ const update3DSlots = (scene, activeTemplate, routeStops, removedOrderIds, slotM
         palletMesh.receiveShadow = true;
         slotMeshGroup.add(palletMesh);
 
-        // 2. Cardboard Box (with dynamic height based on fill ratio)
+        // ── 2x2 BOX STACK LOAD LOGIC (DIVIDE GIANT SLOTS INTO CUBIC PACKAGE BLOCKS) ──
+        const subW = (slotW - 6) / 2;
+        const subD = (slotD - 6) / 2;
         const boxH = slotH * 0.82 * fillRatio;
-        const mainBoxGeo = new THREE.BoxGeometry(slotW - 4, boxH, slotD - 4);
-        const mainBoxMat = new THREE.MeshStandardMaterial({
+
+        const subBoxGeo = new THREE.BoxGeometry(subW, boxH, subD);
+        const subBoxMat = new THREE.MeshStandardMaterial({
           color: boxColor,
-          roughness: 0.9, // Textured matte paper look
+          roughness: 0.9,
           metalness: 0.0
         });
-        const mainBoxMesh = new THREE.Mesh(mainBoxGeo, mainBoxMat);
-        mainBoxMesh.position.y = -slotH / 2 + palletH + boxH / 2;
-        mainBoxMesh.castShadow = true;
-        mainBoxMesh.receiveShadow = true;
-        mainBoxMesh.userData = { slotNum };
-        slotMeshGroup.add(mainBoxMesh);
 
-        // 3. Sealed Flap Tape (runs thin horizontally along top seam & folds down sides)
-        const tapeWidth = slotD / 6;
-        const tapeThickness = 0.15;
-        
-        // Top seam tape
-        const topTapeGeo = new THREE.BoxGeometry(slotW - 3.8, tapeThickness, tapeWidth);
         const tapeMat = new THREE.MeshStandardMaterial({
           color: tapeColor,
           roughness: 0.4,
           metalness: 0.1
         });
-        const topTape = new THREE.Mesh(topTapeGeo, tapeMat);
-        topTape.position.set(0, -slotH / 2 + palletH + boxH, 0);
-        slotMeshGroup.add(topTape);
 
-        // Side seam folds (tape dropping down sides)
-        const sideTapeGeo = new THREE.BoxGeometry(tapeThickness, boxH / 4, tapeWidth);
-        const sideTapeLeft = new THREE.Mesh(sideTapeGeo, tapeMat);
-        sideTapeLeft.position.set(-slotW / 2 + 2, -slotH / 2 + palletH + boxH - boxH / 8, 0);
-        slotMeshGroup.add(sideTapeLeft);
-
-        const sideTapeRight = new THREE.Mesh(sideTapeGeo, tapeMat);
-        sideTapeRight.position.set(slotW / 2 - 2, -slotH / 2 + palletH + boxH - boxH / 8, 0);
-        slotMeshGroup.add(sideTapeRight);
-
-        // 4. White Shipping Label (Placed flat on top-right of front face)
-        const labelW = slotW / 4.5;
-        const labelH = Math.max(4, boxH / 3.5);
-        const labelGeo = new THREE.PlaneGeometry(labelW, labelH);
         const labelMat = new THREE.MeshBasicMaterial({
           color: 0xffffff,
           side: THREE.DoubleSide
         });
-        const labelMesh = new THREE.Mesh(labelGeo, labelMat);
-        labelMesh.position.set(slotW / 4.5, -slotH / 2 + palletH + boxH * 0.7, slotD / 2 - 1.9);
-        slotMeshGroup.add(labelMesh);
 
-        // 5. Handling Glyphs / Symbols (Printed outline squares on bottom-left)
         const glyphMat = new THREE.MeshBasicMaterial({
-          color: 0x475569, // Dark slate printed ink
+          color: 0x475569,
           side: THREE.DoubleSide
         });
-        const glyphGeo = new THREE.PlaneGeometry(2.2, 2.2);
-        const glyphSpacing = 3.2;
-        const glyphCount = 3;
 
-        for (let i = 0; i < glyphCount; i++) {
-          const glyphMesh = new THREE.Mesh(glyphGeo, glyphMat);
-          // Positioned at bottom-left of front face
-          glyphMesh.position.set(-slotW / 4.5 + i * glyphSpacing, -slotH / 2 + palletH + boxH * 0.25, slotD / 2 - 1.9);
-          slotMeshGroup.add(glyphMesh);
-        }
+        // 4 sub-box offsets: Front-Left, Front-Right, Back-Left, Back-Right
+        const offsets = [
+          { dx: -1, dz: 1, label: true },  // Front-Left (Has shipping labels & glyphs facing camera)
+          { dx: 1,  dz: 1, label: true },  // Front-Right
+          { dx: -1, dz: -1, label: false }, // Back-Left (hidden behind, no labels to save WebGL draw calls)
+          { dx: 1,  dz: -1, label: false }  // Back-Right
+        ];
 
-        // Subtle box edges highlight
-        const edges = new THREE.EdgesGeometry(mainBoxGeo);
-        const edgesLines = new THREE.LineSegments(edges, new THREE.LineBasicMaterial({ color: tapeColor, opacity: 0.2, transparent: true }));
-        edgesLines.position.y = -slotH / 2 + palletH + boxH / 2;
-        slotMeshGroup.add(edgesLines);
+        offsets.forEach(({ dx, dz, label }) => {
+          const px = dx * (subW / 2 + 1);
+          const pz = dz * (subD / 2 + 1);
+          const py = -slotH / 2 + palletH + boxH / 2;
+
+          // Cardboard Box Mesh
+          const boxMesh = new THREE.Mesh(subBoxGeo, subBoxMat);
+          boxMesh.position.set(px, py, pz);
+          boxMesh.castShadow = true;
+          boxMesh.receiveShadow = true;
+          slotMeshGroup.add(boxMesh);
+
+          // Top Flap Seam Tape
+          const tapeW = subD / 6;
+          const topTape = new THREE.Mesh(new THREE.BoxGeometry(subW - 0.2, 0.15, tapeW), tapeMat);
+          topTape.position.set(px, py + boxH / 2, pz);
+          slotMeshGroup.add(topTape);
+
+          // Side Tape Folds
+          const sideTapeLeft = new THREE.Mesh(new THREE.BoxGeometry(0.15, boxH / 4, tapeW), tapeMat);
+          sideTapeLeft.position.set(px - subW / 2 + 0.1, py + boxH / 2 - boxH / 8, pz);
+          slotMeshGroup.add(sideTapeLeft);
+
+          const sideTapeRight = new THREE.Mesh(new THREE.BoxGeometry(0.15, boxH / 4, tapeW), tapeMat);
+          sideTapeRight.position.set(px + subW / 2 - 0.1, py + boxH / 2 - boxH / 8, pz);
+          slotMeshGroup.add(sideTapeRight);
+
+          // shipping labels & glyphs on front-facing boxes (matches 2nd reference image)
+          if (label) {
+            // White shipping sticker (top-right of box face)
+            const labelW = subW / 4.2;
+            const labelH = Math.max(3, boxH / 3.8);
+            const labelMesh = new THREE.Mesh(new THREE.PlaneGeometry(labelW, labelH), labelMat);
+            labelMesh.position.set(px + subW / 4.2, py + boxH * 0.2, pz + subD / 2 + 0.1);
+            slotMeshGroup.add(labelMesh);
+
+            // Three handling icons/glyphs (bottom-left of box face)
+            const glyphGeo = new THREE.PlaneGeometry(1.2, 1.2);
+            for (let i = 0; i < 3; i++) {
+              const glyphMesh = new THREE.Mesh(glyphGeo, glyphMat);
+              glyphMesh.position.set(px - subW / 4.5 + i * 1.8, py - boxH * 0.25, pz + subD / 2 + 0.1);
+              slotMeshGroup.add(glyphMesh);
+            }
+          }
+
+          // Subtle box edges highlight
+          const edges = new THREE.EdgesGeometry(subBoxGeo);
+          const edgesLines = new THREE.LineSegments(edges, new THREE.LineBasicMaterial({ color: tapeColor, opacity: 0.15, transparent: true }));
+          edgesLines.position.set(px, py, pz);
+          slotMeshGroup.add(edgesLines);
+        });
 
         // Accumulate center of gravity metrics
         totalW += weight;
