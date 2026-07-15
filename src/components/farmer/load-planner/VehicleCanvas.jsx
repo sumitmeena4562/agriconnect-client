@@ -8,7 +8,7 @@ import { Loader2 } from 'lucide-react';
 
 let cachedGltfModel = null;
 
-// Dynamic Cargo Slot Generator (with Realistic Wooden Pallets & Cardboard Packing Boxes with shipping labels & dynamic fill height)
+// Dynamic Cargo Slot Generator (with Realistic 3D Taped Cardboard Packages & Handling Symbols)
 const update3DSlots = (scene, activeTemplate, routeStops, removedOrderIds, slotMeshesRef, checkLifoViolation, trailerBounds) => {
   slotMeshesRef.current.forEach((obj) => scene.remove(obj));
   slotMeshesRef.current = [];
@@ -32,7 +32,6 @@ const update3DSlots = (scene, activeTemplate, routeStops, removedOrderIds, slotM
   const deliveryStops = routeStops.filter(s => s.stopType === 'delivery' && !removedOrderIds.has(String(s.orderId)));
   const pickupCount = routeStops.filter(s => s.stopType === 'pickup').length;
 
-  // Max weight capacity per slot for dynamic fill height calculation
   const maxCapacity = activeTemplate.capacity || 10000;
   const maxWeightPerSlot = maxCapacity / (rows * cols);
 
@@ -74,30 +73,29 @@ const update3DSlots = (scene, activeTemplate, routeStops, removedOrderIds, slotM
         const isViolated = checkLifoViolation(stop, deliveryStops);
         const weight = order?.requestedQuantity || 0;
 
-        // Calculate dynamic fill ratio based on weight (min 15% box height to keep it visible)
         const fillRatio = Math.max(0.2, Math.min(1.0, weight / maxWeightPerSlot));
         
-        // Dynamic Cargo Classification Colors
         const cropName = order?.crop?.name || '';
         const lowerName = cropName.toLowerCase();
         
-        let boxColor = 0xdcba9d;  // Kraft Cardboard Brown (proper matte tone)
-        let tapeColor = 0x854d0e; // Standard Brown Tape
+        // Warm Kraft Cardboard Color Palettes (Matched to reference image)
+        let boxColor = 0xd29b6c;  // Warm Cardboard Brown
+        let tapeColor = 0xb48256; // Matte Paper Tape (kraft color)
         
         if (lowerName.includes('tomato') || lowerName.includes('egg') || lowerName.includes('strawberr')) {
-          boxColor = 0xffedd5;  // Fragile Amber Kraft
-          tapeColor = 0xea580c; // Red Warning Tape
+          boxColor = 0xe8a97c;  // Fragile Orange Kraft
+          tapeColor = 0xc2410c; // Red-orange warning tape
         } else if (lowerName.includes('milk') || lowerName.includes('paneer') || lowerName.includes('dairy') || lowerName.includes('berr')) {
-          boxColor = 0xe0f2fe;  // Cold Chain Sky Blue
-          tapeColor = 0x0284c7; // Blue Packing Tape
+          boxColor = 0xbce1f7;  // Perishable Cold Blue
+          tapeColor = 0x0284c7; // Blue tape
         } else if (lowerName.includes('potato') || lowerName.includes('wheat') || lowerName.includes('onion') || lowerName.includes('grain')) {
-          boxColor = 0xc79a73;  // Heavy Duty Kraft
-          tapeColor = 0x78350f; // Dark Brown Tape
+          boxColor = 0xc08758;  // Heavy duty dark kraft
+          tapeColor = 0x78350f; // Dark brown tape
         }
 
         if (isViolated) {
-          boxColor = 0xfee2e2;  // LIFO Violation Light Red
-          tapeColor = 0xef4444; // Violation Bright Red Tape
+          boxColor = 0xfca5a5;  // Red Violation Kraft
+          tapeColor = 0xdc2626; // Violation red tape
         }
 
         // 1. Wooden Pallet Base (Height = 12% of slot)
@@ -129,18 +127,32 @@ const update3DSlots = (scene, activeTemplate, routeStops, removedOrderIds, slotM
         mainBoxMesh.userData = { slotNum };
         slotMeshGroup.add(mainBoxMesh);
 
-        // 3. Packaging Tape Strap (scaled to dynamic box height)
-        const tapeGeo = new THREE.BoxGeometry(slotW / 3.8, boxH + 0.1, slotD - 3.6);
+        // 3. Sealed Flap Tape (runs thin horizontally along top seam & folds down sides)
+        const tapeWidth = slotD / 6;
+        const tapeThickness = 0.15;
+        
+        // Top seam tape
+        const topTapeGeo = new THREE.BoxGeometry(slotW - 3.8, tapeThickness, tapeWidth);
         const tapeMat = new THREE.MeshStandardMaterial({
           color: tapeColor,
-          roughness: 0.3,
+          roughness: 0.4,
           metalness: 0.1
         });
-        const tapeMesh = new THREE.Mesh(tapeGeo, tapeMat);
-        tapeMesh.position.y = -slotH / 2 + palletH + boxH / 2;
-        slotMeshGroup.add(tapeMesh);
+        const topTape = new THREE.Mesh(topTapeGeo, tapeMat);
+        topTape.position.set(0, -slotH / 2 + palletH + boxH, 0);
+        slotMeshGroup.add(topTape);
 
-        // 4. White Shipping Label (Placed flat on front face of box for realistic detail)
+        // Side seam folds (tape dropping down sides)
+        const sideTapeGeo = new THREE.BoxGeometry(tapeThickness, boxH / 4, tapeWidth);
+        const sideTapeLeft = new THREE.Mesh(sideTapeGeo, tapeMat);
+        sideTapeLeft.position.set(-slotW / 2 + 2, -slotH / 2 + palletH + boxH - boxH / 8, 0);
+        slotMeshGroup.add(sideTapeLeft);
+
+        const sideTapeRight = new THREE.Mesh(sideTapeGeo, tapeMat);
+        sideTapeRight.position.set(slotW / 2 - 2, -slotH / 2 + palletH + boxH - boxH / 8, 0);
+        slotMeshGroup.add(sideTapeRight);
+
+        // 4. White Shipping Label (Placed flat on top-right of front face)
         const labelW = slotW / 4.5;
         const labelH = Math.max(4, boxH / 3.5);
         const labelGeo = new THREE.PlaneGeometry(labelW, labelH);
@@ -149,20 +161,35 @@ const update3DSlots = (scene, activeTemplate, routeStops, removedOrderIds, slotM
           side: THREE.DoubleSide
         });
         const labelMesh = new THREE.Mesh(labelGeo, labelMat);
-        // Position at front face of the cardboard box
-        labelMesh.position.set(-slotW / 4, -slotH / 2 + palletH + boxH / 2, slotD / 2 - 1.9);
+        labelMesh.position.set(slotW / 4.5, -slotH / 2 + palletH + boxH * 0.7, slotD / 2 - 1.9);
         slotMeshGroup.add(labelMesh);
 
-        // Subtle box edges highlight (scaled dynamically)
+        // 5. Handling Glyphs / Symbols (Printed outline squares on bottom-left)
+        const glyphMat = new THREE.MeshBasicMaterial({
+          color: 0x475569, // Dark slate printed ink
+          side: THREE.DoubleSide
+        });
+        const glyphGeo = new THREE.PlaneGeometry(2.2, 2.2);
+        const glyphSpacing = 3.2;
+        const glyphCount = 3;
+
+        for (let i = 0; i < glyphCount; i++) {
+          const glyphMesh = new THREE.Mesh(glyphGeo, glyphMat);
+          // Positioned at bottom-left of front face
+          glyphMesh.position.set(-slotW / 4.5 + i * glyphSpacing, -slotH / 2 + palletH + boxH * 0.25, slotD / 2 - 1.9);
+          slotMeshGroup.add(glyphMesh);
+        }
+
+        // Subtle box edges highlight
         const edges = new THREE.EdgesGeometry(mainBoxGeo);
-        const edgesLines = new THREE.LineSegments(edges, new THREE.LineBasicMaterial({ color: tapeColor, opacity: 0.3, transparent: true }));
+        const edgesLines = new THREE.LineSegments(edges, new THREE.LineBasicMaterial({ color: tapeColor, opacity: 0.2, transparent: true }));
         edgesLines.position.y = -slotH / 2 + palletH + boxH / 2;
         slotMeshGroup.add(edgesLines);
 
         // Accumulate center of gravity metrics
         totalW += weight;
         weightedX += cellX * weight;
-        weightedY += (-slotH / 2 + palletH + boxH / 2) * weight; // Vertical CoG is now dynamic based on stack height!
+        weightedY += (-slotH / 2 + palletH + boxH / 2) * weight;
         weightedZ += center.z * weight;
       }
     }
