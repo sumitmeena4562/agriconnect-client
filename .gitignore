@@ -35,3 +35,8 @@ dist-ssr
 coverage
 .eslintcache
 
+# 3D Assets (Large files)
+public/modal/
+src/assets/**/*.fbx
+src/assets/**/*.glb
+

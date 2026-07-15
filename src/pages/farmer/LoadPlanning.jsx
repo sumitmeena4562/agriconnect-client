@@ -7,16 +7,17 @@ import StatsHeader from '../../components/farmer/load-planner/StatsHeader';
 import VehicleCanvas from '../../components/farmer/load-planner/VehicleCanvas';
 import LoadSequenceSidebar from '../../components/farmer/load-planner/LoadSequenceSidebar';
 import AnalyticsSummary from '../../components/farmer/load-planner/AnalyticsSummary';
-import { ArrowLeft, RefreshCw, Layers } from 'lucide-react';
+import { ArrowLeft, RefreshCw, Wifi } from 'lucide-react';
 import { toast } from 'react-hot-toast';
 
 const LoadPlanning = () => {
   const { id } = useParams();
   const navigate = useNavigate();
-  const { setBatch } = useLoadPlannerStore();
-  const [loading, setLoading] = useState(true);
+  const { setBatch, batch } = useLoadPlannerStore();
+  const [loading, setLoading]     = useState(true);
+  const [isLive, setIsLive]       = useState(false);
+  const [refreshing, setRefreshing] = useState(false);
 
-  // Fetch batch details
   const fetchBatch = useCallback(async () => {
     setLoading(true);
     try {
@@ -32,101 +33,121 @@ const LoadPlanning = () => {
     }
   }, [id, setBatch]);
 
+  const handleRefresh = async () => {
+    setRefreshing(true);
+    await fetchBatch();
+    setRefreshing(false);
+    toast.success('Batch refreshed');
+  };
+
   useEffect(() => {
     fetchBatch();
 
-    // Socket.io Real-time streams subscription
-    const socketHost = window.location.origin.includes('localhost') 
-      ? 'http://localhost:5000' 
+    const socketHost = window.location.origin.includes('localhost')
+      ? 'http://localhost:5000'
       : window.location.origin;
-    
-    const socket = io(socketHost, {
-      transports: ['websocket'],
-      upgrade: false
-    });
+
+    const socket = io(socketHost, { transports: ['websocket'], upgrade: false });
 
     socket.on('connect', () => {
-      console.log('Socket.io connected to logistics server stream.');
+      setIsLive(true);
     });
 
-    socket.on(`batch-${id}-update`, (data) => {
-      toast.success('Live load plan update received!');
+    socket.on('disconnect', () => setIsLive(false));
+
+    socket.on(`batch-${id}-update`, () => {
+      toast.success('Live update received 📡');
       fetchBatch();
     });
 
-    return () => {
-      socket.disconnect();
-    };
+    return () => socket.disconnect();
   }, [id, fetchBatch]);
 
   if (loading) {
     return (
       <div className="flex flex-col items-center justify-center min-h-[60vh] gap-3">
-        <div className="w-8 h-8 rounded-full border-3 border-indigo-100 border-t-indigo-650 animate-spin" />
-        <span className="text-[12px] font-bold text-slate-400">Loading dynamic load canvas...</span>
+        <div className="w-8 h-8 rounded-full border-2 border-indigo-200 border-t-indigo-600 animate-spin" />
+        <span className="text-[11px] font-bold text-slate-400">Loading Console...</span>
       </div>
     );
   }
 
   return (
-    <div className="space-y-6 pb-12">
-      
-      {/* Page Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+    <div className="space-y-4 pb-6 max-w-[1400px] mx-auto px-2">
+
+      {/* Header (Compact) */}
+      <div className="flex items-center justify-between border-b border-slate-100 pb-3">
         <div className="flex items-center gap-3">
           <button
             onClick={() => navigate('/farmer-dashboard/batches')}
-            className="w-9 h-9 rounded-xl hover:bg-slate-100 border border-slate-200 flex items-center justify-center text-slate-500 cursor-pointer transition-colors shrink-0"
+            className="w-8 h-8 rounded-lg hover:bg-slate-100 border border-slate-200 flex items-center justify-center text-slate-500 cursor-pointer transition-colors"
           >
-            <ArrowLeft className="w-4 h-4" />
+            <ArrowLeft className="w-3.5 h-3.5" />
           </button>
           <div>
-            <h1 className="text-[20px] font-black text-slate-800 tracking-tight leading-none mb-1 flex items-center gap-2">
-              <span>🚚</span> Logistics & Load Planning Console
-            </h1>
-            <p className="text-[11.5px] text-slate-400 font-semibold">
-              Design trailer spatial arrangements, check LIFO order rules, and simulate load distribution.
+            <div className="flex items-center gap-2">
+              <h1 className="text-[16px] font-black text-slate-800 tracking-tight leading-none">
+                🚚 Load Planning Console
+              </h1>
+              {batch?._id && (
+                <span className="font-mono text-[8.5px] font-bold bg-slate-100 border border-slate-200 text-slate-500 px-1.5 py-0.5 rounded">
+                  #{batch._id.slice(-6).toUpperCase()}
+                </span>
+              )}
+              <span className={`flex items-center gap-1 text-[8px] font-black px-1.5 py-0.5 rounded-full border ${
+                isLive ? 'bg-emerald-50 border-emerald-200 text-emerald-700' : 'bg-slate-100 border-slate-200 text-slate-400'
+              }`}>
+                <Wifi className="w-2 h-2" />
+                {isLive ? 'LIVE' : 'OFFLINE'}
+              </span>
+            </div>
+            <p className="text-[10px] text-slate-400 mt-0.5 font-semibold">
+              Arrange trailer cargo and verify LIFO rules.
             </p>
           </div>
         </div>
 
         <button
-          onClick={fetchBatch}
-          className="w-9 h-9 rounded-xl hover:bg-slate-100 border border-slate-200 flex items-center justify-center text-slate-500 cursor-pointer transition-colors shrink-0 self-start sm:self-center"
-          title="Reload Batch Data"
+          onClick={handleRefresh}
+          disabled={refreshing}
+          className="w-8 h-8 rounded-lg hover:bg-slate-100 border border-slate-200 flex items-center justify-center text-slate-500 cursor-pointer transition-colors"
+          title="Reload"
         >
-          <RefreshCw className="w-4 h-4" />
+          <RefreshCw className={`w-3.5 h-3.5 ${refreshing ? 'animate-spin' : ''}`} />
         </button>
       </div>
 
-      {/* Main layout grid */}
-      <div className="grid grid-cols-1 xl:grid-cols-12 gap-6 items-start">
-        {/* Left main planner (xl:col-span-8) */}
-        <div className="xl:col-span-8 space-y-6 flex flex-col min-h-0">
-          
-          {/* KPI metrics bar */}
+      {/* Main Grid (Unified Height) */}
+      <div className="grid grid-cols-1 xl:grid-cols-12 gap-4 items-stretch">
+        
+        {/* Left Column: Visualizer, KPIs, Analytics */}
+        <div className="xl:col-span-8 space-y-4 flex flex-col justify-between">
           <StatsHeader />
 
-          {/* Konva vehicle canvas */}
-          <div className="bg-white border border-slate-150 rounded-3xl p-5 shadow-xs flex flex-col gap-4">
-            <div>
-              <h3 className="text-[12.5px] font-black text-slate-850 uppercase tracking-wider">Spatial Load Canvas</h3>
-              <p className="text-[9.5px] text-slate-400 font-semibold mt-0.5">Drag cargo items from the sequence list and drop them onto the slots</p>
+          {/* 3D Canvas Box */}
+          <div className="bg-white border border-slate-100 rounded-2xl p-4 shadow-xs">
+            <div className="flex items-center justify-between mb-3">
+              <div>
+                <h3 className="text-[11px] font-black text-slate-800 uppercase tracking-wider">
+                  Spatial Load Canvas
+                </h3>
+              </div>
+              <span className="text-[8px] font-black bg-slate-100 border border-slate-200 text-slate-600 px-2 py-0.5 rounded uppercase tracking-wide">
+                {useLoadPlannerStore.getState().activeTemplate?.name}
+              </span>
             </div>
             <VehicleCanvas />
           </div>
 
-          {/* Recharts Analytics distribution graph */}
           <AnalyticsSummary />
-
         </div>
 
-        {/* Right load controller sidebar (xl:col-span-4) */}
-        <div className="xl:col-span-4 bg-white border border-slate-150 rounded-3xl overflow-hidden shadow-xs h-[680px]">
+        {/* Right Column: Sidebar */}
+        <div className="xl:col-span-4 bg-white border border-slate-100 rounded-2xl overflow-hidden shadow-xs flex flex-col min-h-[500px]">
           <LoadSequenceSidebar />
         </div>
-      </div>
 
+      </div>
     </div>
   );
 };
