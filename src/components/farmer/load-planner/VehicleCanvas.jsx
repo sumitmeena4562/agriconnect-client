@@ -351,6 +351,10 @@ const VehicleCanvas = () => {
     update3DSlots(scene, activeTemplate, routeStops, removedOrderIds, slotMeshesRef, checkLifoViolation, trailerBounds);
 
     const setupModelInScene = (modelScene) => {
+      if (type === 'mini_truck' || type === 'pickup_vehicle' || type === 'tractor_trolley' || type === 'bike_delivery') {
+        // Rotate the mini truck model to align it straight along the X-axis (facing left)
+        modelScene.rotation.y = -0.43; // -24.6 degrees clockwise rotation
+      }
       modelScene.updateMatrixWorld(true);
 
       const pivot = new THREE.Group();
