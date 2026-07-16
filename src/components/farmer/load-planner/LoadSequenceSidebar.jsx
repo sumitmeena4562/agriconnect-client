@@ -66,6 +66,7 @@ const LoadSequenceSidebar = () => {
       localRouteStops: batch?.optimizedRoute || [],
       removedOrderIds: new Set(),
     });
+    useLoadPlannerStore.getState().recalculatePackagingReport();
     toast.success('Route reset to default.');
   };
 
@@ -135,7 +136,7 @@ const LoadSequenceSidebar = () => {
             Transport Profile
           </p>
           {isTemplateLocked && (
-            <span className="flex items-center gap-1 text-[8px] font-black text-violet-600 bg-violet-50 border border-violet-200 px-2 py-0.5 rounded-full">
+            <span className="flex items-center gap-1 text-[8px] font-black text-primary-700 bg-primary-50 border border-primary-200 px-2 py-0.5 rounded-full">
               <Lock className="w-2.5 h-2.5" />
               Locked to Driver
             </span>
@@ -149,29 +150,28 @@ const LoadSequenceSidebar = () => {
               const template = vehicleTemplates[driverTemplateKey];
               if (!template) return null;
               return (
-                <div className="py-2.5 px-3 rounded-xl text-[10px] font-black flex items-center gap-2 bg-slate-900 border-slate-900 text-white shadow-md">
-                  <span className="text-white">{getTemplateIcon(template.type)}</span>
+                <div className="py-2.5 px-3 rounded-xl text-[10px] font-black flex items-center gap-2 bg-primary-50 border border-primary-200 text-primary-750 shadow-xs">
+                  <span className="text-primary-600">{getTemplateIcon(template.type)}</span>
                   <span className="truncate leading-tight flex-1">
                     <span className="mr-0.5">{VEHICLE_EMOJIS[template.type] || '📦'}</span>
                     {template.name}
                   </span>
-                  <span className="text-[7.5px] font-black bg-white/20 text-white/80 px-1.5 py-0.5 rounded-md uppercase tracking-wide shrink-0">
+                  <span className="text-[7.5px] font-black bg-primary-100 text-primary-800 px-1.5 py-0.5 rounded-md uppercase tracking-wide shrink-0">
                     {driverVehicleType}
                   </span>
                 </div>
               );
             })()}
-            <p className="text-[8.5px] text-slate-400 font-semibold flex items-center gap-1 pt-0.5">
-              <Lock className="w-2.5 h-2.5 shrink-0" />
-              Canvas locked to <strong className="text-slate-600">{batch?.driver?.name}</strong>'s vehicle.
-              Unassign driver to change.
+            <p className="text-[9.5px] text-slate-500 font-medium pt-1.5 leading-normal">
+              <Lock className="w-3.5 h-3.5 text-slate-400 inline-block mr-1 align-middle -mt-0.5 shrink-0" />
+              Canvas locked to <strong className="text-slate-755">{batch?.driver?.name}</strong>'s vehicle. Unassign driver to change.
             </p>
           </div>
         ) : (
           // ── No driver yet: show all templates for pre-planning ──
           <>
-            <p className="text-[8px] text-amber-600 font-bold bg-amber-50 border border-amber-200 rounded-lg px-2 py-1.5 mb-2 flex items-center gap-1">
-              <AlertTriangle className="w-3 h-3 shrink-0" />
+            <p className="text-[9.5px] text-amber-700 font-medium bg-amber-50/50 border border-amber-200 rounded-lg px-2.5 py-1.5 mb-2.5 leading-normal">
+              <AlertTriangle className="w-3.5 h-3.5 text-amber-600 inline-block mr-1 align-middle -mt-0.5 shrink-0" />
               Assign a driver to auto-lock the correct vehicle canvas.
             </p>
             <div className="grid grid-cols-2 gap-1.5">
@@ -184,7 +184,7 @@ const LoadSequenceSidebar = () => {
                     onClick={() => setActiveTemplate(key)}
                     className={`py-2 px-2.5 rounded-xl text-[10px] font-black flex items-center gap-1.5 transition-all border text-left cursor-pointer ${
                       isSelected
-                        ? 'bg-slate-900 border-slate-900 text-white shadow-md scale-[1.02]'
+                        ? 'bg-primary-600 border-primary-600 text-white shadow-sm scale-[1.01]'
                         : 'bg-slate-50 border-slate-200 text-slate-600 hover:bg-slate-100 hover:border-slate-300'
                     }`}
                   >
@@ -264,24 +264,24 @@ const LoadSequenceSidebar = () => {
                 draggable="true"
                 onDragStart={() => setDraggedItem(stop)}
                 onDragEnd={() => setDraggedItem(null)}
-                className={`relative bg-white rounded-2xl border transition-all cursor-grab active:cursor-grabbing shadow-xs group ${
+                className={`relative bg-white rounded-xl border transition-all cursor-grab active:cursor-grabbing shadow-xs group ${
                   isRemoving
                     ? 'border-rose-200 bg-rose-50/30'
                     : hasViolation
-                    ? 'border-rose-300 bg-rose-50/5 hover:border-rose-450 hover:shadow-md'
-                    : 'border-slate-150 hover:border-slate-300 hover:shadow-md'
+                    ? 'border-rose-350 bg-rose-50/5 hover:border-rose-450 hover:shadow-xs'
+                    : 'border-slate-100 hover:border-slate-250 hover:shadow-xs'
                 }`}
               >
                 {/* Left color accent bar */}
                 <div
-                  className="absolute left-0 top-3 bottom-3 w-[3px] rounded-full"
+                  className="absolute left-0 top-2 bottom-2 w-[3px] rounded-r-md"
                   style={{ backgroundColor: accentColor }}
                 />
 
-                <div className="flex items-center gap-2 p-3 pl-4">
+                <div className="flex items-center justify-between gap-2.5 p-2 pl-3.5">
                   {/* Sequence number */}
                   <div
-                    className="w-6 h-6 rounded-full flex items-center justify-center text-[10px] font-black shrink-0 text-white"
+                    className="w-5 h-5 rounded-full flex items-center justify-center text-[9px] font-black shrink-0 text-white"
                     style={{ backgroundColor: accentColor }}
                   >
                     {idx + 1}
@@ -289,58 +289,61 @@ const LoadSequenceSidebar = () => {
 
                   {/* Info */}
                   <div className="min-w-0 flex-1">
-                    <p className="font-black text-[11.5px] text-slate-800 truncate leading-none">
+                    <p className="font-black text-[10.5px] text-slate-800 truncate leading-none">
                       {order?.crop?.name || 'Crop'}
                     </p>
-                    <p className="text-[9px] text-slate-400 font-semibold truncate mt-0.5">
+                    <p className="text-[8.5px] text-slate-400 font-semibold truncate mt-0.5">
                       🏪 {order?.vendor?.name || 'Vendor'}
                     </p>
-                    <div className="flex items-center gap-1.5 mt-1.5 flex-wrap">
-                      <span className="text-[8px] font-black bg-indigo-50 border border-indigo-100 text-indigo-700 px-1.5 py-0.5 rounded-md uppercase">
+                    <div className="flex items-center gap-1 mt-1 flex-wrap">
+                      <span className="text-[7.5px] font-black bg-primary-50 border border-primary-100 text-primary-750 px-1 py-0.5 rounded uppercase">
                         Load #{stop.loadingSequence}
                       </span>
-                      <span className={`text-[8px] font-black border px-1.5 py-0.5 rounded-md ${typeInfo.color}`}>
+                      <span className={`text-[7.5px] font-black border px-1 py-0.5 rounded ${typeInfo.color}`}>
                         {typeInfo.badge}
                       </span>
-                      <span className="text-[8px] font-bold text-slate-450 bg-slate-50 border border-slate-100 px-1.5 py-0.5 rounded-md">
+                      <span className="text-[7.5px] font-bold text-slate-450 bg-slate-50 border border-slate-100 px-1 py-0.5 rounded">
                         {order?.requestedQuantity} {order?.crop?.unit}
                       </span>
                     </div>
 
                     {/* Stacking Rule Warning */}
                     {hasViolation && (
-                      <div className="mt-2 flex items-center gap-1 text-[8px] font-black text-rose-600 bg-rose-50 border border-rose-200 p-1.5 rounded-lg">
-                        <AlertTriangle className="w-3.5 h-3.5 text-rose-500 shrink-0" />
+                      <div className="mt-1 flex items-center gap-1 text-[7.5px] font-black text-rose-600 bg-rose-50 border border-rose-100 p-1 px-1.5 rounded">
+                        <AlertTriangle className="w-3 h-3 text-rose-500 shrink-0" />
                         <span>Heavy cargo loaded above Fragile cargo!</span>
                       </div>
                     )}
                   </div>
 
-                  {/* Actions */}
-                  <div className="flex flex-col gap-1 shrink-0">
+                  {/* Actions (Horizontal Row for Compaction) */}
+                  <div className="flex items-center gap-1 shrink-0 opacity-70 group-hover:opacity-100 transition-opacity">
                     <button
                       disabled={idx === 0}
                       onClick={() => moveStop(idx, 'up')}
-                      className="w-6 h-6 rounded-lg border border-slate-200 bg-white hover:bg-slate-50 disabled:opacity-20 flex items-center justify-center text-slate-500 cursor-pointer shadow-xs transition-colors"
+                      className="w-5.5 h-5.5 rounded-md border border-slate-100 bg-white hover:bg-slate-50 disabled:opacity-20 flex items-center justify-center text-slate-500 cursor-pointer shadow-xs transition-colors"
+                      title="Move Up"
                     >
-                      <ChevronUp className="w-3.5 h-3.5" />
+                      <ChevronUp className="w-3 h-3" />
                     </button>
                     <button
                       disabled={idx === arr.length - 1}
                       onClick={() => moveStop(idx, 'down')}
-                      className="w-6 h-6 rounded-lg border border-slate-200 bg-white hover:bg-slate-50 disabled:opacity-20 flex items-center justify-center text-slate-500 cursor-pointer shadow-xs transition-colors"
+                      className="w-5.5 h-5.5 rounded-md border border-slate-100 bg-white hover:bg-slate-50 disabled:opacity-20 flex items-center justify-center text-slate-500 cursor-pointer shadow-xs transition-colors"
+                      title="Move Down"
                     >
-                      <ChevronDown className="w-3.5 h-3.5" />
+                      <ChevronDown className="w-3 h-3" />
                     </button>
                     <button
                       onClick={() => setConfirmRemoveId(isRemoving ? null : stop.orderId)}
-                      className={`w-6 h-6 rounded-lg border flex items-center justify-center cursor-pointer shadow-xs transition-colors ${
+                      className={`w-5.5 h-5.5 rounded-md border flex items-center justify-center cursor-pointer shadow-xs transition-colors ${
                         isRemoving
                           ? 'bg-rose-500 border-rose-500 text-white'
-                          : 'border-rose-100 bg-rose-50/50 hover:bg-rose-50 text-rose-400 hover:text-rose-600'
+                          : 'border-rose-100 bg-rose-50/50 hover:bg-rose-50 text-rose-400 hover:text-rose-650'
                       }`}
+                      title="Remove"
                     >
-                      <Trash2 className="w-3.5 h-3.5" />
+                      <Trash2 className="w-3 h-3" />
                     </button>
                   </div>
                 </div>
@@ -379,7 +382,7 @@ const LoadSequenceSidebar = () => {
         <button
           onClick={handleSave}
           disabled={savingPlan || deliveryStops.length === 0}
-          className="w-full py-3 bg-gradient-to-r from-indigo-600 to-indigo-500 hover:from-indigo-700 hover:to-indigo-600 disabled:opacity-50 disabled:cursor-not-allowed text-white font-black text-[12px] rounded-2xl cursor-pointer border-0 active:scale-[0.98] transition-all shadow-md flex items-center justify-center gap-2"
+          className="w-full py-3 bg-primary-600 hover:bg-primary-700 active:bg-primary-800 disabled:opacity-50 disabled:cursor-not-allowed text-white font-black text-[12.5px] rounded-xl cursor-pointer border-0 active:scale-[0.98] transition-all shadow-sm flex items-center justify-center gap-2"
         >
           {savingPlan ? (
             <>

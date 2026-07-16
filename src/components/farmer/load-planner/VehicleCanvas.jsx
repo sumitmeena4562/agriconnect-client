@@ -30,10 +30,9 @@ const update3DSlots = (scene, activeTemplate, routeStops, removedOrderIds, slotM
 
   const activeOrders = useLoadPlannerStore.getState().batch?.orders?.filter(o => !removedOrderIds.has(String(o._id))) || [];
   const deliveryStops = routeStops.filter(s => s.stopType === 'delivery' && !removedOrderIds.has(String(s.orderId)));
-  const pickupCount = routeStops.filter(s => s.stopType === 'pickup').length;
 
-  const maxCapacity = activeTemplate.capacity || 10000;
-  const maxWeightPerSlot = maxCapacity / (rows * cols);
+  const packagingReport = useLoadPlannerStore.getState().packagingReport;
+  const occupancyData = packagingReport?.trailerOccupancyData || [];
 
   let totalW = 0;
   let weightedX = 0;
@@ -46,14 +45,14 @@ const update3DSlots = (scene, activeTemplate, routeStops, removedOrderIds, slotM
       const cellX = startX + c * slotW + slotW / 2;
       const cellY = startY + r * slotH + slotH / 2;
       
-      const stop = deliveryStops.find(s => s.loadingSequence === slotNum);
+      const slotOccupancy = occupancyData.find(item => item.slotIndex === slotNum);
       const slotMeshGroup = new THREE.Group();
       slotMeshGroup.position.set(cellX, cellY, center.z);
       slotGroup.add(slotMeshGroup);
 
       const boxGeo = new THREE.BoxGeometry(slotW - 3, slotH - 3, slotD - 3);
       
-      if (!stop) {
+      if (!slotOccupancy || !slotOccupancy.isFilled) {
         // Empty slot helper (Storage wireframe frame look)
         const emptyMesh = new THREE.Mesh(boxGeo, new THREE.MeshStandardMaterial({
           color: 0x94a3b8,
@@ -69,30 +68,16 @@ const update3DSlots = (scene, activeTemplate, routeStops, removedOrderIds, slotM
         slotMeshGroup.add(new THREE.LineSegments(edges, new THREE.LineBasicMaterial({ color: 0xcbd5e1, opacity: 0.25, transparent: true })));
       } else {
         // Filled cargo box
-        const order = activeOrders.find(o => String(o._id) === String(stop.orderId));
-        const isViolated = checkLifoViolation(stop, deliveryStops);
-        const weight = order?.requestedQuantity || 0;
-
-        const fillRatio = Math.max(0.25, Math.min(1.0, weight / maxWeightPerSlot));
+        const cargo = slotOccupancy.cargoInfo;
+        const stop = deliveryStops.find(s => s.loadingSequence === slotNum);
+        const isViolated = stop ? checkLifoViolation(stop, deliveryStops) : false;
         
-        const cropName = order?.crop?.name || '';
-        const lowerName = cropName.toLowerCase();
+        const weight = cargo.weight || 0;
         
-        // Warm Kraft Cardboard Color Palettes (Matched to reference image)
-        let boxColor = 0xd29b6c;  // Warm Cardboard Brown
-        let tapeColor = 0xb48256; // Matte Paper Tape (kraft color)
+        // Parse custom colors from hex strings
+        let boxColor = parseInt(slotOccupancy.color.replace('#', '0x'));
+        let tapeColor = parseInt(slotOccupancy.tapeColor.replace('#', '0x'));
         
-        if (lowerName.includes('tomato') || lowerName.includes('egg') || lowerName.includes('strawberr')) {
-          boxColor = 0xe8a97c;  // Fragile Orange Kraft
-          tapeColor = 0xc2410c; // Red-orange warning tape
-        } else if (lowerName.includes('milk') || lowerName.includes('paneer') || lowerName.includes('dairy') || lowerName.includes('berr')) {
-          boxColor = 0xbce1f7;  // Perishable Cold Blue
-          tapeColor = 0x0284c7; // Blue tape
-        } else if (lowerName.includes('potato') || lowerName.includes('wheat') || lowerName.includes('onion') || lowerName.includes('grain')) {
-          boxColor = 0xc08758;  // Heavy duty dark kraft
-          tapeColor = 0x78350f; // Dark brown tape
-        }
-
         if (isViolated) {
           boxColor = 0xfca5a5;  // Red Violation Kraft
           tapeColor = 0xdc2626; // Violation red tape
@@ -112,12 +97,17 @@ const update3DSlots = (scene, activeTemplate, routeStops, removedOrderIds, slotM
         palletMesh.receiveShadow = true;
         slotMeshGroup.add(palletMesh);
 
-        // ── 2x2 BOX STACK LOAD LOGIC (CONSTRAIN TO CUBIC PACKAGE PROPORTIONS) ──
-        // Instead of expanding to fill long slots, we calculate a standard cubic package box size
-        const boxSize = Math.min(slotW / 2.3, slotD / 2.3, slotH * 0.38);
+        // ── DYNAMIC BOX SIZE CALCULATION BASED ON RECOMMENDATION ENGINE ──
+        const boxType = cargo.boxType || 'M';
+        const scaleFactor = 
+          boxType === 'S' ? 0.70 :
+          boxType === 'M' ? 0.80 :
+          boxType === 'L' ? 0.90 : 0.98; // XL
+        
+        const boxSize = Math.min(slotW / 2.3, slotD / 2.3, slotH * 0.38) * scaleFactor;
         const subW = boxSize;
         const subD = boxSize;
-        const boxH = boxSize * 1.25 * fillRatio; // Proportional height, scaling dynamically with weight
+        const boxH = boxSize * 1.25;
 
         const subBoxGeo = new THREE.BoxGeometry(subW, boxH, subD);
         const subBoxMat = new THREE.MeshStandardMaterial({

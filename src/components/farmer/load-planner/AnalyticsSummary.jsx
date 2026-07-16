@@ -53,13 +53,13 @@ const AnalyticsSummary = () => {
                       { text: 'text-emerald-600', bg: 'bg-emerald-50', border: 'border-emerald-200' };
 
   return (
-    <div className="bg-white border border-slate-100 rounded-2xl p-4 shadow-xs flex flex-col gap-3 shrink-0">
+    <div className="global-card hover:shadow-sm p-4 flex flex-col gap-3 shrink-0">
       
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
           <h3 className="text-[11px] font-black text-slate-800 uppercase tracking-wider flex items-center gap-1.5">
-            <BarChart2 className="w-3.5 h-3.5 text-indigo-500" />
+            <BarChart2 className="w-3.5 h-3.5 text-primary-600" />
             Payload Weight Distribution
           </h3>
         </div>
@@ -84,7 +84,7 @@ const AnalyticsSummary = () => {
                 axisLine={false}
                 tickLine={false}
               />
-              <Tooltip content={<CustomTooltip />} cursor={{ fill: 'rgba(99,102,241,0.04)', radius: 4 }} />
+              <Tooltip content={<CustomTooltip />} cursor={{ fill: 'rgba(34,197,94,0.04)', radius: 4 }} />
               <Bar dataKey="weight" radius={[4, 4, 0, 0]} barSize={24} maxBarSize={30}>
                 {chartData.map((_, index) => (
                   <Cell key={`cell-${index}`} fill={BAR_COLORS[index % BAR_COLORS.length]} />

@@ -49,7 +49,7 @@ const getPhysicalBlocks = (stops, activeTemplate, activeOrders) => {
 const LoadPlanning = () => {
   const { id } = useParams();
   const navigate = useNavigate();
-  const { setBatch, batch, localRouteStops, removedOrderIds, activeTemplate } = useLoadPlannerStore();
+  const { setBatch, batch, localRouteStops, removedOrderIds, activeTemplate, packagingReport } = useLoadPlannerStore();
   const [loading, setLoading]     = useState(true);
   const [isLive, setIsLive]       = useState(false);
   const [refreshing, setRefreshing] = useState(false);
@@ -177,7 +177,7 @@ const LoadPlanning = () => {
   if (loading) {
     return (
       <div className="flex flex-col items-center justify-center min-h-[60vh] gap-3">
-        <div className="w-8 h-8 rounded-full border-2 border-indigo-200 border-t-indigo-600 animate-spin" />
+        <div className="w-8 h-8 rounded-full border-2 border-primary-200 border-t-primary-600 animate-spin" />
         <span className="text-[11px] font-bold text-slate-400">Loading Console...</span>
       </div>
     );
@@ -197,8 +197,9 @@ const LoadPlanning = () => {
           </button>
           <div>
             <div className="flex items-center gap-2">
-              <h1 className="text-[16px] font-black text-slate-800 tracking-tight leading-none">
-                🚚 Load Planning Console
+              <h1 className="text-[16px] font-black text-slate-800 tracking-tight leading-none flex items-center gap-1.5">
+                <span className="material-symbols-outlined text-[18px] text-primary-600">local_shipping</span>
+                Load Planning Console
               </h1>
               {batch?._id && (
                 <span className="font-mono text-[8.5px] font-bold bg-slate-100 border border-slate-200 text-slate-500 px-1.5 py-0.5 rounded">
@@ -219,10 +220,10 @@ const LoadPlanning = () => {
         </div>
 
         <div className="flex items-center gap-2">
-          {/* Print Manifest Button */}
+          {/* Print Manifest Button - Styled with primary theme colors */}
           <button
             onClick={handlePrintManifest}
-            className="px-3 py-1.5 bg-indigo-50 border border-indigo-200 hover:bg-indigo-100 text-indigo-600 rounded-lg text-[10px] font-black cursor-pointer transition-colors flex items-center gap-1.5 shadow-xs"
+            className="px-3 py-1.5 bg-primary-50 border border-primary-200 hover:bg-primary-100 text-primary-750 rounded-lg text-[10px] font-black cursor-pointer transition-colors flex items-center gap-1.5 shadow-xs"
             title="Print Cargo Manifest Checklist"
           >
             <FileText className="w-3.5 h-3.5" />
@@ -247,31 +248,89 @@ const LoadPlanning = () => {
         <div className="xl:col-span-8 space-y-4 flex flex-col justify-between">
           <StatsHeader />
 
-          {/* 3D Canvas Box */}
-          <div className="bg-white border border-slate-100 rounded-2xl p-4 shadow-xs">
-            <div className="flex items-center justify-between mb-3">
+          {/* 3D Canvas Box - Styled as global-card */}
+          <div className="global-card p-4 hover:shadow-sm">
+            <div className="flex items-center justify-between mb-3 border-b border-slate-50 pb-2">
               <div>
-                <h3 className="text-[11px] font-black text-slate-800 uppercase tracking-wider">
+                <h3 className="text-[11px] font-black text-slate-800 uppercase tracking-wider flex items-center gap-1">
+                  <span className="material-symbols-outlined text-[13px] text-primary-600">view_in_ar</span>
                   Spatial Load Canvas
                 </h3>
               </div>
-              <span className="text-[8px] font-black bg-slate-100 border border-slate-200 text-slate-600 px-2 py-0.5 rounded uppercase tracking-wide">
+              <span className="text-[8px] font-black bg-primary-50 border border-primary-200 text-primary-700 px-2 py-0.5 rounded uppercase tracking-wide">
                 {activeTemplate?.name}
               </span>
             </div>
             <VehicleCanvas />
           </div>
 
-          {/* Stacking / Blocking Warnings Board */}
+          {/* Vegetable Packaging & Box Optimization recommendations card */}
+          {packagingReport && packagingReport.recommendedBoxes?.length > 0 && (
+            <div className="global-card p-4 hover:shadow-sm">
+              <h3 className="text-[11px] font-black text-slate-800 uppercase tracking-wider mb-3 flex items-center gap-1.5 border-b border-slate-50 pb-2">
+                <span className="material-symbols-outlined text-[15px] text-primary-600">inventory_2</span>
+                Vegetable Packaging & Box Optimization
+              </h3>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                {packagingReport.recommendedBoxes.map((box, index) => (
+                  <div key={index} className="bg-slate-50/50 border border-slate-100/70 rounded-xl p-3 flex items-start gap-3">
+                    {/* Visual Cardboard Icon box */}
+                    <div 
+                      className="w-10 h-10 rounded-lg flex flex-col items-center justify-center shrink-0 border"
+                      style={{ backgroundColor: box.color + '20', borderColor: box.color }}
+                    >
+                      <span className="material-symbols-outlined text-[20px]" style={{ color: box.tapeColor }}>
+                        box
+                      </span>
+                      <span className="text-[8px] font-black" style={{ color: box.tapeColor }}>
+                        {box.boxType}
+                      </span>
+                    </div>
+
+                    <div className="min-w-0 flex-1">
+                      <div className="flex items-center justify-between gap-1">
+                        <h4 className="text-[11px] font-black text-slate-850 truncate">
+                          {box.cropName}
+                        </h4>
+                        <span className="text-[8px] font-black bg-primary-50 border border-primary-100 text-primary-750 px-1.5 py-0.5 rounded shrink-0">
+                          {box.count} {box.count === 1 ? 'Box' : 'Boxes'}
+                        </span>
+                      </div>
+                      <p className="text-[9.5px] text-slate-400 font-semibold mt-0.5">
+                        Size: {box.boxName} ({box.boxDimensions})
+                      </p>
+                      
+                      <div className="flex items-center gap-2 mt-2">
+                        <span className={`text-[7.5px] font-black px-1.5 py-0.2 rounded border ${
+                          box.fragility === 'High' 
+                            ? 'bg-rose-50 border-rose-100 text-rose-600' 
+                            : box.fragility === 'Low'
+                            ? 'bg-emerald-50 border-emerald-100 text-emerald-600'
+                            : 'bg-amber-50 border-amber-100 text-amber-600'
+                        }`}>
+                          Fragility: {box.fragility}
+                        </span>
+                        <span className="text-[7.5px] font-bold text-slate-450">
+                          Avg: {Math.round(box.weightPerBox)} kg/box
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Stacking / Blocking Warnings Board - Styled as alert card */}
           {physicalBlocks.length > 0 && (
-            <div className="bg-rose-50/50 border border-rose-250 rounded-2xl p-3 shadow-xs">
+            <div className="bg-rose-50 border border-rose-250 rounded-2xl p-3 shadow-xs">
               <h4 className="text-[9.5px] font-black text-rose-700 uppercase tracking-wider mb-2 flex items-center gap-1.5">
-                <AlertTriangle className="w-4 h-4 text-rose-500" />
+                <AlertTriangle className="w-4 h-4 text-rose-500 animate-pulse" />
                 Physical Accessibility Warnings (LIFO Obstruction)
               </h4>
               <ul className="space-y-1">
                 {physicalBlocks.map((block, idx) => (
-                  <li key={idx} className="text-[9px] font-bold text-rose-600 list-disc ml-4">
+                  <li key={idx} className="text-[9px] font-bold text-rose-650 list-disc ml-4">
                     {block}
                   </li>
                 ))}
@@ -282,8 +341,8 @@ const LoadPlanning = () => {
           <AnalyticsSummary />
         </div>
 
-        {/* Right Column: Sidebar */}
-        <div className="xl:col-span-4 bg-white border border-slate-100 rounded-2xl overflow-hidden shadow-xs flex flex-col min-h-[500px]">
+        {/* Right Column: Sidebar - Styled as global-card flush */}
+        <div className="xl:col-span-4 global-card-flush flex flex-col min-h-[500px]">
           <LoadSequenceSidebar />
         </div>
 

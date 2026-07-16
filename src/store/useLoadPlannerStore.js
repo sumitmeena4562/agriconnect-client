@@ -1,5 +1,6 @@
 import { create } from 'zustand';
 import api from '../utils/api';
+import { calculatePackaging } from '../utils/boxPacker';
 
 const VEHICLE_TEMPLATES = {
   container_truck: {
@@ -8,6 +9,7 @@ const VEHICLE_TEMPLATES = {
     rows: 2,
     cols: 3,
     capacity: 2500, // kg
+    capacityVolume: 12.0, // m³
     dimensions: { width: 550, height: 160 }
   },
   mini_truck: {
@@ -16,6 +18,7 @@ const VEHICLE_TEMPLATES = {
     rows: 2,
     cols: 2,
     capacity: 1500, // kg
+    capacityVolume: 6.0, // m³
     dimensions: { width: 380, height: 160 }
   },
   pickup_vehicle: {
@@ -24,6 +27,7 @@ const VEHICLE_TEMPLATES = {
     rows: 1,
     cols: 3,
     capacity: 800, // kg
+    capacityVolume: 3.5, // m³
     dimensions: { width: 385, height: 95 }
   },
   bike_delivery: {
@@ -32,6 +36,7 @@ const VEHICLE_TEMPLATES = {
     rows: 2,
     cols: 1,
     capacity: 150, // kg
+    capacityVolume: 0.5, // m³
     dimensions: { width: 140, height: 140 }
   },
   tractor_trolley: {
@@ -40,6 +45,7 @@ const VEHICLE_TEMPLATES = {
     rows: 2,
     cols: 2,
     capacity: 2000, // kg
+    capacityVolume: 8.0, // m³
     dimensions: { width: 400, height: 155 }
   },
   warehouse: {
@@ -48,6 +54,7 @@ const VEHICLE_TEMPLATES = {
     rows: 3,
     cols: 4,
     capacity: 10000, // kg
+    capacityVolume: 40.0, // m³
     dimensions: { width: 600, height: 240 }
   }
 };
@@ -60,12 +67,22 @@ export const useLoadPlannerStore = create((set, get) => ({
   removedOrderIds: new Set(),
   savingPlan: false,
   draggedItem: null,
+  packagingReport: null,
+
+  recalculatePackagingReport: () => {
+    const { batch, removedOrderIds, activeTemplate } = get();
+    if (!batch) return;
+    const activeOrders = batch.orders?.filter(o => !removedOrderIds.has(String(o._id))) || [];
+    const report = calculatePackaging(activeOrders, activeTemplate);
+    set({ packagingReport: report });
+  },
 
   setActiveTemplate: (templateType) => {
     const template = VEHICLE_TEMPLATES[templateType];
     if (template) {
       set({ activeTemplate: template });
       get().recalculateLoadingSequences();
+      get().recalculatePackagingReport();
     }
   },
 
@@ -89,6 +106,8 @@ export const useLoadPlannerStore = create((set, get) => ({
     } else {
       get().setActiveTemplate('container_truck');
     }
+    
+    get().recalculatePackagingReport();
   },
 
   setDraggedItem: (item) => set({ draggedItem: item }),
@@ -116,6 +135,7 @@ export const useLoadPlannerStore = create((set, get) => ({
     });
 
     set({ localRouteStops: [...pickups, ...deliveries] });
+    get().recalculatePackagingReport();
   },
 
   removeOrderFromBatch: (orderId) => {
@@ -137,6 +157,7 @@ export const useLoadPlannerStore = create((set, get) => ({
     });
 
     set({ localRouteStops: [...pickups, ...deliveries] });
+    get().recalculatePackagingReport();
   },
 
   recalculateLoadingSequences: () => {
