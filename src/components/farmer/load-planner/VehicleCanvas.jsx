@@ -407,15 +407,15 @@ const VehicleCanvas = () => {
 
         if (type === 'mini_truck') {
           // Manual adjustments for minitrcuck.glb to align the container bounds exactly inside the white rear cargo box
-          adjustedCenter.x += trailerSize.x * 0.17; // Shift to the rear (away from the cab)
-          adjustedCenter.y += trailerSize.y * 0.14; // Shift up to container bed level
+          adjustedCenter.x += trailerSize.x * 0.35; // Shift to the rear (away from the cab)
+          adjustedCenter.y += trailerSize.y * 0.16; // Shift up to container bed level
           adjustedSize.x *= 0.58; // Take only the rear container length (exclude cab)
           adjustedSize.y *= 0.65; // Height of container box
           adjustedSize.z *= 0.78; // Width of container box
         } else if (type === 'pickup_vehicle' || type === 'tractor_trolley' || type === 'bike_delivery') {
           // Adjustments for mini truck model fallback configurations
-          adjustedCenter.x += trailerSize.x * 0.17;
-          adjustedCenter.y += trailerSize.y * 0.08;
+          adjustedCenter.x += trailerSize.x * 0.35;
+          adjustedCenter.y += trailerSize.y * 0.10;
           adjustedSize.x *= 0.58;
           adjustedSize.y *= 0.55;
           adjustedSize.z *= 0.78;
