@@ -18,11 +18,14 @@ const update3DSlots = (scene, activeTemplate, routeStops, removedOrderIds, slotM
   const { rows, cols } = activeTemplate;
   const { center, size } = trailerBounds;
 
-  const slotW = size.x / cols;
-  const slotH = size.y / rows;
-  const slotD = size.z;
+  // Real-world layout: single sequence row along length (X) for perfect side-view clarity. No depth overlap.
+  const totalSlots = rows * cols;
+  const slotW = size.x / totalSlots;
+  const slotH = size.y; // Full height of trailer cargo space
+  const slotD = size.z; // Full depth of trailer cargo space
   const startX = center.x - size.x / 2;
-  const startY = center.y - size.y / 2;
+  const bottomY = center.y - size.y / 2; // Floor height
+  const cellZ = center.z; // Centered in the depth
 
   const slotGroup = new THREE.Group();
   scene.add(slotGroup);
@@ -39,164 +42,175 @@ const update3DSlots = (scene, activeTemplate, routeStops, removedOrderIds, slotM
   let weightedY = 0;
   let weightedZ = 0;
 
-  for (let r = 0; r < rows; r++) {
-    for (let c = 0; c < cols; c++) {
-      const slotNum = r * cols + c + 1;
-      const cellX = startX + c * slotW + slotW / 2;
-      const cellY = startY + r * slotH + slotH / 2;
-      
-      const slotOccupancy = occupancyData.find(item => item.slotIndex === slotNum);
-      const slotMeshGroup = new THREE.Group();
-      slotMeshGroup.position.set(cellX, cellY, center.z);
-      slotGroup.add(slotMeshGroup);
+  const palletH = slotH * 0.08;
 
-      const boxGeo = new THREE.BoxGeometry(slotW - 3, slotH - 3, slotD - 3);
-      
-      if (!slotOccupancy || !slotOccupancy.isFilled) {
-        // Empty slot helper (Storage wireframe frame look)
-        const emptyMesh = new THREE.Mesh(boxGeo, new THREE.MeshStandardMaterial({
-          color: 0x94a3b8,
-          transparent: true,
-          opacity: 0.05,
-          roughness: 0.8
-        }));
-        emptyMesh.userData = { slotNum };
-        emptyMesh.receiveShadow = true;
-        slotMeshGroup.add(emptyMesh);
+  for (let sIdx = 0; sIdx < totalSlots; sIdx++) {
+    const slotNum = sIdx + 1;
+    const cellX = startX + sIdx * slotW + slotW / 2;
+    
+    const slotOccupancy = occupancyData.find(item => item.slotIndex === slotNum);
+    const slotMeshGroup = new THREE.Group();
+    // Position pallet flat on the floor
+    slotMeshGroup.position.set(cellX, bottomY + palletH / 2, cellZ);
+    slotGroup.add(slotMeshGroup);
 
-        const edges = new THREE.EdgesGeometry(boxGeo);
-        slotMeshGroup.add(new THREE.LineSegments(edges, new THREE.LineBasicMaterial({ color: 0xcbd5e1, opacity: 0.25, transparent: true })));
-      } else {
-        // Filled cargo box
-        const cargo = slotOccupancy.cargoInfo;
-        const stop = deliveryStops.find(s => s.loadingSequence === slotNum);
-        const isViolated = stop ? checkLifoViolation(stop, deliveryStops) : false;
-        
-        const weight = cargo.weight || 0;
-        
-        // Parse custom colors from hex strings
-        let boxColor = parseInt(slotOccupancy.color.replace('#', '0x'));
-        let tapeColor = parseInt(slotOccupancy.tapeColor.replace('#', '0x'));
-        
-        if (isViolated) {
-          boxColor = 0xfca5a5;  // Red Violation Kraft
-          tapeColor = 0xdc2626; // Violation red tape
+    const boxGeo = new THREE.BoxGeometry(slotW - 3, slotH - 3, slotD - 6);
+    
+    const stop = deliveryStops.find(s => s.loadingSequence === slotNum);
+    const boxInfo = stop ? packagingReport?.recommendedBoxes?.find(b => String(b.orderId) === String(stop.orderId)) : null;
+    const isViolated = stop ? checkLifoViolation(stop, deliveryStops) : false;
+
+    if (!stop || !boxInfo) {
+      // Empty slot helper (Storage wireframe frame look sitting flat on floor)
+      const emptyMesh = new THREE.Mesh(boxGeo, new THREE.MeshStandardMaterial({
+        color: 0x94a3b8,
+        transparent: true,
+        opacity: 0.03,
+        roughness: 0.8
+      }));
+      emptyMesh.userData = { slotNum };
+      emptyMesh.position.y = slotH / 2 - palletH / 2;
+      emptyMesh.receiveShadow = true;
+      slotMeshGroup.add(emptyMesh);
+
+      const edges = new THREE.EdgesGeometry(boxGeo);
+      const edgesLines = new THREE.LineSegments(edges, new THREE.LineBasicMaterial({ color: 0xcbd5e1, opacity: 0.15, transparent: true }));
+      edgesLines.position.y = slotH / 2 - palletH / 2;
+      slotMeshGroup.add(edgesLines);
+    } else {
+      // Filled cargo box
+      
+      const weight = boxInfo ? boxInfo.weightPerBox : 0;
+      
+      // Parse custom colors from hex strings
+      let boxColor = parseInt(slotOccupancy.color.replace('#', '0x'));
+      let tapeColor = parseInt(slotOccupancy.tapeColor.replace('#', '0x'));
+      
+      if (isViolated) {
+        boxColor = 0xfca5a5;  // Red Violation Kraft
+        tapeColor = 0xdc2626; // Violation red tape
+      }
+
+      // 1. Wooden Pallet Base (Height = palletH, sits flat on floor)
+      const palletGeo = new THREE.BoxGeometry(slotW - 3, palletH, slotD - 6);
+      const palletMat = new THREE.MeshStandardMaterial({
+        color: 0x7c5a3c, // Realistic warm wood color
+        roughness: 0.95,
+        metalness: 0.05
+      });
+      const palletMesh = new THREE.Mesh(palletGeo, palletMat);
+      palletMesh.position.y = 0;
+      palletMesh.castShadow = true;
+      palletMesh.receiveShadow = true;
+      slotMeshGroup.add(palletMesh);
+
+      // ── DYNAMIC BOX SIZE CALCULATION BASED ON RECOMMENDATION ENGINE ──
+      const boxType = boxInfo?.boxType || 'M';
+      const scaleFactor = 
+        boxType === 'S' ? 0.70 :
+        boxType === 'M' ? 0.82 :
+        boxType === 'L' ? 0.90 : 0.98; // XL
+      
+      // Since it's a single row, the pallet is square-ish. Let's stack boxes in a perfect 2x2 grid.
+      const subW = ((slotW - 5) / 2) * scaleFactor;
+      const subD = ((slotD - 6) / 2) * scaleFactor;
+      const boxH = Math.min(Math.min(subW, subD) * 0.78, (slotH - palletH) * 0.28) * scaleFactor;
+
+      const subBoxGeo = new THREE.BoxGeometry(subW, boxH, subD);
+      const subBoxMat = new THREE.MeshStandardMaterial({
+        color: boxColor,
+        roughness: 0.9,
+        metalness: 0.0
+      });
+
+      const tapeMat = new THREE.MeshStandardMaterial({
+        color: tapeColor,
+        roughness: 0.4,
+        metalness: 0.1
+      });
+
+      const labelMat = new THREE.MeshBasicMaterial({
+        color: 0xffffff,
+        side: THREE.DoubleSide
+      });
+
+      const glyphMat = new THREE.MeshBasicMaterial({
+        color: 0x475569,
+        side: THREE.DoubleSide
+      });
+
+      // 2x2 grid offsets
+      const offsets = [
+        { dx: -1, dz: 1, label: true },  // Front-Left
+        { dx: 1,  dz: 1, label: true },  // Front-Right
+        { dx: -1, dz: -1, label: false }, // Back-Left
+        { dx: 1,  dz: -1, label: false }  // Back-Right
+      ];
+
+      // Draw the exact number of boxes recommended for this slot, stacking them vertically
+      const boxCount = boxInfo?.count || 1;
+      const layerSize = 4;
+
+      for (let i = 0; i < boxCount; i++) {
+        const layer = Math.floor(i / layerSize);
+        const subIdx = i % layerSize;
+        const { dx, dz, label } = offsets[subIdx];
+
+        const px = dx * (subW / 2 + 1.2);
+        const pz = dz * (subD / 2 + 1.2);
+        const py = palletH / 2 + (layer * boxH) + boxH / 2; // local position relative to slotMeshGroup center
+
+        // Cardboard Box Mesh
+        const boxMesh = new THREE.Mesh(subBoxGeo, subBoxMat);
+        boxMesh.position.set(px, py, pz);
+        boxMesh.castShadow = true;
+        boxMesh.receiveShadow = true;
+        slotMeshGroup.add(boxMesh);
+
+        // Top Flap Seam Tape
+        const tapeW = subD / 6;
+        const topTape = new THREE.Mesh(new THREE.BoxGeometry(subW - 0.2, 0.15, tapeW), tapeMat);
+        topTape.position.set(px, py + boxH / 2, pz);
+        slotMeshGroup.add(topTape);
+
+        // Side Tape Folds
+        const sideTapeLeft = new THREE.Mesh(new THREE.BoxGeometry(0.15, boxH / 4, tapeW), tapeMat);
+        sideTapeLeft.position.set(px - subW / 2 + 0.1, py + boxH / 2 - boxH / 8, pz);
+        slotMeshGroup.add(sideTapeLeft);
+
+        const sideTapeRight = new THREE.Mesh(new THREE.BoxGeometry(0.15, boxH / 4, tapeW), tapeMat);
+        sideTapeRight.position.set(px + subW / 2 - 0.1, py + boxH / 2 - boxH / 8, pz);
+        slotMeshGroup.add(sideTapeRight);
+
+        // shipping labels & glyphs on front-facing boxes (matches bottom layer only)
+        if (label && layer === 0) {
+          // White shipping sticker (top-right of box face)
+          const labelW = subW / 4.2;
+          const labelH = Math.max(3, boxH / 3.8);
+          const labelMesh = new THREE.Mesh(new THREE.PlaneGeometry(labelW, labelH), labelMat);
+          labelMesh.position.set(px + subW / 4.2, py + boxH * 0.2, pz + subD / 2 + 0.1);
+          slotMeshGroup.add(labelMesh);
+
+          // Three handling icons/glyphs (bottom-left of box face)
+          const glyphGeo = new THREE.PlaneGeometry(1.2, 1.2);
+          for (let g = 0; g < 3; g++) {
+            const glyphMesh = new THREE.Mesh(glyphGeo, glyphMat);
+            glyphMesh.position.set(px - subW / 4.5 + g * 1.8, py - boxH * 0.25, pz + subD / 2 + 0.1);
+            slotMeshGroup.add(glyphMesh);
+          }
         }
 
-        // 1. Wooden Pallet Base (Height = 12% of slot)
-        const palletH = slotH * 0.12;
-        const palletGeo = new THREE.BoxGeometry(slotW - 3, palletH, slotD - 3);
-        const palletMat = new THREE.MeshStandardMaterial({
-          color: 0x7c5a3c, // Realistic warm wood color
-          roughness: 0.95,
-          metalness: 0.05
-        });
-        const palletMesh = new THREE.Mesh(palletGeo, palletMat);
-        palletMesh.position.y = -slotH / 2 + palletH / 2;
-        palletMesh.castShadow = true;
-        palletMesh.receiveShadow = true;
-        slotMeshGroup.add(palletMesh);
+        // Subtle box edges highlight
+        const edges = new THREE.EdgesGeometry(subBoxGeo);
+        const edgesLines = new THREE.LineSegments(edges, new THREE.LineBasicMaterial({ color: tapeColor, opacity: 0.15, transparent: true }));
+        edgesLines.position.set(px, py, pz);
+        slotMeshGroup.add(edgesLines);
 
-        // ── DYNAMIC BOX SIZE CALCULATION BASED ON RECOMMENDATION ENGINE ──
-        const boxType = cargo.boxType || 'M';
-        const scaleFactor = 
-          boxType === 'S' ? 0.70 :
-          boxType === 'M' ? 0.80 :
-          boxType === 'L' ? 0.90 : 0.98; // XL
-        
-        const boxSize = Math.min(slotW / 2.3, slotD / 2.3, slotH * 0.38) * scaleFactor;
-        const subW = boxSize;
-        const subD = boxSize;
-        const boxH = boxSize * 1.25;
-
-        const subBoxGeo = new THREE.BoxGeometry(subW, boxH, subD);
-        const subBoxMat = new THREE.MeshStandardMaterial({
-          color: boxColor,
-          roughness: 0.9,
-          metalness: 0.0
-        });
-
-        const tapeMat = new THREE.MeshStandardMaterial({
-          color: tapeColor,
-          roughness: 0.4,
-          metalness: 0.1
-        });
-
-        const labelMat = new THREE.MeshBasicMaterial({
-          color: 0xffffff,
-          side: THREE.DoubleSide
-        });
-
-        const glyphMat = new THREE.MeshBasicMaterial({
-          color: 0x475569,
-          side: THREE.DoubleSide
-        });
-
-        // 4 sub-box offsets: Front-Left, Front-Right, Back-Left, Back-Right
-        const offsets = [
-          { dx: -1, dz: 1, label: true },  // Front-Left (Has shipping labels & glyphs facing camera)
-          { dx: 1,  dz: 1, label: true },  // Front-Right
-          { dx: -1, dz: -1, label: false }, // Back-Left
-          { dx: 1,  dz: -1, label: false }  // Back-Right
-        ];
-
-        offsets.forEach(({ dx, dz, label }) => {
-          const px = dx * (subW / 2 + 1.2);
-          const pz = dz * (subD / 2 + 1.2);
-          const py = -slotH / 2 + palletH + boxH / 2;
-
-          // Cardboard Box Mesh
-          const boxMesh = new THREE.Mesh(subBoxGeo, subBoxMat);
-          boxMesh.position.set(px, py, pz);
-          boxMesh.castShadow = true;
-          boxMesh.receiveShadow = true;
-          slotMeshGroup.add(boxMesh);
-
-          // Top Flap Seam Tape
-          const tapeW = subD / 6;
-          const topTape = new THREE.Mesh(new THREE.BoxGeometry(subW - 0.2, 0.15, tapeW), tapeMat);
-          topTape.position.set(px, py + boxH / 2, pz);
-          slotMeshGroup.add(topTape);
-
-          // Side Tape Folds
-          const sideTapeLeft = new THREE.Mesh(new THREE.BoxGeometry(0.15, boxH / 4, tapeW), tapeMat);
-          sideTapeLeft.position.set(px - subW / 2 + 0.1, py + boxH / 2 - boxH / 8, pz);
-          slotMeshGroup.add(sideTapeLeft);
-
-          const sideTapeRight = new THREE.Mesh(new THREE.BoxGeometry(0.15, boxH / 4, tapeW), tapeMat);
-          sideTapeRight.position.set(px + subW / 2 - 0.1, py + boxH / 2 - boxH / 8, pz);
-          slotMeshGroup.add(sideTapeRight);
-
-          // shipping labels & glyphs on front-facing boxes (matches 2nd reference image)
-          if (label) {
-            // White shipping sticker (top-right of box face)
-            const labelW = subW / 4.2;
-            const labelH = Math.max(3, boxH / 3.8);
-            const labelMesh = new THREE.Mesh(new THREE.PlaneGeometry(labelW, labelH), labelMat);
-            labelMesh.position.set(px + subW / 4.2, py + boxH * 0.2, pz + subD / 2 + 0.1);
-            slotMeshGroup.add(labelMesh);
-
-            // Three handling icons/glyphs (bottom-left of box face)
-            const glyphGeo = new THREE.PlaneGeometry(1.2, 1.2);
-            for (let i = 0; i < 3; i++) {
-              const glyphMesh = new THREE.Mesh(glyphGeo, glyphMat);
-              glyphMesh.position.set(px - subW / 4.5 + i * 1.8, py - boxH * 0.25, pz + subD / 2 + 0.1);
-              slotMeshGroup.add(glyphMesh);
-            }
-          }
-
-          // Subtle box edges highlight
-          const edges = new THREE.EdgesGeometry(subBoxGeo);
-          const edgesLines = new THREE.LineSegments(edges, new THREE.LineBasicMaterial({ color: tapeColor, opacity: 0.15, transparent: true }));
-          edgesLines.position.set(px, py, pz);
-          slotMeshGroup.add(edgesLines);
-        });
-
-        // Accumulate center of gravity metrics
+        // Accumulate center of gravity metrics per box
         totalW += weight;
         weightedX += cellX * weight;
-        weightedY += (-slotH / 2 + palletH + boxH / 2) * weight;
-        weightedZ += center.z * weight;
+        weightedY += (bottomY + palletH + (layer * boxH) + boxH / 2) * weight;
+        weightedZ += cellZ * weight;
       }
     }
   }
@@ -211,7 +225,7 @@ const update3DSlots = (scene, activeTemplate, routeStops, removedOrderIds, slotM
     cogGroup.position.set(cogX, cogY, cogZ);
     slotGroup.add(cogGroup);
 
-    const isTopHeavy = cogY > (startY + size.y * 0.6);
+    const isTopHeavy = cogY > (bottomY + size.y * 0.6);
     const cogColor = isTopHeavy ? 0xef4444 : 0x3b82f6;
 
     // Glowing core sphere
