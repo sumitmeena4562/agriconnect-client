@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useLoadPlannerStore } from '../../../store/useLoadPlannerStore';
 import { useNavigate } from 'react-router-dom';
-import { ChevronUp, ChevronDown, Trash2, RotateCcw, Truck, Box, Bike, HardHat, Save, AlertTriangle } from 'lucide-react';
+import { ChevronUp, ChevronDown, Trash2, RotateCcw, Truck, Box, Bike, HardHat, Save, AlertTriangle, Lock } from 'lucide-react';
 import { toast } from 'react-hot-toast';
 
 const VEHICLE_EMOJIS = {
@@ -113,39 +113,94 @@ const LoadSequenceSidebar = () => {
     });
   };
 
+  // ── Determine if vehicle template is locked to driver's vehicle type ──────
+  // Map driver.vehicleType strings → VEHICLE_TEMPLATES keys
+  const DRIVER_VEHICLE_MAP = {
+    'Bike':       'bike_delivery',
+    'Tractor':    'tractor_trolley',
+    'Mini Truck': 'mini_truck',
+    'Pickup':     'pickup_vehicle',
+  };
+  const driverVehicleType = batch?.driver?.vehicleType || null;
+  const driverTemplateKey = driverVehicleType ? (DRIVER_VEHICLE_MAP[driverVehicleType] || 'container_truck') : null;
+  const isTemplateLocked  = !!batch?.driver; // lock once a driver is assigned
+
   return (
     <div className="flex flex-col bg-white h-full overflow-hidden">
 
       {/* ── Transport Profile Selector ── */}
       <div className="px-4 pt-4 pb-3 border-b border-slate-100 shrink-0">
-        <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-2.5">
-          Transport Profile
-        </p>
-        <div className="grid grid-cols-2 gap-1.5">
-          {Object.keys(vehicleTemplates).map(key => {
-            const template   = vehicleTemplates[key];
-            const isSelected = activeTemplate.type === template.type;
-            return (
-              <button
-                key={key}
-                onClick={() => setActiveTemplate(key)}
-                className={`py-2 px-2.5 rounded-xl text-[10px] font-black flex items-center gap-1.5 transition-all border text-left cursor-pointer ${
-                  isSelected
-                    ? 'bg-slate-900 border-slate-900 text-white shadow-md scale-[1.02]'
-                    : 'bg-slate-50 border-slate-200 text-slate-600 hover:bg-slate-100 hover:border-slate-300'
-                }`}
-              >
-                <span className={isSelected ? 'text-white' : 'text-slate-400'}>
-                  {getTemplateIcon(template.type)}
-                </span>
-                <span className="truncate leading-tight">
-                  <span className="mr-0.5">{VEHICLE_EMOJIS[template.type] || '📦'}</span>
-                  {template.name}
-                </span>
-              </button>
-            );
-          })}
+        <div className="flex items-center justify-between mb-2.5">
+          <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest">
+            Transport Profile
+          </p>
+          {isTemplateLocked && (
+            <span className="flex items-center gap-1 text-[8px] font-black text-violet-600 bg-violet-50 border border-violet-200 px-2 py-0.5 rounded-full">
+              <Lock className="w-2.5 h-2.5" />
+              Locked to Driver
+            </span>
+          )}
         </div>
+
+        {isTemplateLocked ? (
+          // ── Driver assigned: show ONLY the matching vehicle template (locked) ──
+          <div className="space-y-2">
+            {(() => {
+              const template = vehicleTemplates[driverTemplateKey];
+              if (!template) return null;
+              return (
+                <div className="py-2.5 px-3 rounded-xl text-[10px] font-black flex items-center gap-2 bg-slate-900 border-slate-900 text-white shadow-md">
+                  <span className="text-white">{getTemplateIcon(template.type)}</span>
+                  <span className="truncate leading-tight flex-1">
+                    <span className="mr-0.5">{VEHICLE_EMOJIS[template.type] || '📦'}</span>
+                    {template.name}
+                  </span>
+                  <span className="text-[7.5px] font-black bg-white/20 text-white/80 px-1.5 py-0.5 rounded-md uppercase tracking-wide shrink-0">
+                    {driverVehicleType}
+                  </span>
+                </div>
+              );
+            })()}
+            <p className="text-[8.5px] text-slate-400 font-semibold flex items-center gap-1 pt-0.5">
+              <Lock className="w-2.5 h-2.5 shrink-0" />
+              Canvas locked to <strong className="text-slate-600">{batch?.driver?.name}</strong>'s vehicle.
+              Unassign driver to change.
+            </p>
+          </div>
+        ) : (
+          // ── No driver yet: show all templates for pre-planning ──
+          <>
+            <p className="text-[8px] text-amber-600 font-bold bg-amber-50 border border-amber-200 rounded-lg px-2 py-1.5 mb-2 flex items-center gap-1">
+              <AlertTriangle className="w-3 h-3 shrink-0" />
+              Assign a driver to auto-lock the correct vehicle canvas.
+            </p>
+            <div className="grid grid-cols-2 gap-1.5">
+              {Object.keys(vehicleTemplates).map(key => {
+                const template   = vehicleTemplates[key];
+                const isSelected = activeTemplate.type === template.type;
+                return (
+                  <button
+                    key={key}
+                    onClick={() => setActiveTemplate(key)}
+                    className={`py-2 px-2.5 rounded-xl text-[10px] font-black flex items-center gap-1.5 transition-all border text-left cursor-pointer ${
+                      isSelected
+                        ? 'bg-slate-900 border-slate-900 text-white shadow-md scale-[1.02]'
+                        : 'bg-slate-50 border-slate-200 text-slate-600 hover:bg-slate-100 hover:border-slate-300'
+                    }`}
+                  >
+                    <span className={isSelected ? 'text-white' : 'text-slate-400'}>
+                      {getTemplateIcon(template.type)}
+                    </span>
+                    <span className="truncate leading-tight">
+                      <span className="mr-0.5">{VEHICLE_EMOJIS[template.type] || '📦'}</span>
+                      {template.name}
+                    </span>
+                  </button>
+                );
+              })}
+            </div>
+          </>
+        )}
       </div>
 
       {/* ── Crop Class Legend ── */}

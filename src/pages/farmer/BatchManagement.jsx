@@ -127,19 +127,20 @@ const BatchManagement = () => {
     <>
     <div className="space-y-6 pb-12">
       {/* Header section */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 border-b border-slate-100 pb-5">
         <div>
-          <h1 className="text-[22px] font-black text-slate-800 tracking-tight leading-none mb-1 flex items-center gap-2">
-            <span>📦</span> Multi-Order Delivery & Batches
+          <h1 className="text-[20px] font-black text-slate-900 tracking-tight leading-none mb-1.5 flex items-center gap-2">
+            <span className="material-symbols-outlined p-1.5 bg-primary-50 text-primary-600 rounded-lg text-[18px]">local_shipping</span> 
+            Multi-Order Delivery & Batches
           </h1>
           <p className="text-[12px] text-slate-500 font-medium">
-            Group nearby orders to optimize routes, assign fleet drivers, and track batch statuses.
+            Group accepted orders to optimize routes, assign fleet carriers, and track batch shipments.
           </p>
         </div>
         <button
           onClick={handleAutoGroup}
           disabled={unbatchedOrders.length === 0}
-          className="px-4 py-2.5 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 disabled:opacity-50 text-white font-black text-[12px] rounded-xl shadow-md cursor-pointer border-0 active:scale-95 transition-all flex items-center gap-2 shrink-0 self-start sm:self-center"
+          className="px-4 py-2.5 bg-primary-600 hover:bg-primary-700 disabled:opacity-50 text-white font-black text-[12px] rounded-xl shadow-sm hover:shadow-md cursor-pointer border-0 active:scale-95 transition-all flex items-center gap-2 shrink-0 self-start sm:self-center"
         >
           <span className="material-symbols-outlined text-[16px]">alt_route</span>
           <span>Auto-Group Orders ({unbatchedOrders.length} pending)</span>
@@ -148,20 +149,20 @@ const BatchManagement = () => {
 
       {isLoading ? (
         <div className="flex justify-center py-20">
-          <div className="w-8 h-8 rounded-full border-3 border-emerald-100 border-t-emerald-600 animate-spin" />
+          <div className="w-8 h-8 rounded-full border-3 border-primary-100 border-t-primary-600 animate-spin" />
         </div>
       ) : (
         <div className="grid grid-cols-1 xl:grid-cols-12 gap-6">
           {/* Left col: Batches list */}
           <div className="xl:col-span-8 space-y-4">
-            <h3 className="text-[13px] font-black uppercase tracking-wider text-slate-400">
+            <h3 className="text-[11px] font-black uppercase tracking-wider text-slate-400">
               Active Batches ({batches.length})
             </h3>
             {batches.length === 0 ? (
-              <div className="bg-white border border-slate-100 rounded-2xl p-8 text-center shadow-xs">
+              <div className="global-card p-8 text-center">
                 <span className="material-symbols-outlined text-[36px] text-slate-300">hub</span>
-                <p className="text-[12.5px] font-bold text-slate-500 mt-2">No active batches created</p>
-                <p className="text-[11px] text-slate-400 max-w-xs mx-auto mt-1">
+                <p className="text-[12.5px] font-bold text-slate-600 mt-2">No active batches created</p>
+                <p className="text-[11px] text-slate-400 max-w-xs mx-auto mt-1 leading-relaxed">
                   Click the "Auto-Group Orders" button above to run the routing optimization algorithm on pending orders.
                 </p>
               </div>
@@ -175,49 +176,49 @@ const BatchManagement = () => {
                   return (
                     <div
                       key={batch._id}
-                      className={`bg-white border rounded-2xl p-4 shadow-sm relative transition-all ${
-                        isCompleted ? 'border-slate-200/80 bg-slate-50/50' : 'border-slate-100 hover:border-slate-200'
+                      className={`global-card p-4.5 ${
+                        isCompleted ? 'opacity-85 border-slate-200/80 bg-slate-50/40 shadow-none hover:shadow-none hover:translate-y-0' : ''
                       }`}
                     >
                       {/* Top Header line */}
-                      <div className="flex items-center justify-between gap-2 border-b border-slate-100 pb-3 mb-3">
+                      <div className="flex items-center justify-between gap-2 border-b border-slate-100 pb-2.5 mb-3">
                         <div className="flex items-center gap-2">
-                          <span className="font-mono text-[10px] font-black bg-slate-100 px-2 py-0.5 rounded text-slate-600 border border-slate-200">
+                          <span className="font-mono text-[9.5px] font-black bg-slate-100 px-2 py-0.5 rounded text-slate-600 border border-slate-200">
                             BATCH #{batch._id.slice(-6).toUpperCase()}
                           </span>
                           <span className={`text-[8.5px] font-black uppercase px-2 py-0.5 rounded-full border ${
                             batch.batchStatus === 'Completed'
-                              ? 'bg-emerald-50 border-emerald-200 text-emerald-700'
+                              ? 'bg-emerald-50 border-emerald-250 text-emerald-700'
                               : batch.batchStatus === 'Out For Delivery'
-                              ? 'bg-amber-50 border-amber-200 text-amber-700 animate-pulse'
+                              ? 'bg-amber-50 border-amber-250 text-amber-700 animate-pulse'
                               : batch.batchStatus === 'Driver Assigned'
-                              ? 'bg-violet-50 border-violet-200 text-violet-700'
+                              ? 'bg-indigo-50 border-indigo-250 text-indigo-700'
                               : 'bg-slate-100 border-slate-200 text-slate-500'
                           }`}>
                             {batch.batchStatus}
                           </span>
                         </div>
-                        <div className="text-right">
-                          <span className="text-[10px] font-semibold text-slate-400 block uppercase">Distance</span>
-                          <span className="text-[12.5px] font-extrabold text-slate-700">{batch.totalDistance} km</span>
+                        <div className="text-right flex items-baseline gap-1">
+                          <span className="text-[9px] font-bold text-slate-400 uppercase">Distance:</span>
+                          <span className="text-[12px] font-black text-slate-800">{batch.totalDistance} km</span>
                         </div>
                       </div>
 
                       {/* Orders summary */}
-                      <div className="space-y-2.5 mb-4">
-                        <span className="text-[9.5px] font-black uppercase tracking-wider text-slate-400">Cargo & Destinations ({batch.orders.length})</span>
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+                      <div className="space-y-1.5 mb-3">
+                        <span className="text-[9px] font-black uppercase tracking-wider text-slate-400">Cargo & Destinations ({batch.orders.length})</span>
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-1.5">
                           {batch.orders.map((o) => (
-                            <div key={o._id} className="p-2.5 bg-slate-50/70 border border-slate-200/40 rounded-xl flex items-center justify-between gap-2">
+                            <div key={o._id} className="p-2 bg-slate-50 hover:bg-slate-100/50 border border-slate-200/40 rounded-xl flex items-center justify-between gap-2 transition-colors">
                               <div className="min-w-0">
-                                <h5 className="font-bold text-[11.5px] text-slate-800 truncate leading-none mb-1">
+                                <h5 className="font-extrabold text-[11px] text-slate-800 truncate leading-none mb-1">
                                   {o.crop?.name || 'Deleted Crop'}
                                 </h5>
-                                <p className="text-[9px] text-slate-500 font-semibold truncate leading-none">
-                                  Deliver to: {o.vendor?.name || 'Store'}
+                                <p className="text-[8.5px] text-slate-400 font-bold truncate leading-none">
+                                  Deliver to: <strong className="text-slate-600">{o.vendor?.name || 'Store'}</strong>
                                 </p>
                               </div>
-                              <span className="text-[10px] font-bold bg-white px-2 py-0.5 rounded border border-slate-200 text-slate-600 shrink-0">
+                              <span className="text-[9.5px] font-extrabold bg-white px-1.5 py-0.5 rounded border border-slate-200 text-slate-600 shrink-0">
                                 {o.requestedQuantity} {o.crop?.unit}
                               </span>
                             </div>
@@ -226,12 +227,12 @@ const BatchManagement = () => {
                       </div>
 
                       {/* Sequence stops timeline */}
-                      <div className="bg-slate-50 p-3 rounded-xl mb-4 space-y-2">
-                        <span className="text-[9.5px] font-black uppercase tracking-wider text-slate-400 flex items-center gap-1">
-                          <span className="material-symbols-outlined text-[12px] text-emerald-600 font-bold">route</span>
-                          Optimized Delivery Sequence
+                      <div className="bg-slate-50/50 border border-slate-100 p-2.5 rounded-xl mb-3.5 space-y-1.5">
+                        <span className="text-[9px] font-black uppercase tracking-wider text-slate-400 flex items-center gap-0.5">
+                          <span className="material-symbols-outlined text-[11px] text-primary-600 font-bold">route</span>
+                          Optimized Delivery Route Map
                         </span>
-                        <div className="flex flex-wrap items-center gap-1.5 pt-1">
+                        <div className="flex flex-wrap items-center gap-x-1.5 gap-y-1.5 pt-0.5">
                           {(() => {
                             const route = batch.optimizedRoute || [];
                             if (route.length === 0) {
@@ -245,25 +246,25 @@ const BatchManagement = () => {
                             route.forEach(stop => {
                               const last = groupedStops[groupedStops.length - 1];
                               if (last && last.stopType === stop.stopType && last.address === stop.address) {
-                                last.count++;
+                                  last.count++;
                               } else {
-                                groupedStops.push({ ...stop, count: 1 });
+                                  groupedStops.push({ ...stop, count: 1 });
                               }
                             });
                             return groupedStops.map((stop, index) => (
                               <React.Fragment key={index}>
-                                {index > 0 && <span className="text-slate-350 text-[10px]">➔</span>}
-                                <div className={`flex items-center gap-1 px-2 py-0.5 rounded text-[9.5px] font-black border ${
+                                {index > 0 && <span className="material-symbols-outlined text-[10px] text-slate-300">chevron_right</span>}
+                                <div className={`flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[9px] font-black border transition-all ${
                                   stop.stopType === 'pickup'
-                                    ? 'bg-emerald-50 border-emerald-250/60 text-emerald-700'
-                                    : 'bg-blue-50 border-blue-250/60 text-blue-755'
+                                    ? 'bg-primary-50 border-primary-200 text-primary-700'
+                                    : 'bg-info-50 border-info-200 text-info-750'
                                 }`}>
-                                  <span className="material-symbols-outlined text-[10.5px]">
-                                    {stop.stopType === 'pickup' ? 'agriculture' : 'storefront'}
+                                  <span className="material-symbols-outlined text-[10px]">
+                                    {stop.stopType === 'pickup' ? 'local_mall' : 'storefront'}
                                   </span>
                                   <span>
                                     {stop.address.split("'s")[0]} 
-                                    {stop.count > 1 && ` (x${stop.count})`}
+                                    {stop.count > 1 && <span className="ml-1 font-extrabold text-[8px] bg-white/60 px-1 rounded">x{stop.count}</span>}
                                   </span>
                                 </div>
                               </React.Fragment>
@@ -283,15 +284,15 @@ const BatchManagement = () => {
                                     {batch.driver?.name} ({batch.driver?.vehicleNumber})
                                   </p>
                                   <p className="text-[9px] text-slate-400 font-bold mt-0.5">
-                                    Assigned Fleet Carrier · {batch.driver?.vehicleType}
+                                    Assigned Carrier · {batch.driver?.vehicleType}
                                   </p>
                                 </div>
                                 <button
                                   onClick={() => handleCopyLink(batch.driver)}
-                                  className="px-2 py-1 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 border border-indigo-200 rounded-lg text-[9px] font-black cursor-pointer active:scale-95 transition-all flex items-center gap-0.5"
+                                  className="px-2 py-1 bg-primary-50 hover:bg-primary-100 text-primary-700 border border-primary-200 rounded-lg text-[9px] font-black cursor-pointer active:scale-95 transition-all flex items-center gap-0.5"
                                   title="Copy Driver Tracking Link"
                                 >
-                                  <span className="material-symbols-outlined text-[11.5px]">content_copy</span>
+                                  <span className="material-symbols-outlined text-[11px]">content_copy</span>
                                   <span>Copy Link</span>
                                 </button>
                               </div>
@@ -300,7 +301,7 @@ const BatchManagement = () => {
                                 <select
                                   onChange={(e) => setSelectedDriverMap(prev => ({ ...prev, [batch._id]: e.target.value }))}
                                   value={selectedDriverMap[batch._id] || ''}
-                                  className="px-2 py-1 bg-white border border-slate-300 rounded-lg text-[10.5px] font-bold focus:outline-none focus:border-emerald-500"
+                                  className="px-2 py-1.5 bg-white border border-slate-200 rounded-lg text-[10px] font-bold text-slate-700 focus:outline-none focus:ring-1 focus:ring-primary-500 focus:border-primary-500"
                                 >
                                   <option value="">Select Carrier...</option>
                                   {drivers
@@ -313,17 +314,17 @@ const BatchManagement = () => {
                                 </select>
                                 <button
                                   onClick={() => handleAssignDriver(batch._id)}
-                                  className="px-3 py-1 bg-slate-800 text-white font-black text-[10px] rounded-lg border-0 cursor-pointer active:scale-95 transition-all"
+                                  className="px-3 py-1 bg-primary-600 hover:bg-primary-700 text-white font-black text-[10px] rounded-lg border-0 cursor-pointer active:scale-95 transition-all"
                                 >
                                   Assign
                                 </button>
                               </div>
                             )}
                           </div>
-                          <div className="flex items-center gap-2 self-end">
+                          <div className="flex items-center gap-2 self-end sm:self-center">
                             <button
                               onClick={() => navigate(`/farmer-dashboard/batches/${batch._id}/load-plan`)}
-                              className="px-3 py-1.5 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 border border-indigo-250 rounded-xl text-[10.5px] font-black cursor-pointer active:scale-95 transition-all flex items-center gap-1.5 shadow-xs"
+                              className="px-3 py-1.5 bg-white hover:bg-slate-50 text-slate-700 border border-slate-250 rounded-xl text-[10px] font-black cursor-pointer active:scale-95 transition-all flex items-center gap-1.5 shadow-xs"
                             >
                               <span className="material-symbols-outlined text-[14px]">view_in_ar</span>
                               <span>Plan Load 🚛</span>
@@ -331,7 +332,7 @@ const BatchManagement = () => {
                             {canDispatch && (
                               <button
                                 onClick={() => setDispatchConfirm({ open: true, batchId: batch._id, isLoading: false })}
-                                className="px-4 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white font-black text-[10.5px] rounded-xl cursor-pointer border-0 active:scale-95 transition-all flex items-center gap-1 shadow-sm"
+                                className="px-4 py-1.5 bg-primary-600 hover:bg-primary-700 text-white font-black text-[10px] rounded-xl cursor-pointer border-0 active:scale-95 transition-all flex items-center gap-1 shadow-sm"
                               >
                                 <span className="material-symbols-outlined text-[14px]">local_shipping</span>
                                 <span>Dispatch Batch ➔</span>
@@ -349,36 +350,36 @@ const BatchManagement = () => {
 
           {/* Right col: Unbatched orders sidebar list */}
           <div className="xl:col-span-4 space-y-4">
-            <h3 className="text-[13px] font-black uppercase tracking-wider text-slate-400">
+            <h3 className="text-[11px] font-black uppercase tracking-wider text-slate-400">
               Unbatched Orders ({unbatchedOrders.length})
             </h3>
             {unbatchedOrders.length === 0 ? (
-              <div className="bg-slate-50 border border-slate-200/50 rounded-2xl p-6 text-center">
-                <span className="material-symbols-outlined text-[28px] text-slate-400">done_all</span>
-                <p className="text-[11.5px] font-bold text-slate-500 mt-1">All orders batched!</p>
-                <p className="text-[9.5px] text-slate-400 mt-0.5 leading-snug">
-                  When new accepted orders arrive, run Auto-Group to batch and assign them.
+              <div className="global-card p-6 text-center opacity-90">
+                <span className="material-symbols-outlined text-[28px] text-primary-500 bg-primary-50 p-2 rounded-full">done_all</span>
+                <p className="text-[11.5px] font-extrabold text-slate-700 mt-2">All orders batched!</p>
+                <p className="text-[9.5px] text-slate-400 mt-1 leading-snug">
+                  When new accepted orders arrive, run Auto-Group to optimize and batch shipment route sequences.
                 </p>
               </div>
             ) : (
               <div className="space-y-2">
                 {unbatchedOrders.map((order) => (
-                  <div key={order._id} className="bg-white border border-slate-100 rounded-xl p-3 shadow-xs flex flex-col justify-between gap-1">
+                  <div key={order._id} className="global-card p-3.5 hover:shadow-sm flex flex-col justify-between gap-1">
                     <div className="flex justify-between items-start gap-1">
                       <span className="text-[8.5px] font-mono font-bold text-slate-400 uppercase tracking-wide">
                         #{order._id.slice(-6).toUpperCase()}
                       </span>
-                      <span className="text-[9.5px] font-bold text-slate-700">
+                      <span className="text-[10px] font-black text-primary-700 bg-primary-50 px-1.5 py-0.5 rounded border border-primary-100">
                         {order.requestedQuantity} {order.crop?.unit}
                       </span>
                     </div>
-                    <h4 className="font-extrabold text-[12.5px] text-slate-800 mt-0.5">
+                    <h4 className="font-extrabold text-[12px] text-slate-800 mt-0.5">
                       {order.crop?.name}
                     </h4>
-                    <div className="flex justify-between items-center text-[9px] font-bold text-slate-400 pt-1.5 border-t border-slate-100 mt-1">
-                      <span className="truncate max-w-[100px]">📍 {order.farmer?.name}</span>
-                      <span className="text-slate-300">➔</span>
-                      <span className="truncate max-w-[100px] text-right">🏪 {order.vendor?.name}</span>
+                    <div className="flex justify-between items-center text-[9px] font-bold text-slate-400 pt-1.5 border-t border-slate-100 mt-1.5">
+                      <span className="truncate max-w-[100px] text-slate-500">📍 {order.farmer?.name}</span>
+                      <span className="text-slate-350">➔</span>
+                      <span className="truncate max-w-[100px] text-right text-slate-500">🏪 {order.vendor?.name}</span>
                     </div>
                   </div>
                 ))}

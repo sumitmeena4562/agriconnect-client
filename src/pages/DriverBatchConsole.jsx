@@ -28,11 +28,12 @@ const DriverBatchConsole = () => {
   const isTripActive = batch && (batch.batchStatus === 'Out For Delivery' || batch.batchStatus === 'Partially Delivered');
   const { gpsStatus } = useDriverTracking(orderIds, isTripActive);
 
-  // Fetch active batch for the driver
+  // Fetch active batch for the driver — sends driverId as query param
+  // (Drivers have no login account; they access via shared URL with ?driverId=xxx)
   const fetchActiveBatch = useCallback(async () => {
     if (!driverId) return;
     try {
-      const res = await api.get('/batches/driver/active');
+      const res = await api.get(`/batches/driver/active?driverId=${driverId}`);
       if (res.data.success) {
         setBatch(res.data.data);
       }
@@ -43,6 +44,7 @@ const DriverBatchConsole = () => {
       setIsLoading(false);
     }
   }, [driverId]);
+
 
   useEffect(() => {
     fetchActiveBatch();
