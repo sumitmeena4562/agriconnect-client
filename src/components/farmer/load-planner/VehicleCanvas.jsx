@@ -395,10 +395,34 @@ const VehicleCanvas = () => {
         const trailerSize = trailerBox.getSize(new THREE.Vector3());
         const trailerCenter = trailerBox.getCenter(new THREE.Vector3());
 
+        let adjustedSize = new THREE.Vector3(trailerSize.x, trailerSize.y, trailerSize.z);
+        let adjustedCenter = new THREE.Vector3(trailerCenter.x, trailerCenter.y, trailerCenter.z);
+
+        if (type === 'mini_truck') {
+          // Manual adjustments for minitrcuck.glb to align the container bounds exactly inside the white rear cargo box
+          adjustedCenter.x += trailerSize.x * 0.17; // Shift to the rear (away from the cab)
+          adjustedCenter.y += trailerSize.y * 0.14; // Shift up to container bed level
+          adjustedSize.x *= 0.58; // Take only the rear container length (exclude cab)
+          adjustedSize.y *= 0.65; // Height of container box
+          adjustedSize.z *= 0.78; // Width of container box
+        } else if (type === 'pickup_vehicle' || type === 'tractor_trolley' || type === 'bike_delivery') {
+          // Adjustments for mini truck model fallback configurations
+          adjustedCenter.x += trailerSize.x * 0.17;
+          adjustedCenter.y += trailerSize.y * 0.08;
+          adjustedSize.x *= 0.58;
+          adjustedSize.y *= 0.55;
+          adjustedSize.z *= 0.78;
+        } else {
+          // Standard adjustments for container_truck (Untitled.glb)
+          adjustedSize.x *= 0.90;
+          adjustedSize.y *= 0.85;
+          adjustedSize.z *= 0.90;
+        }
+
         if (isCurrent) {
           setTrailerBounds({
-            center: trailerCenter,
-            size: new THREE.Vector3(trailerSize.x * 0.9, trailerSize.y * 0.85, trailerSize.z * 0.9)
+            center: adjustedCenter,
+            size: adjustedSize
           });
         }
 
@@ -443,7 +467,6 @@ const VehicleCanvas = () => {
           (error) => {
             if (!isCurrent) return;
             console.error(error);
-            setLoadingError(true);
             setLoadErrorMsg('Failed to load 3D asset');
           }
         );
