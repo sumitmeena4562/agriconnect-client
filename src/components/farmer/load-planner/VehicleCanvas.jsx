@@ -351,21 +351,24 @@ const VehicleCanvas = () => {
     update3DSlots(scene, activeTemplate, routeStops, removedOrderIds, slotMeshesRef, checkLifoViolation, trailerBounds);
 
     const setupModelInScene = (modelScene) => {
-      if (type === 'mini_truck' || type === 'pickup_vehicle' || type === 'tractor_trolley' || type === 'bike_delivery') {
-        // Rotate the mini truck model to align it straight along the X-axis (facing left)
-        modelScene.rotation.y = -0.43; // -24.6 degrees clockwise rotation
-      }
       modelScene.updateMatrixWorld(true);
 
       const pivot = new THREE.Group();
       pivot.add(modelScene);
 
+      // 1. Calculate bounds of unrotated model scene to center it locally
       const box = new THREE.Box3().setFromObject(modelScene);
       const center = box.getCenter(new THREE.Vector3());
       const size = box.getSize(new THREE.Vector3());
 
       modelScene.position.set(-center.x, -center.y, -center.z);
 
+      // 2. Rotate pivot to straighten the truck model along the X-axis (facing left)
+      if (type === 'mini_truck' || type === 'pickup_vehicle' || type === 'tractor_trolley' || type === 'bike_delivery') {
+        pivot.rotation.y = -0.43; // -24.6 degrees clockwise rotation to align baked diagonal geometry
+      }
+
+      // 3. Scale and position the pivot in the scene
       const maxDim = Math.max(size.x, size.y, size.z);
       const scale = maxDim > 0.001 ? 200 / maxDim : 1;
       pivot.scale.set(scale, scale, scale);
