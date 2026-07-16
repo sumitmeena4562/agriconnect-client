@@ -356,19 +356,12 @@ const VehicleCanvas = () => {
       const pivot = new THREE.Group();
       pivot.add(modelScene);
 
-      // 1. Calculate bounds of unrotated model scene to center it locally
       const box = new THREE.Box3().setFromObject(modelScene);
       const center = box.getCenter(new THREE.Vector3());
       const size = box.getSize(new THREE.Vector3());
 
       modelScene.position.set(-center.x, -center.y, -center.z);
 
-      // 2. Rotate pivot to straighten the truck model along the X-axis (facing left)
-      if (type === 'mini_truck' || type === 'pickup_vehicle' || type === 'tractor_trolley' || type === 'bike_delivery') {
-        pivot.rotation.y = -0.43; // -24.6 degrees clockwise rotation to align baked diagonal geometry
-      }
-
-      // 3. Scale and position the pivot in the scene
       const maxDim = Math.max(size.x, size.y, size.z);
       const scale = maxDim > 0.001 ? 200 / maxDim : 1;
       pivot.scale.set(scale, scale, scale);
@@ -407,15 +400,15 @@ const VehicleCanvas = () => {
 
         if (type === 'mini_truck') {
           // Manual adjustments for minitrcuck.glb to align the container bounds exactly inside the white rear cargo box
-          adjustedCenter.x += trailerSize.x * 0.35; // Shift to the rear (away from the cab)
-          adjustedCenter.y += trailerSize.y * 0.16; // Shift up to container bed level
+          adjustedCenter.x += trailerSize.x * 0.17; // Shift to the rear (away from the cab)
+          adjustedCenter.y += trailerSize.y * 0.14; // Shift up to container bed level
           adjustedSize.x *= 0.58; // Take only the rear container length (exclude cab)
           adjustedSize.y *= 0.65; // Height of container box
           adjustedSize.z *= 0.78; // Width of container box
         } else if (type === 'pickup_vehicle' || type === 'tractor_trolley' || type === 'bike_delivery') {
           // Adjustments for mini truck model fallback configurations
-          adjustedCenter.x += trailerSize.x * 0.35;
-          adjustedCenter.y += trailerSize.y * 0.10;
+          adjustedCenter.x += trailerSize.x * 0.17;
+          adjustedCenter.y += trailerSize.y * 0.08;
           adjustedSize.x *= 0.58;
           adjustedSize.y *= 0.55;
           adjustedSize.z *= 0.78;
