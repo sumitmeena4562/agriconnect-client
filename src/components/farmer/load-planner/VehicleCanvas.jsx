@@ -6,7 +6,7 @@ import { useLoadPlannerStore } from '../../../store/useLoadPlannerStore';
 import { toast } from 'react-hot-toast';
 import { Loader2 } from 'lucide-react';
 
-let cachedGltfModel = null;
+const cachedGltfModels = {};
 
 // Dynamic Cargo Slot Generator (with Realistic 2x2 stacks of taped cardboard boxes on wooden pallets)
 const update3DSlots = (scene, activeTemplate, routeStops, removedOrderIds, slotMeshesRef, checkLifoViolation, trailerBounds) => {
@@ -423,15 +423,15 @@ const VehicleCanvas = () => {
     };
 
     if (type !== 'warehouse') {
-      if (cachedGltfModel) {
-        setupModelInScene(cachedGltfModel.clone());
+      if (cachedGltfModels[type]) {
+        setupModelInScene(cachedGltfModels[type].clone());
       } else {
         const loader = new GLTFLoader();
         loader.load(
-          '/modal/Untitled.glb',
+          `/modal/${type}/model.glb`,
           (gltf) => {
             if (!isCurrent) return;
-            cachedGltfModel = gltf.scene;
+            cachedGltfModels[type] = gltf.scene;
             setupModelInScene(gltf.scene.clone());
           },
           (xhr) => {
