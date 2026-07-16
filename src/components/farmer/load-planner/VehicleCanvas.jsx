@@ -395,35 +395,22 @@ const VehicleCanvas = () => {
         const trailerSize = trailerBox.getSize(new THREE.Vector3());
         const trailerCenter = trailerBox.getCenter(new THREE.Vector3());
 
-        let adjustedSize = new THREE.Vector3(trailerSize.x, trailerSize.y, trailerSize.z);
-        let adjustedCenter = new THREE.Vector3(trailerCenter.x, trailerCenter.y, trailerCenter.z);
-
-        if (type === 'mini_truck') {
-          // Manual adjustments for minitrcuck.glb to align the container bounds exactly inside the white rear cargo box
-          adjustedCenter.x += trailerSize.x * 0.17; // Shift to the rear (away from the cab)
-          adjustedCenter.y += trailerSize.y * 0.14; // Shift up to container bed level
-          adjustedSize.x *= 0.58; // Take only the rear container length (exclude cab)
-          adjustedSize.y *= 0.65; // Height of container box
-          adjustedSize.z *= 0.78; // Width of container box
-        } else if (type === 'pickup_vehicle' || type === 'tractor_trolley' || type === 'bike_delivery') {
-          // Adjustments for mini truck model fallback configurations
-          adjustedCenter.x += trailerSize.x * 0.17;
-          adjustedCenter.y += trailerSize.y * 0.08;
-          adjustedSize.x *= 0.58;
-          adjustedSize.y *= 0.55;
-          adjustedSize.z *= 0.78;
-        } else {
-          // Standard adjustments for container_truck (Untitled.glb)
-          adjustedSize.x *= 0.90;
-          adjustedSize.y *= 0.85;
-          adjustedSize.z *= 0.90;
-        }
+        // ── All types: largest mesh IS the trailer container body (Mesh.046 in Untitled.glb) ──
+        // Its world-space bounding box center is exactly the container's Y-midpoint after scaling.
+        // Apply tight insets to keep boxes inside the container walls.
+        const adjustedCenter = new THREE.Vector3(
+          trailerCenter.x,
+          trailerCenter.y,  // container is Y-centered — no shift needed
+          trailerCenter.z
+        );
+        const adjustedSize = new THREE.Vector3(
+          trailerSize.x * 0.88,  // exclude thin end walls
+          trailerSize.y * 0.78,  // exclude floor slab + roof beam
+          trailerSize.z * 0.82   // exclude side walls
+        );
 
         if (isCurrent) {
-          setTrailerBounds({
-            center: adjustedCenter,
-            size: adjustedSize
-          });
+          setTrailerBounds({ center: adjustedCenter, size: adjustedSize });
         }
 
         const applyTranslucent = (mat) => {
