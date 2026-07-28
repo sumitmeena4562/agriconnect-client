@@ -308,27 +308,36 @@ const FarmerDashboard = () => {
         {/* Right Column: Weather & Mandi Rates */}
         <div className="lg:col-span-4 space-y-3">
           
-          {/* Live Weather Forecast Widget - Compact */}
-          <div className="global-card-flush flex flex-col bg-gradient-to-br from-info-500 to-indigo-600 relative overflow-hidden text-white p-3 shadow-2xs">
-            <div className="flex justify-between items-start">
-              <div>
-                <p className="text-[8.5px] font-black text-info-100 uppercase tracking-wider mb-0.5">Farm Weather & Advisory</p>
-                <h3 className="text-[13px] font-black leading-none">Your Region</h3>
+          {/* Live Weather Forecast Widget - Clean & Minimal */}
+          <div className="global-card p-3 flex flex-col justify-between">
+            <div className="flex items-center justify-between border-b border-slate-50 pb-2">
+              <div className="flex items-center gap-1.5">
+                <span className="material-symbols-outlined text-[16px] text-sky-500">partly_cloudy_day</span>
+                <h3 className="text-[10.5px] font-black text-slate-800 uppercase tracking-wider">
+                  Farm Weather & Advisory
+                </h3>
               </div>
-              <span className="material-symbols-outlined text-[22px] text-yellow-300">partly_cloudy_day</span>
+              <span className="text-[8.5px] font-black text-sky-700 bg-sky-50 px-1.5 py-0.5 rounded border border-sky-150 flex items-center gap-1">
+                <span className="material-symbols-outlined text-[10px]">location_on</span>
+                {stats.locationName || 'Indore, MP'}
+              </span>
             </div>
 
-            <div className="mt-2 mb-1">
-              <h2 className="text-[26px] font-black text-white tracking-tighter leading-none">
-                {weather.temp}°<span className="text-[14px] text-info-200">C</span>
-              </h2>
-              <p className="text-[9px] font-bold text-info-100 mt-0.5">{weather.condition} · Humidity {weather.humidity}%</p>
+            <div className="my-2 flex items-baseline justify-between">
+              <div>
+                <span className="text-[28px] font-black text-slate-850 leading-none tracking-tight">
+                  {weather.temp}°
+                </span>
+                <span className="text-[14px] font-bold text-slate-400 ml-0.5">C</span>
+                <p className="text-[9.5px] font-bold text-slate-500 mt-0.5">
+                  {weather.condition} · <span className="text-slate-400">Humidity {weather.humidity}%</span>
+                </p>
+              </div>
             </div>
 
-            <div className="mt-1.5 pt-1.5 border-t border-white/20">
-              <p className="text-[8.5px] font-bold text-yellow-100 leading-snug">
-                {weather.advisory}
-              </p>
+            <div className="bg-sky-50/80 border border-sky-150 rounded-lg p-2 text-[9px] font-semibold text-sky-850 leading-snug flex items-start gap-1.5">
+              <span className="text-[11px] shrink-0">🌾</span>
+              <span>{weather.advisory}</span>
             </div>
           </div>
 
