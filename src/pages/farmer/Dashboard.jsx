@@ -49,7 +49,10 @@ const FarmerDashboard = () => {
     }
   };
 
-  const fetchLiveWeather = async (coords) => {
+  const [usingGps, setUsingGps] = useState(false);
+  const [gpsLocationName, setGpsLocationName] = useState('');
+
+  const fetchLiveWeather = async (coords, isGps = false, customLocName = '') => {
     try {
       const lat = coords?.lat || 22.7196;
       const lng = coords?.lng || 75.8577;
@@ -75,10 +78,44 @@ const FarmerDashboard = () => {
           condition,
           advisory
         });
+        if (isGps && customLocName) {
+          setGpsLocationName(customLocName);
+        }
       }
     } catch (e) {
       // Keep default weather state
     }
+  };
+
+  const handleDetectGpsLocation = () => {
+    if (!navigator.geolocation) {
+      toast.error('Geolocation is not supported by your browser');
+      return;
+    }
+    const toastId = toast.loading('Detecting live GPS location...');
+    navigator.geolocation.getCurrentPosition(
+      async (pos) => {
+        const coords = { lat: pos.coords.latitude, lng: pos.coords.longitude };
+        setUsingGps(true);
+        
+        let detectedCity = '📍 Live Device GPS';
+        try {
+          const revRes = await fetch(`https://nominatim.openstreetmap.org/reverse?lat=${coords.lat}&lon=${coords.lng}&format=json`);
+          if (revRes.ok) {
+            const revData = await revRes.json();
+            const city = revData.address?.city || revData.address?.town || revData.address?.county || revData.address?.state;
+            if (city) detectedCity = `📍 ${city}`;
+          }
+        } catch (e) {}
+
+        fetchLiveWeather(coords, true, detectedCity);
+        toast.success(`Weather updated for ${detectedCity}!`, { id: toastId });
+      },
+      (err) => {
+        toast.error('Could not access device GPS location. Using profile location.', { id: toastId });
+      },
+      { timeout: 10000, enableHighAccuracy: true }
+    );
   };
 
   useEffect(() => {
@@ -317,10 +354,14 @@ const FarmerDashboard = () => {
                   Farm Weather & Advisory
                 </h3>
               </div>
-              <span className="text-[8.5px] font-black text-sky-700 bg-sky-50 px-1.5 py-0.5 rounded border border-sky-150 flex items-center gap-1">
-                <span className="material-symbols-outlined text-[10px]">location_on</span>
-                {stats.locationName || 'Indore, MP'}
-              </span>
+              <button
+                onClick={handleDetectGpsLocation}
+                className="text-[8.5px] font-black text-sky-750 bg-sky-50 hover:bg-sky-100 px-2 py-0.5 rounded border border-sky-200 transition-colors flex items-center gap-1 cursor-pointer"
+                title="Detect Live Device GPS Location"
+              >
+                <span className="material-symbols-outlined text-[11px] text-sky-600 animate-pulse">my_location</span>
+                {usingGps ? (gpsLocationName || '📍 Live GPS') : (stats.locationName || 'Indore, MP')}
+              </button>
             </div>
 
             <div className="my-2 flex items-baseline justify-between">
