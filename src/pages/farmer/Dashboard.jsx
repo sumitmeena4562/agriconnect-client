@@ -1,12 +1,37 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import StatCard from '../../components/dashboard/StatCard';
 import { motion } from 'framer-motion';
 import { Link } from 'react-router-dom';
+import api from '../../utils/api';
 
 const FarmerDashboard = () => {
-  // Dummy data for now (to be replaced with API later)
-  const user = JSON.parse(localStorage.getItem('user') || sessionStorage.getItem('user') || '{}');
-  const firstName = user.name ? user.name.split(' ')[0] : 'Farmer';
+  const localUser = JSON.parse(localStorage.getItem('user') || sessionStorage.getItem('user') || '{}');
+  const [stats, setStats] = useState({
+    totalEarnings: 0,
+    activeCropsCount: 0,
+    pendingOrdersCount: 0,
+    totalOrdersCount: 0,
+    hasBankDetails: false,
+  });
+  const [loading, setLoading] = useState(true);
+
+  const firstName = localUser.name ? localUser.name.split(' ')[0] : 'Farmer';
+
+  useEffect(() => {
+    const fetchDashboardStats = async () => {
+      try {
+        const res = await api.get('/farmers/stats');
+        if (res.data.success) {
+          setStats(res.data.data);
+        }
+      } catch (err) {
+        console.error('Failed to fetch dashboard stats:', err);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchDashboardStats();
+  }, []);
 
   return (
     <div className="space-y-4 sm:space-y-5">
@@ -21,35 +46,57 @@ const FarmerDashboard = () => {
           </p>
         </div>
 
-        {/* KYC / Bank Details Alert Banner */}
-        <motion.div 
-          initial={{ opacity: 0, y: -10 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="bg-warning-50 border border-warning-200 rounded-xl p-3 sm:p-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 shadow-sm"
-        >
-          <div className="flex items-start gap-2.5">
-            <div className="w-8 h-8 rounded-full bg-warning-100 flex items-center justify-center shrink-0">
-              <span className="material-symbols-outlined text-[18px] text-warning-500">account_balance</span>
+        {/* KYC / Bank Details Alert Banner — shown ONLY if bank details are missing */}
+        {!stats.hasBankDetails && (
+          <motion.div 
+            initial={{ opacity: 0, y: -10 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="bg-warning-50 border border-warning-200 rounded-xl p-3 sm:p-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 shadow-sm"
+          >
+            <div className="flex items-start gap-2.5">
+              <div className="w-8 h-8 rounded-full bg-warning-100 flex items-center justify-center shrink-0">
+                <span className="material-symbols-outlined text-[18px] text-warning-500">account_balance</span>
+              </div>
+              <div className="mt-0.5">
+                <h3 className="text-[12px] font-bold text-warning-800 leading-none mb-1">Complete Your Setup</h3>
+                <p className="text-[10px] text-warning-700 font-medium leading-relaxed">
+                  Add your bank account details to start receiving payments for your crops directly.
+                </p>
+              </div>
             </div>
-            <div className="mt-0.5">
-              <h3 className="text-[12px] font-bold text-warning-800 leading-none mb-1">Complete Your Setup</h3>
-              <p className="text-[10px] text-warning-700 font-medium leading-relaxed">
-                Add your bank account details to start receiving payments for your crops directly.
-              </p>
-            </div>
-          </div>
-          <Link to="/farmer-dashboard/profile" className="shrink-0 w-full sm:w-auto bg-warning-500 hover:bg-warning-600 text-white text-[11px] font-bold py-2 px-4 rounded-lg transition-colors text-center shadow-sm">
-            Add Details
-          </Link>
-        </motion.div>
+            <Link to="/farmer-dashboard/profile" className="shrink-0 w-full sm:w-auto bg-warning-500 hover:bg-warning-600 text-white text-[11px] font-bold py-2 px-4 rounded-lg transition-colors text-center shadow-sm">
+              Add Details
+            </Link>
+          </motion.div>
+        )}
       </div>
 
       {/* 2. Key Stats Grid */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
-        <StatCard title="Total Earnings" value="₹0.00" icon="account_balance_wallet" color="primary" trend={0} trendLabel="vs last month" />
-        <StatCard title="Active Crops" value="0" icon="grass" color="info" />
-        <StatCard title="Pending Orders" value="0" icon="shopping_basket" color="warning" />
-        <StatCard title="Profile Views" value="0" icon="visibility" color="primary" />
+        <StatCard 
+          title="Total Earnings" 
+          value={`₹${(stats.totalEarnings || 0).toLocaleString('en-IN', { minimumFractionDigits: 2 })}`} 
+          icon="account_balance_wallet" 
+          color="primary" 
+        />
+        <StatCard 
+          title="Active Crops" 
+          value={String(stats.activeCropsCount || 0)} 
+          icon="grass" 
+          color="info" 
+        />
+        <StatCard 
+          title="Pending Orders" 
+          value={String(stats.pendingOrdersCount || 0)} 
+          icon="shopping_basket" 
+          color="warning" 
+        />
+        <StatCard 
+          title="Total Shipments" 
+          value={String(stats.totalOrdersCount || 0)} 
+          icon="local_shipping" 
+          color="primary" 
+        />
       </div>
 
       {/* 3. Weather & Market Widgets Grid */}
