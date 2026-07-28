@@ -2,7 +2,7 @@ import React from 'react';
 import { useLoadPlannerStore } from '../../../store/useLoadPlannerStore';
 import { Scale, Layers, AlertCircle, CheckCircle, TrendingUp, Box } from 'lucide-react';
 
-const StatsHeader = () => {
+const StatsHeader = ({ physicalBlocksCount }) => {
   const { batch, localRouteStops, removedOrderIds, activeTemplate, packagingReport } = useLoadPlannerStore();
 
   const activeOrders = batch?.orders?.filter(o => !removedOrderIds.has(String(o._id))) || [];
@@ -10,11 +10,16 @@ const StatsHeader = () => {
     s => s.stopType === 'delivery' && !removedOrderIds.has(String(s.orderId))
   );
 
-  const lifoAlerts = deliveryStops.filter(stop =>
-    deliveryStops.some(other =>
-      other.loadingSequence > stop.loadingSequence && stop.sequence < other.sequence
-    )
-  ).length;
+  const cols = activeTemplate?.cols || 3;
+
+  const calculatedLifoAlerts = deliveryStops.filter(stop => {
+    return deliveryStops.some(other => {
+      if (other.orderId === stop.orderId) return false;
+      return stop.sequence < other.sequence && other.loadingSequence >= stop.loadingSequence;
+    });
+  }).length;
+
+  const lifoAlerts = typeof physicalBlocksCount === 'number' ? physicalBlocksCount : calculatedLifoAlerts;
 
   const maxCapacity = activeTemplate?.capacity || 10000;
   const maxCapacityVolume = activeTemplate?.capacityVolume || 12.0;
@@ -31,7 +36,6 @@ const StatsHeader = () => {
   const unit = activeOrders[0]?.crop?.unit || 'kg';
 
   // ── Axle Load Calculations ──
-  const cols = activeTemplate?.cols || 3;
   let frontWeight = 0;
   let rearWeight = 0;
 

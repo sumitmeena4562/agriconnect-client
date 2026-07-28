@@ -172,6 +172,24 @@ export const useLoadPlannerStore = create((set, get) => ({
     set({ localRouteStops: [...pickups, ...deliveries] });
   },
 
+  autoFixLifoAndStacking: () => {
+    const stops = [...get().localRouteStops];
+    const pickups = stops.filter(s => s.stopType === 'pickup');
+    const deliveries = stops.filter(s => s.stopType === 'delivery');
+
+    // Sort deliveries strictly by delivery sequence
+    deliveries.sort((a, b) => a.sequence - b.sequence);
+
+    // Reassign loadingSequence: 1st delivery -> loaded last (highest loadingSequence), 5th delivery -> loaded first (1)
+    const totalDeliveries = deliveries.length;
+    deliveries.forEach((stop, index) => {
+      stop.loadingSequence = totalDeliveries - index;
+    });
+
+    set({ localRouteStops: [...pickups, ...deliveries] });
+    get().recalculatePackagingReport();
+  },
+
   saveLoadPlan: async (navigate) => {
     const { batch, localRouteStops, removedOrderIds } = get();
     if (!batch) return;

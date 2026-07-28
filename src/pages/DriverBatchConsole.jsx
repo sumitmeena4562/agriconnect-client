@@ -8,6 +8,7 @@ import useDriverTracking from '../hooks/useDriverTracking';
 const DriverBatchConsole = () => {
   const [searchParams] = useSearchParams();
   const driverId = searchParams.get('driverId') || '';
+  const token = searchParams.get('token') || '';
 
   const [batch, setBatch] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -28,22 +29,22 @@ const DriverBatchConsole = () => {
   const isTripActive = batch && (batch.batchStatus === 'Out For Delivery' || batch.batchStatus === 'Partially Delivered');
   const { gpsStatus } = useDriverTracking(orderIds, isTripActive);
 
-  // Fetch active batch for the driver — sends driverId as query param
-  // (Drivers have no login account; they access via shared URL with ?driverId=xxx)
+  // Fetch active batch for the driver — supports both signed token and driverId
   const fetchActiveBatch = useCallback(async () => {
-    if (!driverId) return;
+    if (!driverId && !token) return;
     try {
-      const res = await api.get(`/batches/driver/active?driverId=${driverId}`);
+      const endpoint = token ? `/batches/driver/active?token=${token}` : `/batches/driver/active?driverId=${driverId}`;
+      const res = await api.get(endpoint);
       if (res.data.success) {
         setBatch(res.data.data);
       }
     } catch (error) {
       console.error('Error fetching driver batch:', error);
-      toast.error('Failed to load batch delivery details');
+      toast.error(error.response?.data?.error || 'Failed to load batch delivery details');
     } finally {
       setIsLoading(false);
     }
-  }, [driverId]);
+  }, [driverId, token]);
 
 
   useEffect(() => {

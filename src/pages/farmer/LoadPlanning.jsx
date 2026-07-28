@@ -1,6 +1,5 @@
 import React, { useEffect, useState, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { io } from 'socket.io-client';
 import api from '../../utils/api';
 import { useLoadPlannerStore } from '../../store/useLoadPlannerStore';
 import StatsHeader from '../../components/farmer/load-planner/StatsHeader';
@@ -20,6 +19,7 @@ const getPhysicalBlocks = (stops, activeTemplate, activeOrders) => {
     const cA = idxA % cols;
     const rA = Math.floor(idxA / cols);
     const nameA = activeOrders.find(o => String(o._id) === String(stopA.orderId))?.crop?.name || 'Crop';
+    const cropTypeA = getCropType(nameA).label;
 
     deliveryStops.forEach(stopB => {
       if (stopB.orderId === stopA.orderId) return;
@@ -28,17 +28,16 @@ const getPhysicalBlocks = (stops, activeTemplate, activeOrders) => {
       const cB = idxB % cols;
       const rB = Math.floor(idxB / cols);
       const nameB = activeOrders.find(o => String(o._id) === String(stopB.orderId))?.crop?.name || 'Crop';
+      const cropTypeB = getCropType(nameB).label;
 
-      // If stopA must be delivered before stopB
-      if (stopA.sequence < stopB.sequence) {
-        // 1. Stacking Block: B sits on top of A
-        if (cA === cB && rB > rA) {
-          blocks.push(`⚠️ ${nameB} is stacked on top of ${nameA}. You must unload ${nameB} first.`);
-        }
-        // 2. Door/Corridor Block: B is in the same row but closer to the door (column is larger)
-        if (rA === rB && cB > cA) {
-          blocks.push(`⚠️ ${nameB} is blocking the rear door path for ${nameA}.`);
-        }
+      // 1. LIFO Door Obstruction: stopA must be delivered before stopB, but stopB is loaded closer to/at the door
+      if (stopA.sequence < stopB.sequence && stopB.loadingSequence >= stopA.loadingSequence) {
+        blocks.push(`⚠️ ${nameB} is blocking the rear door path for ${nameA}.`);
+      }
+
+      // 2. Heavy-on-Fragile Stacking Violation: Heavy item B is stacked on top of Fragile item A in same stack
+      if (cA === cB && rB > rA && cropTypeB === 'Heavy' && cropTypeA === 'Fragile') {
+        blocks.push(`⚠️ ${nameB} (Heavy) is stacked on top of ${nameA} (Fragile). Risk of crushing.`);
       }
     });
   });
@@ -152,24 +151,22 @@ const LoadPlanning = () => {
   useEffect(() => {
     fetchBatch();
 
-    const socketHost = window.location.origin.includes('localhost')
-      ? 'http://localhost:5000'
-      : window.location.origin;
-
-    const socket = io(socketHost, { transports: ['websocket'], upgrade: false });
-
-    socket.on('connect', () => {
-      setIsLive(true);
-    });
-
-    socket.on('disconnect', () => setIsLive(false));
-
-    socket.on(`batch-${id}-update`, () => {
+    const handleLiveUpdate = () => {
       toast.success('Live update received 📡');
       fetchBatch();
-    });
+    };
 
-    return () => socket.disconnect();
+    window.addEventListener('agriconnect:notification', handleLiveUpdate);
+    window.addEventListener('agriconnect:order-updated', handleLiveUpdate);
+    window.addEventListener('agriconnect:refresh-data', handleLiveUpdate);
+
+    setIsLive(true);
+
+    return () => {
+      window.removeEventListener('agriconnect:notification', handleLiveUpdate);
+      window.removeEventListener('agriconnect:order-updated', handleLiveUpdate);
+      window.removeEventListener('agriconnect:refresh-data', handleLiveUpdate);
+    };
   }, [id, fetchBatch]);
 
   const physicalBlocks = getPhysicalBlocks(localRouteStops, activeTemplate, activeOrders);
@@ -246,7 +243,7 @@ const LoadPlanning = () => {
         
         {/* Left Column: Visualizer, KPIs, Analytics */}
         <div className="xl:col-span-8 space-y-4 flex flex-col justify-between">
-          <StatsHeader />
+          <StatsHeader physicalBlocksCount={physicalBlocks.length} />
 
           {/* 3D Canvas Box - Styled as global-card */}
           <div className="global-card p-4 hover:shadow-sm">

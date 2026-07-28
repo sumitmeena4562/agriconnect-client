@@ -18,200 +18,146 @@ const update3DSlots = (scene, activeTemplate, routeStops, removedOrderIds, slotM
   const { rows, cols } = activeTemplate;
   const { center, size } = trailerBounds;
 
-  // Real-world layout: single sequence row along length (X) for perfect side-view clarity. No depth overlap.
   const totalSlots = rows * cols;
-  const slotW = size.x / totalSlots;
-  const slotH = size.y; // Full height of trailer cargo space
-  const slotD = size.z; // Full depth of trailer cargo space
+  const slotW  = size.x / cols;        // each slot's width along truck length (X)
+  const slotH  = size.y / rows;        // slot height for each layer (Y)
+  const slotD  = size.z;               // full container interior depth (Z)
   const startX = center.x - size.x / 2;
-  const bottomY = center.y - size.y / 2; // Floor height
-  const cellZ = center.z; // Centered in the depth
+  const bottomY = center.y - size.y / 2; // container floor Y in world space
+  const cellZ   = center.z;
+
+  const packagingReport = useLoadPlannerStore.getState().packagingReport;
+  const occupancyData   = packagingReport?.trailerOccupancyData || [];
+  const deliveryStops   = routeStops.filter(s => s.stopType === 'delivery' && !removedOrderIds.has(String(s.orderId)));
+
+  console.log(`[update3DSlots] config - totalSlots: ${totalSlots}, occupancyDataLen: ${occupancyData.length}, deliveryStopsLen: ${deliveryStops.length}, center: [${center.x.toFixed(1)}, ${center.y.toFixed(1)}, ${center.z.toFixed(1)}], size: [${size.x.toFixed(1)}, ${size.y.toFixed(1)}, ${size.z.toFixed(1)}]`);
 
   const slotGroup = new THREE.Group();
   scene.add(slotGroup);
   slotMeshesRef.current.push(slotGroup);
 
-  const activeOrders = useLoadPlannerStore.getState().batch?.orders?.filter(o => !removedOrderIds.has(String(o._id))) || [];
-  const deliveryStops = routeStops.filter(s => s.stopType === 'delivery' && !removedOrderIds.has(String(s.orderId)));
+  let totalW = 0, weightedX = 0, weightedY = 0, weightedZ = 0;
 
-  const packagingReport = useLoadPlannerStore.getState().packagingReport;
-  const occupancyData = packagingReport?.trailerOccupancyData || [];
-
-  let totalW = 0;
-  let weightedX = 0;
-  let weightedY = 0;
-  let weightedZ = 0;
-
-  const palletH = slotH * 0.08;
+  // Pallet height = 8% of container height (realistic 15cm pallet vs ~2m container)
+  const realPalletH = slotH * 0.08;
 
   for (let sIdx = 0; sIdx < totalSlots; sIdx++) {
     const slotNum = sIdx + 1;
-    const cellX = startX + sIdx * slotW + slotW / 2;
-    
-    const slotOccupancy = occupancyData.find(item => item.slotIndex === slotNum);
-    const slotMeshGroup = new THREE.Group();
-    // Position pallet flat on the floor
-    slotMeshGroup.position.set(cellX, bottomY + palletH / 2, cellZ);
-    slotGroup.add(slotMeshGroup);
+    const c = sIdx % cols;
+    const r = Math.floor(sIdx / cols);
+    const cellX   = startX + c * slotW + slotW / 2;
 
-    const boxGeo = new THREE.BoxGeometry(slotW - 3, slotH - 3, slotD - 6);
-    
-    const stop = deliveryStops.find(s => s.loadingSequence === slotNum);
-    const boxInfo = stop ? packagingReport?.recommendedBoxes?.find(b => String(b.orderId) === String(stop.orderId)) : null;
+    const slotOccupancy = occupancyData.find(item => item.slotIndex === slotNum);
+    const slotGroup3    = new THREE.Group();
+    slotGroup3.position.set(cellX, bottomY + r * slotH + realPalletH / 2, cellZ);
+    slotGroup.add(slotGroup3);
+
+    // ── Use slotOccupancy as single source of truth ──
+    const stop       = deliveryStops.find(s => s.loadingSequence === slotNum);
     const isViolated = stop ? checkLifoViolation(stop, deliveryStops) : false;
 
-    if (!stop || !boxInfo) {
-      // Empty slot helper (Storage wireframe frame look sitting flat on floor)
-      const emptyMesh = new THREE.Mesh(boxGeo, new THREE.MeshStandardMaterial({
-        color: 0x94a3b8,
-        transparent: true,
-        opacity: 0.03,
-        roughness: 0.8
+    const boxInfo = stop
+      ? packagingReport?.recommendedBoxes?.find(b => String(b.orderId) === String(stop.orderId))
+      : slotOccupancy?.isFilled
+        ? packagingReport?.recommendedBoxes?.[slotNum - 1]
+        : null;
+
+    console.log(`[update3DSlots] Slot ${slotNum} - occupied: ${!!slotOccupancy?.isFilled}, stop: ${!!stop}, boxInfo: ${!!boxInfo}, crop: ${boxInfo?.cropName || 'none'}, count: ${boxInfo?.count || 0}`);
+
+    if (!slotOccupancy?.isFilled || !boxInfo) {
+      // ── Empty slot wireframe ──
+      const emptyGeo = new THREE.BoxGeometry(slotW - 4, slotH - 4, slotD - 8);
+      const emptyMesh = new THREE.Mesh(emptyGeo, new THREE.MeshStandardMaterial({
+        color: 0x94a3b8, transparent: true, opacity: 0.02, roughness: 0.8
       }));
       emptyMesh.userData = { slotNum };
-      emptyMesh.position.y = slotH / 2 - palletH / 2;
-      emptyMesh.receiveShadow = true;
-      slotMeshGroup.add(emptyMesh);
+      emptyMesh.position.y = slotH / 2 - realPalletH / 2;
+      slotGroup3.add(emptyMesh);
+      const edgeMat = new THREE.LineBasicMaterial({ color: 0xcbd5e1, opacity: 0.12, transparent: true });
+      slotGroup3.add(new THREE.LineSegments(new THREE.EdgesGeometry(emptyGeo), edgeMat));
+      continue;
+    }
 
-      const edges = new THREE.EdgesGeometry(boxGeo);
-      const edgesLines = new THREE.LineSegments(edges, new THREE.LineBasicMaterial({ color: 0xcbd5e1, opacity: 0.15, transparent: true }));
-      edgesLines.position.y = slotH / 2 - palletH / 2;
-      slotMeshGroup.add(edgesLines);
-    } else {
-      // Filled cargo box
-      
-      const weight = boxInfo ? boxInfo.weightPerBox : 0;
-      
-      // Parse custom colors from hex strings
-      let boxColor = parseInt(slotOccupancy.color.replace('#', '0x'));
-      let tapeColor = parseInt(slotOccupancy.tapeColor.replace('#', '0x'));
-      
-      if (isViolated) {
-        boxColor = 0xfca5a5;  // Red Violation Kraft
-        tapeColor = 0xdc2626; // Violation red tape
+    // ── Parse colors from slotOccupancy (direct, reliable) ──
+    let boxColor  = parseInt((slotOccupancy.color || '#d29b6c').replace('#', '0x'));
+    let tapeColor = parseInt((slotOccupancy.tapeColor || '#b48256').replace('#', '0x'));
+    if (isViolated) { boxColor = 0xfca5a5; tapeColor = 0xdc2626; }
+
+    // ── 1. Wooden Pallet ──
+    const palletMesh = new THREE.Mesh(
+      new THREE.BoxGeometry(slotW - 4, realPalletH, slotD - 8),
+      new THREE.MeshStandardMaterial({ color: 0x7c5a3c, roughness: 0.95, metalness: 0.05 })
+    );
+    palletMesh.castShadow = true;
+    palletMesh.receiveShadow = true;
+    slotGroup3.add(palletMesh);
+
+    // ── 2. Box sizing: slot-proportional, preserving real box aspect ratio ──
+    const dims  = boxInfo.boxDims || { l: 65, w: 45, h: 40 };
+    const subW  = (slotW - 6) / 2;                               // 2 boxes per slot in X
+    const subD  = (slotD - 8) / 2;                               // 2 boxes per slot in Z
+    const subH  = Math.min(subW * (dims.h / dims.l) * 1.5, slotH * 0.28); // height capped at 28% slot
+
+    const subBoxMat = new THREE.MeshStandardMaterial({ color: boxColor, roughness: 0.88, metalness: 0.0 });
+    const tapeMat   = new THREE.MeshStandardMaterial({ color: tapeColor, roughness: 0.4, metalness: 0.1 });
+    const labelMat  = new THREE.MeshBasicMaterial({ color: 0xffffff, side: THREE.DoubleSide });
+    const glyphMat  = new THREE.MeshBasicMaterial({ color: 0x475569, side: THREE.DoubleSide });
+
+    const halfX = subW / 2 + 1.0;
+    const halfZ = subD / 2 + 1.0;
+    const offsets = [
+      { px: -halfX, pz:  halfZ, label: true  },
+      { px:  halfX, pz:  halfZ, label: true  },
+      { px: -halfX, pz: -halfZ, label: false },
+      { px:  halfX, pz: -halfZ, label: false },
+    ];
+    const subBoxGeo = new THREE.BoxGeometry(subW, subH, subD);
+    const boxCount  = boxInfo.count || 1;
+    const weight    = boxInfo.weightPerBox || 0;
+
+    for (let i = 0; i < boxCount; i++) {
+      const layer  = Math.floor(i / 4);
+      const { px, pz, label } = offsets[i % 4];
+      const py = realPalletH / 2 + layer * subH + subH / 2;
+
+      // Stop stacking if box top would exceed container roof
+      if (py + subH / 2 > slotH - realPalletH) break;
+
+      const boxMesh = new THREE.Mesh(subBoxGeo, subBoxMat);
+      boxMesh.position.set(px, py, pz);
+      boxMesh.castShadow = true;
+      boxMesh.receiveShadow = true;
+      slotGroup3.add(boxMesh);
+
+      // Cross tape on top
+      const tapeThk = subD * 0.12;
+      const topTape  = new THREE.Mesh(new THREE.BoxGeometry(subW * 0.85, 0.8, tapeThk), tapeMat);
+      topTape.position.set(px, py + subH / 2 + 0.3, pz);
+      slotGroup3.add(topTape);
+      const topTape2 = new THREE.Mesh(new THREE.BoxGeometry(tapeThk, 0.8, subD * 0.85), tapeMat);
+      topTape2.position.set(px, py + subH / 2 + 0.3, pz);
+      slotGroup3.add(topTape2);
+
+      // Side tape + label (front-facing, first layer)
+      if (label && layer === 0) {
+        const lW = subW * 0.32, lH = Math.max(3, subH * 0.35);
+        const lMesh = new THREE.Mesh(new THREE.PlaneGeometry(lW, lH), labelMat);
+        lMesh.position.set(px + subW * 0.22, py + subH * 0.15, pz + subD / 2 + 0.15);
+        slotGroup3.add(lMesh);
       }
 
-      // 1. Wooden Pallet Base (Height = palletH, sits flat on floor)
-      const palletGeo = new THREE.BoxGeometry(slotW - 3, palletH, slotD - 6);
-      const palletMat = new THREE.MeshStandardMaterial({
-        color: 0x7c5a3c, // Realistic warm wood color
-        roughness: 0.95,
-        metalness: 0.05
-      });
-      const palletMesh = new THREE.Mesh(palletGeo, palletMat);
-      palletMesh.position.y = 0;
-      palletMesh.castShadow = true;
-      palletMesh.receiveShadow = true;
-      slotMeshGroup.add(palletMesh);
+      // Edge highlight
+      const edgeLines = new THREE.LineSegments(
+        new THREE.EdgesGeometry(subBoxGeo),
+        new THREE.LineBasicMaterial({ color: tapeColor, opacity: 0.25, transparent: true })
+      );
+      edgeLines.position.set(px, py, pz);
+      slotGroup3.add(edgeLines);
 
-      // ── DYNAMIC BOX SIZE CALCULATION BASED ON RECOMMENDATION ENGINE ──
-      const boxType = boxInfo?.boxType || 'M';
-      const scaleFactor = 
-        boxType === 'S' ? 0.70 :
-        boxType === 'M' ? 0.82 :
-        boxType === 'L' ? 0.90 : 0.98; // XL
-      
-      // Since it's a single row, the pallet is square-ish. Let's stack boxes in a perfect 2x2 grid.
-      const subW = ((slotW - 5) / 2) * scaleFactor;
-      const subD = ((slotD - 6) / 2) * scaleFactor;
-      const boxH = Math.min(Math.min(subW, subD) * 0.78, (slotH - palletH) * 0.28) * scaleFactor;
-
-      const subBoxGeo = new THREE.BoxGeometry(subW, boxH, subD);
-      const subBoxMat = new THREE.MeshStandardMaterial({
-        color: boxColor,
-        roughness: 0.9,
-        metalness: 0.0
-      });
-
-      const tapeMat = new THREE.MeshStandardMaterial({
-        color: tapeColor,
-        roughness: 0.4,
-        metalness: 0.1
-      });
-
-      const labelMat = new THREE.MeshBasicMaterial({
-        color: 0xffffff,
-        side: THREE.DoubleSide
-      });
-
-      const glyphMat = new THREE.MeshBasicMaterial({
-        color: 0x475569,
-        side: THREE.DoubleSide
-      });
-
-      // 2x2 grid offsets
-      const offsets = [
-        { dx: -1, dz: 1, label: true },  // Front-Left
-        { dx: 1,  dz: 1, label: true },  // Front-Right
-        { dx: -1, dz: -1, label: false }, // Back-Left
-        { dx: 1,  dz: -1, label: false }  // Back-Right
-      ];
-
-      // Draw the exact number of boxes recommended for this slot, stacking them vertically
-      const boxCount = boxInfo?.count || 1;
-      const layerSize = 4;
-
-      for (let i = 0; i < boxCount; i++) {
-        const layer = Math.floor(i / layerSize);
-        const subIdx = i % layerSize;
-        const { dx, dz, label } = offsets[subIdx];
-
-        const px = dx * (subW / 2 + 1.2);
-        const pz = dz * (subD / 2 + 1.2);
-        const py = palletH / 2 + (layer * boxH) + boxH / 2; // local position relative to slotMeshGroup center
-
-        // Cardboard Box Mesh
-        const boxMesh = new THREE.Mesh(subBoxGeo, subBoxMat);
-        boxMesh.position.set(px, py, pz);
-        boxMesh.castShadow = true;
-        boxMesh.receiveShadow = true;
-        slotMeshGroup.add(boxMesh);
-
-        // Top Flap Seam Tape
-        const tapeW = subD / 6;
-        const topTape = new THREE.Mesh(new THREE.BoxGeometry(subW - 0.2, 0.15, tapeW), tapeMat);
-        topTape.position.set(px, py + boxH / 2, pz);
-        slotMeshGroup.add(topTape);
-
-        // Side Tape Folds
-        const sideTapeLeft = new THREE.Mesh(new THREE.BoxGeometry(0.15, boxH / 4, tapeW), tapeMat);
-        sideTapeLeft.position.set(px - subW / 2 + 0.1, py + boxH / 2 - boxH / 8, pz);
-        slotMeshGroup.add(sideTapeLeft);
-
-        const sideTapeRight = new THREE.Mesh(new THREE.BoxGeometry(0.15, boxH / 4, tapeW), tapeMat);
-        sideTapeRight.position.set(px + subW / 2 - 0.1, py + boxH / 2 - boxH / 8, pz);
-        slotMeshGroup.add(sideTapeRight);
-
-        // shipping labels & glyphs on front-facing boxes (matches bottom layer only)
-        if (label && layer === 0) {
-          // White shipping sticker (top-right of box face)
-          const labelW = subW / 4.2;
-          const labelH = Math.max(3, boxH / 3.8);
-          const labelMesh = new THREE.Mesh(new THREE.PlaneGeometry(labelW, labelH), labelMat);
-          labelMesh.position.set(px + subW / 4.2, py + boxH * 0.2, pz + subD / 2 + 0.1);
-          slotMeshGroup.add(labelMesh);
-
-          // Three handling icons/glyphs (bottom-left of box face)
-          const glyphGeo = new THREE.PlaneGeometry(1.2, 1.2);
-          for (let g = 0; g < 3; g++) {
-            const glyphMesh = new THREE.Mesh(glyphGeo, glyphMat);
-            glyphMesh.position.set(px - subW / 4.5 + g * 1.8, py - boxH * 0.25, pz + subD / 2 + 0.1);
-            slotMeshGroup.add(glyphMesh);
-          }
-        }
-
-        // Subtle box edges highlight
-        const edges = new THREE.EdgesGeometry(subBoxGeo);
-        const edgesLines = new THREE.LineSegments(edges, new THREE.LineBasicMaterial({ color: tapeColor, opacity: 0.15, transparent: true }));
-        edgesLines.position.set(px, py, pz);
-        slotMeshGroup.add(edgesLines);
-
-        // Accumulate center of gravity metrics per box
-        totalW += weight;
-        weightedX += cellX * weight;
-        weightedY += (bottomY + palletH + (layer * boxH) + boxH / 2) * weight;
-        weightedZ += cellZ * weight;
-      }
+      totalW    += weight;
+      weightedX += cellX * weight;
+      weightedY += (bottomY + r * slotH + realPalletH / 2 + py) * weight;
+      weightedZ += cellZ * weight;
     }
   }
 
@@ -269,7 +215,7 @@ const update3DSlots = (scene, activeTemplate, routeStops, removedOrderIds, slotM
 };
 
 const VehicleCanvas = () => {
-  const { activeTemplate, removedOrderIds, batch, setDraggedItem, draggedItem, localRouteStops: routeStops } = useLoadPlannerStore();
+  const { activeTemplate, removedOrderIds, batch, setDraggedItem, draggedItem, localRouteStops: routeStops, packagingReport } = useLoadPlannerStore();
   const [mountElement, setMountElement] = useState(null);
   const [loadProgress, setLoadProgress] = useState(0);
   const [modelLoaded, setModelLoaded] = useState(false);
@@ -314,7 +260,7 @@ const VehicleCanvas = () => {
     renderer.setSize(width, height);
     renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
     renderer.shadowMap.enabled = true;
-    renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+    renderer.shadowMap.type = THREE.PCFShadowMap;
     mountElement.appendChild(renderer.domElement);
     rendererRef.current = renderer;
 
@@ -371,62 +317,63 @@ const VehicleCanvas = () => {
       pivot.updateMatrixWorld(true);
 
       let largestMesh = null;
-      let maxVolume = 0;
+      let largestVol = 0;
 
       modelScene.traverse((child) => {
-        if (child.isMesh) {
-          child.castShadow = true;
-          child.receiveShadow = true;
+        if (!child.isMesh) return;
+        child.castShadow = true;
+        child.receiveShadow = true;
+        child.updateMatrixWorld(true);
 
-          child.updateMatrixWorld(true);
-          const meshBox = new THREE.Box3().setFromObject(child);
-          const meshSize = meshBox.getSize(new THREE.Vector3());
-          const volume = meshSize.x * meshSize.y * meshSize.z;
+        const wb = new THREE.Box3().setFromObject(child);
+        const ws = wb.getSize(new THREE.Vector3());
+        const vol = ws.x * ws.y * ws.z;
 
-          if (volume > maxVolume) {
-            maxVolume = volume;
-            largestMesh = child;
-          }
+        // Container is Mesh.046 (largest by volume = 119M units)
+        if (vol > largestVol) {
+          largestVol = vol;
+          largestMesh = child;
         }
       });
 
-      if (largestMesh) {
-        const trailerBox = new THREE.Box3().setFromObject(largestMesh);
-        const trailerSize = trailerBox.getSize(new THREE.Vector3());
-        const trailerCenter = trailerBox.getCenter(new THREE.Vector3());
+      const targetMesh = largestMesh;
 
-        // ── All types: largest mesh IS the trailer container body (Mesh.046 in Untitled.glb) ──
-        // Its world-space bounding box center is exactly the container's Y-midpoint after scaling.
-        // Apply tight insets to keep boxes inside the container walls.
+      if (targetMesh) {
+        const cargoBox = new THREE.Box3().setFromObject(targetMesh);
+        const cargoSize = cargoBox.getSize(new THREE.Vector3());
+        const cargoCenter = cargoBox.getCenter(new THREE.Vector3());
+
+        console.log(`[TrailerBounds] cargoBox world - min: [${cargoBox.min.x.toFixed(1)}, ${cargoBox.min.y.toFixed(1)}, ${cargoBox.min.z.toFixed(1)}], max: [${cargoBox.max.x.toFixed(1)}, ${cargoBox.max.y.toFixed(1)}, ${cargoBox.max.z.toFixed(1)}], size: [${cargoSize.x.toFixed(1)}, ${cargoSize.y.toFixed(1)}, ${cargoSize.z.toFixed(1)}]`);
+
+        // Container interior: apply tight insets
         const adjustedCenter = new THREE.Vector3(
-          trailerCenter.x,
-          trailerCenter.y,  // container is Y-centered — no shift needed
-          trailerCenter.z
+          cargoCenter.x,
+          cargoCenter.y,
+          cargoCenter.z
         );
         const adjustedSize = new THREE.Vector3(
-          trailerSize.x * 0.88,  // exclude thin end walls
-          trailerSize.y * 0.78,  // exclude floor slab + roof beam
-          trailerSize.z * 0.82   // exclude side walls
+          cargoSize.x * 0.88,
+          cargoSize.y * 0.78,
+          cargoSize.z * 0.82
         );
 
         if (isCurrent) {
           setTrailerBounds({ center: adjustedCenter, size: adjustedSize });
         }
 
+        // Make the container translucent so we see the boxes inside
         const applyTranslucent = (mat) => {
           mat.transparent = true;
           mat.opacity = 0.12;
           mat.color.setHex(0xcbd5e1);
           mat.roughness = 0.1;
           mat.metalness = 0.9;
+          mat.depthWrite = false;
+          mat.needsUpdate = true;
         };
-
-        if (largestMesh.material) {
-          if (Array.isArray(largestMesh.material)) {
-            largestMesh.material.forEach(applyTranslucent);
-          } else {
-            applyTranslucent(largestMesh.material);
-          }
+        if (largestMesh?.material) {
+          if (Array.isArray(largestMesh.material)) largestMesh.material.forEach(applyTranslucent);
+          else applyTranslucent(largestMesh.material);
         }
       }
 
@@ -492,11 +439,12 @@ const VehicleCanvas = () => {
   }, [mountElement, activeTemplate.type]);
 
   // Re-draw slots reactively when stops update or trailer bounds are computed
+  // Re-draw slots reactively when stops update, trailer bounds are computed, or packaging report updates
   useEffect(() => {
     const scene = sceneRef.current;
     if (!scene || !trailerBounds) return;
     update3DSlots(scene, activeTemplate, routeStops, removedOrderIds, slotMeshesRef, checkLifoViolation, trailerBounds);
-  }, [activeTemplate, routeStops, removedOrderIds, batch, trailerBounds]);
+  }, [activeTemplate, routeStops, removedOrderIds, batch, trailerBounds, packagingReport]);
 
   const handleHTMLDrop = (e) => {
     e.preventDefault();

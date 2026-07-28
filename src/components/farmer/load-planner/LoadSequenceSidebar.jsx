@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useLoadPlannerStore } from '../../../store/useLoadPlannerStore';
 import { useNavigate } from 'react-router-dom';
-import { ChevronUp, ChevronDown, Trash2, RotateCcw, Truck, Box, Bike, HardHat, Save, AlertTriangle, Lock } from 'lucide-react';
+import { ChevronUp, ChevronDown, Trash2, RotateCcw, Truck, Box, Bike, HardHat, Save, AlertTriangle, Lock, Zap } from 'lucide-react';
 import { toast } from 'react-hot-toast';
 
 const VEHICLE_EMOJIS = {
@@ -44,6 +44,7 @@ const LoadSequenceSidebar = () => {
     saveLoadPlan,
     savingPlan,
     setDraggedItem,
+    autoFixLifoAndStacking,
   } = useLoadPlannerStore();
 
   const activeOrders = batch?.orders?.filter(o => !removedOrderIds.has(String(o._id))) || [];
@@ -230,14 +231,27 @@ const LoadSequenceSidebar = () => {
             {deliveryStops.length} stop{deliveryStops.length !== 1 ? 's' : ''} · drag to reorder
           </p>
         </div>
-        <button
-          onClick={handleReset}
-          className="flex items-center gap-1 text-[9.5px] font-bold text-slate-400 hover:text-slate-700 transition-colors px-2 py-1 rounded-lg hover:bg-slate-100 border-0 bg-transparent cursor-pointer"
-          title="Reset to default route"
-        >
-          <RotateCcw className="w-3 h-3" />
-          Reset
-        </button>
+        <div className="flex items-center gap-1.5">
+          <button
+            onClick={() => {
+              autoFixLifoAndStacking();
+              toast.success('⚡ LIFO sequence auto-fixed!');
+            }}
+            className="flex items-center gap-1 text-[9.5px] font-black text-amber-700 hover:text-amber-800 bg-amber-50 hover:bg-amber-100 border border-amber-250 transition-colors px-2 py-1 rounded-lg cursor-pointer"
+            title="Auto-Fix LIFO sequence"
+          >
+            <Zap className="w-3 h-3 text-amber-600 fill-amber-500" />
+            Auto-Fix
+          </button>
+          <button
+            onClick={handleReset}
+            className="flex items-center gap-1 text-[9.5px] font-bold text-slate-400 hover:text-slate-700 transition-colors px-2 py-1 rounded-lg hover:bg-slate-100 border-0 bg-transparent cursor-pointer"
+            title="Reset to default route"
+          >
+            <RotateCcw className="w-3 h-3" />
+            Reset
+          </button>
+        </div>
       </div>
 
       {/* ── Stop List ── */}

@@ -12,7 +12,7 @@ const BatchManagement = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [selectedDriverMap, setSelectedDriverMap] = useState({}); // batchId -> driverId
   const [dispatchConfirm, setDispatchConfirm] = useState({ open: false, batchId: null, isLoading: false });
-
+  const [radiusKm, setRadiusKm] = useState(10);
 
   // Fetch batches, unbatched orders and drivers
   const fetchData = useCallback(async () => {
@@ -52,9 +52,9 @@ const BatchManagement = () => {
 
   // Run Auto-Grouping Algorithm
   const handleAutoGroup = async () => {
-    const toastId = toast.loading('Running proximity matching & route optimization...');
+    const toastId = toast.loading(`Running proximity matching within ${radiusKm} km radius...`);
     try {
-      const res = await api.post('/batches/auto-group');
+      const res = await api.post('/batches/auto-group', { radiusKm });
       if (res.data.success) {
         toast.success(res.data.message || 'Batches created successfully!', { id: toastId });
         fetchData();
@@ -137,14 +137,32 @@ const BatchManagement = () => {
             Group accepted orders to optimize routes, assign fleet carriers, and track batch shipments.
           </p>
         </div>
-        <button
-          onClick={handleAutoGroup}
-          disabled={unbatchedOrders.length === 0}
-          className="px-4 py-2.5 bg-primary-600 hover:bg-primary-700 disabled:opacity-50 text-white font-black text-[12px] rounded-xl shadow-sm hover:shadow-md cursor-pointer border-0 active:scale-95 transition-all flex items-center gap-2 shrink-0 self-start sm:self-center"
-        >
-          <span className="material-symbols-outlined text-[16px]">alt_route</span>
-          <span>Auto-Group Orders ({unbatchedOrders.length} pending)</span>
-        </button>
+        <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 shrink-0 self-start sm:self-center">
+          <div className="flex items-center gap-2 bg-slate-50 border border-slate-200/80 px-3 py-2 rounded-xl shadow-2xs">
+            <span className="text-[10px] font-black text-slate-500 uppercase tracking-wider flex items-center gap-1">
+              <span className="material-symbols-outlined text-[14px] text-primary-600">radar</span> Radius:
+            </span>
+            <input
+              type="range"
+              min="5"
+              max="50"
+              step="5"
+              value={radiusKm}
+              onChange={(e) => setRadiusKm(Number(e.target.value))}
+              className="w-20 accent-primary-600 cursor-pointer"
+            />
+            <span className="text-[11px] font-black text-primary-750 tabular-nums min-w-[38px] text-right">{radiusKm} km</span>
+          </div>
+
+          <button
+            onClick={handleAutoGroup}
+            disabled={unbatchedOrders.length === 0}
+            className="px-4 py-2.5 bg-primary-600 hover:bg-primary-700 disabled:opacity-50 text-white font-black text-[12px] rounded-xl shadow-sm hover:shadow-md cursor-pointer border-0 active:scale-95 transition-all flex items-center justify-center gap-2"
+          >
+            <span className="material-symbols-outlined text-[16px]">alt_route</span>
+            <span>Auto-Group Orders ({unbatchedOrders.length} pending)</span>
+          </button>
+        </div>
       </div>
 
       {isLoading ? (
