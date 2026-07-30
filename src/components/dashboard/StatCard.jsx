@@ -1,6 +1,9 @@
 import React from 'react';
+import { useNavigate } from 'react-router-dom';
 
-const StatCard = ({ title, value, icon, trend, trendLabel, color = 'primary' }) => {
+const StatCard = ({ title, value, icon, trend, trendLabel, color = 'primary', to, onClick }) => {
+  const navigate = useNavigate();
+
   // Define color variations based on the global theme
   const colorStyles = {
     primary: 'bg-primary-50 text-primary-600',
@@ -13,8 +16,20 @@ const StatCard = ({ title, value, icon, trend, trendLabel, color = 'primary' }) 
 
   const currentStyle = colorStyles[color] || colorStyles.primary;
 
+  const handleClick = () => {
+    if (onClick) {
+      onClick();
+    } else if (to) {
+      navigate(to);
+    }
+  };
+
   return (
-    <div className="global-card flex flex-col justify-between group glass-shine cursor-pointer !p-4">
+    <div 
+      onClick={handleClick}
+      className="global-card flex flex-col justify-between group glass-shine cursor-pointer !p-4 hover:border-primary-300 transition-all active:scale-[0.98]"
+      title={`Click to view ${title}`}
+    >
       <div className="flex justify-between items-start mb-3">
         <div>
           <p className="text-[11px] font-bold text-slate-500 mb-0.5">{title}</p>
@@ -25,13 +40,18 @@ const StatCard = ({ title, value, icon, trend, trendLabel, color = 'primary' }) 
         </div>
       </div>
       
-      {trend && (
+      {trend ? (
         <div className="flex items-center gap-1.5 mt-1">
           <span className={`flex items-center text-[10px] font-bold ${trend > 0 ? 'text-success-600 bg-success-50' : 'text-danger-600 bg-danger-50'} px-1.5 py-0.5 rounded-sm`}>
             <span className="material-symbols-outlined text-[12px]">{trend > 0 ? 'trending_up' : 'trending_down'}</span>
             {Math.abs(trend)}%
           </span>
           <span className="text-[10px] font-medium text-slate-400 leading-none pt-0.5">{trendLabel}</span>
+        </div>
+      ) : (
+        <div className="flex items-center gap-1 mt-1 text-[9.5px] font-bold text-primary-600">
+          <span className="group-hover:underline">View Details</span>
+          <span className="material-symbols-outlined text-[12px] !no-underline transition-transform duration-200 group-hover:translate-x-1">arrow_forward</span>
         </div>
       )}
     </div>

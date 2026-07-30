@@ -4,6 +4,7 @@ import toast from 'react-hot-toast';
 import { motion, AnimatePresence } from 'framer-motion';
 import ConfirmModal from '../../components/common/ConfirmModal';
 import OrderCard from '../../components/shared/OrderCard';
+import OrderInvoiceModal from '../../components/shared/OrderInvoiceModal';
 
 const FarmerOrders = () => {
   const [orders, setOrders] = useState([]);
@@ -12,6 +13,7 @@ const FarmerOrders = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [confirmModal, setConfirmModal] = useState({ isOpen: false, orderId: null, status: null, isLoading: false });
   const [otpModal, setOtpModal] = useState({ isOpen: false, orderId: null, otpValue: '', isLoading: false });
+  const [invoiceModal, setInvoiceModal] = useState({ isOpen: false, order: null });
 
   const otpInputRef = useRef(null);
 
@@ -366,6 +368,14 @@ const FarmerOrders = () => {
           </div>
         )}
       </AnimatePresence>
+      {/* Printable Invoice Modal */}
+
+      {/* Printable Invoice Modal */}
+      <OrderInvoiceModal
+        isOpen={invoiceModal.isOpen}
+        onClose={() => setInvoiceModal({ isOpen: false, order: null })}
+        order={invoiceModal.order}
+      />
     </div>
   );
 };
