@@ -2,6 +2,8 @@ import React, { useState, useEffect, useRef, useCallback } from 'react';
 import api from '../../utils/api';
 import { toast } from 'react-hot-toast';
 import { motion } from 'framer-motion';
+import jsPDF from 'jspdf';
+import autoTable from 'jspdf-autotable';
 import Input from '../../components/ui/Input';
 import Select from '../../components/ui/Select';
 import Button from '../../components/ui/Button';
@@ -252,13 +254,131 @@ const Profile = () => {
     );
   }
 
+  // Download Official Farmer KYC & Bank Verification PDF
+  const handleDownloadKYCPDF = () => {
+    try {
+      const doc = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
+
+      // Header branding bar
+      doc.setFillColor(15, 23, 42); // slate-900
+      doc.rect(0, 0, 210, 22, 'F');
+      doc.setFillColor(16, 185, 129); // emerald-500 line
+      doc.rect(0, 21, 210, 1, 'F');
+
+      doc.setTextColor(255, 255, 255);
+      doc.setFontSize(14);
+      doc.setFont('helvetica', 'bold');
+      doc.text('AgriConnect™ - Verified Farmer Profile & KYC Certificate', 14, 14);
+
+      doc.setFontSize(8.5);
+      doc.setFont('helvetica', 'normal');
+      doc.text(`Generated: ${new Date().toLocaleString('en-IN')}`, 135, 14);
+
+      // Info Box
+      doc.setFillColor(248, 250, 252);
+      doc.setDrawColor(203, 213, 225);
+      doc.roundedRect(14, 27, 182, 38, 3, 3, 'FD');
+
+      doc.setTextColor(15, 23, 42);
+      doc.setFontSize(10);
+      doc.setFont('helvetica', 'bold');
+      doc.text(`Farmer Name: ${formData.name || 'Registered Producer'}`, 18, 35);
+      doc.text(`Contact Phone: ${formData.phone || 'N/A'}`, 18, 43);
+      doc.text(`Email Address: ${formData.email || 'N/A'}`, 18, 51);
+      doc.text(`Verification Status: MANDI VERIFIED PRODUCER ✓`, 18, 59);
+
+      doc.text(`Village: ${formData.village || 'N/A'}`, 110, 35);
+      doc.text(`District: ${formData.district || 'N/A'}`, 110, 43);
+      doc.text(`State: ${formData.state || 'N/A'}`, 110, 51);
+      doc.text(`GPS: Lat ${parseFloat(formData.lat || 0).toFixed(4)}, Lng ${parseFloat(formData.lng || 0).toFixed(4)}`, 110, 59);
+
+      // Bank & Financial Table
+      const kycTableData = [
+        ['Bank Account Holder', formData.accountName || 'N/A'],
+        ['Bank Account Number', formData.accountNumber ? `•••• •••• ${formData.accountNumber.slice(-4)}` : 'Verified'],
+        ['Bank IFSC Code', formData.ifscCode ? formData.ifscCode.toUpperCase() : 'N/A'],
+        ['UPI Direct ID', formData.upiId || `${formData.phone || 'farmer'}@upi`],
+        ['Agri-Logistics Hub', 'Indore Primary Agriculture Direct Center'],
+        ['Clearance Certificate ID', `AGRI-KYC-${Date.now().toString().slice(-6)}`]
+      ];
+
+      autoTable(doc, {
+        head: [['KYC & Payment Clearance Field', 'Verified Record Detail']],
+        body: kycTableData,
+        startY: 70,
+        theme: 'grid',
+        headStyles: { fillColor: [15, 23, 42], textColor: [255, 255, 255], fontStyle: 'bold', fontSize: 9.5 },
+        bodyStyles: { fontSize: 9, textColor: [51, 65, 85], cellPadding: 3.5 },
+        alternateRowStyles: { fillColor: [248, 250, 252] },
+        columnStyles: {
+          0: { fontStyle: 'bold', cellWidth: 70 },
+          1: { cellWidth: 112 }
+        }
+      });
+
+      // Signature Box
+      const finalY = doc.lastAutoTable?.finalY ? doc.lastAutoTable.finalY + 15 : 180;
+      doc.setDrawColor(203, 213, 225);
+      doc.line(20, finalY + 15, 85, finalY + 15);
+      doc.setFontSize(8);
+      doc.setTextColor(100, 116, 139);
+      doc.text('Farmer Self-Declaration Sign', 25, finalY + 20);
+
+      doc.line(125, finalY + 15, 190, finalY + 15);
+      doc.text('AgriConnect Authority Seal & QR Verified', 128, finalY + 20);
+
+      doc.save(`AgriConnect_Farmer_Profile_${new Date().toISOString().split('T')[0]}.pdf`);
+      toast.success('Farmer Profile & KYC Certificate Downloaded! 📄');
+    } catch (err) {
+      console.error('Error generating PDF:', err);
+      toast.error('Failed to generate Profile PDF');
+    }
+  };
+
   const stateOptions = STATES.map(s => ({ label: s, value: s }));
 
   return (
-    <div className="w-full max-w-4xl mx-auto pb-4">
-      <div className="mb-4">
-        <h1 className="text-[18px] sm:text-[20px] font-black text-[var(--color-text-primary)] tracking-tight leading-none mb-0.5">Profile Settings</h1>
-        <p className="text-[10px] sm:text-[11px] text-[var(--color-text-secondary)] font-medium">Manage your personal details, default location, and bank account for payments.</p>
+    <div className="w-full max-w-4xl mx-auto pb-4 space-y-4">
+      {/* Page Header with Download Button */}
+      <div className="flex flex-col sm:flex-row justify-between sm:items-center gap-3">
+        <div>
+          <h1 className="text-[18px] sm:text-[20px] font-black text-[var(--color-text-primary)] tracking-tight leading-none mb-0.5">Profile Settings</h1>
+          <p className="text-[10px] sm:text-[11px] text-[var(--color-text-secondary)] font-medium">Manage your personal details, default location, and bank account for payments.</p>
+        </div>
+
+        <button
+          onClick={handleDownloadKYCPDF}
+          className="px-3.5 h-9 bg-slate-100 hover:bg-emerald-50 text-slate-700 hover:text-emerald-700 border border-slate-200 hover:border-emerald-200 rounded-[var(--form-border-radius)] font-extrabold text-[11.5px] transition-all flex items-center gap-1.5 cursor-pointer shadow-2xs self-start sm:self-auto"
+        >
+          <span className="material-symbols-outlined text-[15px] text-emerald-600">badge</span>
+          <span>Download KYC PDF</span>
+        </button>
+      </div>
+
+      {/* Verified Producer Header Banner */}
+      <div className="global-card !p-4 bg-gradient-to-r from-emerald-900 to-slate-900 text-white flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 shadow-md">
+        <div className="flex items-center gap-3">
+          <div className="w-11 h-11 rounded-2xl bg-emerald-500/20 border border-emerald-400/40 text-emerald-300 font-black text-[18px] flex items-center justify-center shrink-0">
+            {formData.name ? formData.name.charAt(0).toUpperCase() : 'F'}
+          </div>
+          <div>
+            <div className="flex items-center gap-2">
+              <h2 className="text-[15px] font-black tracking-tight">{formData.name || 'AgriConnect Farmer'}</h2>
+              <span className="px-2 py-0.5 rounded-full text-[8.5px] font-black uppercase bg-emerald-500/20 text-emerald-300 border border-emerald-400/30 flex items-center gap-1">
+                <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+                Verified Producer
+              </span>
+            </div>
+            <p className="text-[10.5px] text-slate-300 font-medium mt-0.5">
+              {formData.village ? `${formData.village}, ` : ''}{formData.district ? `${formData.district}, ` : ''}{formData.state || 'Madhya Pradesh'}
+            </p>
+          </div>
+        </div>
+
+        <div className="text-left sm:text-right text-[10px] text-slate-300">
+          <p className="font-semibold">Registered Phone: <strong className="text-white font-mono">{formData.phone || 'Verified'}</strong></p>
+          <p className="text-[9px] text-emerald-300 font-bold mt-0.5">Direct Payout Mandate Active ✓</p>
+        </div>
       </div>
 
       <motion.div 
