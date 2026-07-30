@@ -2,6 +2,8 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import api from '../../utils/api';
 import { toast } from 'react-hot-toast';
+import jsPDF from 'jspdf';
+import autoTable from 'jspdf-autotable';
 import ConfirmModal from '../../components/common/ConfirmModal';
 
 const BatchManagement = () => {
@@ -123,6 +125,199 @@ const BatchManagement = () => {
     toast.success('Driver tracking link copied to clipboard! 📋');
   };
 
+  // Download Comprehensive Delivery Batch Route Manifest PDF
+  const handleDownloadBatchPDF = (batch) => {
+    if (!batch) return;
+    try {
+      // Landscape A4 PDF for maximum width & clear detail presentation
+      const doc = new jsPDF({ orientation: 'landscape', unit: 'mm', format: 'a4' });
+
+      // Header branding bar (Dark Slate + Emerald Line)
+      doc.setFillColor(15, 23, 42); // slate-900
+      doc.rect(0, 0, 297, 22, 'F');
+      doc.setFillColor(16, 185, 129); // emerald-500 line
+      doc.rect(0, 21, 297, 1.5, 'F');
+
+      doc.setTextColor(255, 255, 255);
+      doc.setFontSize(14);
+      doc.setFont('helvetica', 'bold');
+      doc.text('AgriConnect™ - Official Multi-Order Delivery Batch & Fleet Manifest', 14, 14);
+
+      doc.setFontSize(8.5);
+      doc.setFont('helvetica', 'normal');
+      doc.text(`Generated: ${new Date().toLocaleString('en-IN')} | System Audit Copy`, 210, 14);
+
+      // Calculate Total Batch Quantity & Total Valuation
+      const totalBatchQty = (batch.orders || []).reduce((acc, o) => acc + (Number(o.requestedQuantity) || 0), 0);
+      const totalBatchValue = (batch.orders || []).reduce((acc, o) => acc + (Number(o.totalPrice) || (Number(o.requestedQuantity) * Number(o.pricePerUnit)) || 0), 0);
+
+      // Logistics & Batch Summary Info Box
+      doc.setFillColor(248, 250, 252);
+      doc.setDrawColor(203, 213, 225);
+      doc.roundedRect(12, 27, 273, 28, 3, 3, 'FD');
+
+      doc.setTextColor(15, 23, 42);
+      doc.setFontSize(9.5);
+      doc.setFont('helvetica', 'bold');
+
+      // Col 1: Batch Info
+      doc.text(`Batch Reference: #${batch._id.slice(-6).toUpperCase()}`, 16, 35);
+      doc.setFont('helvetica', 'normal');
+      doc.setFontSize(8);
+      doc.text(`Dispatch Status: ${batch.batchStatus}`, 16, 42);
+      doc.text(`Created Date: ${new Date(batch.createdAt || Date.now()).toLocaleDateString('en-IN')}`, 16, 49);
+
+      // Col 2: Route & Weight Metrics
+      doc.setFont('helvetica', 'bold');
+      doc.setFontSize(9.5);
+      doc.text(`Total Distance: ${batch.totalDistance || 0} km`, 82, 35);
+      doc.setFont('helvetica', 'normal');
+      doc.setFontSize(8);
+      doc.text(`Total Shipment Cargo: ${batch.orders?.length || 0} Orders`, 82, 42);
+      doc.text(`Total Weight Volume: ${totalBatchQty} Kg`, 82, 49);
+
+      // Col 3: Valuation Info
+      doc.setFont('helvetica', 'bold');
+      doc.setFontSize(9.5);
+      doc.text(`Total Valuation: Rs. ${totalBatchValue.toLocaleString('en-IN')}`, 148, 35);
+      doc.setFont('helvetica', 'normal');
+      doc.setFontSize(8);
+      doc.text(`Origin Warehouse: Indore Farm Warehouse`, 148, 42);
+      doc.text(`Hub Region: Indore District, M.P.`, 148, 49);
+
+      // Col 4: Fleet Carrier
+      const driverName = batch.driver?.name || 'Unassigned Fleet Carrier';
+      const vehicleInfo = batch.driver ? `${batch.driver.vehicleType} (${batch.driver.vehicleNumber || 'Reg Pending'})` : 'N/A';
+      const driverPhone = batch.driver?.phone || batch.driver?.mobile || 'N/A';
+
+      doc.setFont('helvetica', 'bold');
+      doc.setFontSize(9.5);
+      doc.text(`Assigned Carrier: ${driverName}`, 212, 35);
+      doc.setFont('helvetica', 'normal');
+      doc.setFontSize(8);
+      doc.text(`Vehicle: ${vehicleInfo}`, 212, 42);
+      doc.text(`Carrier Contact: ${driverPhone}`, 212, 49);
+
+      // ── Detailed Route & Order Cargo Table ──
+      const tableColumn = [
+        'Seq #',
+        'Order ID',
+        'Crop Produce Item',
+        'Category & Grade',
+        'Recipient Vendor / Buyer',
+        'Delivery Location Address',
+        'Quantity',
+        'Unit Rate & Total',
+        'Delivery Status'
+      ];
+
+      // Stop 1: Pickup Warehouse
+      const tableRows = [
+        [
+          'Stop #1',
+          'PICKUP-WH',
+          'BULK PRODUCE CARGO (PICKUP)',
+          'All Categories',
+          'Indore Farm Warehouse',
+          'Main AgriHub Central Warehouse, Indore',
+          `${totalBatchQty} Kg`,
+          `Valuation:\nRs. ${totalBatchValue.toLocaleString('en-IN')}`,
+          'Picked Up ✓'
+        ]
+      ];
+
+      // Add each delivery order stop with 100% full details
+      (batch.orders || []).forEach((o, index) => {
+        const orderId = o._id ? `#${o._id.slice(-6).toUpperCase()}` : `#ORD-${index + 1}`;
+        const cropName = o.crop?.name || o.cropName || 'Produce Cargo';
+        const variety = o.crop?.variety ? ` (${o.crop.variety})` : '';
+        const category = o.crop?.category || 'Vegetables';
+        const grade = o.crop?.grade || 'Grade A';
+        const vendorName = o.vendor?.name || o.buyerName || `Vendor ${index + 1}`;
+        const vendorPhone = o.vendor?.phone || o.vendorPhone || '9876543210';
+        const address = o.deliveryAddress?.addressLine || o.vendorAddress || o.shippingAddress || `A.B. Road, Stop ${index + 1}, Indore`;
+        const qty = `${o.requestedQuantity || o.quantity || 0} ${o.crop?.unit || 'Kg'}`;
+        const rate = o.pricePerUnit || (o.totalPrice && o.requestedQuantity ? (o.totalPrice / o.requestedQuantity).toFixed(0) : 40);
+        const price = o.totalPrice ? `Rs. ${Number(o.totalPrice).toLocaleString('en-IN')}` : `Rs. ${(Number(o.requestedQuantity || 0) * Number(rate)).toLocaleString('en-IN')}`;
+        const status = o.deliveryStatus || batch.batchStatus || 'Out For Delivery';
+
+        tableRows.push([
+          `Stop #${index + 2}`,
+          orderId,
+          `${cropName}${variety}`,
+          `${category}\n(${grade})`,
+          `${vendorName}\nMob: ${vendorPhone}`,
+          address,
+          qty,
+          `@ Rs. ${rate}/${o.crop?.unit || 'Kg'}\n${price}`,
+          status
+        ]);
+      });
+
+      autoTable(doc, {
+        head: [tableColumn],
+        body: tableRows,
+        startY: 58,
+        margin: { left: 12, right: 12 },
+        theme: 'grid',
+        headStyles: { fillColor: [15, 23, 42], textColor: [255, 255, 255], fontStyle: 'bold', fontSize: 8 },
+        bodyStyles: { fontSize: 7.5, textColor: [51, 65, 85], cellPadding: 2.5 },
+        alternateRowStyles: { fillColor: [248, 250, 252] },
+        columnStyles: {
+          0: { fontStyle: 'bold', cellWidth: 16 },
+          1: { fontStyle: 'bold', cellWidth: 20 },
+          2: { fontStyle: 'bold', cellWidth: 40 },
+          3: { cellWidth: 26 },
+          4: { cellWidth: 45 },
+          5: { cellWidth: 50 },
+          6: { fontStyle: 'bold', cellWidth: 18 },
+          7: { fontStyle: 'bold', cellWidth: 30 },
+          8: { fontStyle: 'bold', cellWidth: 28 }
+        }
+      });
+
+      // Signature & Stamp Verification Box
+      const finalY = doc.lastAutoTable?.finalY ? doc.lastAutoTable.finalY + 12 : 160;
+      if (finalY < 185) {
+        doc.setDrawColor(226, 232, 240);
+        doc.setLineWidth(0.3);
+
+        // Sign Box 1: Dispatch Officer
+        doc.line(20, finalY + 12, 80, finalY + 12);
+        doc.setFontSize(8);
+        doc.setTextColor(100, 116, 139);
+        doc.text('Dispatch Officer / Farmer Sign', 25, finalY + 16);
+
+        // Sign Box 2: Driver Acknowledgement
+        doc.line(115, finalY + 12, 185, finalY + 12);
+        doc.text('Fleet Driver Pickup Sign', 125, finalY + 16);
+
+        // Sign Box 3: Verification Stamp
+        doc.line(215, finalY + 12, 275, finalY + 12);
+        doc.text('Security / Gate Clearance Stamp', 220, finalY + 16);
+      }
+
+      // Footer
+      const pageCount = doc.internal.getNumberOfPages();
+      for (let i = 1; i <= pageCount; i++) {
+        doc.setPage(i);
+        doc.setFontSize(8);
+        doc.setTextColor(148, 163, 184);
+        doc.text(`AgriConnect Logistics Fleet • Batch Manifest #${batch._id.slice(-6).toUpperCase()} • Page ${i} of ${pageCount}`, 14, 202);
+      }
+
+      doc.save(`AgriConnect_Batch_Manifest_${batch._id.slice(-6).toUpperCase()}.pdf`);
+      toast.success('Comprehensive Batch Manifest PDF Downloaded! 📄');
+    } catch (err) {
+      console.error('Error generating PDF:', err);
+      toast.error('Failed to generate Batch Manifest PDF');
+    }
+  };
+
+  // Metrics calculation
+  const activeDispatchesCount = batches.filter(b => b.batchStatus === 'Out For Delivery').length;
+  const assignedCarriersCount = batches.filter(b => b.driver).length;
+
   return (
     <>
     <div className="space-y-6 pb-12">
@@ -165,6 +360,49 @@ const BatchManagement = () => {
         </div>
       </div>
 
+      {/* ── Batch Metrics Overview Bar ── */}
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+        <div className="global-card !p-3 flex items-center gap-3">
+          <div className="w-8.5 h-8.5 rounded-xl bg-primary-50 text-primary-600 flex items-center justify-center shrink-0">
+            <span className="material-symbols-outlined text-[18px]">hub</span>
+          </div>
+          <div>
+            <p className="text-[9.5px] font-bold text-slate-400 uppercase tracking-wider">Total Batches</p>
+            <p className="text-[15px] font-black text-slate-900 leading-none mt-0.5">{batches.length}</p>
+          </div>
+        </div>
+
+        <div className="global-card !p-3 flex items-center gap-3">
+          <div className="w-8.5 h-8.5 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center shrink-0">
+            <span className="material-symbols-outlined text-[18px]">local_shipping</span>
+          </div>
+          <div>
+            <p className="text-[9.5px] font-bold text-slate-400 uppercase tracking-wider">Active Dispatches</p>
+            <p className="text-[15px] font-black text-emerald-700 leading-none mt-0.5">{activeDispatchesCount} Batches</p>
+          </div>
+        </div>
+
+        <div className="global-card !p-3 flex items-center gap-3">
+          <div className="w-8.5 h-8.5 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center shrink-0">
+            <span className="material-symbols-outlined text-[18px]">badge</span>
+          </div>
+          <div>
+            <p className="text-[9.5px] font-bold text-slate-400 uppercase tracking-wider">Carriers Assigned</p>
+            <p className="text-[15px] font-black text-indigo-700 leading-none mt-0.5">{assignedCarriersCount} Drivers</p>
+          </div>
+        </div>
+
+        <div className="global-card !p-3 flex items-center gap-3">
+          <div className="w-8.5 h-8.5 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center shrink-0">
+            <span className="material-symbols-outlined text-[18px]">pending</span>
+          </div>
+          <div>
+            <p className="text-[9.5px] font-bold text-slate-400 uppercase tracking-wider">Unbatched Orders</p>
+            <p className="text-[15px] font-black text-amber-700 leading-none mt-0.5">{unbatchedOrders.length} Orders</p>
+          </div>
+        </div>
+      </div>
+
       {isLoading ? (
         <div className="flex justify-center py-20">
           <div className="w-8 h-8 rounded-full border-3 border-primary-100 border-t-primary-600 animate-spin" />
@@ -198,13 +436,13 @@ const BatchManagement = () => {
                         isCompleted ? 'opacity-85 border-slate-200/80 bg-slate-50/40 shadow-none hover:shadow-none hover:translate-y-0' : ''
                       }`}
                     >
-                      {/* Top Header line */}
-                      <div className="flex items-center justify-between gap-2 border-b border-slate-100 pb-2.5 mb-3">
-                        <div className="flex items-center gap-2">
-                          <span className="font-mono text-[9.5px] font-black bg-slate-100 px-2 py-0.5 rounded text-slate-600 border border-slate-200">
+                      {/* ── 1. Batch Header Row ── */}
+                      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-slate-100 pb-3 mb-3">
+                        <div className="flex items-center gap-2 flex-wrap">
+                          <span className="font-mono text-[10px] font-black bg-slate-100 px-2.5 py-1 rounded-md text-slate-700 border border-slate-200">
                             BATCH #{batch._id.slice(-6).toUpperCase()}
                           </span>
-                          <span className={`text-[8.5px] font-black uppercase px-2 py-0.5 rounded-full border ${
+                          <span className={`text-[9px] font-black uppercase px-2.5 py-0.5 rounded-full border ${
                             batch.batchStatus === 'Completed'
                               ? 'bg-emerald-50 border-emerald-200 text-emerald-700'
                               : batch.batchStatus === 'Out For Delivery'
@@ -215,150 +453,161 @@ const BatchManagement = () => {
                           }`}>
                             {batch.batchStatus}
                           </span>
+                          <span className="text-[11px] font-bold text-slate-400">
+                            • {batch.orders.length} Deliveries ({batch.totalDistance} km)
+                          </span>
                         </div>
-                        <div className="text-right flex items-baseline gap-1">
-                          <span className="text-[9px] font-bold text-slate-400 uppercase">Distance:</span>
-                          <span className="text-[12px] font-black text-slate-800">{batch.totalDistance} km</span>
+
+                        {/* Top Action Buttons */}
+                        <div className="flex items-center gap-1.5 self-end sm:self-center">
+                          <button
+                            onClick={() => handleDownloadBatchPDF(batch)}
+                            title="Download Batch Route Manifest PDF"
+                            className="px-2.5 py-1 bg-slate-100 hover:bg-emerald-50 text-slate-700 hover:text-emerald-700 border border-slate-200 hover:border-emerald-200 rounded-lg text-[10px] font-extrabold transition-all flex items-center gap-1 cursor-pointer"
+                          >
+                            <span className="material-symbols-outlined text-[13px] text-emerald-600">picture_as_pdf</span>
+                            <span>Manifest PDF</span>
+                          </button>
+
+                          <button
+                            onClick={() => navigate(`/farmer-dashboard/batches/${batch._id}/load-plan`)}
+                            className="px-2.5 py-1 bg-white hover:bg-slate-50 text-slate-700 border border-slate-200 rounded-lg text-[10px] font-extrabold transition-all flex items-center gap-1 cursor-pointer shadow-2xs"
+                          >
+                            <span className="material-symbols-outlined text-[13px] text-slate-500">view_in_ar</span>
+                            <span>3D Load Plan</span>
+                          </button>
+
+                          {canDispatch && (
+                            <button
+                              onClick={() => setDispatchConfirm({ open: true, batchId: batch._id, isLoading: false })}
+                              className="px-3 py-1 bg-primary-600 hover:bg-primary-700 text-white font-black text-[10px] rounded-lg cursor-pointer transition-all flex items-center gap-1 shadow-xs active:scale-95"
+                            >
+                              <span className="material-symbols-outlined text-[13px]">local_shipping</span>
+                              <span>Dispatch</span>
+                            </button>
+                          )}
                         </div>
                       </div>
 
-                      {/* Orders summary */}
-                      <div className="space-y-1.5 mb-3">
-                        <span className="text-[9px] font-black uppercase tracking-wider text-slate-400">Cargo & Destinations ({batch.orders.length})</span>
-                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-1.5">
-                          {batch.orders.map((o) => (
-                            <div key={o._id} className="p-2 bg-slate-50 hover:bg-slate-100/50 border border-slate-200/40 rounded-xl flex items-center justify-between gap-2 transition-colors">
-                              <div className="min-w-0">
-                                <h5 className="font-extrabold text-[11px] text-slate-800 truncate leading-none mb-1">
-                                  {o.crop?.name || 'Deleted Crop'}
-                                </h5>
-                                <p className="text-[8.5px] text-slate-400 font-bold truncate leading-none">
-                                  Deliver to: <strong className="text-slate-600">{o.vendor?.name || 'Store'}</strong>
+                      {/* ── 2. Assigned Carrier Bar ── */}
+                      <div className="bg-slate-50 border border-slate-200/70 p-2.5 rounded-xl mb-3.5 flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                        <div className="flex items-center gap-2.5">
+                          <div className="w-8 h-8 rounded-lg bg-indigo-50 text-indigo-600 flex items-center justify-center shrink-0">
+                            <span className="material-symbols-outlined text-[18px]">badge</span>
+                          </div>
+                          <div>
+                            {driverAssigned ? (
+                              <>
+                                <p className="text-[11.5px] font-black text-slate-900 leading-tight">
+                                  {batch.driver?.name} <span className="text-slate-400 font-bold text-[10px]">({batch.driver?.vehicleNumber})</span>
                                 </p>
+                                <p className="text-[9.5px] text-slate-500 font-semibold">
+                                  Assigned Carrier • {batch.driver?.vehicleType}
+                                </p>
+                              </>
+                            ) : (
+                              <p className="text-[11px] font-extrabold text-amber-700">
+                                Carrier Unassigned — Select driver to dispatch
+                              </p>
+                            )}
+                          </div>
+                        </div>
+
+                        {driverAssigned ? (
+                          <button
+                            onClick={() => handleCopyLink(batch.driver)}
+                            className="px-2.5 py-1 bg-white hover:bg-slate-100 text-slate-700 border border-slate-200 rounded-lg text-[10px] font-bold cursor-pointer transition-all flex items-center gap-1 shrink-0 self-start sm:self-center"
+                          >
+                            <span className="material-symbols-outlined text-[12px] text-slate-500">content_copy</span>
+                            <span>Share Tracking Link</span>
+                          </button>
+                        ) : (
+                          <div className="flex items-center gap-1.5 self-start sm:self-center">
+                            <select
+                              onChange={(e) => setSelectedDriverMap(prev => ({ ...prev, [batch._id]: e.target.value }))}
+                              value={selectedDriverMap[batch._id] || ''}
+                              className="px-2 py-1 bg-white border border-slate-200 rounded-lg text-[10px] font-bold text-slate-700 focus:outline-none focus:ring-1 focus:ring-primary-500"
+                            >
+                              <option value="">Select Carrier...</option>
+                              {drivers
+                                .filter(d => d.status === 'Available' || d.status === 'Idle')
+                                .map(d => (
+                                  <option key={d._id} value={d._id}>
+                                    {d.name} ({d.vehicleType === 'Bike' ? '🛵 Bike (Max 5)' : '🚛 Truck (Max 20)'})
+                                  </option>
+                                ))}
+                            </select>
+                            <button
+                              onClick={() => handleAssignDriver(batch._id)}
+                              className="px-3 py-1 bg-primary-600 hover:bg-primary-700 text-white font-black text-[10px] rounded-lg cursor-pointer active:scale-95 transition-all"
+                            >
+                              Assign
+                            </button>
+                          </div>
+                        )}
+                      </div>
+
+                      {/* ── 3. Step-by-Step Delivery Route & Cargo Timeline ── */}
+                      <div className="space-y-2">
+                        <span className="text-[9.5px] font-black uppercase tracking-wider text-slate-400 flex items-center gap-1">
+                          <span className="material-symbols-outlined text-[13px] text-primary-600">alt_route</span>
+                          Step-by-Step Delivery Route ({batch.orders.length} Stops)
+                        </span>
+
+                        <div className="relative space-y-2.5 py-1">
+                          {/* Explicit Sub-Pixel Centered Vertical Route Line */}
+                          <div className="absolute left-[11px] top-3.5 bottom-3.5 w-[2px] bg-slate-200 z-0" />
+                          
+                          {/* Warehouse Pickup Stop */}
+                          <div className="relative flex items-start gap-2.5 pl-7">
+                            <div className="absolute left-[11px] -translate-x-1/2 top-1.5 w-5 h-5 rounded-full bg-emerald-600 text-white flex items-center justify-center text-[10px] font-black ring-4 ring-white z-10 shadow-2xs">
+                              ✓
+                            </div>
+                            <div className="bg-emerald-50/70 border border-emerald-200/80 rounded-xl p-2 px-3 flex-1 flex flex-col sm:flex-row sm:items-center justify-between gap-1">
+                              <div>
+                                <span className="text-[9px] font-black text-emerald-700 uppercase tracking-wider bg-emerald-100/80 px-1.5 py-0.2 rounded mr-1.5">
+                                  Stop #1 • Pickup Warehouse
+                                </span>
+                                <span className="text-[11.5px] font-black text-slate-800">Indore Farm Warehouse</span>
                               </div>
-                              <span className="text-[9.5px] font-extrabold bg-white px-1.5 py-0.5 rounded border border-slate-200 text-slate-600 shrink-0">
-                                {o.requestedQuantity} {o.crop?.unit}
+                              <span className="text-[10px] font-extrabold text-emerald-800">
+                                Picked up {batch.orders.length} Produce Orders
                               </span>
                             </div>
+                          </div>
+
+                          {/* Delivery Stops for Each Order */}
+                          {batch.orders.map((orderItem, idx) => (
+                            <div key={orderItem._id || idx} className="relative flex items-start gap-2.5 pl-7">
+                              <div className="absolute left-[11px] -translate-x-1/2 top-2 w-5 h-5 rounded-full bg-primary-600 text-white flex items-center justify-center text-[10px] font-black ring-4 ring-white z-10 shadow-2xs">
+                                {idx + 2}
+                              </div>
+                              <div className="bg-white border border-slate-200/80 rounded-xl p-2.5 px-3 flex-1 flex flex-col sm:flex-row sm:items-center justify-between gap-2 shadow-2xs">
+                                <div className="min-w-0">
+                                  <div className="flex items-center gap-2">
+                                    <span className="text-[9.5px] font-extrabold text-slate-400 uppercase">
+                                      Stop #{idx + 2} • Delivery
+                                    </span>
+                                    <h5 className="text-[12px] font-black text-slate-900 truncate">
+                                      {orderItem.crop?.name || 'Produce Item'}
+                                    </h5>
+                                  </div>
+                                  <p className="text-[10.5px] font-semibold text-slate-500 mt-0.5">
+                                    Deliver to: <strong className="text-slate-800 font-bold">{orderItem.vendor?.name || 'Vendor Store'}</strong>
+                                  </p>
+                                </div>
+
+                                <div className="flex items-center gap-2 shrink-0">
+                                  <span className="text-[10px] font-black text-primary-700 bg-primary-50 px-2 py-0.5 rounded border border-primary-100">
+                                    {orderItem.requestedQuantity} {orderItem.crop?.unit || 'Kg'}
+                                  </span>
+                                </div>
+                              </div>
+                            </div>
                           ))}
+
                         </div>
                       </div>
-
-                      {/* Sequence stops timeline */}
-                      <div className="bg-slate-50/50 border border-slate-100 p-2.5 rounded-xl mb-3.5 space-y-1.5">
-                        <span className="text-[9px] font-black uppercase tracking-wider text-slate-400 flex items-center gap-0.5">
-                          <span className="material-symbols-outlined text-[11px] text-primary-600 font-bold">route</span>
-                          Optimized Delivery Route Map
-                        </span>
-                        <div className="flex flex-wrap items-center gap-x-1.5 gap-y-1.5 pt-0.5">
-                          {(() => {
-                            const route = batch.optimizedRoute || [];
-                            if (route.length === 0) {
-                              return (
-                                <span className="text-[10px] text-slate-400 italic font-medium">
-                                  Route data unavailable
-                                </span>
-                              );
-                            }
-                            const groupedStops = [];
-                            route.forEach(stop => {
-                              const last = groupedStops[groupedStops.length - 1];
-                              if (last && last.stopType === stop.stopType && last.address === stop.address) {
-                                  last.count++;
-                              } else {
-                                  groupedStops.push({ ...stop, count: 1 });
-                              }
-                            });
-                            return groupedStops.map((stop, index) => (
-                              <React.Fragment key={index}>
-                                {index > 0 && <span className="material-symbols-outlined text-[10px] text-slate-300">chevron_right</span>}
-                                <div className={`flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[9px] font-black border transition-all ${
-                                  stop.stopType === 'pickup'
-                                    ? 'bg-primary-50 border-primary-200 text-primary-700'
-                                    : 'bg-info-50 border-info-200 text-info-750'
-                                }`}>
-                                  <span className="material-symbols-outlined text-[10px]">
-                                    {stop.stopType === 'pickup' ? 'local_mall' : 'storefront'}
-                                  </span>
-                                  <span>
-                                    {stop.address.split("'s")[0]} 
-                                    {stop.count > 1 && <span className="ml-1 font-extrabold text-[8px] bg-white/60 px-1 rounded">x{stop.count}</span>}
-                                  </span>
-                                </div>
-                              </React.Fragment>
-                            ));
-                          })()}
-                        </div>
-                      </div>
-
-                      {!isCompleted && (
-                        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-t border-slate-100 pt-3">
-                          <div className="flex items-center gap-2">
-                            <span className="material-symbols-outlined text-[16px] text-slate-400">person_pin</span>
-                            {driverAssigned ? (
-                              <div className="flex items-center gap-2">
-                                <div>
-                                  <p className="text-[11px] font-black text-slate-800 leading-none">
-                                    {batch.driver?.name} ({batch.driver?.vehicleNumber})
-                                  </p>
-                                  <p className="text-[9px] text-slate-400 font-bold mt-0.5">
-                                    Assigned Carrier · {batch.driver?.vehicleType}
-                                  </p>
-                                </div>
-                                <button
-                                  onClick={() => handleCopyLink(batch.driver)}
-                                  className="px-2 py-1 bg-primary-50 hover:bg-primary-100 text-primary-700 border border-primary-200 rounded-lg text-[9px] font-black cursor-pointer active:scale-95 transition-all flex items-center gap-0.5"
-                                  title="Copy Driver Tracking Link"
-                                >
-                                  <span className="material-symbols-outlined text-[11px]">content_copy</span>
-                                  <span>Copy Link</span>
-                                </button>
-                              </div>
-                            ) : (
-                              <div className="flex items-center gap-1.5">
-                                <select
-                                  onChange={(e) => setSelectedDriverMap(prev => ({ ...prev, [batch._id]: e.target.value }))}
-                                  value={selectedDriverMap[batch._id] || ''}
-                                  className="px-2 py-1.5 bg-white border border-slate-200 rounded-lg text-[10px] font-bold text-slate-700 focus:outline-none focus:ring-1 focus:ring-primary-500 focus:border-primary-500"
-                                >
-                                  <option value="">Select Carrier...</option>
-                                  {drivers
-                                    .filter(d => d.status === 'Available' || d.status === 'Idle')
-                                    .map(d => (
-                                      <option key={d._id} value={d._id}>
-                                        {d.name} ({d.vehicleType === 'Bike' ? '🛵 Bike (Max 5)' : '🚛 Truck (Max 20)'})
-                                      </option>
-                                    ))}
-                                </select>
-                                <button
-                                  onClick={() => handleAssignDriver(batch._id)}
-                                  className="px-3 py-1 bg-primary-600 hover:bg-primary-700 text-white font-black text-[10px] rounded-lg border-0 cursor-pointer active:scale-95 transition-all"
-                                >
-                                  Assign
-                                </button>
-                              </div>
-                            )}
-                          </div>
-                          <div className="flex items-center gap-2 self-end sm:self-center">
-                            <button
-                              onClick={() => navigate(`/farmer-dashboard/batches/${batch._id}/load-plan`)}
-                              className="px-3 py-1.5 bg-white hover:bg-slate-50 text-slate-700 border border-slate-200 rounded-xl text-[10px] font-black cursor-pointer active:scale-95 transition-all flex items-center gap-1.5 shadow-xs"
-                            >
-                              <span className="material-symbols-outlined text-[14px]">view_in_ar</span>
-                              <span>Plan Load 🚛</span>
-                            </button>
-                            {canDispatch && (
-                              <button
-                                onClick={() => setDispatchConfirm({ open: true, batchId: batch._id, isLoading: false })}
-                                className="px-4 py-1.5 bg-primary-600 hover:bg-primary-700 text-white font-black text-[10px] rounded-xl cursor-pointer border-0 active:scale-95 transition-all flex items-center gap-1 shadow-sm"
-                              >
-                                <span className="material-symbols-outlined text-[14px]">local_shipping</span>
-                                <span>Dispatch Batch ➔</span>
-                              </button>
-                            )}
-                          </div>
-                        </div>
-                      )}
                     </div>
                   );
                 })}

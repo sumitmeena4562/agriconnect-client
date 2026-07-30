@@ -8,6 +8,8 @@ import LoadSequenceSidebar, { getCropType } from '../../components/farmer/load-p
 import AnalyticsSummary from '../../components/farmer/load-planner/AnalyticsSummary';
 import { ArrowLeft, RefreshCw, Wifi, FileText, AlertTriangle } from 'lucide-react';
 import { toast } from 'react-hot-toast';
+import jsPDF from 'jspdf';
+import autoTable from 'jspdf-autotable';
 
 const getPhysicalBlocks = (stops, activeTemplate, activeOrders) => {
   const cols = activeTemplate.cols || 3;
@@ -86,66 +88,91 @@ const LoadPlanning = () => {
       return;
     }
 
-    const printWindow = window.open('', '_blank');
-    printWindow.document.write(`
-      <html>
-        <head>
-          <title>AgriConnect - Loading Manifest</title>
-          <style>
-            body { font-family: system-ui, -apple-system, sans-serif; padding: 40px; color: #1e293b; line-height: 1.5; }
-            h1 { font-size: 22px; font-weight: 900; border-bottom: 2px solid #e2e8f0; padding-bottom: 12px; margin-bottom: 24px; color: #0f172a; }
-            .meta { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 30px; background: #f8fafc; padding: 20px; border-radius: 12px; border: 1px solid #e2e8f0; font-size: 13px; }
-            .meta div { margin-bottom: 4px; }
-            table { width: 100%; border-collapse: collapse; margin-top: 20px; }
-            th, td { border: 1px solid #e2e8f0; padding: 12px; text-align: left; font-size: 13px; }
-            th { background: #f1f5f9; font-weight: 800; color: #334155; }
-            .step { font-weight: 800; color: #4f46e5; }
-            .sign { margin-top: 60px; display: grid; grid-template-columns: 1fr 1fr; gap: 60px; }
-            .sign-box { border-top: 1px solid #cbd5e1; padding-top: 12px; text-align: center; font-size: 12px; font-weight: bold; color: #64748b; }
-          </style>
-        </head>
-        <body>
-          <h1>📦 Loading Manifest & Dispatch Checklist</h1>
-          <div class="meta">
-            <div><strong>Batch ID:</strong> #${batch._id.toUpperCase()}</div>
-            <div><strong>Driver Name:</strong> ${batch.driver?.name || 'Unassigned'}</div>
-            <div><strong>Vehicle Profile:</strong> ${activeTemplate.name}</div>
-            <div><strong>Consolidation Route Distance:</strong> ${batch.totalDistance} km</div>
-          </div>
-          <table>
-            <thead>
-              <tr>
-                <th>Load Order</th>
-                <th>Placement Slot</th>
-                <th>Crop Type</th>
-                <th>Weight Quantity</th>
-                <th>Delivery Address</th>
-              </tr>
-            </thead>
-            <tbody>
-              ${deliveryStops.map((stop, idx) => {
-                const order = activeOrders.find(o => String(o._id) === String(stop.orderId));
-                return `
-                  <tr>
-                    <td class="step">Step ${idx + 1}</td>
-                    <td>Slot #${stop.loadingSequence}</td>
-                    <td><strong>${order?.crop?.name}</strong> (${getCropType(order?.crop?.name).label})</td>
-                    <td>${order?.requestedQuantity} ${order?.crop?.unit}</td>
-                    <td>${order?.vendor?.name} - ${stop.address}</td>
-                  </tr>
-                `;
-              }).join('')}
-            </tbody>
-          </table>
-          <div class="sign">
-            <div class="sign-box">Warehouse Dispatcher Signature</div>
-            <div class="sign-box">Driver Acknowledgment Signature</div>
-          </div>
-          <script>window.print();</script>
-        </body>
-      </html>
-    `);
-    printWindow.document.close();
+    try {
+      const doc = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
+
+      // Header branding bar
+      doc.setFillColor(15, 23, 42);
+      doc.rect(0, 0, 210, 20, 'F');
+      doc.setFillColor(16, 185, 129);
+      doc.rect(0, 19, 210, 1, 'F');
+
+      doc.setTextColor(255, 255, 255);
+      doc.setFontSize(13);
+      doc.setFont('helvetica', 'bold');
+      doc.text('AgriConnect™ - 3D Cargo Loading & Placement Manifest', 14, 13);
+
+      doc.setFontSize(8.5);
+      doc.setFont('helvetica', 'normal');
+      doc.text(`Generated: ${new Date().toLocaleString('en-IN')}`, 140, 13);
+
+      // Meta Box
+      doc.setFillColor(248, 250, 252);
+      doc.setDrawColor(203, 213, 225);
+      doc.roundedRect(14, 25, 182, 22, 2, 2, 'FD');
+
+      doc.setTextColor(15, 23, 42);
+      doc.setFontSize(9.5);
+      doc.setFont('helvetica', 'bold');
+      doc.text(`Batch ID: #${batch._id?.toUpperCase() || 'N/A'}`, 18, 32);
+      doc.text(`Vehicle Profile: ${activeTemplate?.name || 'Standard Truck'}`, 18, 41);
+
+      doc.text(`Carrier Driver: ${batch.driver?.name || 'Unassigned'}`, 105, 32);
+      doc.text(`Route Distance: ${batch.totalDistance || 0} km`, 105, 41);
+
+      // Loading Table
+      const tableColumn = ['Load Order', 'Slot #', 'Crop Produce Item', 'Qty Weight', 'Recipient & Address'];
+      const tableRows = deliveryStops.map((stop, idx) => {
+        const order = activeOrders.find(o => String(o._id) === String(stop.orderId));
+        const cropLabel = order?.crop?.name ? `${order.crop.name} (${getCropType(order.crop.name).label})` : 'Produce Cargo';
+        const qty = order?.requestedQuantity ? `${order.requestedQuantity} ${order.crop?.unit || 'Kg'}` : '-';
+        const address = `${order?.vendor?.name || 'Vendor Store'} - ${stop.address || 'Address'}`;
+
+        return [
+          `Step #${idx + 1}`,
+          `Slot #${stop.loadingSequence}`,
+          cropLabel,
+          qty,
+          address
+        ];
+      });
+
+      autoTable(doc, {
+        head: [tableColumn],
+        body: tableRows,
+        startY: 52,
+        theme: 'grid',
+        headStyles: { fillColor: [15, 23, 42], textColor: [255, 255, 255], fontStyle: 'bold', fontSize: 8.5 },
+        bodyStyles: { fontSize: 8, textColor: [51, 65, 85], cellPadding: 3 },
+        alternateRowStyles: { fillColor: [248, 250, 252] },
+        columnStyles: {
+          0: { fontStyle: 'bold', cellWidth: 22 },
+          1: { fontStyle: 'bold', cellWidth: 20 },
+          2: { fontStyle: 'bold', cellWidth: 48 },
+          3: { fontStyle: 'bold', cellWidth: 25 },
+          4: { cellWidth: 67 }
+        }
+      });
+
+      // Signature Box
+      const finalY = doc.lastAutoTable?.finalY ? doc.lastAutoTable.finalY + 15 : 180;
+      if (finalY < 260) {
+        doc.setDrawColor(203, 213, 225);
+        doc.line(20, finalY + 12, 85, finalY + 12);
+        doc.setFontSize(8);
+        doc.setTextColor(100, 116, 139);
+        doc.text('Warehouse Dispatcher Signature', 25, finalY + 16);
+
+        doc.line(125, finalY + 12, 190, finalY + 12);
+        doc.text('Driver Acknowledgment Signature', 130, finalY + 16);
+      }
+
+      doc.save(`AgriConnect_Load_Plan_#${batch._id?.slice(-6).toUpperCase() || 'MANIFEST'}.pdf`);
+      toast.success('3D Loading Manifest PDF Downloaded! 📄');
+    } catch (err) {
+      console.error('Error generating PDF:', err);
+      toast.error('Failed to generate Loading Manifest PDF');
+    }
   };
 
   useEffect(() => {
