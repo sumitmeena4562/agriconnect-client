@@ -188,26 +188,34 @@ const OrderCard = ({ order, role = 'farmer', onUpdateStatus, onCancelOrder, onSu
             )}
             
             <div className="min-w-0 flex-1">
-              <div className="flex justify-between items-start gap-1.5 min-w-0">
-                <h3 className="text-[13.5px] font-bold text-[var(--color-text-primary)] leading-tight truncate flex items-center gap-1.5">
-                  <span className="truncate">{order.crop?.name || 'Deleted Crop'}</span>
+              {/* Row 1: Crop Name & Status Badge */}
+              <div className="flex justify-between items-start gap-2 min-w-0">
+                <div className="min-w-0 flex-1">
+                  <h3 className="text-[14px] font-black text-slate-900 leading-tight truncate">
+                    {order.crop?.name || 'Produce Item'}
+                  </h3>
                   {order.crop?.variety && (
-                    <span className="text-[10px] font-semibold text-slate-400 shrink-0">
+                    <p className="text-[10.5px] font-bold text-slate-400 leading-none mt-0.5 truncate">
                       ({order.crop.variety})
-                    </span>
+                    </p>
                   )}
-                </h3>
-                <span className={`px-1.5 py-0.5 rounded text-[8.5px] font-bold uppercase tracking-wider shrink-0 ${getStatusBadgeClass(order.status)}`}>
+                </div>
+                <span className={`px-2 py-0.5 rounded-full text-[9px] font-black uppercase tracking-wider shrink-0 ${getStatusBadgeClass(order.status)}`}>
                   {order.status}
                 </span>
               </div>
-              <div className="text-[9.5px] text-[var(--color-text-secondary)] font-semibold uppercase tracking-wider mt-0.5 flex items-center gap-1.5 min-w-0">
-                <span className="truncate">{order.crop?.category}</span>
-                <span className="text-slate-400 bg-slate-100 px-1 py-0.2 rounded border border-slate-200/50 text-[8.5px] select-all font-bold shrink-0">
+
+              {/* Row 2: Category • Order ID • Date */}
+              <div className="text-[10px] text-slate-500 font-semibold mt-1.5 flex items-center gap-1.5 min-w-0">
+                <span className="bg-slate-100 text-slate-700 px-1.5 py-0.2 rounded border border-slate-200/60 font-extrabold uppercase text-[8.5px] shrink-0">
+                  {order.crop?.category || 'Crop'}
+                </span>
+                <span className="text-slate-400 font-extrabold text-[9px] select-all shrink-0">
                   #{order._id?.slice(-6).toUpperCase()}
                 </span>
-                <span className="text-slate-400 normal-case font-medium ml-auto text-[8.5px] shrink-0">
-                  {new Date(order.createdAt).toLocaleDateString()}
+                <span className="text-slate-300 shrink-0">•</span>
+                <span className="text-slate-400 text-[9.5px] truncate">
+                  {new Date(order.createdAt).toLocaleDateString('en-IN')}
                 </span>
               </div>
             </div>
@@ -331,8 +339,8 @@ const OrderCard = ({ order, role = 'farmer', onUpdateStatus, onCancelOrder, onSu
                       </div>
 
                       {/* Driver Link Share controls */}
-                      <div className="p-2 bg-slate-50 border border-slate-250 rounded-lg text-[10.5px] font-bold mt-1.5 shadow-sm space-y-1.5">
-                        <div className="text-slate-500 text-left">Share Tracking Link:</div>
+                      <div className="p-2.5 bg-slate-50 border border-slate-200/80 rounded-xl text-[10.5px] font-bold mt-2 space-y-1.5 shadow-2xs">
+                        <div className="text-slate-500 text-left uppercase text-[9.5px] tracking-wider font-extrabold">Share Tracking Link:</div>
                         <div className="grid grid-cols-2 gap-1.5">
                           <button
                             type="button"
@@ -342,18 +350,16 @@ const OrderCard = ({ order, role = 'farmer', onUpdateStatus, onCancelOrder, onSu
                               navigator.clipboard.writeText(link);
                               toast.success('Driver tracking link copied!');
                             }}
-                            className="bg-white border border-slate-200 py-1 px-2 rounded text-slate-700 hover:bg-slate-50 flex items-center justify-center gap-1 cursor-pointer transition-colors"
+                            className="bg-white border border-slate-200 h-8 rounded-lg text-slate-700 hover:bg-slate-100 flex items-center justify-center gap-1.5 cursor-pointer transition-all text-[11px] font-bold"
                           >
-                            <span className="material-symbols-outlined text-[13px]">content_copy</span>
+                            <span className="material-symbols-outlined text-[14px] text-slate-500">content_copy</span>
                             <span>Copy Link</span>
                           </button>
                           <a
                             href={(() => {
                               let phone = order.driver ? order.driver.phone : '';
                               if (phone) {
-                                // Clean up spaces or dashes
                                 const clean = phone.replace(/\D/g, '');
-                                // Prepend 91 for Indian numbers if it's 10 digits
                                 phone = clean.length === 10 ? `91${clean}` : clean;
                               }
                               const text = `Please click this link to start live GPS tracking for order #${order._id.slice(-6).toUpperCase()}: ${window.location.origin}/driver-track?orderId=${order._id}&name=${encodeURIComponent(order.driver?.name || 'Farmer')}&crop=${encodeURIComponent(order.crop?.name || 'Crop')}&vendor=${encodeURIComponent(order.vendor?.name || 'Vendor')}`;
@@ -362,27 +368,28 @@ const OrderCard = ({ order, role = 'farmer', onUpdateStatus, onCancelOrder, onSu
                             onClick={(e) => e.stopPropagation()}
                             target="_blank"
                             rel="noreferrer"
-                            className="bg-emerald-50 border border-emerald-200 py-1 px-2 rounded text-emerald-700 hover:bg-emerald-100 flex items-center justify-center gap-1 no-underline transition-all"
+                            className="bg-emerald-50 border border-emerald-200 h-8 rounded-lg text-emerald-700 hover:bg-emerald-100 flex items-center justify-center gap-1.5 no-underline transition-all text-[11px] font-bold"
                           >
-                            <span className="material-symbols-outlined text-[13px]">share</span>
+                            <span className="material-symbols-outlined text-[14px] text-emerald-600">share</span>
                             <span>WhatsApp</span>
                           </a>
                         </div>
                       </div>
 
-                      <div className="flex gap-2 mt-2">
+                      <div className="flex items-center gap-1.5 mt-2.5">
                         <button
                           onClick={() => navigate(`/farmer-dashboard/tracking?orderId=${order._id}`)}
-                          className="flex-1 h-8 rounded-lg border border-primary-200 text-primary-600 bg-white hover:bg-primary-50 text-[11px] font-bold transition-all active:scale-[0.98] cursor-pointer flex items-center justify-center gap-1"
+                          className="flex-1 h-8 px-2 rounded-lg border border-primary-200 text-primary-600 bg-white hover:bg-primary-50 text-[10.5px] font-extrabold transition-all active:scale-95 cursor-pointer flex items-center justify-center gap-1 whitespace-nowrap"
                         >
                           <span className="material-symbols-outlined text-[14px]">navigation</span>
-                          Track Route
+                          <span>Track Route</span>
                         </button>
                         <button
                           onClick={() => onUpdateStatus(order._id, 'Completed')}
-                          className="flex-1 h-8 rounded-lg bg-success-600 hover:bg-success-700 text-white text-[11px] font-bold transition-all active:scale-[0.98] cursor-pointer flex items-center justify-center"
+                          className="flex-1 h-8 px-2 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white text-[10.5px] font-extrabold transition-all active:scale-95 cursor-pointer flex items-center justify-center gap-1 shadow-xs whitespace-nowrap"
                         >
-                          Complete Delivery
+                          <span className="material-symbols-outlined text-[14px]">task_alt</span>
+                          <span>Complete Deal</span>
                         </button>
                       </div>
                     </>

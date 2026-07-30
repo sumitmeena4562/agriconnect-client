@@ -206,11 +206,11 @@ const BatchManagement = () => {
                           </span>
                           <span className={`text-[8.5px] font-black uppercase px-2 py-0.5 rounded-full border ${
                             batch.batchStatus === 'Completed'
-                              ? 'bg-emerald-50 border-emerald-250 text-emerald-700'
+                              ? 'bg-emerald-50 border-emerald-200 text-emerald-700'
                               : batch.batchStatus === 'Out For Delivery'
-                              ? 'bg-amber-50 border-amber-250 text-amber-700 animate-pulse'
+                              ? 'bg-amber-50 border-amber-200 text-amber-700 animate-pulse'
                               : batch.batchStatus === 'Driver Assigned'
-                              ? 'bg-indigo-50 border-indigo-250 text-indigo-700'
+                              ? 'bg-indigo-50 border-indigo-200 text-indigo-700'
                               : 'bg-slate-100 border-slate-200 text-slate-500'
                           }`}>
                             {batch.batchStatus}
@@ -342,7 +342,7 @@ const BatchManagement = () => {
                           <div className="flex items-center gap-2 self-end sm:self-center">
                             <button
                               onClick={() => navigate(`/farmer-dashboard/batches/${batch._id}/load-plan`)}
-                              className="px-3 py-1.5 bg-white hover:bg-slate-50 text-slate-700 border border-slate-250 rounded-xl text-[10px] font-black cursor-pointer active:scale-95 transition-all flex items-center gap-1.5 shadow-xs"
+                              className="px-3 py-1.5 bg-white hover:bg-slate-50 text-slate-700 border border-slate-200 rounded-xl text-[10px] font-black cursor-pointer active:scale-95 transition-all flex items-center gap-1.5 shadow-xs"
                             >
                               <span className="material-symbols-outlined text-[14px]">view_in_ar</span>
                               <span>Plan Load 🚛</span>
