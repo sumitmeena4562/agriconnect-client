@@ -2,8 +2,11 @@ import React, { useState, useEffect, useRef } from 'react';
 import api from '../../utils/api';
 import toast from 'react-hot-toast';
 import { motion, AnimatePresence } from 'framer-motion';
+import jsPDF from 'jspdf';
+import autoTable from 'jspdf-autotable';
 import ConfirmModal from '../../components/common/ConfirmModal';
 import DriverCard from '../../components/shared/DriverCard';
+import CustomSelect from '../../components/ui/CustomSelect';
 
 const DriverRegistry = () => {
   const [drivers, setDrivers] = useState([]);
@@ -817,6 +820,104 @@ const DriverRegistry = () => {
     );
   }
 
+  // Download Registered Fleet Carriers Directory PDF
+  const handleDownloadFleetPDF = () => {
+    if (!drivers || drivers.length === 0) {
+      toast.error('No registered fleet drivers to export.');
+      return;
+    }
+    try {
+      const doc = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
+
+      // Header branding bar
+      doc.setFillColor(15, 23, 42); // slate-900
+      doc.rect(0, 0, 210, 20, 'F');
+      doc.setFillColor(16, 185, 129); // emerald-500 line
+      doc.rect(0, 19, 210, 1, 'F');
+
+      doc.setTextColor(255, 255, 255);
+      doc.setFontSize(13);
+      doc.setFont('helvetica', 'bold');
+      doc.text('AgriConnect™ - Registered Fleet Carriers & Driver Directory', 14, 13);
+
+      doc.setFontSize(8.5);
+      doc.setFont('helvetica', 'normal');
+      doc.text(`Generated: ${new Date().toLocaleString('en-IN')}`, 135, 13);
+
+      // Meta Info Box
+      const availableCount = drivers.filter(d => d.status === 'Available').length;
+      const totalPayload = drivers.reduce((acc, d) => acc + (Number(d.payloadCapacity) || 0), 0);
+
+      doc.setFillColor(248, 250, 252);
+      doc.setDrawColor(203, 213, 225);
+      doc.roundedRect(14, 25, 182, 22, 2, 2, 'FD');
+
+      doc.setTextColor(15, 23, 42);
+      doc.setFontSize(9.5);
+      doc.setFont('helvetica', 'bold');
+      doc.text(`Total Registered Carriers: ${drivers.length} Drivers`, 18, 32);
+      doc.text(`Available Drivers: ${availableCount} Ready`, 18, 41);
+
+      doc.text(`Combined Fleet Payload: ${totalPayload.toLocaleString('en-IN')} Kg`, 105, 32);
+      doc.text(`Hub Location: Indore Agri-Logistics Hub`, 105, 41);
+
+      // Fleet Table
+      const tableColumn = ['Driver Name & Phone', 'Vehicle Type', 'License Plate', 'Payload Cap', 'DL Number', 'RC / Insurance', 'Fleet Status'];
+      const tableRows = drivers.map(d => [
+        `${d.name}\nMob: ${d.phone}`,
+        d.vehicleType || 'Mini Truck',
+        d.vehicleNumber || 'Reg Pending',
+        `${d.payloadCapacity || 0} Kg`,
+        d.licenseNumber ? d.licenseNumber.toUpperCase() : 'N/A',
+        d.rcNumber ? d.rcNumber.toUpperCase() : 'Verified',
+        d.status || 'Available'
+      ]);
+
+      autoTable(doc, {
+        head: [tableColumn],
+        body: tableRows,
+        startY: 52,
+        theme: 'grid',
+        headStyles: { fillColor: [15, 23, 42], textColor: [255, 255, 255], fontStyle: 'bold', fontSize: 8.5 },
+        bodyStyles: { fontSize: 8, textColor: [51, 65, 85], cellPadding: 3 },
+        alternateRowStyles: { fillColor: [248, 250, 252] },
+        columnStyles: {
+          0: { fontStyle: 'bold', cellWidth: 40 },
+          1: { cellWidth: 28 },
+          2: { fontStyle: 'bold', cellWidth: 28 },
+          3: { fontStyle: 'bold', cellWidth: 22 },
+          4: { cellWidth: 24 },
+          5: { cellWidth: 22 },
+          6: { fontStyle: 'bold', cellWidth: 18 }
+        }
+      });
+
+      // Signature Box
+      const finalY = doc.lastAutoTable?.finalY ? doc.lastAutoTable.finalY + 15 : 180;
+      if (finalY < 260) {
+        doc.setDrawColor(203, 213, 225);
+        doc.line(20, finalY + 12, 85, finalY + 12);
+        doc.setFontSize(8);
+        doc.setTextColor(100, 116, 139);
+        doc.text('Fleet Logistics Manager Sign', 25, finalY + 16);
+
+        doc.line(125, finalY + 12, 190, finalY + 12);
+        doc.text('Transport Authority Clearance Seal', 130, finalY + 16);
+      }
+
+      doc.save(`AgriConnect_Fleet_Directory_${new Date().toISOString().split('T')[0]}.pdf`);
+      toast.success('Fleet Drivers Directory PDF Downloaded! 📄');
+    } catch (err) {
+      console.error('Error generating PDF:', err);
+      toast.error('Failed to generate Fleet Directory PDF');
+    }
+  };
+
+  // Metrics Calculations
+  const availableDriversCount = drivers.filter(d => d.status === 'Available').length;
+  const onDeliveryCount = drivers.filter(d => d.status === 'On Delivery' || d.status === 'In Transit').length;
+  const totalFleetPayload = drivers.reduce((acc, d) => acc + (Number(d.payloadCapacity) || 0), 0);
+
   return (
     <div className="space-y-6">
       {/* Header */}
@@ -829,102 +930,297 @@ const DriverRegistry = () => {
             Add and manage drivers who will deliver crops to buyers.
           </p>
         </div>
-        <button
-          onClick={() => setIsFormViewActive(true)}
-          className="bg-[var(--color-primary-600)] hover:bg-[var(--color-primary-700)] text-white px-4 h-9.5 rounded-[var(--form-border-radius)] font-bold text-[11.5px] shadow-sm shadow-[var(--color-primary-500)]/10 hover:shadow-md transition-all flex items-center gap-1.5 cursor-pointer active:scale-[0.98] shrink-0 w-fit self-start sm:self-auto"
-        >
-          <span className="material-symbols-outlined text-[15px] font-bold">add</span>
-          Add Vehicle
-        </button>
+
+        <div className="flex items-center gap-2 self-start sm:self-auto">
+          <button
+            onClick={handleDownloadFleetPDF}
+            className="px-3.5 h-9.5 bg-slate-100 hover:bg-emerald-50 text-slate-700 hover:text-emerald-700 border border-slate-200 hover:border-emerald-200 rounded-[var(--form-border-radius)] font-extrabold text-[11.5px] transition-all flex items-center gap-1.5 cursor-pointer shadow-2xs"
+          >
+            <span className="material-symbols-outlined text-[15px] text-emerald-600">picture_as_pdf</span>
+            <span>Export Fleet PDF</span>
+          </button>
+
+          <button
+            onClick={() => setIsFormViewActive(true)}
+            className="bg-[var(--color-primary-600)] hover:bg-[var(--color-primary-700)] text-white px-4 h-9.5 rounded-[var(--form-border-radius)] font-bold text-[11.5px] shadow-sm shadow-[var(--color-primary-500)]/10 hover:shadow-md transition-all flex items-center gap-1.5 cursor-pointer active:scale-[0.98] shrink-0"
+          >
+            <span className="material-symbols-outlined text-[15px] font-bold">add</span>
+            Add Vehicle
+          </button>
+        </div>
       </div>
 
-      {/* Search and Advanced Filters */}
-      <div className="bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[var(--card-border-radius)] p-3 shadow-sm">
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-          {/* Search Input */}
-          <div className="relative">
-            <span className="material-symbols-outlined absolute left-2.5 top-1/2 -translate-y-1/2 text-[18px] text-[var(--color-text-muted)]">search</span>
-            <input 
-              type="text" 
-              placeholder="Search by driver, vehicle #..." 
-              value={searchKeyword}
-              onChange={e => setSearchKeyword(e.target.value)}
-              className="w-full pl-9 pr-3 h-[36px] text-[12px] rounded-lg border border-[var(--color-border)] bg-[var(--color-bg-body)] text-[var(--color-text-primary)] focus:border-[var(--color-primary-500)] focus:ring-2 focus:ring-[var(--color-primary-500)]/10 outline-none transition-all placeholder:text-[var(--color-text-secondary)] placeholder:font-medium"
-            />
+      {/* ── Fleet Metrics Overview Bar ── */}
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+        <div className="global-card !p-3 flex items-center gap-3">
+          <div className="w-8.5 h-8.5 rounded-xl bg-primary-50 text-primary-600 flex items-center justify-center shrink-0">
+            <span className="material-symbols-outlined text-[18px]">badge</span>
           </div>
+          <div>
+            <p className="text-[9.5px] font-bold text-slate-400 uppercase tracking-wider">Total Drivers</p>
+            <p className="text-[15px] font-black text-slate-900 leading-none mt-0.5">{drivers.length} Vehicles</p>
+          </div>
+        </div>
 
-          {/* Vehicle Type Filter */}
-          <div className="relative">
-            <span className="material-symbols-outlined absolute left-2.5 top-1/2 -translate-y-1/2 text-[17px] text-[var(--color-text-muted)]">local_shipping</span>
-            <select 
-              value={filterVehicleType}
-              onChange={e => setFilterVehicleType(e.target.value)}
-              className="w-full pl-9 pr-3 h-[36px] text-[12px] rounded-lg border border-[var(--color-border)] bg-[var(--color-bg-body)] text-[var(--color-text-primary)] focus:border-[var(--color-primary-500)] focus:ring-2 focus:ring-[var(--color-primary-500)]/10 outline-none transition-all appearance-none cursor-pointer"
-            >
-              <option value="All">All Vehicle Types</option>
-              <option value="Bike">Bike</option>
-              <option value="Tractor">Tractor</option>
-              <option value="Mini Truck">Mini Truck</option>
-              <option value="Large Truck">Large Truck</option>
-            </select>
+        <div className="global-card !p-3 flex items-center gap-3">
+          <div className="w-8.5 h-8.5 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center shrink-0">
+            <span className="material-symbols-outlined text-[18px]">check_circle</span>
           </div>
+          <div>
+            <p className="text-[9.5px] font-bold text-slate-400 uppercase tracking-wider">Available Ready</p>
+            <p className="text-[15px] font-black text-emerald-700 leading-none mt-0.5">{availableDriversCount} Drivers</p>
+          </div>
+        </div>
+
+        <div className="global-card !p-3 flex items-center gap-3">
+          <div className="w-8.5 h-8.5 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center shrink-0">
+            <span className="material-symbols-outlined text-[18px]">local_shipping</span>
+          </div>
+          <div>
+            <p className="text-[9.5px] font-bold text-slate-400 uppercase tracking-wider">On Delivery</p>
+            <p className="text-[15px] font-black text-amber-700 leading-none mt-0.5">{onDeliveryCount} Active</p>
+          </div>
+        </div>
+
+        <div className="global-card !p-3 flex items-center gap-3">
+          <div className="w-8.5 h-8.5 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center shrink-0">
+            <span className="material-symbols-outlined text-[18px]">weight</span>
+          </div>
+          <div>
+            <p className="text-[9.5px] font-bold text-slate-400 uppercase tracking-wider">Fleet Payload</p>
+            <p className="text-[15px] font-black text-indigo-700 leading-none mt-0.5">{totalFleetPayload.toLocaleString()} Kg</p>
+          </div>
+        </div>
+      </div>
+
+      {/* ── Search & Advanced Filters Bar ── */}
+      <div className="global-card !p-2.5 flex flex-col md:flex-row items-center justify-between gap-3">
+        {/* Search Input */}
+        <div className="relative flex-1 min-w-0 w-full">
+          <span className="material-symbols-outlined absolute left-2.5 top-1/2 -translate-y-1/2 text-[17px] text-slate-400">search</span>
+          <input 
+            type="text" 
+            placeholder="Search driver name, vehicle plate #..." 
+            value={searchKeyword}
+            onChange={e => setSearchKeyword(e.target.value)}
+            className="w-full pl-8.5 pr-3 h-8 text-[11.5px] rounded-lg border border-slate-200 bg-slate-50/50 text-slate-800 placeholder:text-slate-400 focus:bg-white focus:border-primary-500 transition-all outline-none"
+          />
+        </div>
+
+        {/* Filters Group */}
+        <div className="flex items-center gap-2 w-full md:w-auto shrink-0">
+          {/* Vehicle Type Filter */}
+          <CustomSelect 
+            value={filterVehicleType}
+            onChange={(val) => setFilterVehicleType(val)}
+            icon="local_shipping"
+            minWidth="155px"
+            options={[
+              { label: 'All Vehicle Types', value: 'All' },
+              { label: 'Bike', value: 'Bike' },
+              { label: 'Tractor', value: 'Tractor' },
+              { label: 'Mini Truck', value: 'Mini Truck' },
+              { label: 'Large Truck', value: 'Large Truck' }
+            ]}
+          />
 
           {/* Status Filter */}
-          <div className="relative">
-            <span className="material-symbols-outlined absolute left-2.5 top-1/2 -translate-y-1/2 text-[17px] text-[var(--color-text-muted)]">check_circle</span>
-            <select 
-              value={filterStatus}
-              onChange={e => setFilterStatus(e.target.value)}
-              className="w-full pl-9 pr-3 h-[36px] text-[12px] rounded-lg border border-[var(--color-border)] bg-[var(--color-bg-body)] text-[var(--color-text-primary)] focus:border-[var(--color-primary-500)] focus:ring-2 focus:ring-[var(--color-primary-500)]/10 outline-none transition-all appearance-none cursor-pointer"
-            >
-              <option value="All">All Statuses</option>
-              <option value="Available">Available</option>
-              <option value="On Delivery">On Delivery</option>
-            </select>
-          </div>
+          <CustomSelect 
+            value={filterStatus}
+            onChange={(val) => setFilterStatus(val)}
+            icon="check_circle"
+            minWidth="135px"
+            options={[
+              { label: 'All Statuses', value: 'All' },
+              { label: 'Available', value: 'Available' },
+              { label: 'On Delivery', value: 'On Delivery' }
+            ]}
+          />
         </div>
       </div>
 
-      {/* Fleet Cards Grid */}
+      {/* ── Fleet Drivers Data Table ── */}
       {isLoading ? (
         <div className="flex justify-center py-20">
-          <div className="w-8 h-8 rounded-full border-3 border-[var(--color-primary-100)] border-t-[var(--color-primary-600)] animate-spin"></div>
+          <div className="w-8 h-8 rounded-full border-3 border-primary-100 border-t-primary-600 animate-spin" />
         </div>
       ) : filteredDrivers.length === 0 ? (
-        <div className="bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[var(--card-border-radius)] shadow-[var(--shadow-card)] text-center py-16 px-6">
-          <div className="w-16 h-16 bg-[var(--color-bg-subtle)] rounded-full flex items-center justify-center mx-auto mb-4 border border-[var(--color-border)]/50">
-            <span className="material-symbols-outlined text-[28px] text-[var(--color-text-secondary)]">local_shipping</span>
+        <div className="global-card p-12 text-center">
+          <div className="w-14 h-14 bg-slate-100 rounded-full flex items-center justify-center mx-auto mb-3 border border-slate-200">
+            <span className="material-symbols-outlined text-[26px] text-slate-400">local_shipping</span>
           </div>
-          <h3 className="text-[15px] font-bold text-[var(--color-text-primary)] mb-1">No vehicles found</h3>
-          <p className="text-[11.5px] text-[var(--color-text-secondary)] max-w-xs mx-auto mb-5 leading-relaxed">
+          <h3 className="text-[14px] font-extrabold text-slate-800 mb-1">No Fleet Drivers Found</h3>
+          <p className="text-[11.5px] text-slate-400 max-w-xs mx-auto mb-4 leading-relaxed">
             {drivers.length === 0 
-              ? "Register your own drivers and trucks to offer transport services and coordinate live trackable crop delivery."
-              : "No drivers match your current search keywords or filters."}
+              ? "Register your drivers and vehicles to assign dispatches and track shipments."
+              : "No drivers match your current search criteria."}
           </p>
           {drivers.length === 0 && (
             <button 
               onClick={() => setIsFormViewActive(true)}
-              className="inline-block bg-[var(--color-primary-50)] hover:bg-[var(--color-primary-100)] text-[var(--color-primary-700)] px-4 py-2 rounded-lg font-bold text-[11px] border border-[var(--color-primary-100)] transition-all cursor-pointer active:scale-[0.97]"
+              className="px-4 py-2 bg-primary-600 hover:bg-primary-700 text-white rounded-xl font-black text-[11px] shadow-sm transition-all cursor-pointer"
             >
               Register First Driver
             </button>
           )}
         </div>
       ) : (
-        <motion.div 
-          layout
-          className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4"
-        >
-          <AnimatePresence mode="popLayout">
-            {filteredDrivers.map((drv) => (
-              <DriverCard 
-                key={drv._id} 
-                driver={drv} 
-                onDelete={handleDeleteClick} 
-              />
-            ))}
-          </AnimatePresence>
-        </motion.div>
+        <div className="global-card overflow-hidden !p-0 border border-slate-200/80 shadow-2xs">
+          <div className="overflow-x-auto">
+            <table className="w-full text-left border-collapse min-w-[750px]">
+              <thead>
+                <tr className="bg-slate-50/90 border-b border-slate-200 text-slate-500 text-[9.5px] font-extrabold uppercase tracking-wider">
+                  <th className="py-2.5 px-3.5">Driver & Contact</th>
+                  <th className="py-2.5 px-3.5">Vehicle & Specs</th>
+                  <th className="py-2.5 px-3.5 text-center">Plate #</th>
+                  <th className="py-2.5 px-3.5 text-right">Payload Cap</th>
+                  <th className="py-2.5 px-3.5">Compliance Docs</th>
+                  <th className="py-2.5 px-3.5 text-center">Status</th>
+                  <th className="py-2.5 px-3.5 text-right">Actions</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-slate-100 text-[11px]">
+                {filteredDrivers.map((drv) => (
+                  <tr key={drv._id} className="hover:bg-slate-50/60 transition-colors">
+                    {/* Driver Name & Contacts */}
+                    <td className="py-2.5 px-3.5">
+                      <div className="flex items-center gap-2.5">
+                        <div className="w-8 h-8 rounded-xl bg-primary-50 text-primary-700 font-black text-[12px] flex items-center justify-center shrink-0 border border-primary-100">
+                          {drv.name.charAt(0).toUpperCase()}
+                        </div>
+                        <div className="min-w-0">
+                          <h4 className="font-extrabold text-slate-900 leading-tight truncate text-[12px]">{drv.name}</h4>
+                          <a
+                            href={`tel:${drv.phone}`}
+                            className="text-[10px] font-bold text-slate-500 hover:text-primary-600 hover:underline transition-colors block mt-0.5 font-mono"
+                          >
+                            Mob: {drv.phone}
+                          </a>
+                          {drv.emergencyContactPhone && (
+                            <p className="text-[8.5px] text-slate-400 font-medium truncate">
+                              SOS: {drv.emergencyContactName ? `${drv.emergencyContactName} (` : ''}{drv.emergencyContactPhone}{drv.emergencyContactName ? ')' : ''}
+                            </p>
+                          )}
+                        </div>
+                      </div>
+                    </td>
+
+                    {/* Vehicle Type & Fuel Specs */}
+                    <td className="py-2.5 px-3.5">
+                      <div>
+                        <div className="flex items-center gap-1.5">
+                          <span className="material-symbols-outlined text-[15px] text-slate-400 shrink-0">
+                            {drv.vehicleType?.toLowerCase().includes('bike') ? 'two_wheeler' : drv.vehicleType?.toLowerCase().includes('tractor') ? 'agriculture' : 'local_shipping'}
+                          </span>
+                          <span className="font-bold text-slate-800 text-[11.5px]">{drv.vehicleType || 'Mini Truck'}</span>
+                        </div>
+                        {drv.fuelType && (
+                          <span className="text-[9px] font-semibold text-slate-400 block mt-0.5">
+                            Fuel: {drv.fuelType} {drv.vehicleModel ? `• ${drv.vehicleModel}` : ''}
+                          </span>
+                        )}
+                      </div>
+                    </td>
+
+                    {/* Vehicle Plate Number */}
+                    <td className="py-2.5 px-3.5 text-center">
+                      <span className="font-mono text-[9.5px] font-black bg-slate-100 border border-slate-200 px-2 py-0.5 rounded text-slate-700 uppercase inline-block">
+                        {drv.vehicleNumber || 'REG PENDING'}
+                      </span>
+                    </td>
+
+                    {/* Payload Capacity */}
+                    <td className="py-2.5 px-3.5 text-right font-black text-slate-900 text-[11.5px]">
+                      {(drv.payloadCapacity || 0).toLocaleString()} Kg
+                    </td>
+
+                    {/* DL, RC & Insurance Compliance Docs */}
+                    <td className="py-2.5 px-3.5">
+                      <div className="text-[10px] leading-tight space-y-0.5">
+                        <p className="font-semibold text-slate-600">DL: <strong className="font-extrabold text-slate-800 uppercase">{drv.licenseNumber || 'VERIFIED'}</strong></p>
+                        <p className="text-[9px] text-slate-400 font-medium">RC: <strong className="uppercase font-semibold text-slate-600">{drv.rcNumber || 'VERIFIED'}</strong></p>
+                        {drv.insuranceDocUrl && (
+                          <a
+                            href={drv.insuranceDocUrl}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="text-[8.5px] font-bold text-emerald-600 hover:underline flex items-center gap-0.5 mt-0.5"
+                          >
+                            <span className="material-symbols-outlined text-[10px]">file_present</span>
+                            <span>Insurance Copy 📄</span>
+                          </a>
+                        )}
+                      </div>
+                    </td>
+
+                    {/* Fleet Status */}
+                    <td className="py-2.5 px-3.5 text-center">
+                      {drv.status === 'Available' ? (
+                        <span className="inline-flex items-center gap-1.5 px-2.5 py-0.8 rounded-full text-[10px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200/80 shadow-2xs select-none">
+                          <span className="w-4 h-4 rounded-full bg-emerald-500 text-white flex items-center justify-center shrink-0">
+                            <span className="material-symbols-outlined text-[10px] font-black leading-none">check</span>
+                          </span>
+                          <span>Available</span>
+                        </span>
+                      ) : drv.status === 'On Delivery' || drv.status === 'In Transit' ? (
+                        <span className="inline-flex items-center gap-1.5 px-2.5 py-0.8 rounded-full text-[10px] font-bold bg-amber-50 text-amber-700 border border-amber-200/80 shadow-2xs select-none">
+                          <span className="w-4 h-4 rounded-full bg-amber-500 text-white flex items-center justify-center shrink-0">
+                            <span className="material-symbols-outlined text-[10px] font-black leading-none">schedule</span>
+                          </span>
+                          <span>On Delivery</span>
+                        </span>
+                      ) : (
+                        <span className="inline-flex items-center gap-1.5 px-2.5 py-0.8 rounded-full text-[10px] font-bold bg-slate-100 text-slate-600 border border-slate-200/80 shadow-2xs select-none">
+                          <span className="w-4 h-4 rounded-full bg-slate-400 text-white flex items-center justify-center shrink-0">
+                            <span className="material-symbols-outlined text-[10px] font-black leading-none">pause</span>
+                          </span>
+                          <span>{drv.status || 'Offline'}</span>
+                        </span>
+                      )}
+                    </td>
+
+                    {/* Actions */}
+                    <td className="py-2.5 px-3.5 text-right">
+                      <div className="flex items-center justify-end gap-1">
+                        {/* Call Driver */}
+                        <a
+                          href={`tel:${drv.phone}`}
+                          title="Call Driver"
+                          className="w-7 h-7 rounded-lg hover:bg-emerald-50 text-slate-400 hover:text-emerald-600 transition-colors flex items-center justify-center cursor-pointer"
+                        >
+                          <span className="material-symbols-outlined text-[15px]">call</span>
+                        </a>
+
+                        {/* Share Tracking Link */}
+                        <button
+                          onClick={() => {
+                            const link = `${window.location.origin}/driver-batch?driverId=${drv._id}`;
+                            navigator.clipboard.writeText(link);
+                            toast.success('Driver tracking link copied!');
+                          }}
+                          title="Share Tracking Link"
+                          className="w-7 h-7 rounded-lg hover:bg-indigo-50 text-slate-400 hover:text-indigo-600 transition-colors flex items-center justify-center cursor-pointer"
+                        >
+                          <span className="material-symbols-outlined text-[15px]">open_in_new</span>
+                        </button>
+
+                        {/* Delete Carrier */}
+                        <button
+                          onClick={() => handleDeleteClick(drv._id)}
+                          disabled={drv.status === 'On Delivery'}
+                          title={drv.status === 'On Delivery' ? 'Cannot remove active carrier' : 'Remove Driver'}
+                          className="w-7 h-7 rounded-lg hover:bg-rose-50 text-slate-400 hover:text-rose-600 transition-colors disabled:opacity-30 disabled:pointer-events-none cursor-pointer flex items-center justify-center"
+                        >
+                          <span className="material-symbols-outlined text-[15px]">delete</span>
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
       )}
 
       <ConfirmModal
