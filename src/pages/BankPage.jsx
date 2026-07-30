@@ -2,6 +2,8 @@ import React, { useState, useEffect } from 'react';
 import api from '../utils/api';
 import toast from 'react-hot-toast';
 import { motion, AnimatePresence } from 'framer-motion';
+import jsPDF from 'jspdf';
+import autoTable from 'jspdf-autotable';
 
 const BankPage = () => {
   const [account, setAccount] = useState(null);
@@ -86,12 +88,113 @@ const BankPage = () => {
     );
   }
 
+  // Download Bank Account Statement PDF
+  const handleDownloadStatementPDF = () => {
+    if (!account) {
+      toast.error('Bank account details not loaded');
+      return;
+    }
+    try {
+      const doc = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
+
+      // Header branding bar
+      doc.setFillColor(15, 23, 42); // slate-900
+      doc.rect(0, 0, 210, 22, 'F');
+      doc.setFillColor(16, 185, 129); // emerald-500 line
+      doc.rect(0, 21, 210, 1, 'F');
+
+      doc.setTextColor(255, 255, 255);
+      doc.setFontSize(14);
+      doc.setFont('helvetica', 'bold');
+      doc.text('AgriConnect™ - Official Escrow Bank Account Statement', 14, 14);
+
+      doc.setFontSize(8.5);
+      doc.setFont('helvetica', 'normal');
+      doc.text(`Generated: ${new Date().toLocaleString('en-IN')}`, 135, 14);
+
+      // Account Info Summary Box
+      doc.setFillColor(248, 250, 252);
+      doc.setDrawColor(203, 213, 225);
+      doc.roundedRect(14, 27, 182, 32, 3, 3, 'FD');
+
+      doc.setTextColor(15, 23, 42);
+      doc.setFontSize(10);
+      doc.setFont('helvetica', 'bold');
+      doc.text(`Account Holder: ${account.accountHolderName || 'Primary Producer'}`, 18, 35);
+      doc.text(`Bank Name: ${account.bankName || 'Escrow Agri Bank'}`, 18, 43);
+      doc.text(`Available Balance: Rs. ${(account.balance || 0).toLocaleString('en-IN')}`, 18, 51);
+
+      doc.text(`Account No: ${account.accountNumber || 'N/A'}`, 110, 35);
+      doc.text(`IFSC Code: ${account.ifscCode || 'N/A'}`, 110, 43);
+      doc.text(`Statement Period: All Direct Transactions`, 110, 51);
+
+      // Transactions Ledger Table
+      const tableColumn = ['Date & Time', 'Transaction Ref / Description', 'Type', 'Debit (Rs.)', 'Credit (Rs.)', 'Status'];
+      const tableRows = transactions.map(tx => {
+        const details = getTransactionDetails(tx);
+        return [
+          new Date(tx.createdAt).toLocaleString('en-IN', { day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' }),
+          tx.description || 'Crop Payment',
+          tx.type || 'PAYMENT',
+          !details.isCredit ? `Rs. ${tx.amount.toLocaleString('en-IN')}` : '-',
+          details.isCredit ? `Rs. ${tx.amount.toLocaleString('en-IN')}` : '-',
+          tx.status || 'COMPLETED'
+        ];
+      });
+
+      autoTable(doc, {
+        head: [tableColumn],
+        body: tableRows,
+        startY: 64,
+        theme: 'grid',
+        headStyles: { fillColor: [15, 23, 42], textColor: [255, 255, 255], fontStyle: 'bold', fontSize: 8.5 },
+        bodyStyles: { fontSize: 8, textColor: [51, 65, 85], cellPadding: 3 },
+        alternateRowStyles: { fillColor: [248, 250, 252] },
+        columnStyles: {
+          0: { cellWidth: 35 },
+          1: { fontStyle: 'bold', cellWidth: 65 },
+          2: { cellWidth: 22 },
+          3: { fontStyle: 'bold', cellWidth: 22, halign: 'right' },
+          4: { fontStyle: 'bold', cellWidth: 22, halign: 'right' },
+          5: { fontStyle: 'bold', cellWidth: 16 }
+        }
+      });
+
+      // Signature Footer
+      const finalY = doc.lastAutoTable?.finalY ? doc.lastAutoTable.finalY + 15 : 180;
+      doc.setDrawColor(203, 213, 225);
+      doc.line(20, finalY + 15, 85, finalY + 15);
+      doc.setFontSize(8);
+      doc.setTextColor(100, 116, 139);
+      doc.text('Authorized Bank Audit Seal', 25, finalY + 20);
+
+      doc.line(125, finalY + 15, 190, finalY + 15);
+      doc.text('AgriConnect Escrow Payment Clearance', 126, finalY + 20);
+
+      doc.save(`AgriConnect_Bank_Statement_${new Date().toISOString().split('T')[0]}.pdf`);
+      toast.success('Bank Account Statement Downloaded! 📄');
+    } catch (err) {
+      console.error('Error generating PDF:', err);
+      toast.error('Failed to generate Bank Statement PDF');
+    }
+  };
+
   return (
     <div className="space-y-6 max-w-4xl mx-auto pb-8">
       {/* Header */}
-      <div>
-        <h1 className="text-[20px] font-black text-slate-800 leading-none mb-1">🏦 Mock Bank Account</h1>
-        <p className="text-[11px] text-slate-500 font-medium">Manage your simulated bank balance, perform top-ups, and review transaction history.</p>
+      <div className="flex flex-col sm:flex-row justify-between sm:items-center gap-3">
+        <div>
+          <h1 className="text-[20px] font-black text-slate-800 leading-none mb-1">🏦 Escrow Bank Account</h1>
+          <p className="text-[11px] text-slate-500 font-medium">Manage your direct crop sales balance, top-ups, and ledger statement.</p>
+        </div>
+
+        <button
+          onClick={handleDownloadStatementPDF}
+          className="px-3.5 h-9 bg-slate-100 hover:bg-emerald-50 text-slate-700 hover:text-emerald-700 border border-slate-200 hover:border-emerald-200 rounded-[var(--form-border-radius)] font-extrabold text-[11.5px] transition-all flex items-center gap-1.5 cursor-pointer shadow-2xs self-start sm:self-auto"
+        >
+          <span className="material-symbols-outlined text-[15px] text-emerald-600">picture_as_pdf</span>
+          <span>Export Statement PDF</span>
+        </button>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-5 gap-6">
