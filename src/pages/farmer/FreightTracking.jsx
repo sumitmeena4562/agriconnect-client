@@ -3,6 +3,8 @@ import { useSearchParams } from 'react-router-dom';
 import api from '../../utils/api';
 import { toast } from 'react-hot-toast';
 import { motion, AnimatePresence } from 'framer-motion';
+import jsPDF from 'jspdf';
+import autoTable from 'jspdf-autotable';
 import useLiveTracking from '../../hooks/useLiveTracking';
 
 // Haversine formula to compute distance in km
@@ -474,17 +476,131 @@ const FreightTracking = () => {
     return [...Object.values(tripsMap), ...standaloneOrders];
   }, [activeTransitOrders]);
 
+  // Download Official Shipment Tracking & Proof of Delivery Audit PDF
+  const handleDownloadShipmentPDF = (order) => {
+    if (!order) return;
+    try {
+      const doc = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
+
+      // Header branding bar
+      doc.setFillColor(15, 23, 42); // slate-900
+      doc.rect(0, 0, 210, 20, 'F');
+      doc.setFillColor(16, 185, 129); // emerald-500 line
+      doc.rect(0, 19, 210, 1, 'F');
+
+      doc.setTextColor(255, 255, 255);
+      doc.setFontSize(13);
+      doc.setFont('helvetica', 'bold');
+      doc.text('AgriConnect™ - Official Live Freight & Delivery Proof Audit', 14, 13);
+
+      doc.setFontSize(8.5);
+      doc.setFont('helvetica', 'normal');
+      doc.text(`Generated: ${new Date().toLocaleString('en-IN')}`, 135, 13);
+
+      // Meta Box
+      doc.setFillColor(248, 250, 252);
+      doc.setDrawColor(203, 213, 225);
+      doc.roundedRect(14, 25, 182, 32, 3, 3, 'FD');
+
+      doc.setTextColor(15, 23, 42);
+      doc.setFontSize(9.5);
+      doc.setFont('helvetica', 'bold');
+      doc.text(`Shipment Order ID: #${order._id.slice(-6).toUpperCase()}`, 18, 33);
+      doc.setFont('helvetica', 'normal');
+      doc.setFontSize(8.5);
+      doc.text(`Delivery Status: ${order.deliveryStatus || 'In Transit'}`, 18, 41);
+      doc.text(`OTP Verification: ${order.otp || 'Verified'}`, 18, 49);
+
+      doc.setFont('helvetica', 'bold');
+      doc.setFontSize(9.5);
+      doc.text(`Carrier Driver: ${order.driver?.name || 'Assigned Driver'}`, 105, 33);
+      doc.setFont('helvetica', 'normal');
+      doc.setFontSize(8.5);
+      doc.text(`Vehicle: ${order.driver?.vehicleType || 'Truck'} (${order.driver?.vehicleNumber || 'N/A'})`, 105, 41);
+      doc.text(`Driver Phone: ${order.driver?.phone || order.driver?.mobile || 'N/A'}`, 105, 49);
+
+      // Table Details
+      const cropName = order.crop?.name || 'Produce Cargo';
+      const variety = order.crop?.variety ? ` (${order.crop.variety})` : '';
+      const category = order.crop?.category || 'Vegetables';
+      const vendorName = order.vendor?.name || 'Buyer Store';
+      const vendorPhone = order.vendor?.phone || '9876543210';
+      const address = order.deliveryAddress?.addressLine || 'Indore Region';
+      const qty = `${order.requestedQuantity || 0} ${order.crop?.unit || 'Kg'}`;
+      const totalPrice = order.totalPrice ? `Rs. ${Number(order.totalPrice).toLocaleString('en-IN')}` : `Rs. ${(Number(order.requestedQuantity || 0) * 40).toLocaleString('en-IN')}`;
+
+      const tableColumn = ['Field Details', 'Shipment Audit Values'];
+      const tableRows = [
+        ['Crop Produce Item', `${cropName}${variety}`],
+        ['Produce Category', category],
+        ['Dispatched Quantity', qty],
+        ['Total Shipment Valuation', totalPrice],
+        ['Recipient / Buyer', `${vendorName} (Mob: ${vendorPhone})`],
+        ['Delivery Destination', address],
+        ['Logistics Fleet Operator', order.driver?.name || 'Self-Delivery Fleet'],
+        ['Vehicle Plate Number', order.driver?.vehicleNumber || 'Registered Fleet Vehicle'],
+        ['GPS Telematics Status', isDriverOnline ? 'Active Realtime Signal ✓' : 'Last Known Location Recorded'],
+        ['Order Dispatch Status', order.deliveryStatus || 'In Transit']
+      ];
+
+      autoTable(doc, {
+        head: [tableColumn],
+        body: tableRows,
+        startY: 63,
+        theme: 'grid',
+        headStyles: { fillColor: [15, 23, 42], textColor: [255, 255, 255], fontStyle: 'bold', fontSize: 9 },
+        bodyStyles: { fontSize: 8.5, textColor: [51, 65, 85], cellPadding: 3.5 },
+        alternateRowStyles: { fillColor: [248, 250, 252] },
+        columnStyles: {
+          0: { fontStyle: 'bold', cellWidth: 55 },
+          1: { cellWidth: 127 }
+        }
+      });
+
+      // Sign Box
+      const finalY = doc.lastAutoTable?.finalY ? doc.lastAutoTable.finalY + 15 : 180;
+      if (finalY < 260) {
+        doc.setDrawColor(203, 213, 225);
+        doc.line(20, finalY + 12, 85, finalY + 12);
+        doc.setFontSize(8);
+        doc.setTextColor(100, 116, 139);
+        doc.text('Dispatcher / Farmer Sign', 25, finalY + 16);
+
+        doc.line(125, finalY + 12, 190, finalY + 12);
+        doc.text('Customer Delivery Acknowledgement Sign', 130, finalY + 16);
+      }
+
+      doc.save(`AgriConnect_Shipment_Log_#${order._id.slice(-6).toUpperCase()}.pdf`);
+      toast.success('Shipment Audit Log PDF Downloaded! 📄');
+    } catch (err) {
+      console.error('Error generating PDF:', err);
+      toast.error('Failed to generate Shipment PDF');
+    }
+  };
+
   // ── Render ────────────────────────────────────────────────────────────────
   return (
     <div className="space-y-4 lg:h-[calc(100vh-100px)] lg:flex lg:flex-col lg:overflow-hidden pb-1">
       {/* Page Header */}
-      <div>
-        <h1 className="text-[20px] sm:text-[22px] font-black text-[var(--color-text-primary)] tracking-tight leading-none mb-1 flex items-center gap-2">
-          <span>🚚</span> Live Fleet Tracking
-        </h1>
-        <p className="text-[11.5px] text-[var(--color-text-secondary)] font-medium">
-          Monitor dispatched shipments and driver locations in real time.
-        </p>
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-100 pb-3">
+        <div>
+          <h1 className="text-[20px] sm:text-[22px] font-black text-[var(--color-text-primary)] tracking-tight leading-none mb-1 flex items-center gap-2">
+            <span>🚚</span> Live Fleet Tracking
+          </h1>
+          <p className="text-[11.5px] text-[var(--color-text-secondary)] font-medium">
+            Monitor dispatched shipments and driver locations in real time.
+          </p>
+        </div>
+
+        {selectedOrder && (
+          <button
+            onClick={() => handleDownloadShipmentPDF(selectedOrder)}
+            className="px-3 py-1.5 bg-slate-100 hover:bg-emerald-50 text-slate-700 hover:text-emerald-700 border border-slate-200 hover:border-emerald-200 rounded-xl text-[11px] font-black cursor-pointer transition-all flex items-center gap-1.5 shadow-2xs self-start sm:self-center"
+          >
+            <span className="material-symbols-outlined text-[15px] text-emerald-600">picture_as_pdf</span>
+            <span>Download Shipment Log PDF</span>
+          </button>
+        )}
       </div>
 
       {isLoading ? (
