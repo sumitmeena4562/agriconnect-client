@@ -1,561 +1,723 @@
-import React, { useState, useEffect, useRef, useCallback } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import api from '../../utils/api';
 import { toast } from 'react-hot-toast';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
-import Input from '../../components/ui/Input';
-import Select from '../../components/ui/Select';
-import Button from '../../components/ui/Button';
+import { 
+  User, Phone, Mail, FileText, CreditCard, ShieldCheck, MapPin, 
+  Landmark, Wallet, Bell, Globe, Lock, Key, CheckCircle2, AlertCircle,
+  Eye, EyeOff, Save, Download, Sparkles, Navigation, Layers, ShieldAlert
+} from 'lucide-react';
 
 const STATES = [
-  'Andhra Pradesh', 'Arunachal Pradesh', 'Assam', 'Bihar', 'Chhattisgarh', 'Goa', 'Gujarat', 
-  'Haryana', 'Himachal Pradesh', 'Jharkhand', 'Karnataka', 'Kerala', 'Madhya Pradesh', 
-  'Maharashtra', 'Manipur', 'Meghalaya', 'Mizoram', 'Nagaland', 'Odisha', 'Punjab', 
-  'Rajasthan', 'Sikkim', 'Tamil Nadu', 'Telangana', 'Tripura', 'Uttar Pradesh', 
-  'Uttarakhand', 'West Bengal', 'Delhi'
+  'Andhra Pradesh','Arunachal Pradesh','Assam','Bihar','Chhattisgarh','Goa','Gujarat',
+  'Haryana','Himachal Pradesh','Jharkhand','Karnataka','Kerala','Madhya Pradesh',
+  'Maharashtra','Manipur','Meghalaya','Mizoram','Nagaland','Odisha','Punjab',
+  'Rajasthan','Sikkim','Tamil Nadu','Telangana','Tripura','Uttar Pradesh',
+  'Uttarakhand','West Bengal','Delhi'
 ];
 
+/* ─── Compact & Simple Input Component ────────────────────────────────── */
+const CompactInput = ({ label, icon: Icon, className = '', wrapperClass = '', type = 'text', hint = '', ...props }) => {
+  const [show, setShow] = useState(false);
+  const isPwd = type === 'password';
+  return (
+    <div className={`flex flex-col gap-1 ${wrapperClass}`}>
+      {label && (
+        <label className="text-[10px] font-bold text-slate-600 uppercase tracking-wider flex items-center justify-between">
+          <span>{label}</span>
+          {hint && <span className="text-[9px] font-normal text-slate-400 normal-case">{hint}</span>}
+        </label>
+      )}
+      <div className="relative flex items-center">
+        {Icon && (
+          <div className="absolute left-2.5 text-slate-400 pointer-events-none">
+            <Icon size={14} />
+          </div>
+        )}
+        <input
+          type={isPwd ? (show ? 'text' : 'password') : type}
+          className={`w-full h-[34px] ${Icon ? 'pl-8' : 'pl-2.5'} pr-2.5 text-[11.5px] font-medium text-slate-800 bg-white border border-slate-200 rounded-lg outline-none transition-all
+            hover:border-slate-300 focus:border-emerald-500 focus:ring-1 focus:ring-emerald-200
+            placeholder:text-slate-300 disabled:bg-slate-50 disabled:text-slate-400 disabled:cursor-not-allowed
+            ${isPwd ? 'pr-8' : ''} ${className}`}
+          {...props}
+        />
+        {isPwd && (
+          <button
+            type="button"
+            onClick={() => setShow(s => !s)}
+            className="absolute right-2 text-slate-400 hover:text-slate-600 p-1 cursor-pointer"
+          >
+            {show ? <EyeOff size={13} /> : <Eye size={13} />}
+          </button>
+        )}
+      </div>
+    </div>
+  );
+};
+
+/* ─── Compact Select Component ───────────────────────────────────────── */
+const CompactSelect = ({ label, icon: Icon, options = [], wrapperClass = '', ...props }) => (
+  <div className={`flex flex-col gap-1 ${wrapperClass}`}>
+    {label && <label className="text-[10px] font-bold text-slate-600 uppercase tracking-wider">{label}</label>}
+    <div className="relative flex items-center">
+      {Icon && (
+        <div className="absolute left-2.5 text-slate-400 pointer-events-none">
+          <Icon size={14} />
+        </div>
+      )}
+      <select
+        className={`w-full h-[34px] ${Icon ? 'pl-8' : 'pl-2.5'} pr-8 text-[11.5px] font-medium text-slate-800 bg-white border border-slate-200 rounded-lg outline-none transition-all
+          hover:border-slate-300 focus:border-emerald-500 focus:ring-1 focus:ring-emerald-200 cursor-pointer appearance-none`}
+        style={{ backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%2394a3b8' stroke-width='2'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E")`, backgroundRepeat: 'no-repeat', backgroundPosition: 'right 8px center' }}
+        {...props}
+      >
+        <option value="">Select State…</option>
+        {options.map(o => <option key={o} value={o}>{o}</option>)}
+      </select>
+    </div>
+  </div>
+);
+
+/* ─── Simple Toggle Switch ───────────────────────────────────────────── */
+const CompactToggle = ({ checked, onChange, label, description, icon: Icon }) => (
+  <div 
+    onClick={() => onChange({ target: { checked: !checked } })}
+    className={`flex items-center justify-between p-3 rounded-xl border transition-all cursor-pointer ${
+      checked ? 'bg-emerald-50/40 border-emerald-300' : 'bg-white border-slate-200 hover:border-slate-300'
+    }`}
+  >
+    <div className="flex items-center gap-2.5">
+      {Icon && (
+        <div className={`p-1.5 rounded-lg ${checked ? 'bg-emerald-600 text-white' : 'bg-slate-100 text-slate-500'}`}>
+          <Icon size={15} />
+        </div>
+      )}
+      <div>
+        <p className="text-[12px] font-bold text-slate-800 leading-snug">{label}</p>
+        <p className="text-[10px] text-slate-400 mt-0.5">{description}</p>
+      </div>
+    </div>
+    <div className={`relative inline-flex h-5 w-9 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out ${checked ? 'bg-emerald-600' : 'bg-slate-200'}`}>
+      <span className={`pointer-events-none inline-block h-4 w-4 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out ${checked ? 'translate-x-4' : 'translate-x-0'}`} />
+    </div>
+  </div>
+);
+
+const TABS = [
+  { id: 'kyc',         label: 'Personal & KYC',      icon: User,        badge: 'KYC' },
+  { id: 'location',    label: 'Farm & GPS',           icon: MapPin,      badge: 'GPS' },
+  { id: 'bank',        label: 'Bank & UPI',           icon: Landmark,    badge: 'Payout' },
+  { id: 'preferences', label: 'App Settings',         icon: Bell,        badge: 'Alerts' },
+  { id: 'security',    label: 'Security & Auth',      icon: Lock,        badge: 'Auth' },
+];
+
+/* ─── Main Compact Settings Component ─────────────────────────────── */
 const Profile = () => {
-  const [formData, setFormData] = useState({
-    name: '',
-    phone: '',
-    email: '',
-    state: '',
-    district: '',
-    village: '',
-    lat: '',
-    lng: '',
-    accountName: '',
-    accountNumber: '',
-    ifscCode: ''
-  });
-  
+  const [searchParams, setSearchParams] = useSearchParams();
+  const tabFromUrl = searchParams.get('tab');
+  const [activeTab, setActiveTab] = useState(tabFromUrl && TABS.some(t => t.id === tabFromUrl) ? tabFromUrl : 'kyc');
+
   const [isLoading, setIsLoading] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [gpsStatus, setGpsStatus] = useState('idle'); // idle | loading | success | error
+  const [gpsStatus, setGpsStatus] = useState('idle');
   const [gpsAccuracy, setGpsAccuracy] = useState(null);
-  
-  // Leaflet Map refs
-  const [mapLoaded, setMapLoaded] = useState(false);
+
   const mapRef = useRef(null);
   const mapInstanceRef = useRef(null);
   const markerRef = useRef(null);
-  const tileLayerRef = useRef(null);
 
-  // Load Leaflet CDNs dynamically
+  const [form, setForm] = useState({
+    name: '', phone: '', email: '',
+    aadhaarNumber: '1234-5678-9012', panNumber: 'ABCDE1234F', kccCardId: 'KCC-MH-992810',
+    state: '', district: '', village: '', landHoldingAcres: '5.5',
+    lat: '', lng: '',
+    accountName: '', accountNumber: '', ifscCode: '', upiId: '',
+    payoutPreference: 'UPI Instant Transfer',
+    whatsappAlerts: true, smsAlerts: true, preferredLanguage: 'Hindi',
+    currentPassword: '', newPassword: '', confirmPassword: ''
+  });
+
   useEffect(() => {
-    if (window.L) {
-      setMapLoaded(true);
-      return;
+    if (tabFromUrl && TABS.some(t => t.id === tabFromUrl)) {
+      setActiveTab(tabFromUrl);
     }
+  }, [tabFromUrl]);
 
-    const cssLink = document.createElement('link');
-    cssLink.rel = 'stylesheet';
-    cssLink.href = 'https://unpkg.com/leaflet@1.9.4/dist/leaflet.css';
-    document.head.appendChild(cssLink);
+  const handleTabChange = (tabId) => {
+    setActiveTab(tabId);
+    setSearchParams({ tab: tabId }, { replace: true });
+  };
 
-    const script = document.createElement('script');
-    script.src = 'https://unpkg.com/leaflet@1.9.4/dist/leaflet.js';
-    script.async = true;
-    script.onload = () => {
-      setMapLoaded(true);
-    };
-    document.body.appendChild(script);
-  }, []);
-
+  /* ── Load Profile & Settings Data ── */
   useEffect(() => {
-    const fetchProfile = async () => {
+    const load = async () => {
       try {
+        const local = JSON.parse(localStorage.getItem('agri_profile_v2') || '{}');
         const res = await api.get('/farmers/profile');
-        const { user, profile } = res.data.data;
-        
-        setFormData({
-          name: user.name || '',
-          phone: user.phone || '',
-          email: user.email || '',
-          state: profile?.location?.state || '',
-          district: profile?.location?.district || '',
-          village: profile?.location?.village || '',
-          lat: profile?.location?.coordinates?.lat || '',
-          lng: profile?.location?.coordinates?.lng || '',
-          accountName: user.bankDetails?.accountName || '',
-          accountNumber: user.bankDetails?.accountNumber || '',
-          ifscCode: user.bankDetails?.ifscCode || ''
-        });
-      } catch (error) {
-        toast.error('Failed to load profile');
+        const { user, profile } = res.data?.data || {};
+
+        setForm(p => ({
+          ...p,
+          name:             user?.name                      || local.name            || '',
+          phone:            user?.phone                     || local.phone           || '',
+          email:            user?.email                     || local.email           || '',
+          aadhaarNumber:    profile?.kycDetails?.aadhaarNumber || local.aadhaarNumber  || '1234-5678-9012',
+          panNumber:        profile?.kycDetails?.panNumber     || local.panNumber      || 'ABCDE1234F',
+          kccCardId:        profile?.kycDetails?.kccCardId     || local.kccCardId      || 'KCC-MH-992810',
+          state:            profile?.location?.state        || local.state           || '',
+          district:         profile?.location?.district     || local.district        || '',
+          village:          profile?.location?.village      || local.village         || '',
+          landHoldingAcres: profile?.farmDetails?.landHoldingAcres || profile?.farmDetails?.landSize || local.landHoldingAcres || '5.5',
+          lat:              profile?.location?.coordinates?.lat || local.lat          || '',
+          lng:              profile?.location?.coordinates?.lng || local.lng          || '',
+          accountName:      user?.bankDetails?.accountName  || local.accountName     || '',
+          accountNumber:    user?.bankDetails?.accountNumber || local.accountNumber   || '',
+          ifscCode:         user?.bankDetails?.ifscCode     || local.ifscCode        || '',
+          upiId:            user?.bankDetails?.upiId        || local.upiId           || `${user?.phone || 'farmer'}@upi`,
+          payoutPreference: user?.bankDetails?.payoutPreference || local.payoutPreference || 'UPI Instant Transfer',
+          whatsappAlerts:   user?.preferences?.whatsappAlerts   ?? local.whatsappAlerts  ?? true,
+          smsAlerts:        user?.preferences?.smsAlerts        ?? local.smsAlerts       ?? true,
+          preferredLanguage:user?.preferences?.preferredLanguage|| local.preferredLanguage || 'Hindi',
+        }));
+      } catch (err) {
+        console.error('Profile load error:', err);
       } finally {
         setIsLoading(false);
       }
     };
-    
-    fetchProfile();
+    load();
   }, []);
 
-  // Update map marker when coordinates change
+  /* ── Leaflet Satellite Map ── */
   useEffect(() => {
-    if (!mapLoaded || !mapRef.current || !formData.lat || !formData.lng) return;
-    const L = window.L;
+    if (activeTab !== 'location') return;
+    let isSubscribed = true;
 
-    const currentLat = parseFloat(formData.lat);
-    const currentLng = parseFloat(formData.lng);
-    if (isNaN(currentLat) || isNaN(currentLng)) return;
-
-    if (!mapInstanceRef.current) {
-      mapInstanceRef.current = L.map(mapRef.current, {
-        zoomControl: true,
-        scrollWheelZoom: true
-      }).setView([currentLat, currentLng], 15);
-
-      tileLayerRef.current = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
-        maxZoom: 19,
-        attribution: 'Esri Satellite Imagery'
-      }).addTo(mapInstanceRef.current);
-
-      // Trigger redraw helper
-      setTimeout(() => {
-        if (mapInstanceRef.current) mapInstanceRef.current.invalidateSize();
-      }, 400);
-    }
-
-    const map = mapInstanceRef.current;
-    const pos = [currentLat, currentLng];
-
-    if (markerRef.current) {
-      markerRef.current.setLatLng(pos);
-    } else {
-      markerRef.current = L.marker(pos, { draggable: false }).addTo(map);
-    }
-  }, [mapLoaded, formData.lat, formData.lng]);
-
-  // Cleanup map instance on unmount
-  useEffect(() => {
-    return () => {
+    const initMap = () => {
+      if (!mapRef.current || !isSubscribed) return;
       if (mapInstanceRef.current) {
         mapInstanceRef.current.remove();
         mapInstanceRef.current = null;
-        markerRef.current = null;
-        tileLayerRef.current = null;
+      }
+      const L = window.L;
+      if (!L) return;
+      const lat = parseFloat(form.lat) || 22.7196;
+      const lng = parseFloat(form.lng) || 75.8577;
+      const map = L.map(mapRef.current, { zoomControl: true, attributionControl: false }).setView([lat, lng], 14);
+      
+      L.tileLayer('https://{s}.google.com/vt/lyrs=s&x={x}&y={y}&z={z}', {
+        subdomains: ['mt0','mt1','mt2','mt3'], maxZoom: 20
+      }).addTo(map);
+
+      const m = L.circleMarker([lat, lng], { radius: 8, color: '#10b981', fillColor: '#10b981', fillOpacity: 0.8 }).addTo(map);
+      mapInstanceRef.current = map;
+      markerRef.current = m;
+
+      setTimeout(() => {
+        if (mapInstanceRef.current) mapInstanceRef.current.invalidateSize();
+      }, 300);
+    };
+
+    if (window.L) {
+      initMap();
+    } else {
+      const script = document.createElement('script');
+      script.src = 'https://unpkg.com/leaflet@1.9.4/dist/leaflet.js';
+      script.onload = () => { if (isSubscribed) initMap(); };
+      document.head.appendChild(script);
+
+      if (!document.querySelector('link[href*="leaflet.css"]')) {
+        const link = document.createElement('link');
+        link.rel = 'stylesheet';
+        link.href = 'https://unpkg.com/leaflet@1.9.4/dist/leaflet.css';
+        document.head.appendChild(link);
+      }
+    }
+
+    return () => {
+      isSubscribed = false;
+      if (mapInstanceRef.current) {
+        mapInstanceRef.current.remove();
+        mapInstanceRef.current = null;
       }
     };
-  }, []);
+  }, [activeTab]);
 
-  // Nominatim Address Lookup Fallback
-  const geocodeAddress = useCallback(async (st, dist, vil) => {
-    if (!st && !dist && !vil) return;
-    try {
-      const queryStr = [vil, dist, st, 'India'].filter(Boolean).join(', ');
-      const response = await fetch(`https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(queryStr)}&format=json&limit=1`);
-      if (!response.ok) throw new Error('Geocoding fail');
-      const results = await response.json();
-      if (results && results.length > 0) {
-        const latVal = parseFloat(results[0].lat);
-        const lngVal = parseFloat(results[0].lon);
-        setFormData(prev => ({ ...prev, lat: latVal, lng: lngVal }));
-        
-        if (mapInstanceRef.current) {
-          mapInstanceRef.current.setView([latVal, lngVal], 15);
-        }
-      }
-    } catch (e) {
-      console.warn('Fallback geocoding failed:', e.message);
-    }
-  }, []);
-
-  const handleAddressBlur = () => {
-    if (formData.state && formData.district && formData.village && gpsStatus !== 'success') {
-      geocodeAddress(formData.state, formData.district, formData.village);
-    }
+  const set = (name, val) => setForm(p => ({ ...p, [name]: val }));
+  const handle = e => {
+    const { name, value, type, checked } = e.target;
+    set(name, type === 'checkbox' ? checked : value);
   };
 
-  // High-accuracy Browser GPS Trigger
-  const handleAutoDetect = () => {
-    if (!navigator.geolocation) {
-      toast.error('GPS not supported by your browser');
-      setGpsStatus('error');
-      return;
-    }
-
+  /* ── GPS Scan ── */
+  const scanGPS = () => {
+    if (!navigator.geolocation) { toast.error('Geolocation not supported'); return; }
     setGpsStatus('loading');
-    setGpsAccuracy(null);
-
     navigator.geolocation.getCurrentPosition(
-      (position) => {
-        const { latitude, longitude, accuracy } = position.coords;
-        setFormData(prev => ({
-          ...prev,
-          lat: latitude,
-          lng: longitude
-        }));
+      pos => {
+        const { latitude: lat, longitude: lng, accuracy } = pos.coords;
+        setForm(p => ({ ...p, lat, lng }));
         setGpsAccuracy(Math.round(accuracy));
         setGpsStatus('success');
-        toast.success('High-Accuracy GPS Scan successful!');
-
+        toast.success('GPS coordinates captured!');
         if (mapInstanceRef.current) {
-          mapInstanceRef.current.setView([latitude, longitude], 16);
+          mapInstanceRef.current.setView([lat, lng], 16);
+          if (markerRef.current) markerRef.current.setLatLng([lat, lng]);
         }
       },
-      (error) => {
-        console.error('[Profile GPS] Error fetching coordinates:', error);
-        setGpsStatus('error');
-        toast.error('GPS detection failed. Make sure location is turned on.');
-      },
-      {
-        enableHighAccuracy: true,
-        timeout: 12000,
-        maximumAge: 0
-      }
+      () => { setGpsStatus('error'); toast.error('GPS failed. Check location permission.'); },
+      { enableHighAccuracy: true, timeout: 12000 }
     );
   };
 
-  const handleChange = (e) => {
-    const { name, value } = e.target;
-    setFormData(prev => ({ ...prev, [name]: value }));
-  };
-
-  const handleSubmit = async (e) => {
+  /* ── Save Form Data ── */
+  const handleSubmit = async e => {
     e.preventDefault();
     setIsSubmitting(true);
-    
     try {
-      const payload = {
-        name: formData.name,
-        location: {
-          state: formData.state,
-          district: formData.district,
-          village: formData.village,
-          coordinates: {
-            lat: formData.lat ? parseFloat(formData.lat) : undefined,
-            lng: formData.lng ? parseFloat(formData.lng) : undefined
-          }
-        },
-        bankDetails: {
-          accountName: formData.accountName,
-          accountNumber: formData.accountNumber,
-          ifscCode: formData.ifscCode
+      if (activeTab === 'security') {
+        if (!form.currentPassword) {
+          toast.error('Enter current password');
+          setIsSubmitting(false);
+          return;
         }
-      };
-      
-      await api.put('/farmers/profile', payload);
-      toast.success('Profile & coordinates updated successfully!');
-    } catch (error) {
-      toast.error(error.response?.data?.error || 'Failed to update profile');
+        if (!form.newPassword || form.newPassword.length < 6) {
+          toast.error('New password must be at least 6 characters');
+          setIsSubmitting(false);
+          return;
+        }
+        if (form.newPassword !== form.confirmPassword) {
+          toast.error('New passwords do not match!');
+          setIsSubmitting(false);
+          return;
+        }
+
+        const res = await api.put('/farmers/change-password', {
+          currentPassword: form.currentPassword,
+          newPassword: form.newPassword
+        });
+        
+        toast.success(res.data.message || 'Password updated! 🔒');
+        setForm(p => ({ ...p, currentPassword: '', newPassword: '', confirmPassword: '' }));
+        setIsSubmitting(false);
+        return;
+      }
+
+      localStorage.setItem('agri_profile_v2', JSON.stringify(form));
+
+      await api.put('/farmers/profile', {
+        name: form.name || undefined,
+        email: form.email || undefined,
+        bankDetails: {
+          accountName: form.accountName || undefined,
+          accountNumber: form.accountNumber || undefined,
+          ifscCode: form.ifscCode || undefined,
+          upiId: form.upiId || undefined,
+          payoutPreference: form.payoutPreference || undefined,
+        },
+        preferences: {
+          whatsappAlerts: form.whatsappAlerts,
+          smsAlerts: form.smsAlerts,
+          preferredLanguage: form.preferredLanguage,
+        },
+        kycDetails: {
+          aadhaarNumber: form.aadhaarNumber || undefined,
+          panNumber: form.panNumber || undefined,
+          kccCardId: form.kccCardId || undefined,
+        },
+        location: {
+          state: form.state || undefined,
+          district: form.district || undefined,
+          village: form.village || undefined,
+          coordinates: (form.lat && form.lng) ? { lat: +form.lat, lng: +form.lng } : undefined,
+        },
+        farmDetails: {
+          landHoldingAcres: form.landHoldingAcres ? +form.landHoldingAcres : undefined,
+          landSize: form.landHoldingAcres ? +form.landHoldingAcres : undefined,
+        }
+      });
+
+      const storedUser = JSON.parse(localStorage.getItem('user') || '{}');
+      if (storedUser && form.name) {
+        storedUser.name = form.name;
+        localStorage.setItem('user', JSON.stringify(storedUser));
+      }
+
+      toast.success('Settings & Profile saved! ✅');
+    } catch (err) {
+      console.error('Save error:', err);
+      const msg = err.response?.data?.message || 'Save failed';
+      toast.error(msg);
     } finally {
       setIsSubmitting(false);
     }
   };
 
-  if (isLoading) {
-    return (
-      <div className="flex justify-center py-20">
-        <div className="w-8 h-8 rounded-full border-4 border-primary-100 border-t-primary-600 animate-spin"></div>
-      </div>
-    );
-  }
-
-  // Download Official Farmer KYC & Bank Verification PDF
-  const handleDownloadKYCPDF = () => {
+  /* ── Download KYC PDF ── */
+  const downloadKYC = async () => {
     try {
-      const doc = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
-
-      // Header branding bar
-      doc.setFillColor(15, 23, 42); // slate-900
-      doc.rect(0, 0, 210, 22, 'F');
-      doc.setFillColor(16, 185, 129); // emerald-500 line
-      doc.rect(0, 21, 210, 1, 'F');
-
-      doc.setTextColor(255, 255, 255);
-      doc.setFontSize(14);
-      doc.setFont('helvetica', 'bold');
-      doc.text('AgriConnect™ - Verified Farmer Profile & KYC Certificate', 14, 14);
-
-      doc.setFontSize(8.5);
-      doc.setFont('helvetica', 'normal');
-      doc.text(`Generated: ${new Date().toLocaleString('en-IN')}`, 135, 14);
-
-      // Info Box
-      doc.setFillColor(248, 250, 252);
-      doc.setDrawColor(203, 213, 225);
-      doc.roundedRect(14, 27, 182, 38, 3, 3, 'FD');
-
-      doc.setTextColor(15, 23, 42);
-      doc.setFontSize(10);
-      doc.setFont('helvetica', 'bold');
-      doc.text(`Farmer Name: ${formData.name || 'Registered Producer'}`, 18, 35);
-      doc.text(`Contact Phone: ${formData.phone || 'N/A'}`, 18, 43);
-      doc.text(`Email Address: ${formData.email || 'N/A'}`, 18, 51);
-      doc.text(`Verification Status: MANDI VERIFIED PRODUCER ✓`, 18, 59);
-
-      doc.text(`Village: ${formData.village || 'N/A'}`, 110, 35);
-      doc.text(`District: ${formData.district || 'N/A'}`, 110, 43);
-      doc.text(`State: ${formData.state || 'N/A'}`, 110, 51);
-      doc.text(`GPS: Lat ${parseFloat(formData.lat || 0).toFixed(4)}, Lng ${parseFloat(formData.lng || 0).toFixed(4)}`, 110, 59);
-
-      // Bank & Financial Table
-      const kycTableData = [
-        ['Bank Account Holder', formData.accountName || 'N/A'],
-        ['Bank Account Number', formData.accountNumber ? `•••• •••• ${formData.accountNumber.slice(-4)}` : 'Verified'],
-        ['Bank IFSC Code', formData.ifscCode ? formData.ifscCode.toUpperCase() : 'N/A'],
-        ['UPI Direct ID', formData.upiId || `${formData.phone || 'farmer'}@upi`],
-        ['Agri-Logistics Hub', 'Indore Primary Agriculture Direct Center'],
-        ['Clearance Certificate ID', `AGRI-KYC-${Date.now().toString().slice(-6)}`]
-      ];
+      const doc = new jsPDF({ unit: 'mm', format: 'a4' });
+      doc.setFillColor(15, 23, 42); doc.rect(0, 0, 210, 40, 'F');
+      doc.setTextColor(255,255,255); doc.setFontSize(18); doc.setFont('helvetica','bold');
+      doc.text('AgriConnect', 14, 18);
+      doc.setFontSize(8); doc.setFont('helvetica','normal');
+      doc.text('OFFICIAL FARMER KYC CERTIFICATE', 14, 26);
+      doc.setFontSize(7); doc.text(`Generated: ${new Date().toLocaleString()}`, 14, 32);
 
       autoTable(doc, {
-        head: [['KYC & Payment Clearance Field', 'Verified Record Detail']],
-        body: kycTableData,
-        startY: 70,
-        theme: 'grid',
-        headStyles: { fillColor: [15, 23, 42], textColor: [255, 255, 255], fontStyle: 'bold', fontSize: 9.5 },
-        bodyStyles: { fontSize: 9, textColor: [51, 65, 85], cellPadding: 3.5 },
-        alternateRowStyles: { fillColor: [248, 250, 252] },
-        columnStyles: {
-          0: { fontStyle: 'bold', cellWidth: 70 },
-          1: { cellWidth: 112 }
-        }
+        startY: 48, theme: 'grid',
+        head: [['Field','Registered Detail']],
+        body: [
+          ['Producer Full Name', form.name],['Mobile', form.phone],['Email', form.email || 'N/A'],
+          ['Aadhaar Number', form.aadhaarNumber],['PAN Number', form.panNumber],['KCC ID', form.kccCardId],
+          ['State', form.state],['District', form.district],['Village', form.village],
+          ['Land Size', `${form.landHoldingAcres} Acres`],
+          ['GPS Coordinates', form.lat ? `${form.lat}, ${form.lng}` : 'N/A'],
+          ['Bank Account', form.accountNumber ? `•••• ${form.accountNumber.slice(-4)} (${form.ifscCode})` : 'N/A'],
+          ['UPI ID', form.upiId || 'N/A'],
+        ],
+        styles: { fontSize: 9, cellPadding: 3 },
+        headStyles: { fillColor: [16, 185, 129], textColor: 255, fontStyle: 'bold' },
       });
-
-      // Signature Box
-      const finalY = doc.lastAutoTable?.finalY ? doc.lastAutoTable.finalY + 15 : 180;
-      doc.setDrawColor(203, 213, 225);
-      doc.line(20, finalY + 15, 85, finalY + 15);
-      doc.setFontSize(8);
-      doc.setTextColor(100, 116, 139);
-      doc.text('Farmer Self-Declaration Sign', 25, finalY + 20);
-
-      doc.line(125, finalY + 15, 190, finalY + 15);
-      doc.text('AgriConnect Authority Seal & QR Verified', 128, finalY + 20);
-
-      doc.save(`AgriConnect_Farmer_Profile_${new Date().toISOString().split('T')[0]}.pdf`);
-      toast.success('Farmer Profile & KYC Certificate Downloaded! 📄');
-    } catch (err) {
-      console.error('Error generating PDF:', err);
-      toast.error('Failed to generate Profile PDF');
-    }
+      doc.save(`AgriConnect_KYC_${new Date().toISOString().split('T')[0]}.pdf`);
+      toast.success('KYC Certificate downloaded!');
+    } catch { toast.error('PDF export failed'); }
   };
 
-  const stateOptions = STATES.map(s => ({ label: s, value: s }));
+  if (isLoading) return (
+    <div className="flex items-center justify-center h-48">
+      <div className="w-6 h-6 border-2 border-emerald-500 border-t-transparent rounded-full animate-spin" />
+    </div>
+  );
 
   return (
-    <div className="w-full max-w-4xl mx-auto pb-4 space-y-4">
-      {/* Page Header with Download Button */}
-      <div className="flex flex-col sm:flex-row justify-between sm:items-center gap-3">
-        <div>
-          <h1 className="text-[18px] sm:text-[20px] font-black text-[var(--color-text-primary)] tracking-tight leading-none mb-0.5">Profile Settings</h1>
-          <p className="text-[10px] sm:text-[11px] text-[var(--color-text-secondary)] font-medium">Manage your personal details, default location, and bank account for payments.</p>
-        </div>
+    <div className="w-full max-w-4xl mx-auto space-y-3 pb-8">
 
-        <button
-          onClick={handleDownloadKYCPDF}
-          className="px-3.5 h-9 bg-slate-100 hover:bg-emerald-50 text-slate-700 hover:text-emerald-700 border border-slate-200 hover:border-emerald-200 rounded-[var(--form-border-radius)] font-extrabold text-[11.5px] transition-all flex items-center gap-1.5 cursor-pointer shadow-2xs self-start sm:self-auto"
-        >
-          <span className="material-symbols-outlined text-[15px] text-emerald-600">badge</span>
-          <span>Download KYC PDF</span>
-        </button>
-      </div>
-
-      {/* Verified Producer Header Banner */}
-      <div className="global-card !p-4 bg-gradient-to-r from-emerald-900 to-slate-900 text-white flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 shadow-md">
-        <div className="flex items-center gap-3">
-          <div className="w-11 h-11 rounded-2xl bg-emerald-500/20 border border-emerald-400/40 text-emerald-300 font-black text-[18px] flex items-center justify-center shrink-0">
-            {formData.name ? formData.name.charAt(0).toUpperCase() : 'F'}
-          </div>
-          <div>
-            <div className="flex items-center gap-2">
-              <h2 className="text-[15px] font-black tracking-tight">{formData.name || 'AgriConnect Farmer'}</h2>
-              <span className="px-2 py-0.5 rounded-full text-[8.5px] font-black uppercase bg-emerald-500/20 text-emerald-300 border border-emerald-400/30 flex items-center gap-1">
-                <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
-                Verified Producer
+      {/* ── Compact Header Banner ── */}
+      <div className="rounded-2xl bg-gradient-to-r from-slate-900 via-emerald-950 to-slate-900 p-3.5 sm:p-4 flex items-center justify-between gap-3 shadow-md border border-slate-800">
+        <div className="flex items-center gap-3 min-w-0">
+          <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-emerald-500 to-teal-400 p-0.5 shrink-0 shadow-sm flex items-center justify-center">
+            <div className="w-full h-full bg-slate-900 rounded-[10px] flex items-center justify-center">
+              <span className="text-emerald-400 font-black text-lg">
+                {form.name?.charAt(0)?.toUpperCase() || 'F'}
               </span>
             </div>
-            <p className="text-[10.5px] text-slate-300 font-medium mt-0.5">
-              {formData.village ? `${formData.village}, ` : ''}{formData.district ? `${formData.district}, ` : ''}{formData.state || 'Madhya Pradesh'}
+          </div>
+          <div className="min-w-0">
+            <div className="flex items-center gap-2 flex-wrap">
+              <h1 className="text-xs sm:text-sm font-black text-white leading-tight truncate">{form.name || 'AgriConnect Farmer'}</h1>
+              <span className="text-[8px] font-black uppercase px-2 py-0.5 rounded-md bg-emerald-500/20 text-emerald-300 border border-emerald-400/30 shrink-0">
+                ✓ Verified Producer
+              </span>
+            </div>
+            <p className="text-[10px] text-slate-300 mt-0.5 truncate">
+              {[form.village, form.district, form.state].filter(Boolean).join(', ') || 'Location details pending'}
+              {form.landHoldingAcres && <span className="text-emerald-400 font-bold ml-1">• {form.landHoldingAcres} Acres</span>}
+              {form.kccCardId && <span className="font-mono text-slate-400 ml-1">• {form.kccCardId}</span>}
             </p>
           </div>
         </div>
 
-        <div className="text-left sm:text-right text-[10px] text-slate-300">
-          <p className="font-semibold">Registered Phone: <strong className="text-white font-mono">{formData.phone || 'Verified'}</strong></p>
-          <p className="text-[9px] text-emerald-300 font-bold mt-0.5">Direct Payout Mandate Active ✓</p>
-        </div>
+        <button
+          onClick={downloadKYC}
+          className="shrink-0 flex items-center gap-1.5 h-8 px-3 rounded-lg bg-white/10 hover:bg-emerald-600 border border-white/20 text-white text-[10.5px] font-bold transition-all cursor-pointer active:scale-[0.98]"
+        >
+          <Download size={13} />
+          <span>KYC PDF</span>
+        </button>
       </div>
 
-      <motion.div 
-        initial={{ opacity: 0, y: 10 }}
-        animate={{ opacity: 1, y: 0 }}
-        className="global-card !p-4 md:!p-6"
-      >
-        <form onSubmit={handleSubmit} className="space-y-5">
-          
-          {/* Basic Details */}
-          <div>
-            <h3 className="text-[12px] font-bold text-[var(--color-text-primary)] mb-3 flex items-center gap-1.5 uppercase tracking-wide border-b border-[var(--color-border)] pb-2">
-              <span className="material-symbols-outlined text-[16px] text-primary-500">person</span>
-              Personal Details
-            </h3>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <Input 
-                label="Full Name"
-                name="name"
-                value={formData.name}
-                onChange={handleChange}
-                placeholder="Enter your name"
-                required
-              />
-              <Input 
-                label="Phone Number"
-                name="phone"
-                value={formData.phone}
-                disabled
-                className="bg-gray-50 text-gray-500"
-                helperText="Phone number cannot be changed"
-              />
-            </div>
+      {/* ── 2-Column Compact Layout ── */}
+      <div className="grid grid-cols-1 md:grid-cols-12 gap-3 items-start">
+
+        {/* Left Compact Sidebar Menu */}
+        <div className="md:col-span-4 bg-white rounded-xl border border-slate-200 p-2 shadow-sm space-y-1">
+          <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest px-2.5 py-1">Settings Menu</p>
+
+          <div className="flex md:flex-col gap-1 overflow-x-auto pb-1 md:pb-0">
+            {TABS.map(tab => {
+              const Icon = tab.icon;
+              const isActive = activeTab === tab.id;
+              return (
+                <button
+                  key={tab.id}
+                  type="button"
+                  onClick={() => handleTabChange(tab.id)}
+                  className={`w-full flex items-center justify-between gap-2.5 px-3 py-2 rounded-lg text-left transition-all cursor-pointer shrink-0 ${
+                    isActive
+                      ? 'bg-emerald-50 text-emerald-800 font-black shadow-sm border border-emerald-200'
+                      : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900 font-bold'
+                  }`}
+                >
+                  <div className="flex items-center gap-2">
+                    <div className={`p-1.5 rounded-md ${isActive ? 'bg-emerald-600 text-white' : 'bg-slate-100 text-slate-500'}`}>
+                      <Icon size={14} />
+                    </div>
+                    <span className="text-[11.5px]">{tab.label}</span>
+                  </div>
+                  <span className={`text-[8.5px] font-bold px-1.5 py-0.5 rounded ${isActive ? 'bg-emerald-200/60 text-emerald-900' : 'bg-slate-100 text-slate-400'}`}>
+                    {tab.badge}
+                  </span>
+                </button>
+              );
+            })}
           </div>
+        </div>
 
-          {/* Location Setting with Integrated Satellite Map & GPS */}
-          <div>
-            <h3 className="text-[12px] font-bold text-[var(--color-text-primary)] mb-3 flex items-center gap-1.5 uppercase tracking-wide border-b border-[var(--color-border)] pb-2 mt-2">
-              <span className="material-symbols-outlined text-[16px] text-danger-500">location_on</span>
-              Farm Location & GPS Coordinates
-            </h3>
-            
-            <div className="space-y-4">
-              {/* Alert Warning Box */}
-              <div className="p-2.5 rounded-[var(--form-border-radius)] bg-amber-50 border border-amber-200 flex items-start gap-2">
-                <span className="material-symbols-outlined text-[16px] text-amber-600 mt-0.5 shrink-0">warning</span>
-                <p className="text-[10px] sm:text-[11px] text-amber-800 font-semibold leading-normal">
-                  <b>Farm Location verify krne ke liye:</b> Kripya apne khet par jakar hi location update karein, jisse exact coordinates link ho sakein.
-                </p>
-              </div>
+        {/* Right Form Card */}
+        <div className="md:col-span-8 bg-white rounded-xl border border-slate-200 shadow-sm p-4 space-y-4">
+          <form onSubmit={handleSubmit}>
+            <AnimatePresence mode="wait">
+              <motion.div
+                key={activeTab}
+                initial={{ opacity: 0, y: 6 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -4 }}
+                transition={{ duration: 0.14 }}
+                className="space-y-4"
+              >
 
-              {/* State & District (Side by side) */}
-              <div className="grid grid-cols-2 gap-3">
-                <Select 
-                  label="State / Rajya" 
-                  id="state" 
-                  name="state"
-                  options={stateOptions}
-                  value={formData.state}
-                  onChange={handleChange}
-                  onBlur={handleAddressBlur}
-                  required
-                />
-                <Input 
-                  label="District / Zila" 
-                  id="district" 
-                  name="district"
-                  type="text"
-                  placeholder="e.g. Nashik" 
-                  value={formData.district}
-                  onChange={handleChange}
-                  onBlur={handleAddressBlur}
-                  required
-                />
-              </div>
+                {/* TAB 1: Personal & KYC */}
+                {activeTab === 'kyc' && (
+                  <>
+                    <div className="border-b border-slate-100 pb-2 flex items-center gap-1.5 text-emerald-600">
+                      <ShieldCheck size={16} />
+                      <h2 className="text-[11px] font-black uppercase tracking-wider text-slate-700">Personal Details & Mandi KYC Verification</h2>
+                    </div>
 
-              {/* Village & Auto GPS Button (Side by side) */}
-              <div className="grid grid-cols-2 gap-3 items-start">
-                <Input 
-                  label="Village / Gaon" 
-                  id="village" 
-                  name="village"
-                  type="text"
-                  placeholder="e.g. Kolari" 
-                  value={formData.village}
-                  onChange={handleChange}
-                  onBlur={handleAddressBlur}
-                  required
-                />
-                <div className="flex flex-col">
-                  <span className="block text-[13px] font-bold mb-1.5 opacity-0 select-none pointer-events-none">GPS Spacer</span>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                      <CompactInput label="Full Name" icon={User} name="name" value={form.name} onChange={handle} placeholder="Enter full name" />
+                      <CompactInput label="Registered Mobile" icon={Phone} name="phone" value={form.phone} onChange={handle} disabled hint="Read-only" />
+                    </div>
+
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                      <CompactInput label="Email Address" icon={Mail} name="email" type="email" value={form.email} onChange={handle} placeholder="farmer@gmail.com" />
+                      <CompactInput label="Kisan Credit Card (KCC) ID" icon={CreditCard} name="kccCardId" value={form.kccCardId} onChange={handle} className="uppercase font-mono" placeholder="KCC-MH-992810" />
+                    </div>
+
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                      <CompactInput label="Aadhaar Card (12-Digit)" icon={FileText} name="aadhaarNumber" value={form.aadhaarNumber} onChange={handle} className="font-mono" placeholder="1234-5678-9012" />
+                      <CompactInput label="PAN Card Number" icon={FileText} name="panNumber" value={form.panNumber} onChange={handle} className="uppercase font-mono" placeholder="ABCDE1234F" />
+                    </div>
+                  </>
+                )}
+
+                {/* TAB 2: Farm Location & GPS */}
+                {activeTab === 'location' && (
+                  <>
+                    <div className="border-b border-slate-100 pb-2 flex items-center gap-1.5 text-rose-500">
+                      <MapPin size={16} />
+                      <h2 className="text-[11px] font-black uppercase tracking-wider text-slate-700">Farm Location & Live GPS Coordinates</h2>
+                    </div>
+
+                    <div className="flex items-start gap-2 p-2.5 rounded-lg bg-amber-50 border border-amber-200 text-amber-900">
+                      <AlertCircle size={15} className="text-amber-600 shrink-0 mt-0.5" />
+                      <p className="text-[10.5px] font-semibold leading-tight">
+                        Khet par maujood rehkar hi GPS scan karein taaki exact pickup coordinates link ho sakein.
+                      </p>
+                    </div>
+
+                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                      <CompactSelect label="State / Rajya" icon={Globe} name="state" options={STATES} value={form.state} onChange={handle} />
+                      <CompactInput label="District / Zila" icon={MapPin} name="district" value={form.district} onChange={handle} placeholder="e.g. Indore" />
+                      <CompactInput label="Land Size (Acres)" icon={Landmark} name="landHoldingAcres" value={form.landHoldingAcres} onChange={handle} placeholder="e.g. 5.5" />
+                    </div>
+
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 items-end">
+                      <CompactInput label="Village / Gaon" icon={MapPin} name="village" value={form.village} onChange={handle} placeholder="e.g. Vijay Nagar" />
+                      
+                      <div className="flex flex-col gap-1">
+                        <label className="text-[10px] font-bold text-slate-600 uppercase tracking-wider">GPS Capture</label>
+                        <button
+                          type="button"
+                          onClick={scanGPS}
+                          className={`h-[34px] px-3 rounded-lg text-[11px] font-black flex items-center justify-center gap-1.5 border transition-all cursor-pointer shadow-sm ${
+                            gpsStatus === 'success' ? 'bg-emerald-50 border-emerald-400 text-emerald-700' :
+                            gpsStatus === 'error'   ? 'bg-red-50 border-red-300 text-red-600' :
+                            gpsStatus === 'loading' ? 'bg-slate-100 border-slate-300 text-slate-500' :
+                            'bg-slate-800 text-white border-slate-700 hover:bg-slate-900'
+                          }`}
+                        >
+                          <Navigation size={14} className={gpsStatus === 'loading' ? 'animate-spin' : ''} />
+                          <span>{gpsStatus === 'loading' ? 'Scanning GPS...' : gpsStatus === 'success' ? `GPS Captured (±${gpsAccuracy}m)` : '📍 Scan Farm GPS'}</span>
+                        </button>
+                      </div>
+                    </div>
+
+                    {/* Satellite Map */}
+                    <div className="space-y-1 pt-1">
+                      <div className="flex items-center justify-between">
+                        <span className="text-[10px] font-bold text-slate-600 uppercase tracking-wider flex items-center gap-1">
+                          <Layers size={13} className="text-emerald-600" /> Satellite Preview
+                        </span>
+                        {form.lat && form.lng && (
+                          <span className="text-[9.5px] font-mono text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded border border-emerald-200">
+                            {parseFloat(form.lat).toFixed(6)}, {parseFloat(form.lng).toFixed(6)}
+                          </span>
+                        )}
+                      </div>
+                      <div ref={mapRef} className="w-full h-[160px] rounded-lg border border-slate-200 overflow-hidden shadow-inner" />
+                    </div>
+                  </>
+                )}
+
+                {/* TAB 3: Bank Account & UPI */}
+                {activeTab === 'bank' && (
+                  <>
+                    <div className="border-b border-slate-100 pb-2 flex items-center gap-1.5 text-blue-600">
+                      <Landmark size={16} />
+                      <h2 className="text-[11px] font-black uppercase tracking-wider text-slate-700">Bank Details & Direct Payment Wallet</h2>
+                    </div>
+
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                      <CompactInput label="Account Holder Name" icon={User} name="accountName" value={form.accountName} onChange={handle} placeholder="Name as per bank" />
+                      <CompactInput label="Account Number" icon={CreditCard} name="accountNumber" type="password" value={form.accountNumber} onChange={handle} placeholder="Account number" />
+                    </div>
+
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                      <CompactInput label="IFSC Code" icon={Landmark} name="ifscCode" value={form.ifscCode} onChange={handle} className="uppercase font-mono" placeholder="SBIN0001234" />
+                      <CompactInput label="UPI ID (Instant Payments)" icon={Wallet} name="upiId" value={form.upiId} onChange={handle} className="font-mono text-emerald-700" placeholder="farmer@upi" />
+                    </div>
+
+                    <div className="space-y-1.5 pt-1">
+                      <label className="text-[10px] font-bold text-slate-600 uppercase tracking-wider block">Primary Payout Settlement Mode</label>
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                        {[
+                          { title: 'UPI Instant Transfer', desc: 'Direct 24x7 instant credit' },
+                          { title: 'NEFT / IMPS Bank Transfer', desc: 'Standard bank settlement' }
+                        ].map(({ title, desc }) => (
+                          <div
+                            key={title}
+                            onClick={() => set('payoutPreference', title)}
+                            className={`p-3 rounded-lg border transition-all cursor-pointer flex items-center justify-between ${
+                              form.payoutPreference === title
+                                ? 'bg-emerald-50 border-emerald-400 text-emerald-900 font-bold shadow-sm'
+                                : 'bg-white border-slate-200 text-slate-600 hover:border-slate-300'
+                            }`}
+                          >
+                            <div>
+                              <p className="text-[11.5px] leading-snug">{title}</p>
+                              <p className="text-[9.5px] text-slate-400">{desc}</p>
+                            </div>
+                            {form.payoutPreference === title && (
+                              <CheckCircle2 size={16} className="text-emerald-600 shrink-0" />
+                            )}
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  </>
+                )}
+
+                {/* TAB 4: Preferences */}
+                {activeTab === 'preferences' && (
+                  <>
+                    <div className="border-b border-slate-100 pb-2 flex items-center gap-1.5 text-indigo-600">
+                      <Bell size={16} />
+                      <h2 className="text-[11px] font-black uppercase tracking-wider text-slate-700">App Preferences & Mandi Price Alerts</h2>
+                    </div>
+
+                    <div className="space-y-2">
+                      <CompactToggle
+                        icon={Bell}
+                        label="WhatsApp Mandi Price Alerts"
+                        description="Daily crop price updates on WhatsApp"
+                        checked={form.whatsappAlerts}
+                        onChange={e => set('whatsappAlerts', e.target.checked)}
+                      />
+
+                      <CompactToggle
+                        icon={Phone}
+                        label="SMS Order & Dispatch Alerts"
+                        description="Get buyer confirmations via SMS"
+                        checked={form.smsAlerts}
+                        onChange={e => set('smsAlerts', e.target.checked)}
+                      />
+
+                      <div className="space-y-1 pt-1">
+                        <label className="text-[10px] font-bold text-slate-600 uppercase tracking-wider block">Preferred Interface Language</label>
+                        <div className="grid grid-cols-3 gap-2">
+                          {[
+                            { val: 'Hindi',   label: 'हिंदी (Hindi)' },
+                            { val: 'English', label: 'English (English)' },
+                            { val: 'Marathi', label: 'मराठी (Marathi)' },
+                          ].map(({ val, label }) => (
+                            <button
+                              key={val}
+                              type="button"
+                              onClick={() => set('preferredLanguage', val)}
+                              className={`h-[34px] rounded-lg text-[11px] font-bold border transition-all cursor-pointer ${
+                                form.preferredLanguage === val
+                                  ? 'bg-emerald-50 border-emerald-400 text-emerald-800 font-black shadow-sm'
+                                  : 'bg-white border-slate-200 text-slate-500 hover:border-slate-300'
+                              }`}
+                            >
+                              {label}
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+                    </div>
+                  </>
+                )}
+
+                {/* TAB 5: Security */}
+                {activeTab === 'security' && (
+                  <>
+                    <div className="border-b border-slate-100 pb-2 flex items-center gap-1.5 text-rose-500">
+                      <ShieldAlert size={16} />
+                      <h2 className="text-[11px] font-black uppercase tracking-wider text-slate-700">Security & Account Password</h2>
+                    </div>
+
+                    <div className="space-y-3">
+                      <CompactInput label="Current Password" icon={Key} name="currentPassword" type="password" value={form.currentPassword} onChange={handle} placeholder="Current password" />
+                      
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                        <CompactInput label="New Password" icon={Lock} name="newPassword" type="password" value={form.newPassword} onChange={handle} placeholder="Minimum 6 characters" />
+                        <CompactInput label="Confirm New Password" icon={Lock} name="confirmPassword" type="password" value={form.confirmPassword} onChange={handle} placeholder="Confirm password" />
+                      </div>
+
+                      {form.newPassword && form.confirmPassword && form.newPassword !== form.confirmPassword && (
+                        <p className="text-[10px] text-red-500 font-semibold flex items-center gap-1">
+                          <AlertCircle size={13} />
+                          <span>Passwords do not match</span>
+                        </p>
+                      )}
+                    </div>
+                  </>
+                )}
+
+                {/* Save Button */}
+                <div className="pt-3 border-t border-slate-100 flex justify-end">
                   <button
-                    type="button"
-                    onClick={handleAutoDetect}
-                    className={`w-full h-[40px] px-2 rounded-[var(--form-border-radius)] text-[11px] font-black flex items-center justify-center gap-1.5 border transition-all cursor-pointer ${
-                      gpsStatus === 'success'
-                        ? 'bg-emerald-50 border-emerald-300 text-emerald-700'
-                        : gpsStatus === 'error'
-                        ? 'bg-red-50 border-red-300 text-red-700'
-                        : 'bg-slate-800 text-white border-slate-700 hover:bg-slate-900 shadow-sm'
-                    }`}
+                    type="submit"
+                    disabled={isSubmitting}
+                    className="h-[34px] px-6 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white text-[11.5px] font-black transition-all cursor-pointer disabled:opacity-60 flex items-center gap-1.5 shadow-sm active:scale-[0.98]"
                   >
-                    <span className="material-symbols-outlined text-[16px]">
-                      {gpsStatus === 'success' ? 'check_circle' : gpsStatus === 'loading' ? 'sync' : 'gps_fixed'}
-                    </span>
-                    {gpsStatus === 'loading'
-                      ? 'Scanning...'
-                      : gpsStatus === 'success'
-                      ? `Acc: ~${gpsAccuracy}m`
-                      : '📍 Auto GPS'}
+                    {isSubmitting ? (
+                      <>
+                        <div className="w-3.5 h-3.5 border-2 border-white/50 border-t-white rounded-full animate-spin" />
+                        <span>Saving…</span>
+                      </>
+                    ) : (
+                      <>
+                        <Save size={14} />
+                        <span>Save {TABS.find(t => t.id === activeTab)?.label}</span>
+                      </>
+                    )}
                   </button>
                 </div>
-              </div>
 
-              {/* Map Preview */}
-              <div className="flex flex-col gap-1.5">
-                <label className="text-[10px] font-black text-slate-400 uppercase tracking-wider">Farm Boundaries satellite Preview</label>
-                <div 
-                  ref={mapRef} 
-                  className="w-full h-[140px] rounded-xl border border-slate-200 overflow-hidden shadow-inner relative z-0"
-                />
-                {formData.lat && formData.lng ? (
-                  <p className="text-[9px] font-mono text-slate-500 mt-0.5">
-                    Lat: {parseFloat(formData.lat).toFixed(6)} | Lng: {parseFloat(formData.lng).toFixed(6)} (Drag marker to refine)
-                  </p>
-                ) : (
-                  <p className="text-[9px] text-slate-400 mt-0.5">Enter details or click GPS to render satellite boundaries.</p>
-                )}
-              </div>
-            </div>
-          </div>
+              </motion.div>
+            </AnimatePresence>
+          </form>
+        </div>
 
-          {/* Bank Details */}
-          <div>
-            <h3 className="text-[12px] font-bold text-[var(--color-text-primary)] mb-3 flex items-center gap-1.5 uppercase tracking-wide border-b border-[var(--color-border)] pb-2 mt-2">
-              <span className="material-symbols-outlined text-[16px] text-success-500">account_balance</span>
-              Bank Details (For Payments)
-            </h3>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <Input 
-                label="Account Holder Name"
-                name="accountName"
-                value={formData.accountName}
-                onChange={handleChange}
-                placeholder="Name as per bank record"
-              />
-              <Input 
-                label="Account Number"
-                name="accountNumber"
-                value={formData.accountNumber}
-                onChange={handleChange}
-                placeholder="Enter account number"
-                type="password"
-              />
-              <Input 
-                label="IFSC Code"
-                name="ifscCode"
-                value={formData.ifscCode}
-                onChange={handleChange}
-                placeholder="e.g. SBIN0001234"
-                className="uppercase"
-              />
-            </div>
-          </div>
-
-          <div className="pt-4 flex justify-end">
-            <Button 
-              type="submit" 
-              disabled={isSubmitting}
-              className="!px-8 shadow-md"
-            >
-              {isSubmitting ? 'Saving...' : 'Save Changes'}
-            </Button>
-          </div>
-
-        </form>
-      </motion.div>
+      </div>
     </div>
   );
 };

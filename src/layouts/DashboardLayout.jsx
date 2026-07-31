@@ -489,11 +489,11 @@ const DashboardLayout = () => {
                     </button>
                     
                     <button 
-                      onClick={() => { setIsProfileOpen(false); /* Add Settings Route later */ }}
-                      className="w-full text-left px-4 py-2 text-[13px] font-bold text-slate-600 hover:bg-slate-50 hover:text-primary-600 flex items-center gap-2 transition-colors"
+                      onClick={() => { setIsProfileOpen(false); navigate('/farmer-dashboard/profile?tab=preferences'); }}
+                      className="w-full text-left px-4 py-2 text-[13px] font-bold text-slate-600 hover:bg-slate-50 hover:text-primary-600 flex items-center gap-2 transition-colors cursor-pointer"
                     >
                       <span className="material-symbols-outlined text-[18px]">settings</span>
-                      Settings
+                      Settings & Preferences
                     </button>
                     
                     <div className="h-[1px] bg-slate-100 my-1"></div>
